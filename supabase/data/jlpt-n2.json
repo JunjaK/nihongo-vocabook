@@ -1,0 +1,22 @@
+[
+  { "term": "維持", "reading": "いじ", "meaning": "유지", "jlptLevel": 2 },
+  { "term": "展開", "reading": "てんかい", "meaning": "전개", "jlptLevel": 2 },
+  { "term": "構成", "reading": "こうせい", "meaning": "구성", "jlptLevel": 2 },
+  { "term": "把握", "reading": "はあく", "meaning": "파악", "jlptLevel": 2 },
+  { "term": "概念", "reading": "がいねん", "meaning": "개념", "jlptLevel": 2 },
+  { "term": "傾向", "reading": "けいこう", "meaning": "경향", "jlptLevel": 2 },
+  { "term": "根拠", "reading": "こんきょ", "meaning": "근거", "jlptLevel": 2 },
+  { "term": "促進", "reading": "そくしん", "meaning": "촉진", "jlptLevel": 2 },
+  { "term": "抽象", "reading": "ちゅうしょう", "meaning": "추상", "jlptLevel": 2 },
+  { "term": "妥当", "reading": "だとう", "meaning": "타당", "jlptLevel": 2 },
+  { "term": "追求", "reading": "ついきゅう", "meaning": "추구", "jlptLevel": 2 },
+  { "term": "発揮", "reading": "はっき", "meaning": "발휘", "jlptLevel": 2 },
+  { "term": "普及", "reading": "ふきゅう", "meaning": "보급", "jlptLevel": 2 },
+  { "term": "矛盾", "reading": "むじゅん", "meaning": "모순", "jlptLevel": 2 },
+  { "term": "余裕", "reading": "よゆう", "meaning": "여유", "jlptLevel": 2 },
+  { "term": "論理", "reading": "ろんり", "meaning": "논리", "jlptLevel": 2 },
+  { "term": "貢献", "reading": "こうけん", "meaning": "공헌", "jlptLevel": 2 },
+  { "term": "適切", "reading": "てきせつ", "meaning": "적절", "jlptLevel": 2 },
+  { "term": "独自", "reading": "どくじ", "meaning": "독자적", "jlptLevel": 2 },
+  { "term": "柔軟", "reading": "じゅうなん", "meaning": "유연", "jlptLevel": 2 }
+]

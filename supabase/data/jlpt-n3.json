@@ -1,0 +1,22 @@
+[
+  { "term": "経験", "reading": "けいけん", "meaning": "경험", "jlptLevel": 3 },
+  { "term": "努力", "reading": "どりょく", "meaning": "노력", "jlptLevel": 3 },
+  { "term": "影響", "reading": "えいきょう", "meaning": "영향", "jlptLevel": 3 },
+  { "term": "関係", "reading": "かんけい", "meaning": "관계", "jlptLevel": 3 },
+  { "term": "状況", "reading": "じょうきょう", "meaning": "상황", "jlptLevel": 3 },
+  { "term": "責任", "reading": "せきにん", "meaning": "책임", "jlptLevel": 3 },
+  { "term": "態度", "reading": "たいど", "meaning": "태도", "jlptLevel": 3 },
+  { "term": "価値", "reading": "かち", "meaning": "가치", "jlptLevel": 3 },
+  { "term": "印象", "reading": "いんしょう", "meaning": "인상", "jlptLevel": 3 },
+  { "term": "確認", "reading": "かくにん", "meaning": "확인", "jlptLevel": 3 },
+  { "term": "期待", "reading": "きたい", "meaning": "기대", "jlptLevel": 3 },
+  { "term": "表現", "reading": "ひょうげん", "meaning": "표현", "jlptLevel": 3 },
+  { "term": "意識", "reading": "いしき", "meaning": "의식", "jlptLevel": 3 },
+  { "term": "判断", "reading": "はんだん", "meaning": "판단", "jlptLevel": 3 },
+  { "term": "対応", "reading": "たいおう", "meaning": "대응", "jlptLevel": 3 },
+  { "term": "活動", "reading": "かつどう", "meaning": "활동", "jlptLevel": 3 },
+  { "term": "成長", "reading": "せいちょう", "meaning": "성장", "jlptLevel": 3 },
+  { "term": "実現", "reading": "じつげん", "meaning": "실현", "jlptLevel": 3 },
+  { "term": "解決", "reading": "かいけつ", "meaning": "해결", "jlptLevel": 3 },
+  { "term": "提案", "reading": "ていあん", "meaning": "제안", "jlptLevel": 3 }
+]

@@ -153,6 +153,28 @@ export interface Translations {
     noWords: string;
     cannotAddMastered: string;
     selectWordbook: string;
+    shareToggle: string;
+    browseShared: string;
+    systemWordbooks: string;
+    subscribe: string;
+    copyToMine: string;
+    unsubscribe: string;
+    myWordbooks: string;
+    subscribedWordbooks: string;
+    createNew: string;
+    createNewDescription: string;
+    findShared: string;
+    findSharedDescription: string;
+    sharedWordbooks: string;
+    importTitle: string;
+    importDescription: string;
+    subscribed: string;
+    copied: string;
+    unsubscribed: string;
+    ownerLabel: string;
+    readOnly: string;
+    loginRequired: string;
+    loginRequiredDescription: string;
   };
   masteredPage: {
     title: string;

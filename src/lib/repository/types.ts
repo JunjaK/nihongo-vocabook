@@ -12,6 +12,7 @@ import type {
   CreateWordbookInput,
   UpdateWordbookInput,
   WordbookWithCount,
+  SharedWordbookListItem,
 } from '@/types/wordbook';
 
 export interface WordRepository {
@@ -42,6 +43,11 @@ export interface WordbookRepository {
   addWord(wordbookId: string, wordId: string): Promise<void>;
   removeWord(wordbookId: string, wordId: string): Promise<void>;
   getWordbooksForWord(wordId: string): Promise<Wordbook[]>;
+  getSubscribed(): Promise<WordbookWithCount[]>;
+  browseShared(): Promise<SharedWordbookListItem[]>;
+  subscribe(wordbookId: string): Promise<void>;
+  unsubscribe(wordbookId: string): Promise<void>;
+  copySharedWordbook(wordbookId: string): Promise<Wordbook>;
 }
 
 export interface DataRepository {

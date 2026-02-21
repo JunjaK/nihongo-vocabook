@@ -1,0 +1,22 @@
+[
+  { "term": "届ける", "reading": "とどける", "meaning": "전달하다, 배달하다", "jlptLevel": 4 },
+  { "term": "届く", "reading": "とどく", "meaning": "도착하다, 닿다", "jlptLevel": 4 },
+  { "term": "届け", "reading": "とどけ", "meaning": "신고, 신청서", "jlptLevel": 4 },
+  { "term": "調べる", "reading": "しらべる", "meaning": "조사하다", "jlptLevel": 4 },
+  { "term": "片付ける", "reading": "かたづける", "meaning": "정리하다", "jlptLevel": 4 },
+  { "term": "見つける", "reading": "みつける", "meaning": "찾다, 발견하다", "jlptLevel": 4 },
+  { "term": "見つかる", "reading": "みつかる", "meaning": "발견되다", "jlptLevel": 4 },
+  { "term": "決める", "reading": "きめる", "meaning": "결정하다", "jlptLevel": 4 },
+  { "term": "決まる", "reading": "きまる", "meaning": "결정되다", "jlptLevel": 4 },
+  { "term": "伝える", "reading": "つたえる", "meaning": "전하다", "jlptLevel": 4 },
+  { "term": "比べる", "reading": "くらべる", "meaning": "비교하다", "jlptLevel": 4 },
+  { "term": "育てる", "reading": "そだてる", "meaning": "기르다", "jlptLevel": 4 },
+  { "term": "慣れる", "reading": "なれる", "meaning": "익숙해지다", "jlptLevel": 4 },
+  { "term": "間に合う", "reading": "まにあう", "meaning": "시간에 맞다", "jlptLevel": 4 },
+  { "term": "残る", "reading": "のこる", "meaning": "남다", "jlptLevel": 4 },
+  { "term": "集める", "reading": "あつめる", "meaning": "모으다", "jlptLevel": 4 },
+  { "term": "集まる", "reading": "あつまる", "meaning": "모이다", "jlptLevel": 4 },
+  { "term": "変える", "reading": "かえる", "meaning": "바꾸다", "jlptLevel": 4 },
+  { "term": "変わる", "reading": "かわる", "meaning": "바뀌다", "jlptLevel": 4 },
+  { "term": "役に立つ", "reading": "やくにたつ", "meaning": "도움이 되다", "jlptLevel": 4 }
+]

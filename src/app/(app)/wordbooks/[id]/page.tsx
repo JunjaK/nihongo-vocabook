@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { WordCardWithMenu } from '@/components/word/swipeable-word-card';
 import { WordbookForm } from '@/components/wordbook/wordbook-form';
 import { useRepository } from '@/lib/repository/provider';
+import { useAuthStore } from '@/stores/auth-store';
 import { useTranslation } from '@/lib/i18n';
 import type { Word } from '@/types/word';
 import type { Wordbook } from '@/types/wordbook';
@@ -21,6 +22,7 @@ export default function WordbookDetailPage({
   const { id } = use(params);
   const router = useRouter();
   const repo = useRepository();
+  const user = useAuthStore((s) => s.user);
   const { t } = useTranslation();
   const [wordbook, setWordbook] = useState<Wordbook | null>(null);
   const [words, setWords] = useState<Word[]>([]);
@@ -30,6 +32,9 @@ export default function WordbookDetailPage({
   const [showMeaning, setShowMeaning] = useState(false);
   const [searchInput, setSearchInput] = useState('');
   const [appliedQuery, setAppliedQuery] = useState('');
+
+  const isOwned = wordbook && user && wordbook.userId === user.id;
+  const isSubscribed = wordbook && user && wordbook.userId !== user.id;
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -49,7 +54,7 @@ export default function WordbookDetailPage({
     loadData();
   }, [loadData]);
 
-  const handleUpdate = async (values: { name: string; description: string | null }) => {
+  const handleUpdate = async (values: { name: string; description: string | null; isShared?: boolean }) => {
     await repo.wordbooks.update(id, values);
     toast.success(t.wordbooks.wordbookUpdated);
     setEditing(false);
@@ -61,6 +66,12 @@ export default function WordbookDetailPage({
     if (!window.confirm(t.wordbooks.deleteConfirm)) return;
     await repo.wordbooks.delete(id);
     toast.success(t.wordbooks.wordbookDeleted);
+    router.push('/wordbooks');
+  };
+
+  const handleUnsubscribe = async () => {
+    await repo.wordbooks.unsubscribe(id);
+    toast.success(t.wordbooks.unsubscribed);
     router.push('/wordbooks');
   };
 
@@ -121,19 +132,23 @@ export default function WordbookDetailPage({
       <>
         <Header
           title={t.wordbooks.editWordbook}
+          showBack
           actions={
             <Button variant="ghost" size="sm" onClick={() => setEditing(false)}>
               {t.common.cancel}
             </Button>
           }
         />
-        <div className="p-4">
-          <WordbookForm
-            initialValues={wordbook}
-            onSubmit={handleUpdate}
-            submitLabel={t.common.update}
-          />
-        </div>
+        <WordbookForm
+          initialValues={{
+            name: wordbook.name,
+            description: wordbook.description,
+            isShared: wordbook.isShared,
+          }}
+          onSubmit={handleUpdate}
+          submitLabel={t.common.update}
+          showShareToggle={!!user}
+        />
       </>
     );
   }
@@ -144,25 +159,37 @@ export default function WordbookDetailPage({
         title={wordbook.name}
         showBack
         actions={
-          <div className="flex items-center gap-1">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setEditing(true)}
-              data-testid="wordbook-edit-button"
-            >
-              {t.common.edit}
-            </Button>
+          isSubscribed ? (
             <Button
               variant="ghost"
               size="sm"
               className="text-destructive"
-              onClick={handleDelete}
-              data-testid="wordbook-delete-button"
+              onClick={handleUnsubscribe}
+              data-testid="wordbook-unsubscribe-button"
             >
-              {t.common.delete}
+              {t.wordbooks.unsubscribe}
             </Button>
-          </div>
+          ) : (
+            <div className="flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setEditing(true)}
+                data-testid="wordbook-edit-button"
+              >
+                {t.common.edit}
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-destructive"
+                onClick={handleDelete}
+                data-testid="wordbook-delete-button"
+              >
+                {t.common.delete}
+              </Button>
+            </div>
+          )
         }
       />
 
@@ -191,6 +218,12 @@ export default function WordbookDetailPage({
               <div className="mb-4 text-sm text-muted-foreground">{wordbook.description}</div>
             )}
 
+            {isSubscribed && (
+              <div className="mb-4 rounded-lg bg-muted px-3 py-2 text-sm text-muted-foreground">
+                {t.wordbooks.readOnly}
+              </div>
+            )}
+
             {filteredWords.length === 0 ? (
               <div className="py-8 text-center text-muted-foreground">
                 {t.words.noWords}
@@ -203,17 +236,21 @@ export default function WordbookDetailPage({
                     word={word}
                     showReading={showReading}
                     showMeaning={showMeaning}
-                    actions={[
-                      {
-                        label: t.wordDetail.markMastered,
-                        onAction: handleMasterWord,
-                      },
-                      {
-                        label: t.wordbooks.removeWord,
-                        onAction: handleRemoveWord,
-                        variant: 'destructive',
-                      },
-                    ]}
+                    actions={
+                      isOwned
+                        ? [
+                            {
+                              label: t.wordDetail.markMastered,
+                              onAction: handleMasterWord,
+                            },
+                            {
+                              label: t.wordbooks.removeWord,
+                              onAction: handleRemoveWord,
+                              variant: 'destructive',
+                            },
+                          ]
+                        : []
+                    }
                   />
                 ))}
               </div>
@@ -224,7 +261,11 @@ export default function WordbookDetailPage({
             <div className="mx-4 mb-3 h-px bg-border" />
             <Button
               className="w-full"
-              onClick={() => router.push(`/quiz?wordbookId=${id}`)}
+              onClick={() =>
+                router.push(
+                  `/quiz?wordbookId=${id}${isSubscribed ? '&subscribed=true' : ''}`,
+                )
+              }
               data-testid="wordbook-start-quiz"
             >
               {t.wordbooks.startQuiz}

@@ -14,6 +14,7 @@ import type {
   CreateWordbookInput,
   UpdateWordbookInput,
   WordbookWithCount,
+  SharedWordbookListItem,
 } from '@/types/wordbook';
 import type {
   DataRepository,
@@ -53,6 +54,8 @@ interface DbWordbook {
   user_id: string;
   name: string;
   description: string | null;
+  is_shared: boolean;
+  is_system: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -97,8 +100,11 @@ function dbProgressToProgress(row: DbStudyProgress): StudyProgress {
 function dbWordbookToWordbook(row: DbWordbook): Wordbook {
   return {
     id: row.id,
+    userId: row.user_id,
     name: row.name,
     description: row.description,
+    isShared: row.is_shared ?? false,
+    isSystem: row.is_system ?? false,
     createdAt: new Date(row.created_at),
     updatedAt: new Date(row.updated_at),
   };
@@ -322,9 +328,13 @@ class SupabaseWordbookRepository implements WordbookRepository {
   constructor(private supabase: SupabaseClient) {}
 
   async getAll(): Promise<WordbookWithCount[]> {
+    const { data: userData } = await this.supabase.auth.getUser();
+    const userId = userData.user!.id;
+
     const { data, error } = await this.supabase
       .from('wordbooks')
       .select('*, wordbook_items(count)')
+      .eq('user_id', userId)
       .order('created_at', { ascending: false });
     if (error) throw error;
 
@@ -360,6 +370,7 @@ class SupabaseWordbookRepository implements WordbookRepository {
         user_id: userData.user!.id,
         name: input.name,
         description: input.description ?? null,
+        is_shared: input.isShared ?? false,
       })
       .select()
       .single();
@@ -373,6 +384,7 @@ class SupabaseWordbookRepository implements WordbookRepository {
     };
     if (input.name !== undefined) updateData.name = input.name;
     if (input.description !== undefined) updateData.description = input.description;
+    if (input.isShared !== undefined) updateData.is_shared = input.isShared;
 
     const { data, error } = await this.supabase
       .from('wordbooks')
@@ -444,6 +456,155 @@ class SupabaseWordbookRepository implements WordbookRepository {
       ),
     );
   }
+
+  async getSubscribed(): Promise<WordbookWithCount[]> {
+    const { data: userData } = await this.supabase.auth.getUser();
+    const userId = userData.user!.id;
+
+    const { data, error } = await this.supabase
+      .from('wordbook_subscriptions')
+      .select('wordbook_id, wordbooks(*, wordbook_items(count))')
+      .eq('subscriber_id', userId);
+    if (error) throw error;
+
+    return (data ?? []).map((row) => {
+      const wb = (row as Record<string, unknown>).wordbooks as unknown as DbWordbook & {
+        wordbook_items: [{ count: number }];
+      };
+      return {
+        ...dbWordbookToWordbook(wb),
+        wordCount: wb.wordbook_items[0]?.count ?? 0,
+      };
+    });
+  }
+
+  async browseShared(): Promise<SharedWordbookListItem[]> {
+    const { data: userData } = await this.supabase.auth.getUser();
+    const userId = userData.user!.id;
+
+    const { data, error } = await this.supabase
+      .from('wordbooks')
+      .select('*, wordbook_items(count), wordbook_subscriptions(subscriber_id)')
+      .eq('is_shared', true)
+      .neq('user_id', userId)
+      .order('is_system', { ascending: false })
+      .order('created_at', { ascending: false });
+    if (error) throw error;
+
+    const results: SharedWordbookListItem[] = [];
+    for (const row of data ?? []) {
+      const wb = row as unknown as DbWordbook & {
+        wordbook_items: [{ count: number }];
+        wordbook_subscriptions: Array<{ subscriber_id: string }>;
+      };
+
+      const { data: emailData } = await this.supabase
+        .rpc('get_user_email', { uid: wb.user_id });
+
+      const isSubscribed = wb.wordbook_subscriptions.some(
+        (s) => s.subscriber_id === userId,
+      );
+
+      results.push({
+        ...dbWordbookToWordbook(wb),
+        wordCount: wb.wordbook_items[0]?.count ?? 0,
+        ownerEmail: (emailData as string) ?? '',
+        isSubscribed,
+      });
+    }
+
+    return results;
+  }
+
+  async subscribe(wordbookId: string): Promise<void> {
+    const { data: userData } = await this.supabase.auth.getUser();
+    const { error } = await this.supabase
+      .from('wordbook_subscriptions')
+      .insert({
+        wordbook_id: wordbookId,
+        subscriber_id: userData.user!.id,
+      });
+    if (error) {
+      if (error.code === '23505') return; // already subscribed
+      throw error;
+    }
+  }
+
+  async unsubscribe(wordbookId: string): Promise<void> {
+    const { data: userData } = await this.supabase.auth.getUser();
+    const { error } = await this.supabase
+      .from('wordbook_subscriptions')
+      .delete()
+      .eq('wordbook_id', wordbookId)
+      .eq('subscriber_id', userData.user!.id);
+    if (error) throw error;
+  }
+
+  async copySharedWordbook(wordbookId: string): Promise<Wordbook> {
+    const { data: userData } = await this.supabase.auth.getUser();
+    const userId = userData.user!.id;
+
+    // Fetch the source wordbook
+    const source = await this.getById(wordbookId);
+    if (!source) throw new Error('Wordbook not found');
+
+    // Fetch the source words
+    const sourceWords = await this.getWords(wordbookId);
+
+    // Create the new wordbook
+    const newWb = await this.create({
+      name: source.name,
+      description: source.description,
+    });
+
+    // Get existing user words to dedup by (term, reading)
+    const { data: existingWords } = await this.supabase
+      .from('words')
+      .select('id, term, reading')
+      .eq('user_id', userId);
+
+    const existingMap = new Map(
+      (existingWords ?? []).map((w: { id: string; term: string; reading: string }) =>
+        [`${w.term}|${w.reading}`, w.id],
+      ),
+    );
+
+    // Copy words and link to new wordbook
+    for (const word of sourceWords) {
+      const key = `${word.term}|${word.reading}`;
+      let wordId = existingMap.get(key);
+
+      if (!wordId) {
+        const created = await this.supabase
+          .from('words')
+          .insert({
+            user_id: userId,
+            term: word.term,
+            reading: word.reading,
+            meaning: word.meaning,
+            notes: word.notes,
+            tags: word.tags,
+            jlpt_level: word.jlptLevel,
+          })
+          .select('id')
+          .single();
+        if (created.error) throw created.error;
+        wordId = (created.data as { id: string }).id;
+        existingMap.set(key, wordId);
+      }
+
+      await this.supabase
+        .from('wordbook_items')
+        .insert({ wordbook_id: newWb.id, word_id: wordId })
+        .select()
+        .single()
+        .then(({ error }) => {
+          if (error && error.code !== '23505') throw error;
+        });
+    }
+
+    return newWb;
+  }
 }
 
 export class SupabaseRepository implements DataRepository {
@@ -465,9 +626,13 @@ export class SupabaseRepository implements DataRepository {
       if (progress) studyProgress.push(progress);
     }
 
+    const { data: userData } = await this.supabase.auth.getUser();
+    const userId = userData.user!.id;
+
     const { data: wbData } = await this.supabase
       .from('wordbooks')
       .select('*')
+      .eq('user_id', userId)
       .order('created_at', { ascending: false });
     const wordbooks = (wbData ?? []).map((wb: DbWordbook) => ({
       id: wb.id,

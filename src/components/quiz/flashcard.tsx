@@ -10,9 +10,10 @@ interface FlashcardProps {
   word: WordWithProgress;
   onRate: (quality: number) => void;
   onMaster: () => void;
+  showMaster?: boolean;
 }
 
-export function Flashcard({ word, onRate, onMaster }: FlashcardProps) {
+export function Flashcard({ word, onRate, onMaster, showMaster = true }: FlashcardProps) {
   const { t } = useTranslation();
   const [revealed, setRevealed] = useState(false);
 
@@ -80,14 +81,16 @@ export function Flashcard({ word, onRate, onMaster }: FlashcardProps) {
           >
             {t.quiz.good}
           </Button>
-          <Button
-            variant="outline"
-            className="flex-1 border-primary text-primary hover:bg-primary/10"
-            onClick={() => { onMaster(); setRevealed(false); }}
-            data-testid="flashcard-rate-master"
-          >
-            {t.wordDetail.markMastered}
-          </Button>
+          {showMaster && (
+            <Button
+              variant="outline"
+              className="flex-1 border-primary text-primary hover:bg-primary/10"
+              onClick={() => { onMaster(); setRevealed(false); }}
+              data-testid="flashcard-rate-master"
+            >
+              {t.wordDetail.markMastered}
+            </Button>
+          )}
         </div>
       </div>
     </div>

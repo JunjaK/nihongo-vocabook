@@ -23,6 +23,7 @@ function QuizContent() {
   const searchParams = useSearchParams();
   const wordId = searchParams.get('wordId');
   const wordbookId = searchParams.get('wordbookId');
+  const isSubscribed = searchParams.get('subscribed') === 'true';
 
   const [dueWords, setDueWords] = useState<WordWithProgress[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -144,7 +145,12 @@ function QuizContent() {
           )}
         </div>
       ) : (
-        <Flashcard word={currentWord} onRate={handleRate} onMaster={handleMaster} />
+        <Flashcard
+          word={currentWord}
+          onRate={handleRate}
+          onMaster={handleMaster}
+          showMaster={!isSubscribed}
+        />
       )}
     </>
   );

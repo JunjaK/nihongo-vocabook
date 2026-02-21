@@ -1,0 +1,22 @@
+[
+  { "term": "曖昧", "reading": "あいまい", "meaning": "애매, 모호", "jlptLevel": 1 },
+  { "term": "顕著", "reading": "けんちょ", "meaning": "현저", "jlptLevel": 1 },
+  { "term": "懸念", "reading": "けねん", "meaning": "우려", "jlptLevel": 1 },
+  { "term": "措置", "reading": "そち", "meaning": "조치", "jlptLevel": 1 },
+  { "term": "遂行", "reading": "すいこう", "meaning": "수행", "jlptLevel": 1 },
+  { "term": "精緻", "reading": "せいち", "meaning": "정치, 정밀", "jlptLevel": 1 },
+  { "term": "斬新", "reading": "ざんしん", "meaning": "참신", "jlptLevel": 1 },
+  { "term": "淘汰", "reading": "とうた", "meaning": "도태", "jlptLevel": 1 },
+  { "term": "恣意", "reading": "しい", "meaning": "자의", "jlptLevel": 1 },
+  { "term": "逸脱", "reading": "いつだつ", "meaning": "일탈", "jlptLevel": 1 },
+  { "term": "俯瞰", "reading": "ふかん", "meaning": "부감, 조망", "jlptLevel": 1 },
+  { "term": "乖離", "reading": "かいり", "meaning": "괴리", "jlptLevel": 1 },
+  { "term": "齟齬", "reading": "そご", "meaning": "어긋남, 불일치", "jlptLevel": 1 },
+  { "term": "払拭", "reading": "ふっしょく", "meaning": "불식", "jlptLevel": 1 },
+  { "term": "醸成", "reading": "じょうせい", "meaning": "양성, 조성", "jlptLevel": 1 },
+  { "term": "忖度", "reading": "そんたく", "meaning": "손탁, 짐작", "jlptLevel": 1 },
+  { "term": "凡庸", "reading": "ぼんよう", "meaning": "범용, 평범", "jlptLevel": 1 },
+  { "term": "網羅", "reading": "もうら", "meaning": "망라", "jlptLevel": 1 },
+  { "term": "杞憂", "reading": "きゆう", "meaning": "기우, 쓸데없는 걱정", "jlptLevel": 1 },
+  { "term": "瓦解", "reading": "がかい", "meaning": "와해", "jlptLevel": 1 }
+]

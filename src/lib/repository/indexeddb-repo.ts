@@ -3,7 +3,6 @@ import {
   type LocalWord,
   type LocalStudyProgress,
   type LocalWordbook,
-  type LocalWordbookItem,
 } from '@/lib/db/dexie';
 import { sm2, createInitialProgress } from '@/lib/spaced-repetition';
 import type {
@@ -20,6 +19,7 @@ import type {
   CreateWordbookInput,
   UpdateWordbookInput,
   WordbookWithCount,
+  SharedWordbookListItem,
 } from '@/types/wordbook';
 import type {
   DataRepository,
@@ -61,8 +61,11 @@ function localProgressToProgress(
 function localWordbookToWordbook(local: LocalWordbook & { id: number }): Wordbook {
   return {
     id: String(local.id),
+    userId: '',
     name: local.name,
     description: local.description,
+    isShared: false,
+    isSystem: false,
     createdAt: local.createdAt,
     updatedAt: local.updatedAt,
   };
@@ -344,6 +347,27 @@ class IndexedDBWordbookRepository implements WordbookRepository {
       }
     }
     return wordbooks;
+  }
+
+  // Shared features not available in guest mode
+  async getSubscribed(): Promise<WordbookWithCount[]> {
+    return [];
+  }
+
+  async browseShared(): Promise<SharedWordbookListItem[]> {
+    return [];
+  }
+
+  async subscribe(): Promise<void> {
+    throw new Error('Sign in required to subscribe to shared wordbooks');
+  }
+
+  async unsubscribe(): Promise<void> {
+    throw new Error('Sign in required to unsubscribe from shared wordbooks');
+  }
+
+  async copySharedWordbook(): Promise<Wordbook> {
+    throw new Error('Sign in required to copy shared wordbooks');
   }
 }
 

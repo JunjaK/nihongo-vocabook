@@ -1,0 +1,22 @@
+[
+  { "term": "食べる", "reading": "たべる", "meaning": "먹다", "jlptLevel": 5 },
+  { "term": "飲む", "reading": "のむ", "meaning": "마시다", "jlptLevel": 5 },
+  { "term": "見る", "reading": "みる", "meaning": "보다", "jlptLevel": 5 },
+  { "term": "聞く", "reading": "きく", "meaning": "듣다", "jlptLevel": 5 },
+  { "term": "読む", "reading": "よむ", "meaning": "읽다", "jlptLevel": 5 },
+  { "term": "書く", "reading": "かく", "meaning": "쓰다", "jlptLevel": 5 },
+  { "term": "話す", "reading": "はなす", "meaning": "말하다", "jlptLevel": 5 },
+  { "term": "行く", "reading": "いく", "meaning": "가다", "jlptLevel": 5 },
+  { "term": "来る", "reading": "くる", "meaning": "오다", "jlptLevel": 5 },
+  { "term": "帰る", "reading": "かえる", "meaning": "돌아가다", "jlptLevel": 5 },
+  { "term": "買う", "reading": "かう", "meaning": "사다", "jlptLevel": 5 },
+  { "term": "入る", "reading": "はいる", "meaning": "들어가다", "jlptLevel": 5 },
+  { "term": "出る", "reading": "でる", "meaning": "나가다", "jlptLevel": 5 },
+  { "term": "会う", "reading": "あう", "meaning": "만나다", "jlptLevel": 5 },
+  { "term": "待つ", "reading": "まつ", "meaning": "기다리다", "jlptLevel": 5 },
+  { "term": "大きい", "reading": "おおきい", "meaning": "크다", "jlptLevel": 5 },
+  { "term": "小さい", "reading": "ちいさい", "meaning": "작다", "jlptLevel": 5 },
+  { "term": "新しい", "reading": "あたらしい", "meaning": "새롭다", "jlptLevel": 5 },
+  { "term": "古い", "reading": "ふるい", "meaning": "오래되다", "jlptLevel": 5 },
+  { "term": "高い", "reading": "たかい", "meaning": "높다, 비싸다", "jlptLevel": 5 }
+]
