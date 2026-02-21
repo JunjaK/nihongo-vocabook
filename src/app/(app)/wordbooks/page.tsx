@@ -1,7 +1,9 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
+import { Download, FolderOpen } from 'lucide-react';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { Header } from '@/components/layout/header';
 import { Button } from '@/components/ui/button';
 import { WordbookCard } from '@/components/wordbook/wordbook-card';
@@ -17,9 +19,11 @@ export default function WordbooksPage() {
   const [wordbooks, setWordbooks] = useState<WordbookWithCount[]>([]);
   const [subscribed, setSubscribed] = useState<WordbookWithCount[]>([]);
   const [loading, setLoading] = useState(true);
+  const loadStart = useRef(0);
 
   const loadWordbooks = useCallback(async () => {
     setLoading(true);
+    loadStart.current = Date.now();
     try {
       const [owned, subs] = await Promise.all([
         repo.wordbooks.getAll(),
@@ -28,6 +32,8 @@ export default function WordbooksPage() {
       setWordbooks(owned);
       setSubscribed(subs);
     } finally {
+      const remaining = 300 - (Date.now() - loadStart.current);
+      if (remaining > 0) await new Promise((r) => setTimeout(r, remaining));
       setLoading(false);
     }
   }, [repo, user]);
@@ -39,57 +45,84 @@ export default function WordbooksPage() {
   const isEmpty = wordbooks.length === 0 && subscribed.length === 0;
 
   return (
-    <>
+    <div className="flex min-h-0 flex-1 flex-col">
       <Header
         title={t.wordbooks.title}
         actions={
-          <Link href="/wordbooks/new">
-            <Button variant="ghost" size="sm" data-testid="wordbooks-add-button">
-              {t.common.add}
+          <Link href="/wordbooks/browse">
+            <Button variant="ghost" size="icon-sm" data-testid="wordbooks-browse-button" aria-label="Browse shared">
+              <Download className="size-5" />
             </Button>
           </Link>
         }
       />
 
       {loading ? (
-        <div className="p-4 py-8 text-center text-muted-foreground">
+        <div className="flex flex-1 flex-col items-center justify-center gap-3 text-muted-foreground">
+          <LoadingSpinner className="size-8" />
           {t.common.loading}
         </div>
       ) : isEmpty ? (
-        <div className="flex flex-1 flex-col items-center justify-center text-center text-muted-foreground">
+        <div className="animate-fade-in flex flex-1 flex-col items-center justify-center text-center text-muted-foreground">
+          <FolderOpen className="mb-3 size-10 text-muted-foreground/50" />
           {t.wordbooks.noWordbooksYet}
         </div>
       ) : (
-        <div className="space-y-6 p-4">
-          {wordbooks.length > 0 && (
-            <section>
-              {subscribed.length > 0 && (
-                <h2 className="mb-2 text-sm font-medium text-muted-foreground">
-                  {t.wordbooks.myWordbooks}
-                </h2>
-              )}
-              <div className="space-y-2">
-                {wordbooks.map((wb) => (
-                  <WordbookCard key={wb.id} wordbook={wb} />
-                ))}
-              </div>
-            </section>
-          )}
+        <div className="flex-1 overflow-y-auto">
+          <div className="space-y-6 p-4">
+            {wordbooks.length > 0 && (
+              <section className="animate-fade-in">
+                {subscribed.length > 0 && (
+                  <h2 className="mb-2 text-sm font-medium text-muted-foreground">
+                    {t.wordbooks.myWordbooks}
+                  </h2>
+                )}
+                <div className="space-y-2">
+                  {wordbooks.map((wb, i) => (
+                    <div
+                      key={wb.id}
+                      className="animate-stagger"
+                      style={{ '--stagger': Math.min(i, 15) } as React.CSSProperties}
+                    >
+                      <WordbookCard wordbook={wb} />
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
 
-          {subscribed.length > 0 && (
-            <section>
-              <h2 className="mb-2 text-sm font-medium text-muted-foreground">
-                {t.wordbooks.subscribedWordbooks}
-              </h2>
-              <div className="space-y-2">
-                {subscribed.map((wb) => (
-                  <WordbookCard key={wb.id} wordbook={wb} subscribed />
-                ))}
-              </div>
-            </section>
-          )}
+            {subscribed.length > 0 && (
+              <section className="animate-fade-in" style={{ animationDelay: '100ms' }}>
+                <h2 className="mb-2 text-sm font-medium text-muted-foreground">
+                  {t.wordbooks.subscribedWordbooks}
+                </h2>
+                <div className="space-y-2">
+                  {subscribed.map((wb, i) => (
+                    <div
+                      key={wb.id}
+                      className="animate-stagger"
+                      style={{ '--stagger': Math.min(i + wordbooks.length, 15) } as React.CSSProperties}
+                    >
+                      <WordbookCard wordbook={wb} subscribed />
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+          </div>
         </div>
       )}
-    </>
+
+      {!loading && (
+        <div className="shrink-0 bg-background px-4 pb-3">
+          <div className="mb-3 h-px bg-border" />
+          <Link href="/wordbooks/new">
+            <Button className="w-full" data-testid="wordbooks-create-button">
+              {t.wordbooks.createWordbook}
+            </Button>
+          </Link>
+        </div>
+      )}
+    </div>
   );
 }

@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { Flag } from 'lucide-react';
 import { Header } from '@/components/layout/header';
 import { ListToolbar } from '@/components/layout/list-toolbar';
 import { WordCardWithMenu } from '@/components/word/swipeable-word-card';
@@ -86,33 +87,39 @@ export default function MasteredPage() {
       />
 
       {loading ? (
-        <div className="p-4 py-8 text-center text-muted-foreground">
+        <div className="py-8 text-center text-muted-foreground">
           {t.common.loading}
         </div>
       ) : words.length === 0 ? (
-        <div className="flex flex-1 flex-col items-center justify-center text-center text-muted-foreground">
+        <div className="animate-fade-in flex flex-1 flex-col items-center justify-center text-center text-muted-foreground">
+          <Flag className="mb-3 size-10 text-muted-foreground/50" />
           {appliedQuery ? t.words.noWords : t.masteredPage.noWords}
         </div>
       ) : (
         <div className="space-y-2 p-4">
-          {words.map((word) => (
-            <WordCardWithMenu
+          {words.map((word, i) => (
+            <div
               key={word.id}
-              word={word}
-              showReading={showReading}
-              showMeaning={showMeaning}
-              actions={[
-                {
-                  label: t.masteredPage.unmaster,
-                  onAction: handleUnmaster,
-                },
-                {
-                  label: t.common.delete,
-                  onAction: handleDelete,
-                  variant: 'destructive',
-                },
-              ]}
-            />
+              className="animate-stagger"
+              style={{ '--stagger': Math.min(i, 15) } as React.CSSProperties}
+            >
+              <WordCardWithMenu
+                word={word}
+                showReading={showReading}
+                showMeaning={showMeaning}
+                actions={[
+                  {
+                    label: t.masteredPage.unmaster,
+                    onAction: handleUnmaster,
+                  },
+                  {
+                    label: t.common.delete,
+                    onAction: handleDelete,
+                    variant: 'destructive',
+                  },
+                ]}
+              />
+            </div>
           ))}
         </div>
       )}

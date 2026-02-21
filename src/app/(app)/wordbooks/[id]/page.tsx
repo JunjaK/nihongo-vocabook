@@ -1,8 +1,10 @@
 'use client';
 
 import { useState, useEffect, useCallback, use } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { Plus } from 'lucide-react';
 import { Header } from '@/components/layout/header';
 import { ListToolbar } from '@/components/layout/list-toolbar';
 import { Button } from '@/components/ui/button';
@@ -54,7 +56,7 @@ export default function WordbookDetailPage({
     loadData();
   }, [loadData]);
 
-  const handleUpdate = async (values: { name: string; description: string | null; isShared?: boolean }) => {
+  const handleUpdate = async (values: { name: string; description: string | null; isShared?: boolean; tags?: string[] }) => {
     await repo.wordbooks.update(id, values);
     toast.success(t.wordbooks.wordbookUpdated);
     setEditing(false);
@@ -111,7 +113,7 @@ export default function WordbookDetailPage({
     return (
       <>
         <Header title={t.wordbooks.title} showBack />
-        <div className="p-4 text-center text-muted-foreground">{t.common.loading}</div>
+        <div className="py-8 text-center text-muted-foreground">{t.common.loading}</div>
       </>
     );
   }
@@ -120,7 +122,7 @@ export default function WordbookDetailPage({
     return (
       <>
         <Header title={t.wordbooks.title} showBack />
-        <div className="p-4 text-center text-muted-foreground">
+        <div className="py-8 text-center text-muted-foreground">
           {t.words.wordNotFound}
         </div>
       </>
@@ -144,6 +146,7 @@ export default function WordbookDetailPage({
             name: wordbook.name,
             description: wordbook.description,
             isShared: wordbook.isShared,
+            tags: wordbook.tags,
           }}
           onSubmit={handleUpdate}
           submitLabel={t.common.update}
@@ -171,6 +174,16 @@ export default function WordbookDetailPage({
             </Button>
           ) : (
             <div className="flex items-center gap-1">
+              <Link href={`/wordbooks/${id}/add-words`}>
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  data-testid="wordbook-add-words-button"
+                  aria-label={t.wordbooks.addWords}
+                >
+                  <Plus className="size-5" />
+                </Button>
+              </Link>
               <Button
                 variant="ghost"
                 size="sm"
@@ -208,14 +221,14 @@ export default function WordbookDetailPage({
       )}
 
       {words.length === 0 ? (
-        <div className="flex flex-1 flex-col items-center justify-center text-center text-muted-foreground">
+        <div className="animate-fade-in flex flex-1 flex-col items-center justify-center text-center text-muted-foreground">
           {t.wordbooks.noWords}
         </div>
       ) : (
         <>
           <div className="min-h-0 flex-1 overflow-y-auto p-4">
             {wordbook.description && (
-              <div className="mb-4 text-sm text-muted-foreground">{wordbook.description}</div>
+              <div className="animate-fade-in mb-4 text-sm text-muted-foreground">{wordbook.description}</div>
             )}
 
             {isSubscribed && (
@@ -230,35 +243,40 @@ export default function WordbookDetailPage({
               </div>
             ) : (
               <div className="space-y-2">
-                {filteredWords.map((word) => (
-                  <WordCardWithMenu
+                {filteredWords.map((word, i) => (
+                  <div
                     key={word.id}
-                    word={word}
-                    showReading={showReading}
-                    showMeaning={showMeaning}
-                    actions={
-                      isOwned
-                        ? [
-                            {
-                              label: t.wordDetail.markMastered,
-                              onAction: handleMasterWord,
-                            },
-                            {
-                              label: t.wordbooks.removeWord,
-                              onAction: handleRemoveWord,
-                              variant: 'destructive',
-                            },
-                          ]
-                        : []
-                    }
-                  />
+                    className="animate-stagger"
+                    style={{ '--stagger': Math.min(i, 15) } as React.CSSProperties}
+                  >
+                    <WordCardWithMenu
+                      word={word}
+                      showReading={showReading}
+                      showMeaning={showMeaning}
+                      actions={
+                        isOwned
+                          ? [
+                              {
+                                label: t.wordDetail.markMastered,
+                                onAction: handleMasterWord,
+                              },
+                              {
+                                label: t.wordbooks.removeWord,
+                                onAction: handleRemoveWord,
+                                variant: 'destructive',
+                              },
+                            ]
+                          : []
+                      }
+                    />
+                  </div>
                 ))}
               </div>
             )}
           </div>
 
           <div className="shrink-0 px-4 pb-3">
-            <div className="mx-4 mb-3 h-px bg-border" />
+            <div className="mb-3 h-px bg-border" />
             <Button
               className="w-full"
               onClick={() =>
