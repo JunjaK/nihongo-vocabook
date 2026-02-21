@@ -4,8 +4,9 @@ import { useState, useEffect, useCallback, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { Header } from '@/components/layout/header';
+import { ListToolbar } from '@/components/layout/list-toolbar';
 import { Button } from '@/components/ui/button';
-import { SwipeableWordCard } from '@/components/word/swipeable-word-card';
+import { WordCardWithMenu } from '@/components/word/swipeable-word-card';
 import { WordbookForm } from '@/components/wordbook/wordbook-form';
 import { useRepository } from '@/lib/repository/provider';
 import { useTranslation } from '@/lib/i18n';
@@ -27,6 +28,8 @@ export default function WordbookDetailPage({
   const [editing, setEditing] = useState(false);
   const [showReading, setShowReading] = useState(false);
   const [showMeaning, setShowMeaning] = useState(false);
+  const [searchInput, setSearchInput] = useState('');
+  const [appliedQuery, setAppliedQuery] = useState('');
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -61,16 +64,42 @@ export default function WordbookDetailPage({
     router.push('/wordbooks');
   };
 
+  const handleMasterWord = async (wordId: string) => {
+    await repo.words.setMastered(wordId, true);
+    setWords((prev) => prev.filter((w) => w.id !== wordId));
+    toast.success(t.masteredPage.wordMastered);
+  };
+
   const handleRemoveWord = async (wordId: string) => {
     await repo.wordbooks.removeWord(id, wordId);
     setWords((prev) => prev.filter((w) => w.id !== wordId));
     toast.success(t.wordbooks.wordRemoved);
   };
 
+  const handleSearch = () => {
+    setAppliedQuery(searchInput.trim());
+  };
+
+  const handleSearchClear = () => {
+    setSearchInput('');
+    setAppliedQuery('');
+  };
+
+  const filteredWords = appliedQuery
+    ? words.filter((w) => {
+        const lower = appliedQuery.toLowerCase();
+        return (
+          w.term.toLowerCase().includes(lower) ||
+          w.reading.toLowerCase().includes(lower) ||
+          w.meaning.toLowerCase().includes(lower)
+        );
+      })
+    : words;
+
   if (loading) {
     return (
       <>
-        <Header title={t.wordbooks.title} />
+        <Header title={t.wordbooks.title} showBack />
         <div className="p-4 text-center text-muted-foreground">{t.common.loading}</div>
       </>
     );
@@ -79,7 +108,7 @@ export default function WordbookDetailPage({
   if (!wordbook) {
     return (
       <>
-        <Header title={t.wordbooks.title} />
+        <Header title={t.wordbooks.title} showBack />
         <div className="p-4 text-center text-muted-foreground">
           {t.words.wordNotFound}
         </div>
@@ -113,22 +142,9 @@ export default function WordbookDetailPage({
     <>
       <Header
         title={wordbook.name}
+        showBack
         actions={
           <div className="flex items-center gap-1">
-            <Button
-              variant={showReading ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setShowReading((v) => !v)}
-            >
-              {t.words.showReading}
-            </Button>
-            <Button
-              variant={showMeaning ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setShowMeaning((v) => !v)}
-            >
-              {t.words.showMeaning}
-            </Button>
             <Button
               variant="ghost"
               size="sm"
@@ -150,60 +166,72 @@ export default function WordbookDetailPage({
         }
       />
 
-      <div className="space-y-4 p-4">
-        {wordbook.description && (
-          <div className="text-sm text-muted-foreground">{wordbook.description}</div>
-        )}
+      {words.length > 0 && (
+        <ListToolbar
+          searchValue={searchInput}
+          onSearchChange={setSearchInput}
+          onSearchSubmit={handleSearch}
+          onSearchClear={handleSearchClear}
+          searchPlaceholder={t.words.searchPlaceholder}
+          showReading={showReading}
+          onToggleReading={() => setShowReading((v) => !v)}
+          showMeaning={showMeaning}
+          onToggleMeaning={() => setShowMeaning((v) => !v)}
+        />
+      )}
 
-        {words.length > 0 && (
-          <Button
-            className="w-full"
-            onClick={() => router.push(`/quiz?wordbookId=${id}`)}
-            data-testid="wordbook-start-quiz"
-          >
-            {t.wordbooks.startQuiz}
-          </Button>
-        )}
+      {words.length === 0 ? (
+        <div className="flex flex-1 flex-col items-center justify-center text-center text-muted-foreground">
+          {t.wordbooks.noWords}
+        </div>
+      ) : (
+        <>
+          <div className="min-h-0 flex-1 overflow-y-auto p-4">
+            {wordbook.description && (
+              <div className="mb-4 text-sm text-muted-foreground">{wordbook.description}</div>
+            )}
 
-        {words.length === 0 ? (
-          <div className="py-8 text-center text-muted-foreground">
-            {t.wordbooks.noWords}
+            {filteredWords.length === 0 ? (
+              <div className="py-8 text-center text-muted-foreground">
+                {t.words.noWords}
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {filteredWords.map((word) => (
+                  <WordCardWithMenu
+                    key={word.id}
+                    word={word}
+                    showReading={showReading}
+                    showMeaning={showMeaning}
+                    actions={[
+                      {
+                        label: t.wordDetail.markMastered,
+                        onAction: handleMasterWord,
+                      },
+                      {
+                        label: t.wordbooks.removeWord,
+                        onAction: handleRemoveWord,
+                        variant: 'destructive',
+                      },
+                    ]}
+                  />
+                ))}
+              </div>
+            )}
           </div>
-        ) : (
-          <div className="space-y-2">
-            {words.map((word) => (
-              <SwipeableWordCard
-                key={word.id}
-                word={word}
-                showReading={showReading}
-                showMeaning={showMeaning}
-                actionIcon={<RemoveIcon className="h-5 w-5" />}
-                actionLabel={t.wordbooks.removeWord}
-                actionColor="bg-red-500"
-                onAction={handleRemoveWord}
-              />
-            ))}
+
+          <div className="shrink-0 px-4 pb-3">
+            <div className="mx-4 mb-3 h-px bg-border" />
+            <Button
+              className="w-full"
+              onClick={() => router.push(`/quiz?wordbookId=${id}`)}
+              data-testid="wordbook-start-quiz"
+            >
+              {t.wordbooks.startQuiz}
+            </Button>
           </div>
-        )}
-      </div>
+        </>
+      )}
     </>
-  );
-}
-
-function RemoveIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={2}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-    >
-      <path d="M18 6 6 18" />
-      <path d="m6 6 12 12" />
-    </svg>
   );
 }

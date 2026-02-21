@@ -2,6 +2,7 @@
 
 import { Suspense, useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { toast } from 'sonner';
 import { Header } from '@/components/layout/header';
 import { Flashcard } from '@/components/quiz/flashcard';
 import { useRepository } from '@/lib/repository/provider';
@@ -61,11 +62,7 @@ function QuizContent() {
     loadDueWords();
   }, [loadDueWords]);
 
-  const handleRate = async (quality: number) => {
-    const currentWord = dueWords[currentIndex];
-    await repo.study.recordReview(currentWord.id, quality);
-    setCompleted((c) => c + 1);
-
+  const advanceToNext = async () => {
     if (currentIndex + 1 < dueWords.length) {
       setCurrentIndex((i) => i + 1);
     } else {
@@ -84,6 +81,24 @@ function QuizContent() {
     }
   };
 
+  const handleRate = async (quality: number) => {
+    const currentWord = dueWords[currentIndex];
+    await repo.study.recordReview(currentWord.id, quality);
+    setCompleted((c) => c + 1);
+    await advanceToNext();
+  };
+
+  const handleMaster = async () => {
+    const currentWord = dueWords[currentIndex];
+    await repo.words.setMastered(currentWord.id, true);
+    toast.success(t.masteredPage.wordMastered);
+    setDueWords((prev) => prev.filter((_, i) => i !== currentIndex));
+    setCompleted((c) => c + 1);
+    if (currentIndex >= dueWords.length - 1) {
+      setCurrentIndex(0);
+    }
+  };
+
   const currentWord = dueWords[currentIndex];
   const title = wordId
     ? t.quiz.practice
@@ -91,44 +106,46 @@ function QuizContent() {
       ? t.quiz.wordbookQuiz
       : t.quiz.title;
 
+  const progressText = !loading && dueWords.length > 0
+    ? wordId
+      ? completed > 0 ? t.quiz.reviewCount(completed) : undefined
+      : `${currentIndex + 1} / ${dueWords.length}${completed > 0 ? ` · ${t.quiz.reviewCount(completed)}` : ''}`
+    : undefined;
+
   return (
     <>
-      <Header title={title} />
-      <div className="p-4">
-        {loading ? (
-          <div className="py-8 text-center text-muted-foreground">
-            {t.common.loading}
+      <Header
+        title={title}
+        showBack={!!(wordId || wordbookId)}
+        actions={
+          progressText && (
+            <span className="text-sm text-muted-foreground">{progressText}</span>
+          )
+        }
+      />
+      {loading ? (
+        <div className="p-4 py-8 text-center text-muted-foreground">
+          {t.common.loading}
+        </div>
+      ) : dueWords.length === 0 ? (
+        <div className="flex flex-1 flex-col items-center justify-center text-center">
+          <div className="text-4xl">🎉</div>
+          <div className="mt-4 text-lg font-semibold">{t.quiz.allCaughtUp}</div>
+          <div className="mt-2 text-muted-foreground">
+            {t.quiz.noWordsDue}
           </div>
-        ) : dueWords.length === 0 ? (
-          <div className="space-y-4 py-8 text-center">
-            <div className="text-4xl">🎉</div>
-            <div className="text-lg font-semibold">{t.quiz.allCaughtUp}</div>
-            <div className="text-muted-foreground">
-              {t.quiz.noWordsDue}
+          <div className="mt-1 text-muted-foreground">
+            {t.quiz.noWordsDueHint}
+          </div>
+          {completed > 0 && (
+            <div className="mt-4 text-sm text-muted-foreground">
+              {t.quiz.reviewed(completed)}
             </div>
-            {completed > 0 && (
-              <div className="text-sm text-muted-foreground">
-                {t.quiz.reviewed(completed)}
-              </div>
-            )}
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {!wordId && (
-              <div className="text-center text-sm text-muted-foreground">
-                {currentIndex + 1} / {dueWords.length}
-                {completed > 0 && ` · ${t.quiz.reviewCount(completed)}`}
-              </div>
-            )}
-            {wordId && completed > 0 && (
-              <div className="text-center text-sm text-muted-foreground">
-                {t.quiz.reviewCount(completed)}
-              </div>
-            )}
-            <Flashcard word={currentWord} onRate={handleRate} />
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      ) : (
+        <Flashcard word={currentWord} onRate={handleRate} onMaster={handleMaster} />
+      )}
     </>
   );
 }

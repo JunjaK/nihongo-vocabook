@@ -97,12 +97,12 @@ const ko: Translations = {
     title: '퀴즈',
     practice: '연습',
     allCaughtUp: '모두 완료!',
-    noWordsDue: '복습할 단어가 없습니다. 단어를 추가하거나 나중에 다시 확인하세요.',
+    noWordsDue: '복습할 단어가 없습니다.',
+    noWordsDueHint: '단어를 추가하거나 나중에 다시 확인하세요.',
     tapToReveal: '탭하여 뜻 보기',
     again: '다시',
     hard: '어려움',
     good: '좋음',
-    easy: '쉬움',
     reviewed: (n: number) =>
       `이번 세션에서 ${n}개의 단어를 복습했습니다.`,
     reviewCount: (n: number) =>

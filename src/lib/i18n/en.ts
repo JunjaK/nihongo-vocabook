@@ -97,12 +97,12 @@ const en: Translations = {
     title: 'Quiz',
     practice: 'Practice',
     allCaughtUp: 'All caught up!',
-    noWordsDue: 'No words due for review. Add more words or check back later.',
+    noWordsDue: 'No words due for review.',
+    noWordsDueHint: 'Add more words or check back later.',
     tapToReveal: 'Tap to reveal',
     again: 'Again',
     hard: 'Hard',
     good: 'Good',
-    easy: 'Easy',
     reviewed: (n: number) =>
       `You reviewed ${n} word${n !== 1 ? 's' : ''} this session.`,
     reviewCount: (n: number) =>

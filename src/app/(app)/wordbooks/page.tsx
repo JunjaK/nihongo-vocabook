@@ -42,23 +42,21 @@ export default function WordbooksPage() {
         }
       />
 
-      <div className="space-y-4 p-4">
-        {loading ? (
-          <div className="py-8 text-center text-muted-foreground">
-            {t.common.loading}
-          </div>
-        ) : wordbooks.length === 0 ? (
-          <div className="py-8 text-center text-muted-foreground">
-            {t.wordbooks.noWordbooksYet}
-          </div>
-        ) : (
-          <div className="space-y-2">
-            {wordbooks.map((wb) => (
-              <WordbookCard key={wb.id} wordbook={wb} />
-            ))}
-          </div>
-        )}
-      </div>
+      {loading ? (
+        <div className="p-4 py-8 text-center text-muted-foreground">
+          {t.common.loading}
+        </div>
+      ) : wordbooks.length === 0 ? (
+        <div className="flex flex-1 flex-col items-center justify-center text-center text-muted-foreground">
+          {t.wordbooks.noWordbooksYet}
+        </div>
+      ) : (
+        <div className="space-y-2 p-4">
+          {wordbooks.map((wb) => (
+            <WordbookCard key={wb.id} wordbook={wb} />
+          ))}
+        </div>
+      )}
     </>
   );
 }

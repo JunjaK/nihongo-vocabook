@@ -20,7 +20,7 @@ export default function NewWordbookPage() {
 
   return (
     <>
-      <Header title={t.wordbooks.createWordbook} />
+      <Header title={t.wordbooks.createWordbook} showBack />
       <div className="p-4">
         <WordbookForm onSubmit={handleSubmit} submitLabel={t.common.save} />
       </div>

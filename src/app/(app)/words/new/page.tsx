@@ -20,10 +20,8 @@ export default function NewWordPage() {
 
   return (
     <>
-      <Header title={t.words.addWord} />
-      <div className="p-4">
-        <WordForm onSubmit={handleSubmit} submitLabel={t.words.addWord} />
-      </div>
+      <Header title={t.words.addWord} showBack />
+      <WordForm onSubmit={handleSubmit} submitLabel={t.words.addWord} />
     </>
   );
 }

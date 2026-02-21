@@ -1,16 +1,17 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { Header } from '@/components/layout/header';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { SwipeableWordCard } from '@/components/word/swipeable-word-card';
+import { ListToolbar } from '@/components/layout/list-toolbar';
+import { WordCardWithMenu } from '@/components/word/swipeable-word-card';
 import { useRepository } from '@/lib/repository/provider';
 import { useTranslation } from '@/lib/i18n';
 import type { Word } from '@/types/word';
 
 export default function MasteredPage() {
+  const router = useRouter();
   const repo = useRepository();
   const { t } = useTranslation();
   const [words, setWords] = useState<Word[]>([]);
@@ -50,13 +51,9 @@ export default function MasteredPage() {
     setAppliedQuery(searchInput.trim());
   };
 
-  const handleReset = () => {
+  const handleSearchClear = () => {
     setSearchInput('');
     setAppliedQuery('');
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') handleSearch();
   };
 
   const handleUnmaster = async (wordId: string) => {
@@ -65,98 +62,60 @@ export default function MasteredPage() {
     toast.success(t.masteredPage.wordUnmastered);
   };
 
+  const handleDelete = async (wordId: string) => {
+    if (!window.confirm(t.words.deleteConfirm)) return;
+    await repo.words.delete(wordId);
+    setWords((prev) => prev.filter((w) => w.id !== wordId));
+    toast.success(t.words.wordDeleted);
+  };
+
   return (
     <>
-      <Header
-        title={t.masteredPage.title}
-        actions={
-          <div className="flex items-center gap-1">
-            <Button
-              variant={showReading ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setShowReading((v) => !v)}
-              data-testid="mastered-toggle-reading"
-            >
-              {t.words.showReading}
-            </Button>
-            <Button
-              variant={showMeaning ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setShowMeaning((v) => !v)}
-              data-testid="mastered-toggle-meaning"
-            >
-              {t.words.showMeaning}
-            </Button>
-          </div>
-        }
+      <Header title={t.masteredPage.title} />
+
+      <ListToolbar
+        searchValue={searchInput}
+        onSearchChange={setSearchInput}
+        onSearchSubmit={handleSearch}
+        onSearchClear={handleSearchClear}
+        searchPlaceholder={t.words.searchPlaceholder}
+        showReading={showReading}
+        onToggleReading={() => setShowReading((v) => !v)}
+        showMeaning={showMeaning}
+        onToggleMeaning={() => setShowMeaning((v) => !v)}
       />
 
-      <div className="space-y-4 p-4">
-        <div className="flex gap-2">
-          <Input
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder={t.words.searchPlaceholder}
-            data-testid="mastered-search-input"
-          />
-          <Button
-            onClick={handleSearch}
-            variant="secondary"
-            data-testid="mastered-search-button"
-          >
-            {t.common.search}
-          </Button>
-          {appliedQuery && (
-            <Button onClick={handleReset} variant="ghost" size="sm">
-              {t.common.clear}
-            </Button>
-          )}
+      {loading ? (
+        <div className="p-4 py-8 text-center text-muted-foreground">
+          {t.common.loading}
         </div>
-
-        {loading ? (
-          <div className="py-8 text-center text-muted-foreground">
-            {t.common.loading}
-          </div>
-        ) : words.length === 0 ? (
-          <div className="py-8 text-center text-muted-foreground">
-            {appliedQuery ? t.words.noWords : t.masteredPage.noWords}
-          </div>
-        ) : (
-          <div className="space-y-2">
-            {words.map((word) => (
-              <SwipeableWordCard
-                key={word.id}
-                word={word}
-                showReading={showReading}
-                showMeaning={showMeaning}
-                actionIcon={<UndoIcon className="h-5 w-5" />}
-                actionLabel={t.masteredPage.unmaster}
-                actionColor="bg-orange-500"
-                onAction={handleUnmaster}
-              />
-            ))}
-          </div>
-        )}
-      </div>
+      ) : words.length === 0 ? (
+        <div className="flex flex-1 flex-col items-center justify-center text-center text-muted-foreground">
+          {appliedQuery ? t.words.noWords : t.masteredPage.noWords}
+        </div>
+      ) : (
+        <div className="space-y-2 p-4">
+          {words.map((word) => (
+            <WordCardWithMenu
+              key={word.id}
+              word={word}
+              showReading={showReading}
+              showMeaning={showMeaning}
+              actions={[
+                {
+                  label: t.masteredPage.unmaster,
+                  onAction: handleUnmaster,
+                },
+                {
+                  label: t.common.delete,
+                  onAction: handleDelete,
+                  variant: 'destructive',
+                },
+              ]}
+            />
+          ))}
+        </div>
+      )}
     </>
-  );
-}
-
-function UndoIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={2}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-    >
-      <path d="M3 7v6h6" />
-      <path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13" />
-    </svg>
   );
 }

@@ -94,11 +94,11 @@ export interface Translations {
     practice: string;
     allCaughtUp: string;
     noWordsDue: string;
+    noWordsDueHint: string;
     tapToReveal: string;
     again: string;
     hard: string;
     good: string;
-    easy: string;
     reviewed: (n: number) => string;
     reviewCount: (n: number) => string;
     wordbookQuiz: string;

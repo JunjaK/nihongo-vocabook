@@ -4,9 +4,10 @@ import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { toast } from 'sonner';
 import { Header } from '@/components/layout/header';
+import { ListToolbar } from '@/components/layout/list-toolbar';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { SwipeableWordCard } from '@/components/word/swipeable-word-card';
+import { WordCardWithMenu } from '@/components/word/swipeable-word-card';
+import { AddToWordbookDialog } from '@/components/wordbook/add-to-wordbook-dialog';
 import { useRepository } from '@/lib/repository/provider';
 import { useTranslation } from '@/lib/i18n';
 import type { Word } from '@/types/word';
@@ -20,6 +21,7 @@ export default function WordsPage() {
   const [loading, setLoading] = useState(true);
   const [showReading, setShowReading] = useState(false);
   const [showMeaning, setShowMeaning] = useState(false);
+  const [wordbookDialogWordId, setWordbookDialogWordId] = useState<string | null>(null);
 
   const loadWords = useCallback(async () => {
     setLoading(true);
@@ -44,13 +46,9 @@ export default function WordsPage() {
     setAppliedQuery(searchInput.trim());
   };
 
-  const handleReset = () => {
+  const handleSearchClear = () => {
     setSearchInput('');
     setAppliedQuery('');
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') handleSearch();
   };
 
   const handleMaster = async (wordId: string) => {
@@ -64,97 +62,64 @@ export default function WordsPage() {
       <Header
         title={t.words.title}
         actions={
-          <div className="flex items-center gap-1">
-            <Button
-              variant={showReading ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setShowReading((v) => !v)}
-              data-testid="words-toggle-reading"
-            >
-              {t.words.showReading}
+          <Link href="/words/new">
+            <Button variant="ghost" size="sm" data-testid="words-add-button">
+              {t.common.add}
             </Button>
-            <Button
-              variant={showMeaning ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setShowMeaning((v) => !v)}
-              data-testid="words-toggle-meaning"
-            >
-              {t.words.showMeaning}
-            </Button>
-            <Link href="/words/new">
-              <Button variant="ghost" size="sm" data-testid="words-add-button">
-                {t.common.add}
-              </Button>
-            </Link>
-          </div>
+          </Link>
         }
       />
 
-      <div className="space-y-4 p-4">
-        <div className="flex gap-2">
-          <Input
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder={t.words.searchPlaceholder}
-            data-testid="words-search-input"
-          />
-          <Button
-            onClick={handleSearch}
-            variant="secondary"
-            data-testid="words-search-button"
-          >
-            {t.common.search}
-          </Button>
-          {appliedQuery && (
-            <Button onClick={handleReset} variant="ghost" size="sm">
-              {t.common.clear}
-            </Button>
-          )}
+      <ListToolbar
+        searchValue={searchInput}
+        onSearchChange={setSearchInput}
+        onSearchSubmit={handleSearch}
+        onSearchClear={handleSearchClear}
+        searchPlaceholder={t.words.searchPlaceholder}
+        showReading={showReading}
+        onToggleReading={() => setShowReading((v) => !v)}
+        showMeaning={showMeaning}
+        onToggleMeaning={() => setShowMeaning((v) => !v)}
+      />
+
+      {loading ? (
+        <div className="p-4 py-8 text-center text-muted-foreground">
+          {t.common.loading}
         </div>
+      ) : words.length === 0 ? (
+        <div className="flex flex-1 flex-col items-center justify-center text-center text-muted-foreground">
+          {appliedQuery ? t.words.noWords : t.words.noWordsYet}
+        </div>
+      ) : (
+        <div className="space-y-2 p-4">
+          {words.map((word) => (
+            <WordCardWithMenu
+              key={word.id}
+              word={word}
+              showReading={showReading}
+              showMeaning={showMeaning}
+              actions={[
+                {
+                  label: t.wordDetail.markMastered,
+                  onAction: handleMaster,
+                },
+                {
+                  label: t.wordDetail.addToWordbook,
+                  onAction: (id) => setWordbookDialogWordId(id),
+                },
+              ]}
+            />
+          ))}
+        </div>
+      )}
 
-        {loading ? (
-          <div className="py-8 text-center text-muted-foreground">
-            {t.common.loading}
-          </div>
-        ) : words.length === 0 ? (
-          <div className="py-8 text-center text-muted-foreground">
-            {appliedQuery ? t.words.noWords : t.words.noWordsYet}
-          </div>
-        ) : (
-          <div className="space-y-2">
-            {words.map((word) => (
-              <SwipeableWordCard
-                key={word.id}
-                word={word}
-                showReading={showReading}
-                showMeaning={showMeaning}
-                actionIcon={<CheckIcon className="h-5 w-5" />}
-                actionLabel={t.wordDetail.markMastered}
-                actionColor="bg-green-500"
-                onAction={handleMaster}
-              />
-            ))}
-          </div>
-        )}
-      </div>
+      {wordbookDialogWordId && (
+        <AddToWordbookDialog
+          wordId={wordbookDialogWordId}
+          open
+          onClose={() => setWordbookDialogWordId(null)}
+        />
+      )}
     </>
-  );
-}
-
-function CheckIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={2}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-    >
-      <path d="M20 6 9 17l-5-5" />
-    </svg>
   );
 }

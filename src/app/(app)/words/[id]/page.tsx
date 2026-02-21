@@ -75,7 +75,7 @@ export default function WordDetailPage({
   if (loading) {
     return (
       <>
-        <Header title={t.wordDetail.title} />
+        <Header title={t.wordDetail.title} showBack />
         <div className="p-4 text-center text-muted-foreground">{t.common.loading}</div>
       </>
     );
@@ -84,7 +84,7 @@ export default function WordDetailPage({
   if (!word) {
     return (
       <>
-        <Header title={t.wordDetail.title} />
+        <Header title={t.wordDetail.title} showBack />
         <div className="p-4 text-center text-muted-foreground">
           {t.words.wordNotFound}
         </div>
@@ -103,13 +103,11 @@ export default function WordDetailPage({
             </Button>
           }
         />
-        <div className="p-4">
-          <WordForm
-            initialValues={word}
-            onSubmit={handleUpdate}
-            submitLabel={t.common.update}
-          />
-        </div>
+        <WordForm
+          initialValues={word}
+          onSubmit={handleUpdate}
+          submitLabel={t.common.update}
+        />
       </>
     );
   }
@@ -118,6 +116,7 @@ export default function WordDetailPage({
     <>
       <Header
         title={t.wordDetail.title}
+        showBack
         actions={
           <div className="flex gap-1">
             <Button
@@ -140,7 +139,8 @@ export default function WordDetailPage({
           </div>
         }
       />
-      <div className="p-4">
+
+      <div className="min-h-0 flex-1 overflow-y-auto p-4">
         <div className="space-y-6">
           {/* Term + Reading */}
           <div>
@@ -227,37 +227,40 @@ export default function WordDetailPage({
               </div>
             </div>
           </div>
+        </div>
+      </div>
 
-          {/* Action Buttons */}
-          <div className="space-y-2">
-            <Button
-              className="w-full"
-              onClick={() => router.push(`/quiz?wordId=${word.id}`)}
-              data-testid="word-practice-button"
-            >
-              {t.wordDetail.practiceWord}
-            </Button>
+      {/* Action Buttons — fixed outside scroll */}
+      <div className="shrink-0 bg-background px-4 pb-3">
+        <div className="mb-3 h-px bg-border" />
+        <div className="space-y-2">
+        <Button
+          className="w-full"
+          onClick={() => router.push(`/quiz?wordId=${word.id}`)}
+          data-testid="word-practice-button"
+        >
+          {t.wordDetail.practiceWord}
+        </Button>
 
-            <Button
-              variant={word.mastered ? 'outline' : 'secondary'}
-              className="w-full"
-              onClick={handleToggleMastered}
-              data-testid="word-mastered-button"
-            >
-              {word.mastered ? t.wordDetail.unmarkMastered : t.wordDetail.markMastered}
-            </Button>
+        <Button
+          variant={word.mastered ? 'outline' : 'secondary'}
+          className="w-full"
+          onClick={handleToggleMastered}
+          data-testid="word-mastered-button"
+        >
+          {word.mastered ? t.wordDetail.unmarkMastered : t.wordDetail.markMastered}
+        </Button>
 
-            {!word.mastered && (
-              <Button
-                variant="outline"
-                className="w-full"
-                onClick={() => setWordbookDialogOpen(true)}
-                data-testid="word-add-to-wordbook-button"
-              >
-                {t.wordDetail.addToWordbook}
-              </Button>
-            )}
-          </div>
+        {!word.mastered && (
+          <Button
+            variant="outline"
+            className="w-full"
+            onClick={() => setWordbookDialogOpen(true)}
+            data-testid="word-add-to-wordbook-button"
+          >
+            {t.wordDetail.addToWordbook}
+          </Button>
+        )}
         </div>
       </div>
 
