@@ -37,6 +37,7 @@ function localWordToWord(local: LocalWord & { id: number }): Word {
     notes: local.notes,
     tags: local.tags,
     jlptLevel: local.jlptLevel,
+    priority: ((local as unknown as Record<string, unknown>).priority as number) ?? 2,
     mastered: local.mastered ?? false,
     masteredAt: local.masteredAt ?? null,
     createdAt: local.createdAt,
@@ -66,6 +67,7 @@ function localWordbookToWordbook(local: LocalWordbook & { id: number }): Wordboo
     description: local.description,
     isShared: false,
     isSystem: false,
+    tags: [],
     createdAt: local.createdAt,
     updatedAt: local.updatedAt,
   };
@@ -254,7 +256,7 @@ class IndexedDBWordbookRepository implements WordbookRepository {
         .where('wordbookId')
         .equals(typedWb.id)
         .count();
-      result.push({ ...localWordbookToWordbook(typedWb), wordCount });
+      result.push({ ...localWordbookToWordbook(typedWb), wordCount, importCount: 0 });
     }
     return result;
   }

@@ -1,27 +1,40 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
-import { toast } from 'sonner';
+import Link from 'next/link';
 import { Header } from '@/components/layout/header';
-import { WordForm } from '@/components/word/word-form';
-import { useRepository } from '@/lib/repository/provider';
 import { useTranslation } from '@/lib/i18n';
 
 export default function NewWordPage() {
-  const router = useRouter();
-  const repo = useRepository();
   const { t } = useTranslation();
-
-  const handleSubmit = async (data: Parameters<typeof repo.words.create>[0]) => {
-    await repo.words.create(data);
-    toast.success(t.words.wordAdded);
-    router.push('/words');
-  };
 
   return (
     <>
       <Header title={t.words.addWord} showBack />
-      <WordForm onSubmit={handleSubmit} submitLabel={t.words.addWord} />
+      <div className="space-y-3 p-4">
+        <Link
+          href="/words/create"
+          className="animate-stagger block rounded-lg border p-4 transition-colors hover:bg-accent"
+          style={{ '--stagger': 0 } as React.CSSProperties}
+          data-testid="word-new-dictionary"
+        >
+          <div className="text-lg font-semibold">{t.scan.dictionarySearch}</div>
+          <div className="mt-1 text-sm text-muted-foreground">
+            {t.wordForm.searchPlaceholder}
+          </div>
+        </Link>
+
+        <Link
+          href="/words/scan"
+          className="animate-stagger block rounded-lg border p-4 transition-colors hover:bg-accent"
+          style={{ '--stagger': 1 } as React.CSSProperties}
+          data-testid="word-new-scan"
+        >
+          <div className="text-lg font-semibold">{t.scan.fromImage}</div>
+          <div className="mt-1 text-sm text-muted-foreground">
+            {t.scan.fromImageDescription}
+          </div>
+        </Link>
+      </div>
     </>
   );
 }

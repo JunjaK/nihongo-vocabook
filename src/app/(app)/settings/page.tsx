@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useTheme } from 'next-themes';
 import { toast } from 'sonner';
 import { Header } from '@/components/layout/header';
@@ -15,6 +16,8 @@ import {
   migrateToSupabase,
 } from '@/lib/migration/migrate-to-supabase';
 import { useTranslation, type Locale } from '@/lib/i18n';
+import { getLocalOcrMode } from '@/lib/ocr/settings';
+import { fetchProfile } from '@/lib/profile/fetch';
 import type { ImportData } from '@/types/word';
 
 export default function SettingsPage() {
@@ -25,6 +28,20 @@ export default function SettingsPage() {
   const { theme, setTheme } = useTheme();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [migrating, setMigrating] = useState(false);
+  const [ocrModeLabel, setOcrModeLabel] = useState('');
+  const [profileNickname, setProfileNickname] = useState<string | null>(null);
+
+  useEffect(() => {
+    const mode = getLocalOcrMode();
+    setOcrModeLabel(mode === 'llm' ? t.settings.llmVision : t.settings.ocrFree);
+  }, [t]);
+
+  useEffect(() => {
+    if (!user) return;
+    fetchProfile()
+      .then((p) => setProfileNickname(p.nickname))
+      .catch(() => {});
+  }, [user]);
 
   const handleExportJSON = async () => {
     const data = await repo.exportAll();
@@ -137,10 +154,10 @@ export default function SettingsPage() {
   return (
     <>
       <Header title={t.settings.title} />
-      <div className="space-y-6 p-4">
+      <div className="animate-page flex-1 space-y-6 overflow-y-auto p-4">
         {/* Account */}
         <section className="space-y-2">
-          <h2 className="text-sm font-medium text-muted-foreground">{t.settings.account}</h2>
+          <h2 className="text-sm font-semibold text-foreground">{t.settings.account}</h2>
           {user ? (
             <div className="space-y-2">
               <div className="text-sm">
@@ -178,9 +195,29 @@ export default function SettingsPage() {
 
         <Separator />
 
+        {/* Profile */}
+        {user && (
+          <>
+            <section className="space-y-2">
+              <h2 className="text-sm font-semibold text-foreground">{t.profile.title}</h2>
+              <div className="flex items-center justify-between">
+                <div className="text-sm text-muted-foreground">
+                  {profileNickname || user.email}
+                </div>
+                <Link href="/settings/profile">
+                  <Button variant="outline" size="sm" data-testid="settings-profile-link">
+                    {t.common.edit}
+                  </Button>
+                </Link>
+              </div>
+            </section>
+            <Separator />
+          </>
+        )}
+
         {/* Language */}
         <section className="space-y-2">
-          <h2 className="text-sm font-medium text-muted-foreground">{t.settings.language}</h2>
+          <h2 className="text-sm font-semibold text-foreground">{t.settings.language}</h2>
           <div className="flex gap-2">
             {languageOptions.map((opt) => (
               <Button
@@ -200,7 +237,7 @@ export default function SettingsPage() {
 
         {/* Theme */}
         <section className="space-y-2">
-          <h2 className="text-sm font-medium text-muted-foreground">{t.settings.theme}</h2>
+          <h2 className="text-sm font-semibold text-foreground">{t.settings.theme}</h2>
           <div className="flex gap-2">
             {([
               { value: 'system', label: t.settings.themeSystem },
@@ -222,11 +259,34 @@ export default function SettingsPage() {
 
         <Separator />
 
+        {/* OCR / AI */}
+        <section className="space-y-2">
+          <h2 className="text-sm font-semibold text-foreground">
+            {t.settings.ocrTitle}
+          </h2>
+          {user ? (
+            <div className="flex items-center justify-between">
+              <div className="text-sm">{ocrModeLabel}</div>
+              <Link href="/settings/ocr">
+                <Button variant="outline" size="sm" data-testid="settings-ocr-link">
+                  {t.settings.goToSettings}
+                </Button>
+              </Link>
+            </div>
+          ) : (
+            <div className="text-sm text-muted-foreground">
+              {t.settings.loginRequiredOcr}
+            </div>
+          )}
+        </section>
+
+        <Separator />
+
         {/* Data Migration */}
         {user && (
           <>
             <section className="space-y-2">
-              <h2 className="text-sm font-medium text-muted-foreground">
+              <h2 className="text-sm font-semibold text-foreground">
                 {t.settings.migration}
               </h2>
               <div className="text-sm text-muted-foreground">
@@ -248,7 +308,7 @@ export default function SettingsPage() {
 
         {/* Import/Export */}
         <section className="space-y-2">
-          <h2 className="text-sm font-medium text-muted-foreground">
+          <h2 className="text-sm font-semibold text-foreground">
             {t.settings.importExport}
           </h2>
           <div className="flex flex-wrap gap-2">

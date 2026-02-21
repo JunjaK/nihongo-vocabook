@@ -13,7 +13,8 @@ export default function NewWordbookPage() {
       <div className="space-y-3 p-4">
         <Link
           href="/wordbooks/create"
-          className="block rounded-lg border p-4 transition-colors hover:bg-accent"
+          className="animate-stagger block rounded-lg border p-4 transition-colors hover:bg-accent"
+          style={{ '--stagger': 0 } as React.CSSProperties}
           data-testid="wordbook-new-create"
         >
           <div className="text-lg font-semibold">{t.wordbooks.createNew}</div>
@@ -24,7 +25,8 @@ export default function NewWordbookPage() {
 
         <Link
           href="/wordbooks/browse"
-          className="block rounded-lg border p-4 transition-colors hover:bg-accent"
+          className="animate-stagger block rounded-lg border p-4 transition-colors hover:bg-accent"
+          style={{ '--stagger': 1 } as React.CSSProperties}
           data-testid="wordbook-new-browse"
         >
           <div className="text-lg font-semibold">{t.wordbooks.findShared}</div>

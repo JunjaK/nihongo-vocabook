@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { Flag } from 'lucide-react';
 import { Header } from '@/components/layout/header';
 import { ListToolbar } from '@/components/layout/list-toolbar';
@@ -21,9 +22,11 @@ export default function MasteredPage() {
   const [loading, setLoading] = useState(true);
   const [showReading, setShowReading] = useState(false);
   const [showMeaning, setShowMeaning] = useState(false);
+  const loadStart = useRef(0);
 
   const loadWords = useCallback(async () => {
     setLoading(true);
+    loadStart.current = Date.now();
     try {
       const data = await repo.words.getMastered();
       if (appliedQuery) {
@@ -40,6 +43,8 @@ export default function MasteredPage() {
         setWords(data);
       }
     } finally {
+      const remaining = 300 - (Date.now() - loadStart.current);
+      if (remaining > 0) await new Promise((r) => setTimeout(r, remaining));
       setLoading(false);
     }
   }, [repo, appliedQuery]);
@@ -87,7 +92,8 @@ export default function MasteredPage() {
       />
 
       {loading ? (
-        <div className="py-8 text-center text-muted-foreground">
+        <div className="flex flex-1 flex-col items-center justify-center gap-3 text-muted-foreground">
+          <LoadingSpinner className="size-8" />
           {t.common.loading}
         </div>
       ) : words.length === 0 ? (

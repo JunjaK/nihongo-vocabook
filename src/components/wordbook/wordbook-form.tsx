@@ -10,10 +10,11 @@ interface WordbookFormValues {
   name: string;
   description: string | null;
   isShared?: boolean;
+  tags?: string[];
 }
 
 interface WordbookFormProps {
-  initialValues?: { name: string; description: string | null; isShared?: boolean };
+  initialValues?: { name: string; description: string | null; isShared?: boolean; tags?: string[] };
   onSubmit: (values: WordbookFormValues) => Promise<void>;
   submitLabel: string;
   showShareToggle?: boolean;
@@ -24,6 +25,7 @@ export function WordbookForm({ initialValues, onSubmit, submitLabel, showShareTo
   const [name, setName] = useState(initialValues?.name ?? '');
   const [description, setDescription] = useState(initialValues?.description ?? '');
   const [isShared, setIsShared] = useState(initialValues?.isShared ?? false);
+  const [tagsInput, setTagsInput] = useState(initialValues?.tags?.join(', ') ?? '');
   const [saving, setSaving] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -31,9 +33,14 @@ export function WordbookForm({ initialValues, onSubmit, submitLabel, showShareTo
     if (!name.trim()) return;
     setSaving(true);
     try {
+      const tags = tagsInput
+        .split(',')
+        .map((t) => t.trim())
+        .filter(Boolean);
       await onSubmit({
         name: name.trim(),
         description: description.trim() || null,
+        tags,
         ...(showShareToggle ? { isShared } : {}),
       });
     } finally {
@@ -63,6 +70,16 @@ export function WordbookForm({ initialValues, onSubmit, submitLabel, showShareTo
             onChange={(e) => setDescription(e.target.value)}
             placeholder={t.wordbooks.descriptionPlaceholder}
             data-testid="wordbook-description-input"
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="wordbook-tags">{t.wordbooks.tags}</Label>
+          <Input
+            id="wordbook-tags"
+            value={tagsInput}
+            onChange={(e) => setTagsInput(e.target.value)}
+            placeholder={t.wordbooks.tagsPlaceholder}
+            data-testid="wordbook-tags-input"
           />
         </div>
         {showShareToggle && (

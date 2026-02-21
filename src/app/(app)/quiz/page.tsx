@@ -1,8 +1,10 @@
 'use client';
 
-import { Suspense, useState, useEffect, useCallback } from 'react';
+import { Suspense, useState, useEffect, useCallback, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { BookOpenCheck } from 'lucide-react';
 import { Header } from '@/components/layout/header';
 import { Flashcard } from '@/components/quiz/flashcard';
 import { useRepository } from '@/lib/repository/provider';
@@ -29,9 +31,11 @@ function QuizContent() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [completed, setCompleted] = useState(0);
+  const loadStart = useRef(0);
 
   const loadDueWords = useCallback(async () => {
     setLoading(true);
+    loadStart.current = Date.now();
 
     if (wordId) {
       const word = await repo.words.getById(wordId);
@@ -56,6 +60,8 @@ function QuizContent() {
 
     setCurrentIndex(0);
     setCompleted(0);
+    const remaining = 300 - (Date.now() - loadStart.current);
+    if (remaining > 0) await new Promise((r) => setTimeout(r, remaining));
     setLoading(false);
   }, [repo, wordId, wordbookId]);
 
@@ -125,17 +131,18 @@ function QuizContent() {
         }
       />
       {loading ? (
-        <div className="p-4 py-8 text-center text-muted-foreground">
+        <div className="flex flex-1 flex-col items-center justify-center gap-3 text-muted-foreground">
+          <LoadingSpinner className="size-8" />
           {t.common.loading}
         </div>
       ) : dueWords.length === 0 ? (
         <div className="flex flex-1 flex-col items-center justify-center text-center">
-          <div className="text-4xl">🎉</div>
-          <div className="mt-4 text-lg font-semibold">{t.quiz.allCaughtUp}</div>
-          <div className="mt-2 text-muted-foreground">
+          <BookOpenCheck className="animate-scale-in size-10 text-primary" />
+          <div className="animate-slide-up mt-4 text-lg font-semibold" style={{ animationDelay: '100ms' }}>{t.quiz.allCaughtUp}</div>
+          <div className="animate-slide-up mt-2 text-muted-foreground" style={{ animationDelay: '200ms' }}>
             {t.quiz.noWordsDue}
           </div>
-          <div className="mt-1 text-muted-foreground">
+          <div className="animate-slide-up mt-1 text-muted-foreground" style={{ animationDelay: '300ms' }}>
             {t.quiz.noWordsDueHint}
           </div>
           {completed > 0 && (

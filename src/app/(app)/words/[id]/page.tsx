@@ -40,11 +40,19 @@ export default function WordDetailPage({
   }, [repo, id]);
 
   const handleUpdate = async (data: Parameters<typeof repo.words.update>[1]) => {
-    await repo.words.update(id, data);
-    toast.success(t.words.wordUpdated);
-    setEditing(false);
-    const updated = await repo.words.getById(id);
-    setWord(updated);
+    try {
+      await repo.words.update(id, data);
+      toast.success(t.words.wordUpdated);
+      setEditing(false);
+      const updated = await repo.words.getById(id);
+      setWord(updated);
+    } catch (err) {
+      if (err instanceof Error && err.message === 'DUPLICATE_WORD') {
+        toast.error(t.words.duplicateWord);
+      } else {
+        throw err;
+      }
+    }
   };
 
   const handleDelete = async () => {
@@ -76,7 +84,7 @@ export default function WordDetailPage({
     return (
       <>
         <Header title={t.wordDetail.title} showBack />
-        <div className="p-4 text-center text-muted-foreground">{t.common.loading}</div>
+        <div className="py-8 text-center text-muted-foreground">{t.common.loading}</div>
       </>
     );
   }
@@ -85,7 +93,7 @@ export default function WordDetailPage({
     return (
       <>
         <Header title={t.wordDetail.title} showBack />
-        <div className="p-4 text-center text-muted-foreground">
+        <div className="py-8 text-center text-muted-foreground">
           {t.words.wordNotFound}
         </div>
       </>
@@ -141,7 +149,7 @@ export default function WordDetailPage({
       />
 
       <div className="min-h-0 flex-1 overflow-y-auto p-4">
-        <div className="space-y-6">
+        <div className="animate-page space-y-6">
           {/* Term + Reading */}
           <div>
             <div className="flex items-center gap-2">

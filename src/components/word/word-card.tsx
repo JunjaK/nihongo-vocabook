@@ -23,7 +23,15 @@ export function WordCard({ word, showReading, showMeaning }: WordCardProps) {
         className="min-w-0 flex-1 p-4"
         data-testid="word-card"
       >
-        <div className="text-xl font-bold">{word.term}</div>
+        <div className="flex items-center gap-1.5">
+          {word.priority === 1 && (
+            <span className="size-2 shrink-0 rounded-full bg-red-500" />
+          )}
+          {word.priority === 3 && (
+            <span className="size-2 shrink-0 rounded-full bg-gray-300 dark:bg-gray-600" />
+          )}
+          <span className="text-xl font-bold">{word.term}</span>
+        </div>
         {readingVisible && (
           <div className="text-sm text-muted-foreground">{word.reading}</div>
         )}

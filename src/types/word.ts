@@ -6,6 +6,7 @@ export interface Word {
   notes: string | null;
   tags: string[];
   jlptLevel: number | null;
+  priority: number;
   mastered: boolean;
   masteredAt: Date | null;
   createdAt: Date;
@@ -19,6 +20,7 @@ export interface CreateWordInput {
   notes?: string | null;
   tags?: string[];
   jlptLevel?: number | null;
+  priority?: number;
 }
 
 export interface UpdateWordInput {
@@ -28,6 +30,7 @@ export interface UpdateWordInput {
   notes?: string | null;
   tags?: string[];
   jlptLevel?: number | null;
+  priority?: number;
 }
 
 export interface StudyProgress {

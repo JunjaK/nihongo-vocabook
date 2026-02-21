@@ -85,7 +85,7 @@ export function WordForm({
     <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col">
       <div className="flex-1 space-y-4 overflow-y-auto p-4">
         {!initialValues && (
-          <div>
+          <div className="space-y-2">
             <Label>{t.wordForm.dictionarySearch}</Label>
             <WordSearch onSelect={handleDictionarySelect} />
           </div>

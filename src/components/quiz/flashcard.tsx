@@ -21,13 +21,21 @@ export function Flashcard({ word, onRate, onMaster, showMaster = true }: Flashca
     <div className="flex min-h-0 flex-1 flex-col">
       <div className="flex min-h-0 flex-1 flex-col items-center justify-center px-4">
         <Card
-          className="w-full cursor-pointer"
+          className="animate-scale-in w-full cursor-pointer"
           onClick={() => setRevealed((v) => !v)}
           data-testid="flashcard"
         >
           <CardContent className="relative h-[280px] p-6 text-center">
             <div className="absolute inset-x-6 top-1/3 -translate-y-1/2 text-center">
-              <div className="text-3xl font-bold">{word.term}</div>
+              <div className="flex items-center justify-center gap-2 text-3xl font-bold">
+                {word.priority === 1 && (
+                  <span className="size-2.5 shrink-0 rounded-full bg-red-500" />
+                )}
+                {word.priority === 3 && (
+                  <span className="size-2.5 shrink-0 rounded-full bg-gray-300 dark:bg-gray-600" />
+                )}
+                {word.term}
+              </div>
             </div>
             <div className="absolute inset-x-6 top-1/2 pt-2 text-center">
               {revealed ? (
@@ -55,7 +63,7 @@ export function Flashcard({ word, onRate, onMaster, showMaster = true }: Flashca
       </div>
 
       <div className="shrink-0 px-4 pb-3 pt-3">
-        <div className="mx-4 mb-3 h-px bg-border" />
+        <div className="mb-3 h-px bg-border" />
         <div className="flex gap-2" data-testid="flashcard-rating">
           <Button
             variant="outline"

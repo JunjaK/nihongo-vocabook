@@ -14,10 +14,18 @@ export default function CreateWordbookPage() {
   const user = useAuthStore((s) => s.user);
   const { t } = useTranslation();
 
-  const handleSubmit = async (values: { name: string; description: string | null; isShared?: boolean }) => {
-    await repo.wordbooks.create(values);
-    toast.success(t.wordbooks.wordbookCreated);
-    router.push('/wordbooks');
+  const handleSubmit = async (values: { name: string; description: string | null; isShared?: boolean; tags?: string[] }) => {
+    try {
+      await repo.wordbooks.create(values);
+      toast.success(t.wordbooks.wordbookCreated);
+      router.push('/wordbooks');
+    } catch (err) {
+      if (err instanceof Error && err.message === 'DUPLICATE_WORDBOOK') {
+        toast.error(t.wordbooks.duplicateWordbook);
+      } else {
+        throw err;
+      }
+    }
   };
 
   return (

@@ -32,6 +32,7 @@ interface DbWord {
   notes: string | null;
   tags: string[];
   jlpt_level: number | null;
+  priority: number;
   mastered: boolean;
   mastered_at: string | null;
   created_at: string;
@@ -56,6 +57,8 @@ interface DbWordbook {
   description: string | null;
   is_shared: boolean;
   is_system: boolean;
+  tags: string[];
+  import_count: number;
   created_at: string;
   updated_at: string;
 }
@@ -76,6 +79,7 @@ function dbWordToWord(row: DbWord): Word {
     notes: row.notes,
     tags: row.tags,
     jlptLevel: row.jlpt_level,
+    priority: row.priority ?? 2,
     mastered: row.mastered ?? false,
     masteredAt: row.mastered_at ? new Date(row.mastered_at) : null,
     createdAt: new Date(row.created_at),
@@ -105,6 +109,7 @@ function dbWordbookToWordbook(row: DbWordbook): Wordbook {
     description: row.description,
     isShared: row.is_shared ?? false,
     isSystem: row.is_system ?? false,
+    tags: row.tags ?? [],
     createdAt: new Date(row.created_at),
     updatedAt: new Date(row.updated_at),
   };
@@ -117,6 +122,7 @@ class SupabaseWordRepository implements WordRepository {
     const { data, error } = await this.supabase
       .from('words')
       .select('*')
+      .order('priority', { ascending: true })
       .order('created_at', { ascending: false });
     if (error) throw error;
     return (data as DbWord[]).map(dbWordToWord);
@@ -127,6 +133,7 @@ class SupabaseWordRepository implements WordRepository {
       .from('words')
       .select('*')
       .eq('mastered', false)
+      .order('priority', { ascending: true })
       .order('created_at', { ascending: false });
     if (error) throw error;
     return (data as DbWord[]).map(dbWordToWord);
@@ -177,10 +184,14 @@ class SupabaseWordRepository implements WordRepository {
         notes: input.notes ?? null,
         tags: input.tags ?? [],
         jlpt_level: input.jlptLevel ?? null,
+        priority: input.priority ?? 2,
       })
       .select()
       .single();
-    if (error) throw error;
+    if (error) {
+      if (error.code === '23505') throw new Error('DUPLICATE_WORD');
+      throw error;
+    }
     return dbWordToWord(data as DbWord);
   }
 
@@ -192,6 +203,7 @@ class SupabaseWordRepository implements WordRepository {
     if (input.notes !== undefined) updateData.notes = input.notes;
     if (input.tags !== undefined) updateData.tags = input.tags;
     if (input.jlptLevel !== undefined) updateData.jlpt_level = input.jlptLevel;
+    if (input.priority !== undefined) updateData.priority = input.priority;
 
     const { data, error } = await this.supabase
       .from('words')
@@ -199,7 +211,10 @@ class SupabaseWordRepository implements WordRepository {
       .eq('id', id)
       .select()
       .single();
-    if (error) throw error;
+    if (error) {
+      if (error.code === '23505') throw new Error('DUPLICATE_WORD');
+      throw error;
+    }
     return dbWordToWord(data as DbWord);
   }
 
@@ -321,6 +336,15 @@ class SupabaseStudyRepository implements StudyRepository {
       });
       if (error) throw error;
     }
+
+    // Upgrade priority to high when rated "Hard"
+    if (quality === 3) {
+      await this.supabase
+        .from('words')
+        .update({ priority: 1 })
+        .eq('id', wordId)
+        .gt('priority', 1);
+    }
   }
 }
 
@@ -345,6 +369,7 @@ class SupabaseWordbookRepository implements WordbookRepository {
       return {
         ...dbWordbookToWordbook(wb),
         wordCount: wb.wordbook_items[0]?.count ?? 0,
+        importCount: wb.import_count ?? 0,
       };
     });
   }
@@ -371,10 +396,14 @@ class SupabaseWordbookRepository implements WordbookRepository {
         name: input.name,
         description: input.description ?? null,
         is_shared: input.isShared ?? false,
+        tags: input.tags ?? [],
       })
       .select()
       .single();
-    if (error) throw error;
+    if (error) {
+      if (error.code === '23505') throw new Error('DUPLICATE_WORDBOOK');
+      throw error;
+    }
     return dbWordbookToWordbook(data as DbWordbook);
   }
 
@@ -385,6 +414,7 @@ class SupabaseWordbookRepository implements WordbookRepository {
     if (input.name !== undefined) updateData.name = input.name;
     if (input.description !== undefined) updateData.description = input.description;
     if (input.isShared !== undefined) updateData.is_shared = input.isShared;
+    if (input.tags !== undefined) updateData.tags = input.tags;
 
     const { data, error } = await this.supabase
       .from('wordbooks')
@@ -474,6 +504,7 @@ class SupabaseWordbookRepository implements WordbookRepository {
       return {
         ...dbWordbookToWordbook(wb),
         wordCount: wb.wordbook_items[0]?.count ?? 0,
+        importCount: wb.import_count ?? 0,
       };
     });
   }
@@ -488,6 +519,7 @@ class SupabaseWordbookRepository implements WordbookRepository {
       .eq('is_shared', true)
       .neq('user_id', userId)
       .order('is_system', { ascending: false })
+      .order('import_count', { ascending: false })
       .order('created_at', { ascending: false });
     if (error) throw error;
 
@@ -508,6 +540,7 @@ class SupabaseWordbookRepository implements WordbookRepository {
       results.push({
         ...dbWordbookToWordbook(wb),
         wordCount: wb.wordbook_items[0]?.count ?? 0,
+        importCount: wb.import_count ?? 0,
         ownerEmail: (emailData as string) ?? '',
         isSubscribed,
       });
@@ -528,6 +561,21 @@ class SupabaseWordbookRepository implements WordbookRepository {
       if (error.code === '23505') return; // already subscribed
       throw error;
     }
+
+    await this.incrementImportCount(wordbookId);
+  }
+
+  private async incrementImportCount(wordbookId: string): Promise<void> {
+    const { data } = await this.supabase
+      .from('wordbooks')
+      .select('import_count')
+      .eq('id', wordbookId)
+      .single();
+    const current = (data as { import_count: number } | null)?.import_count ?? 0;
+    await this.supabase
+      .from('wordbooks')
+      .update({ import_count: current + 1 })
+      .eq('id', wordbookId);
   }
 
   async unsubscribe(wordbookId: string): Promise<void> {
@@ -603,6 +651,8 @@ class SupabaseWordbookRepository implements WordbookRepository {
         });
     }
 
+    await this.incrementImportCount(wordbookId);
+
     return newWb;
   }
 }
@@ -665,14 +715,20 @@ export class SupabaseRepository implements DataRepository {
     const wordIdMap = new Map<string, string>();
 
     for (const word of data.words) {
-      const created = await this.words.create({
-        term: word.term,
-        reading: word.reading,
-        meaning: word.meaning,
-        notes: word.notes,
-        tags: word.tags,
-        jlptLevel: word.jlptLevel,
-      });
+      let created: Word;
+      try {
+        created = await this.words.create({
+          term: word.term,
+          reading: word.reading,
+          meaning: word.meaning,
+          notes: word.notes,
+          tags: word.tags,
+          jlptLevel: word.jlptLevel,
+        });
+      } catch (err) {
+        if (err instanceof Error && err.message === 'DUPLICATE_WORD') continue;
+        throw err;
+      }
 
       if (word.mastered) {
         await this.words.setMastered(created.id, true);
