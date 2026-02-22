@@ -8,6 +8,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    environment: production
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -39,19 +40,20 @@ jobs:
       - name: Clean macOS metadata
         run: find public -name 'Icon?' -delete 2>/dev/null || true
 
+      - name: Package build
+        run: tar -cf build.tar .next/standalone .next/static public
+
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
           name: build
-          path: |
-            .next/standalone
-            .next/static
-            public
+          path: build.tar
           retention-days: 1
 
   deploy:
     runs-on: self-hosted
     needs: build
+    environment: production
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -63,6 +65,9 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: build
+
+      - name: Extract build
+        run: tar -xf build.tar && rm build.tar
 
       - name: Build Docker image
         run: DOCKER_BUILDKIT=1 docker build -t nihongo-vocabook .
