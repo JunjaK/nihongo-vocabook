@@ -25,7 +25,15 @@ export async function updateSession(request: NextRequest) {
     },
   );
 
-  await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  // Redirect logged-in users away from public-only pages
+  const pathname = request.nextUrl.pathname;
+  if (user && (pathname === '/' || pathname === '/login' || pathname === '/signup')) {
+    const url = request.nextUrl.clone();
+    url.pathname = '/words';
+    return NextResponse.redirect(url);
+  }
 
   return supabaseResponse;
 }

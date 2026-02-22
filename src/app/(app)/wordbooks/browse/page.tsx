@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
-import { LogIn, Search, X } from 'lucide-react';
+import { ArrowUpDown, Check, FolderOpen, LogIn, Search, X } from 'lucide-react';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { Header } from '@/components/layout/header';
 import { Button } from '@/components/ui/button';
@@ -27,6 +27,7 @@ function sortSharedItems(items: SharedWordbookListItem[], sort: SharedSort): Sha
 export default function BrowseSharedPage() {
   const repo = useRepository();
   const user = useAuthStore((s) => s.user);
+  const authLoading = useAuthStore((s) => s.loading);
   const { t } = useTranslation();
 
   const [items, setItems] = useState<SharedWordbookListItem[]>([]);
@@ -65,8 +66,8 @@ export default function BrowseSharedPage() {
     if (e.key === 'Enter') handleSearch();
   };
 
-  // Guest user: show sign-up CTA
-  if (!user) {
+  // Guest user: show sign-up CTA (wait for auth to resolve first)
+  if (!authLoading && !user) {
     return (
       <>
         <Header title={t.wordbooks.findShared} showBack />
@@ -132,10 +133,10 @@ export default function BrowseSharedPage() {
             </TabsList>
           </div>
 
-          <TabsContent value="user" className="flex-1 overflow-y-auto p-4">
-            <div className="animate-fade-in space-y-3">
-              {/* Search input */}
-              <div className="relative">
+          <TabsContent value="user" className="flex min-h-0 flex-1 flex-col">
+            {/* Search + sort toolbar */}
+            <div className="flex items-center gap-2 px-4 py-2">
+              <div className="relative flex-1">
                 <Search className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   value={searchInput}
@@ -156,35 +157,28 @@ export default function BrowseSharedPage() {
                   </button>
                 )}
               </div>
+              <SortDropdown
+                value={sortBy}
+                options={[
+                  { value: 'imports', label: t.wordbooks.sortByImports },
+                  { value: 'newest', label: t.wordbooks.sortByNewest },
+                  { value: 'name', label: t.wordbooks.sortByName },
+                ]}
+                onChange={(v) => setSortBy(v as SharedSort)}
+              />
+            </div>
+            <div className="mx-4 h-px bg-border" />
 
-              {/* Sort pills */}
-              <div className="flex flex-wrap gap-2">
-                {([
-                  { value: 'imports' as const, label: t.wordbooks.sortByImports },
-                  { value: 'newest' as const, label: t.wordbooks.sortByNewest },
-                  { value: 'name' as const, label: t.wordbooks.sortByName },
-                ] as const).map((opt) => (
-                  <button
-                    key={opt.value}
-                    onClick={() => setSortBy(opt.value)}
-                    className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
-                      sortBy === opt.value
-                        ? 'bg-primary text-primary-foreground'
-                        : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                    }`}
-                  >
-                    {opt.label}
-                  </button>
-                ))}
-              </div>
-
-              {/* User wordbook cards */}
-              {userItems.length === 0 ? (
-                <div className="py-12 text-center text-muted-foreground">
-                  {appliedQuery ? t.wordbooks.noWordbooks : t.wordbooks.noWordbooksYet}
+            {userItems.length === 0 ? (
+              <div className="animate-fade-in flex flex-1 flex-col items-center justify-center px-6 text-center text-muted-foreground">
+                <FolderOpen className="mb-3 size-10 text-muted-foreground/50" />
+                <div className="font-medium">
+                  {appliedQuery ? t.wordbooks.noWordbooks : t.wordbooks.noSharedWordbooks}
                 </div>
-              ) : (
-                <div className="space-y-2">
+              </div>
+            ) : (
+              <div className="flex-1 overflow-y-auto p-4">
+                <div className="animate-fade-in space-y-2">
                   {userItems.map((item, i) => (
                     <div
                       key={item.id}
@@ -198,8 +192,8 @@ export default function BrowseSharedPage() {
                     </div>
                   ))}
                 </div>
-              )}
-            </div>
+              </div>
+            )}
           </TabsContent>
 
           <TabsContent value="system" className="flex-1 overflow-y-auto p-4">
@@ -231,6 +225,60 @@ export default function BrowseSharedPage() {
         }}
       />
     </>
+  );
+}
+
+function SortDropdown({
+  value,
+  options,
+  onChange,
+}: {
+  value: string;
+  options: { value: string; label: string }[];
+  onChange: (value: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const handleClick = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [open]);
+
+  return (
+    <div className="relative" ref={ref}>
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={() => setOpen((v) => !v)}
+        aria-label="Sort"
+      >
+        <ArrowUpDown className="size-4" />
+      </Button>
+      {open && (
+        <div className="absolute right-0 top-full z-50 mt-1 min-w-36 rounded-md border bg-popover py-1 shadow-md">
+          {options.map((opt) => (
+            <button
+              key={opt.value}
+              onClick={() => {
+                onChange(opt.value);
+                setOpen(false);
+              }}
+              className="flex w-full items-center gap-2 px-3 py-1.5 text-sm transition-colors hover:bg-accent"
+            >
+              <Check className={`size-4 ${value === opt.value ? 'opacity-100' : 'opacity-0'}`} />
+              {opt.label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
 

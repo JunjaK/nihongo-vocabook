@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { BookOpen, Link2Off, Pencil, Trash2, X } from 'lucide-react';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Header } from '@/components/layout/header';
 import { ListToolbar } from '@/components/layout/list-toolbar';
 import { Button } from '@/components/ui/button';
@@ -35,6 +36,7 @@ export default function WordbookDetailPage({
   const [showMeaning, setShowMeaning] = useState(false);
   const [searchInput, setSearchInput] = useState('');
   const [appliedQuery, setAppliedQuery] = useState('');
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const isOwned = wordbook && user && wordbook.userId === user.id;
   const isSubscribed = wordbook && user && wordbook.userId !== user.id;
@@ -71,7 +73,7 @@ export default function WordbookDetailPage({
   };
 
   const handleDelete = async () => {
-    if (!window.confirm(t.wordbooks.deleteConfirm)) return;
+    setShowDeleteConfirm(false);
     await repo.wordbooks.delete(id);
     toast.success(t.wordbooks.wordbookDeleted);
     router.push('/wordbooks');
@@ -150,7 +152,7 @@ export default function WordbookDetailPage({
                 variant="ghost"
                 size="icon-sm"
                 className="text-destructive"
-                onClick={handleDelete}
+                onClick={() => setShowDeleteConfirm(true)}
                 data-testid="wordbook-delete-button"
                 aria-label={t.common.delete}
               >
@@ -327,6 +329,16 @@ export default function WordbookDetailPage({
           </Button>
         )}
       </div>
+
+      <ConfirmDialog
+        open={showDeleteConfirm}
+        icon={<Trash2 className="text-destructive" />}
+        title={t.common.delete}
+        description={t.wordbooks.deleteConfirm}
+        destructive
+        onConfirm={handleDelete}
+        onCancel={() => setShowDeleteConfirm(false)}
+      />
     </>
   );
 }

@@ -1,7 +1,9 @@
 'use client';
 
+import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Check } from 'lucide-react';
 
 interface SortOption {
   value: string;
@@ -40,6 +42,20 @@ export function ListToolbar({
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') onSearchSubmit();
   };
+
+  const [sortOpen, setSortOpen] = useState(false);
+  const sortRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!sortOpen) return;
+    const handleClick = (e: MouseEvent) => {
+      if (sortRef.current && !sortRef.current.contains(e.target as Node)) {
+        setSortOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [sortOpen]);
 
   return (
     <div className="animate-slide-down-fade sticky top-14 z-[9] bg-background">
@@ -84,20 +100,35 @@ export function ListToolbar({
         <span className="text-sm font-bold">意</span>
       </Button>
       {sortOptions && sortValue && onSortChange && (
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => {
-            const idx = sortOptions.findIndex((o) => o.value === sortValue);
-            const next = sortOptions[(idx + 1) % sortOptions.length];
-            onSortChange(next.value);
-          }}
-          data-testid="list-toolbar-sort"
-          aria-label="Sort"
-          title={sortOptions.find((o) => o.value === sortValue)?.label}
-        >
-          <ArrowUpDownIcon className="size-4" />
-        </Button>
+        <div className="relative" ref={sortRef}>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setSortOpen((v) => !v)}
+            data-testid="list-toolbar-sort"
+            aria-label="Sort"
+          >
+            <ArrowUpDownIcon className="size-4" />
+          </Button>
+          {sortOpen && (
+            <div className="absolute right-0 top-full z-50 mt-1 min-w-36 rounded-md border bg-popover py-1 shadow-md">
+              {sortOptions.map((opt) => (
+                <button
+                  key={opt.value}
+                  onClick={() => {
+                    onSortChange(opt.value);
+                    setSortOpen(false);
+                  }}
+                  className="flex w-full items-center gap-2 px-3 py-1.5 text-sm transition-colors hover:bg-accent"
+                  data-testid={`list-toolbar-sort-${opt.value}`}
+                >
+                  <Check className={`size-4 ${sortValue === opt.value ? 'opacity-100' : 'opacity-0'}`} />
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
       )}
       </div>
       <div className="mx-4 h-px bg-border" />

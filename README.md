@@ -1,36 +1,48 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 日本語 VocaBook
+
+Japanese vocabulary study PWA — Learn, Review, and Share words with spaced repetition.
+
+## Features
+
+- **Dictionary Search** — Look up Japanese words via Jisho dictionary with romaji-to-kana conversion
+- **OCR / AI Extraction** — Extract Japanese words from photos using Tesseract.js OCR or LLM Vision
+- **Spaced Repetition** — SM-2 algorithm flashcard quiz for efficient memorization
+- **Wordbooks** — Organize words into custom collections, share them with others
+- **JLPT Wordbooks** — Subscribe to built-in N5–N1 wordbooks
+- **Offline Support** — Full guest mode with IndexedDB; no account required
+- **Cloud Sync** — Sign up to sync data across devices via Supabase
+- **Bilingual UI** — Korean and English interface
+- **Dark Mode** — System, light, and dark theme support
+
+## Tech Stack
+
+| Category | Technology |
+|----------|-----------|
+| Framework | Next.js 16 (App Router, Turbopack) |
+| UI | React 19, Tailwind CSS 4, shadcn/ui (Radix) |
+| State | Zustand (auth), React local state |
+| Database | Supabase (authenticated), IndexedDB via Dexie (guest) |
+| OCR | Tesseract.js, LLM Vision (OpenAI / Google) |
+| Icons | Lucide React |
+| Testing | Vitest, Playwright |
+| Deployment | GitHub Actions → Docker (standalone) |
 
 ## Getting Started
 
-First, run the development server:
-
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
+# Install dependencies
+bun install
+
+# Run development server
 bun dev
+
+# Build for production
+bun run build
+
+# Run tests
+bun test
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## License
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+[MIT](LICENSE)

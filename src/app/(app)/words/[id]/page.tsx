@@ -3,7 +3,9 @@
 import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { Trash2 } from 'lucide-react';
 import { Header } from '@/components/layout/header';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
@@ -27,6 +29,7 @@ export default function WordDetailPage({
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
   const [wordbookDialogOpen, setWordbookDialogOpen] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   useEffect(() => {
     Promise.all([
@@ -56,7 +59,7 @@ export default function WordDetailPage({
   };
 
   const handleDelete = async () => {
-    if (!window.confirm(t.words.deleteConfirm)) return;
+    setShowDeleteConfirm(false);
     await repo.words.delete(id);
     toast.success(t.words.wordDeleted);
     router.push('/words');
@@ -139,7 +142,7 @@ export default function WordDetailPage({
               variant="ghost"
               size="sm"
               className="text-destructive"
-              onClick={handleDelete}
+              onClick={() => setShowDeleteConfirm(true)}
               data-testid="word-delete-button"
             >
               {t.common.delete}
@@ -282,6 +285,16 @@ export default function WordDetailPage({
         wordId={id}
         open={wordbookDialogOpen}
         onClose={() => setWordbookDialogOpen(false)}
+      />
+
+      <ConfirmDialog
+        open={showDeleteConfirm}
+        icon={<Trash2 className="text-destructive" />}
+        title={t.common.delete}
+        description={t.words.deleteConfirm}
+        destructive
+        onConfirm={handleDelete}
+        onCancel={() => setShowDeleteConfirm(false)}
       />
     </>
   );

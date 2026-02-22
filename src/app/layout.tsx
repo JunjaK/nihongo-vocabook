@@ -21,6 +21,18 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: 'Nihongo VocaBook',
   description: 'Japanese vocabulary study app with spaced repetition',
+  openGraph: {
+    title: '日本語 VocaBook',
+    description: 'Learn · Review · Share Japanese words',
+    images: [{ url: '/logo.png', width: 1280, height: 926 }],
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: '日本語 VocaBook',
+    description: 'Learn · Review · Share Japanese words',
+    images: ['/logo.png'],
+  },
 };
 
 export default function RootLayout({

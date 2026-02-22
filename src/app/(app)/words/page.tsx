@@ -15,7 +15,7 @@ import { useRepository } from '@/lib/repository/provider';
 import { useTranslation } from '@/lib/i18n';
 import type { Word } from '@/types/word';
 
-type SortOrder = 'priority' | 'newest' | 'oldest';
+type SortOrder = 'priority' | 'newest' | 'alphabetical';
 
 function sortWords(words: Word[], order: SortOrder): Word[] {
   return [...words].sort((a, b) => {
@@ -24,7 +24,7 @@ function sortWords(words: Word[], order: SortOrder): Word[] {
       return b.createdAt.getTime() - a.createdAt.getTime();
     }
     if (order === 'newest') return b.createdAt.getTime() - a.createdAt.getTime();
-    return a.createdAt.getTime() - b.createdAt.getTime();
+    return a.term.localeCompare(b.term, 'ja');
   });
 }
 
@@ -76,7 +76,7 @@ export default function WordsPage() {
   const sortOptions = [
     { value: 'priority', label: t.priority.sortByPriority },
     { value: 'newest', label: t.priority.sortByNewest },
-    { value: 'oldest', label: t.priority.sortByOldest },
+    { value: 'alphabetical', label: t.priority.sortByAlphabetical },
   ];
 
   const sortedWords = sortWords(words, sortOrder);

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
-import { Download, FolderOpen } from 'lucide-react';
+import { Share2, FolderOpen } from 'lucide-react';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { Header } from '@/components/layout/header';
 import { Button } from '@/components/ui/button';
@@ -51,7 +51,7 @@ export default function WordbooksPage() {
         actions={
           <Link href="/wordbooks/browse">
             <Button variant="ghost" size="icon-sm" data-testid="wordbooks-browse-button" aria-label="Browse shared">
-              <Download className="size-5" />
+              <Share2 className="size-5" />
             </Button>
           </Link>
         }
@@ -63,9 +63,10 @@ export default function WordbooksPage() {
           {t.common.loading}
         </div>
       ) : isEmpty ? (
-        <div className="animate-fade-in flex flex-1 flex-col items-center justify-center text-center text-muted-foreground">
+        <div className="animate-fade-in flex flex-1 flex-col items-center justify-center px-6 text-center text-muted-foreground">
           <FolderOpen className="mb-3 size-10 text-muted-foreground/50" />
-          {t.wordbooks.noWordbooksYet}
+          <div className="font-medium">{t.wordbooks.noWordbooksYet}</div>
+          <div className="mt-1 text-sm">{t.wordbooks.noWordbooksYetHint}</div>
         </div>
       ) : (
         <div className="flex-1 overflow-y-auto">
@@ -116,7 +117,7 @@ export default function WordbooksPage() {
       {!loading && (
         <div className="shrink-0 bg-background px-4 pb-3">
           <div className="mb-3 h-px bg-border" />
-          <Link href="/wordbooks/new">
+          <Link href="/wordbooks/create">
             <Button className="w-full" data-testid="wordbooks-create-button">
               {t.wordbooks.createWordbook}
             </Button>

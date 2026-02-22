@@ -163,6 +163,10 @@ export interface Translations {
     ocrSettings: string;
     configureRequired: string;
     goToSettings: string;
+    about: string;
+    developer: string;
+    sourceCode: string;
+    openSource: string;
   };
   wordbooks: {
     title: string;
@@ -174,6 +178,7 @@ export interface Translations {
     descriptionPlaceholder: string;
     noWordbooks: string;
     noWordbooksYet: string;
+    noWordbooksYetHint: string;
     wordCount: (n: number) => string;
     startQuiz: string;
     removeWord: string;
@@ -213,6 +218,7 @@ export interface Translations {
     tags: string;
     tagsPlaceholder: string;
     defaultWordbooks: string;
+    noSharedWordbooks: string;
     sortByImports: string;
     sortByNewest: string;
     sortByName: string;
@@ -286,7 +292,7 @@ export interface Translations {
     low: string;
     sortByPriority: string;
     sortByNewest: string;
-    sortByOldest: string;
+    sortByAlphabetical: string;
   };
   masteredPage: {
     title: string;

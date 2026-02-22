@@ -1,0 +1,81 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Cache bun dependencies
+        id: cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            ~/.bun/install/cache
+          key: gh-bun-${{ hashFiles('bun.lock') }}
+          restore-keys: |
+            gh-bun-
+
+      - name: Install dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: bun install --frozen-lockfile
+
+      - name: Build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+        run: bun run build
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: build
+          path: |
+            .next/standalone
+            .next/static
+            public
+          retention-days: 1
+
+  deploy:
+    runs-on: self-hosted
+    needs: build
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            Dockerfile
+
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: build
+
+      - name: Build Docker image
+        run: DOCKER_BUILDKIT=1 docker build -t nihongo-vocabook .
+
+      - name: Deploy container
+        run: |
+          docker stop nihongo-vocabook 2>/dev/null && docker rm nihongo-vocabook 2>/dev/null || true
+          docker run -d \
+            --name nihongo-vocabook \
+            -p 3500:3000 \
+            -e NEXT_PRIVATE_SUPABASE_SERVICE_ROLE_KEY=${{ secrets.NEXT_PRIVATE_SUPABASE_SERVICE_ROLE_KEY }} \
+            -e NEXT_PRIVATE_ENCRYPTION_KEY=${{ secrets.NEXT_PRIVATE_ENCRYPTION_KEY }} \
+            nihongo-vocabook
+
+      - name: Delete build artifact
+        if: always()
+        uses: geekyeggo/delete-artifact@v5
+        with:
+          name: build

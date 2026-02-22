@@ -6,9 +6,10 @@ import Link from 'next/link';
 import { useTheme } from 'next-themes';
 import { toast } from 'sonner';
 import { Header } from '@/components/layout/header';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, ArrowRightLeft, ExternalLink } from 'lucide-react';
 import { useAuthStore } from '@/stores/auth-store';
 import { useRepository } from '@/lib/repository/provider';
 import { createClient } from '@/lib/supabase/client';
@@ -29,6 +30,8 @@ export default function SettingsPage() {
   const { theme, setTheme } = useTheme();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [migrating, setMigrating] = useState(false);
+  const [migrateCount, setMigrateCount] = useState(0);
+  const [showMigrateConfirm, setShowMigrateConfirm] = useState(false);
   const [ocrModeLabel, setOcrModeLabel] = useState('');
   const [profileNickname, setProfileNickname] = useState<string | null>(null);
 
@@ -115,18 +118,18 @@ export default function SettingsPage() {
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
-  const handleMigrate = async () => {
+  const handleMigrateRequest = async () => {
     const count = await getLocalWordCount();
     if (count === 0) {
       toast.info(t.settings.noLocalData);
       return;
     }
+    setMigrateCount(count);
+    setShowMigrateConfirm(true);
+  };
 
-    const confirmed = window.confirm(
-      t.auth.migrationPrompt(count),
-    );
-    if (!confirmed) return;
-
+  const handleMigrateConfirm = async () => {
+    setShowMigrateConfirm(false);
     setMigrating(true);
     try {
       const supabase = createClient();
@@ -288,7 +291,7 @@ export default function SettingsPage() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={handleMigrate}
+                onClick={handleMigrateRequest}
                 disabled={migrating}
                 data-testid="settings-migrate-button"
               >
@@ -338,7 +341,64 @@ export default function SettingsPage() {
             />
           </div>
         </section>
+
+        <Separator />
+
+        {/* About */}
+        <section className="space-y-3">
+          <h2 className="text-sm font-semibold text-foreground">{t.settings.about}</h2>
+
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">{t.settings.developer}</span>
+              <a
+                href="https://github.com/JunjaK"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-primary hover:underline"
+              >
+                JunjaK
+                <ExternalLink className="size-3" />
+              </a>
+            </div>
+
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">{t.settings.sourceCode}</span>
+              <a
+                href="https://github.com/JunjaK/nihongo-vocabook"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-primary hover:underline"
+              >
+                GitHub
+                <ExternalLink className="size-3" />
+              </a>
+            </div>
+          </div>
+
+          <Link
+            href="/settings/licenses"
+            className="flex items-center justify-between rounded-lg border p-3 active:bg-accent/50"
+          >
+            <span className="text-sm">{t.settings.openSource}</span>
+            <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
+          </Link>
+
+          <div className="pt-1 text-center text-xs text-muted-foreground/60">
+            v0.1.0
+          </div>
+        </section>
       </div>
+
+      <ConfirmDialog
+        open={showMigrateConfirm}
+        icon={<ArrowRightLeft />}
+        title={t.settings.migration}
+        description={t.auth.migrationPrompt(migrateCount)}
+        confirmLabel={t.settings.migrateLocalData}
+        onConfirm={handleMigrateConfirm}
+        onCancel={() => setShowMigrateConfirm(false)}
+      />
     </>
   );
 }

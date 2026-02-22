@@ -4,7 +4,8 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
-import { Flag } from 'lucide-react';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import { Flag, Trash2 } from 'lucide-react';
 import { Header } from '@/components/layout/header';
 import { ListToolbar } from '@/components/layout/list-toolbar';
 import { WordCardWithMenu } from '@/components/word/swipeable-word-card';
@@ -22,6 +23,7 @@ export default function MasteredPage() {
   const [loading, setLoading] = useState(true);
   const [showReading, setShowReading] = useState(false);
   const [showMeaning, setShowMeaning] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
   const loadStart = useRef(0);
 
   const loadWords = useCallback(async () => {
@@ -68,10 +70,15 @@ export default function MasteredPage() {
     toast.success(t.masteredPage.wordUnmastered);
   };
 
-  const handleDelete = async (wordId: string) => {
-    if (!window.confirm(t.words.deleteConfirm)) return;
-    await repo.words.delete(wordId);
-    setWords((prev) => prev.filter((w) => w.id !== wordId));
+  const handleDeleteRequest = (wordId: string) => {
+    setDeleteTarget(wordId);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteTarget) return;
+    await repo.words.delete(deleteTarget);
+    setWords((prev) => prev.filter((w) => w.id !== deleteTarget));
+    setDeleteTarget(null);
     toast.success(t.words.wordDeleted);
   };
 
@@ -120,7 +127,7 @@ export default function MasteredPage() {
                   },
                   {
                     label: t.common.delete,
-                    onAction: handleDelete,
+                    onAction: handleDeleteRequest,
                     variant: 'destructive',
                   },
                 ]}
@@ -129,6 +136,16 @@ export default function MasteredPage() {
           ))}
         </div>
       )}
+
+      <ConfirmDialog
+        open={deleteTarget !== null}
+        icon={<Trash2 className="text-destructive" />}
+        title={t.common.delete}
+        description={t.words.deleteConfirm}
+        destructive
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => setDeleteTarget(null)}
+      />
     </>
   );
 }

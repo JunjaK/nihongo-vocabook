@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { Header } from '@/components/layout/header';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
@@ -137,9 +138,10 @@ export default function ProfilePage() {
     }
   };
 
-  const handleDeleteAccount = async () => {
-    if (!window.confirm(t.profile.deleteAccountConfirm)) return;
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
+  const handleDeleteAccount = async () => {
+    setShowDeleteConfirm(false);
     setDeletingAccount(true);
     try {
       const res = await fetch('/api/account', { method: 'DELETE' });
@@ -339,7 +341,7 @@ export default function ProfilePage() {
             <Button
               variant="destructive"
               size="sm"
-              onClick={handleDeleteAccount}
+              onClick={() => setShowDeleteConfirm(true)}
               disabled={deletingAccount}
               data-testid="profile-delete-account-button"
             >
@@ -361,6 +363,17 @@ export default function ProfilePage() {
           </Button>
         </div>
       </div>
+
+      <ConfirmDialog
+        open={showDeleteConfirm}
+        icon={<span className="text-2xl">⚠️</span>}
+        title={t.profile.deleteAccount}
+        description={t.profile.deleteAccountConfirm}
+        confirmLabel={t.profile.deleteAccount}
+        destructive
+        onConfirm={handleDeleteAccount}
+        onCancel={() => setShowDeleteConfirm(false)}
+      />
     </>
   );
 }
