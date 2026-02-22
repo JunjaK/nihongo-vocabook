@@ -21,6 +21,11 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: 'Nihongo VocaBook',
   description: 'Japanese vocabulary study app with spaced repetition',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'VocaBook',
+  },
   openGraph: {
     title: '日本語 VocaBook',
     description: 'Learn · Review · Share Japanese words',
@@ -42,6 +47,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko" suppressHydrationWarning>
+      <head>
+        <meta name="theme-color" content="#3eb8d4" media="(prefers-color-scheme: light)" />
+        <meta name="theme-color" content="#1a1a2e" media="(prefers-color-scheme: dark)" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >

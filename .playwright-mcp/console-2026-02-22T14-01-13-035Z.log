@@ -1,0 +1,2 @@
+[      55ms] [ERROR] Access to image at 'http://localhost:8899/icon.svg' from origin 'null' has been blocked by CORS policy: The request client is not a secure context and the resource is in more-private address space `loopback`. @ data:text/html,<html><body style="margin:0;display:flex;justify-content:center;align-items:center;height:100vh;background:%23222"><img src="http://localhost:8899/icon.svg" width="400" height="400"></body></html>:0
+[      55ms] [ERROR] Failed to load resource: net::ERR_FAILED @ http://localhost:8899/icon.svg:0

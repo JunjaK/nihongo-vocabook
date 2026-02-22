@@ -1,7 +1,8 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  output: "standalone",
+  output: 'standalone',
+  serverExternalPackages: ['esbuild-wasm'],
 };
 
 export default nextConfig;
