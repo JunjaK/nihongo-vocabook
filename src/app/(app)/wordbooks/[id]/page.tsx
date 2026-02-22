@@ -10,7 +10,8 @@ import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Header } from '@/components/layout/header';
 import { ListToolbar } from '@/components/layout/list-toolbar';
 import { Button } from '@/components/ui/button';
-import { WordCardWithMenu } from '@/components/word/swipeable-word-card';
+import { SwipeableWordCard } from '@/components/word/swipeable-word-card';
+import { WordCard } from '@/components/word/word-card';
 import { WordbookForm } from '@/components/wordbook/wordbook-form';
 import { useRepository } from '@/lib/repository/provider';
 import { useAuthStore } from '@/stores/auth-store';
@@ -88,7 +89,6 @@ export default function WordbookDetailPage({
   const handleMasterWord = async (wordId: string) => {
     await repo.words.setMastered(wordId, true);
     setWords((prev) => prev.filter((w) => w.id !== wordId));
-    toast.success(t.masteredPage.wordMastered);
   };
 
   const handleRemoveWord = async (wordId: string) => {
@@ -264,26 +264,33 @@ export default function WordbookDetailPage({
                   className="animate-stagger"
                   style={{ '--stagger': Math.min(i, 15) } as React.CSSProperties}
                 >
-                  <WordCardWithMenu
-                    word={word}
-                    showReading={showReading}
-                    showMeaning={showMeaning}
-                    actions={
-                      isOwned
-                        ? [
-                            {
-                              label: t.wordDetail.markMastered,
-                              onAction: handleMasterWord,
-                            },
-                            {
-                              label: t.wordbooks.removeWord,
-                              onAction: handleRemoveWord,
-                              variant: 'destructive',
-                            },
-                          ]
-                        : []
-                    }
-                  />
+                  {isOwned ? (
+                    <SwipeableWordCard
+                      word={word}
+                      showReading={showReading}
+                      showMeaning={showMeaning}
+                      onSwipeAction={handleMasterWord}
+                      swipeLabel={t.wordDetail.markMastered}
+                      swipeColor="green"
+                      contextMenuActions={[
+                        {
+                          label: t.wordDetail.markMastered,
+                          onAction: handleMasterWord,
+                        },
+                        {
+                          label: t.wordbooks.removeWord,
+                          onAction: handleRemoveWord,
+                          variant: 'destructive',
+                        },
+                      ]}
+                    />
+                  ) : (
+                    <WordCard
+                      word={word}
+                      showReading={showReading}
+                      showMeaning={showMeaning}
+                    />
+                  )}
                 </div>
               ))}
             </div>

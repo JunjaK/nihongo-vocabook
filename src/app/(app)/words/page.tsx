@@ -2,14 +2,13 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
-import { toast } from 'sonner';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { BookOpen, FileImage } from 'lucide-react';
 import { Header } from '@/components/layout/header';
 import { ListToolbar } from '@/components/layout/list-toolbar';
 import { Button } from '@/components/ui/button';
-import { WordCardWithMenu } from '@/components/word/swipeable-word-card';
+import { SwipeableWordCard } from '@/components/word/swipeable-word-card';
 import { AddToWordbookDialog } from '@/components/wordbook/add-to-wordbook-dialog';
 import { useRepository } from '@/lib/repository/provider';
 import { useTranslation } from '@/lib/i18n';
@@ -88,15 +87,9 @@ export default function WordsPage() {
     overscan: 5,
   });
 
-  const handleSetPriority = async (wordId: string, priority: number) => {
-    await repo.words.update(wordId, { priority });
-    setWords((prev) => prev.map((w) => (w.id === wordId ? { ...w, priority } : w)));
-  };
-
   const handleMaster = async (wordId: string) => {
     await repo.words.setMastered(wordId, true);
     setWords((prev) => prev.filter((w) => w.id !== wordId));
-    toast.success(t.masteredPage.wordMastered);
   };
 
   return (
@@ -156,23 +149,14 @@ export default function WordsPage() {
                   className="absolute left-4 right-4 pb-2"
                   style={{ height: vr.size, transform: `translateY(${vr.start}px)` }}
                 >
-                  <WordCardWithMenu
+                  <SwipeableWordCard
                     word={word}
                     showReading={showReading}
                     showMeaning={showMeaning}
-                    actions={[
-                      {
-                        label: `${t.priority.title}: ${t.priority.high}`,
-                        onAction: (id) => handleSetPriority(id, 1),
-                      },
-                      {
-                        label: `${t.priority.title}: ${t.priority.medium}`,
-                        onAction: (id) => handleSetPriority(id, 2),
-                      },
-                      {
-                        label: `${t.priority.title}: ${t.priority.low}`,
-                        onAction: (id) => handleSetPriority(id, 3),
-                      },
+                    onSwipeAction={handleMaster}
+                    swipeLabel={t.wordDetail.markMastered}
+                    swipeColor="green"
+                    contextMenuActions={[
                       {
                         label: t.wordDetail.markMastered,
                         onAction: handleMaster,

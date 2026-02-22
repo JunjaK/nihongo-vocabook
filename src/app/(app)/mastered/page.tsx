@@ -8,7 +8,7 @@ import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Flag, Trash2 } from 'lucide-react';
 import { Header } from '@/components/layout/header';
 import { ListToolbar } from '@/components/layout/list-toolbar';
-import { WordCardWithMenu } from '@/components/word/swipeable-word-card';
+import { SwipeableWordCard } from '@/components/word/swipeable-word-card';
 import { useRepository } from '@/lib/repository/provider';
 import { useTranslation } from '@/lib/i18n';
 import type { Word } from '@/types/word';
@@ -67,7 +67,6 @@ export default function MasteredPage() {
   const handleUnmaster = async (wordId: string) => {
     await repo.words.setMastered(wordId, false);
     setWords((prev) => prev.filter((w) => w.id !== wordId));
-    toast.success(t.masteredPage.wordUnmastered);
   };
 
   const handleDeleteRequest = (wordId: string) => {
@@ -116,11 +115,14 @@ export default function MasteredPage() {
               className="animate-stagger"
               style={{ '--stagger': Math.min(i, 15) } as React.CSSProperties}
             >
-              <WordCardWithMenu
+              <SwipeableWordCard
                 word={word}
                 showReading={showReading}
                 showMeaning={showMeaning}
-                actions={[
+                onSwipeAction={handleUnmaster}
+                swipeLabel={t.masteredPage.unmaster}
+                swipeColor="orange"
+                contextMenuActions={[
                   {
                     label: t.masteredPage.unmaster,
                     onAction: handleUnmaster,

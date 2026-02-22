@@ -4,6 +4,7 @@ import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { Trash2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { Header } from '@/components/layout/header';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Button } from '@/components/ui/button';
@@ -69,9 +70,11 @@ export default function WordDetailPage({
     if (!word) return;
     const updated = await repo.words.setMastered(id, !word.mastered);
     setWord(updated);
-    toast.success(
-      updated.mastered ? t.masteredPage.wordMastered : t.masteredPage.wordUnmastered,
-    );
+  };
+
+  const handleSetPriority = async (priority: number) => {
+    await repo.words.update(id, { priority });
+    setWord((prev) => prev ? { ...prev, priority } : prev);
   };
 
   const formatNextReview = (nextReview: Date) => {
@@ -217,6 +220,34 @@ export default function WordDetailPage({
               </div>
             </div>
           )}
+
+          {/* Priority */}
+          <div>
+            <div className="text-xs font-medium uppercase text-muted-foreground">
+              {t.priority.title}
+            </div>
+            <div className="mt-2 flex gap-2">
+              {[
+                { value: 1, label: t.priority.high, color: 'bg-red-500' },
+                { value: 2, label: t.priority.medium, color: 'bg-primary' },
+                { value: 3, label: t.priority.low, color: 'bg-gray-300' },
+              ].map((p) => (
+                <button
+                  key={p.value}
+                  onClick={() => handleSetPriority(p.value)}
+                  className={cn(
+                    'flex items-center gap-1.5 rounded-full border px-3 py-1 text-sm transition-colors',
+                    word.priority === p.value
+                      ? 'border-primary bg-primary/10 font-medium text-primary'
+                      : 'border-border text-muted-foreground hover:bg-accent',
+                  )}
+                >
+                  <span className={cn('size-2 rounded-full', p.color)} />
+                  {p.label}
+                </button>
+              ))}
+            </div>
+          </div>
 
           <Separator />
 

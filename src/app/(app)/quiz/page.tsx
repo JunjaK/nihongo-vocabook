@@ -98,7 +98,6 @@ function QuizContent() {
   const handleMaster = async () => {
     const currentWord = dueWords[currentIndex];
     await repo.words.setMastered(currentWord.id, true);
-    toast.success(t.masteredPage.wordMastered);
     setDueWords((prev) => prev.filter((_, i) => i !== currentIndex));
     setCompleted((c) => c + 1);
     if (currentIndex >= dueWords.length - 1) {
