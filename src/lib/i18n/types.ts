@@ -10,6 +10,7 @@ export interface Translations {
     add: string;
     update: string;
     saving: string;
+    createdAt: string;
   };
   nav: {
     words: string;
@@ -69,6 +70,7 @@ export interface Translations {
     searchPlaceholder: string;
     noWords: string;
     noWordsYet: string;
+    noWordsYetHint: string;
     showReading: string;
     showMeaning: string;
     wordNotFound: string;
@@ -214,6 +216,9 @@ export interface Translations {
     sortByImports: string;
     sortByNewest: string;
     sortByName: string;
+    tabUserWordbooks: string;
+    tabSystemWordbooks: string;
+    searchPlaceholder: string;
     addWords: string;
     addNWords: (n: number) => string;
     selectWords: string;
@@ -245,6 +250,9 @@ export interface Translations {
     fromImage: string;
     fromImageDescription: string;
     filterByLevel: string;
+    enrichingWords: string;
+    notFound: string;
+    extractedCount: (n: number) => string;
   };
   profile: {
     title: string;
@@ -265,6 +273,11 @@ export interface Translations {
     passwordChanged: string;
     saved: string;
     editProfile: string;
+    email: string;
+    deleteAccount: string;
+    deleteAccountWarning: string;
+    deleteAccountConfirm: string;
+    accountDeleted: string;
   };
   priority: {
     title: string;

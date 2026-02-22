@@ -29,6 +29,7 @@ export interface WordRepository {
 
 export interface StudyRepository {
   getProgress(wordId: string): Promise<StudyProgress | null>;
+  getDueCount(): Promise<number>;
   getDueWords(limit?: number): Promise<WordWithProgress[]>;
   recordReview(wordId: string, quality: number): Promise<void>;
 }

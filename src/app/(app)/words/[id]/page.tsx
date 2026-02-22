@@ -21,7 +21,7 @@ export default function WordDetailPage({
   const { id } = use(params);
   const router = useRouter();
   const repo = useRepository();
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const [word, setWord] = useState<Word | null>(null);
   const [progress, setProgress] = useState<StudyProgress | null>(null);
   const [loading, setLoading] = useState(true);
@@ -234,6 +234,12 @@ export default function WordDetailPage({
                 </span>
               </div>
             </div>
+          </div>
+
+          {/* Created At */}
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-muted-foreground">{t.common.createdAt}</span>
+            <span>{word.createdAt.toLocaleDateString(locale === 'ko' ? 'ko-KR' : 'en-US')}</span>
           </div>
         </div>
       </div>

@@ -249,12 +249,15 @@ toast.info(t.settings.noLocalData);   // info
 
 ## Header Actions Convention
 
-| Page type | Header action | Primary action |
-|-----------|---------------|----------------|
-| Words list | Scan icon → `/words/scan` | Bottom: Add Word → `/words/new` |
-| Wordbooks list | Download icon → `/wordbooks/browse` | Bottom: Create Wordbook → `/wordbooks/new` |
-| Wordbook detail (owned) | `+` icon, Edit, Delete | Bottom: Start Quiz |
-| Wordbook detail (subscribed) | Unsubscribe | Bottom: Start Quiz |
+**Rule: Header actions MUST be icon-only buttons** (`variant="ghost" size="icon-sm"` + `aria-label`). No text buttons in the header actions area.
+
+| Page type | Header action (icons) | Bottom button |
+|-----------|----------------------|---------------|
+| Words list | Scan icon → `/words/scan` | Add Word → `/words/new` |
+| Wordbooks list | Download icon → `/wordbooks/browse` | Create Wordbook → `/wordbooks/new` |
+| Wordbook detail (owned) | Edit (Pencil) | Add Words (outline) + Start Quiz (primary) |
+| Wordbook detail (subscribed) | Unsubscribe (Link2Off) | Start Quiz |
+| Wordbook edit | Delete (Trash2) + Cancel (X) | Save (form submit) |
 | Word detail | Edit, Delete | — |
 
 ---

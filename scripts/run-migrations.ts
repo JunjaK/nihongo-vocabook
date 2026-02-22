@@ -1,9 +1,12 @@
 import postgres from 'postgres';
 import { readFileSync } from 'fs';
-import { join } from 'path';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 // Load .env.local manually to handle special chars (#, etc.) in values
-const envPath = join(import.meta.dirname, '..', '.env.local');
+const envPath = join(__dirname, '..', '.env.local');
 const envContent = readFileSync(envPath, 'utf-8');
 const dbLine = envContent.split('\n').find(l => l.startsWith('NEXT_PRIVATE_SUPABASE_DB_LINK_SESSION='));
 if (!dbLine) {
@@ -49,11 +52,13 @@ const migrations = [
   '004_user_settings.sql',
   '005_user_profiles.sql',
   '006_dedup_priority_tags.sql',
+  '007_dictionary_entries.sql',
+  '008_shared_wordbook_items_rls.sql',
 ];
 
 async function run() {
   for (const file of migrations) {
-    const path = join(import.meta.dirname, '..', 'supabase', 'migrations', file);
+    const path = join(__dirname, '..', 'supabase', 'migrations', file);
     const content = readFileSync(path, 'utf-8');
     console.log(`Running ${file}...`);
     try {

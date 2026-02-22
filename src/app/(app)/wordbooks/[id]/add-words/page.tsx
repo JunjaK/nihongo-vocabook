@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useRef, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { Search } from 'lucide-react';
+import { Search, X } from 'lucide-react';
 import { Header } from '@/components/layout/header';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -108,11 +108,11 @@ export default function AddWordsPage({
     <div className="flex min-h-0 flex-1 flex-col">
       <Header title={t.wordbooks.addWords} showBack />
 
-      <div className="shrink-0 px-4 pt-3 pb-2">
+      <div className="shrink-0 bg-background px-4 pt-3 pb-2">
         <div className="relative">
-          <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+          <Search className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            className="pl-9 pr-16"
+            className="pl-8 pr-8"
             placeholder={t.words.searchPlaceholder}
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
@@ -124,19 +124,13 @@ export default function AddWordsPage({
           {searchInput && (
             <button
               type="button"
-              className="absolute top-1/2 right-10 -translate-y-1/2 text-xs text-muted-foreground hover:text-foreground"
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
               onClick={handleSearchClear}
+              data-testid="add-words-search-clear"
             >
-              {t.common.clear}
+              <X className="size-4" />
             </button>
           )}
-          <button
-            type="button"
-            className="absolute top-1/2 right-3 -translate-y-1/2 text-sm font-medium text-primary"
-            onClick={handleSearch}
-          >
-            {t.common.search}
-          </button>
         </div>
         <p className="mt-2 text-xs text-muted-foreground">{t.wordbooks.selectWords}</p>
       </div>

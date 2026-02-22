@@ -1,10 +1,13 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
-import { LogIn } from 'lucide-react';
+import { LogIn, Search, X } from 'lucide-react';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { Header } from '@/components/layout/header';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { ImportWordbookDialog } from '@/components/wordbook/import-wordbook-dialog';
 import { useRepository } from '@/lib/repository/provider';
 import { useAuthStore } from '@/stores/auth-store';
@@ -25,11 +28,15 @@ export default function BrowseSharedPage() {
   const repo = useRepository();
   const user = useAuthStore((s) => s.user);
   const { t } = useTranslation();
+
   const [items, setItems] = useState<SharedWordbookListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<SharedWordbookListItem | null>(null);
   const [sortBy, setSortBy] = useState<SharedSort>('imports');
-  const [tagFilter, setTagFilter] = useState('');
+  const [searchInput, setSearchInput] = useState('');
+  const [appliedQuery, setAppliedQuery] = useState('');
+
+  const loadStart = useRef(0);
 
   const load = useCallback(async () => {
     if (!user) {
@@ -37,10 +44,13 @@ export default function BrowseSharedPage() {
       return;
     }
     setLoading(true);
+    loadStart.current = Date.now();
     try {
       const data = await repo.wordbooks.browseShared();
       setItems(data);
     } finally {
+      const remaining = 300 - (Date.now() - loadStart.current);
+      if (remaining > 0) await new Promise((r) => setTimeout(r, remaining));
       setLoading(false);
     }
   }, [repo, user]);
@@ -48,6 +58,12 @@ export default function BrowseSharedPage() {
   useEffect(() => {
     load();
   }, [load]);
+
+  const handleSearch = () => setAppliedQuery(searchInput.trim());
+  const handleSearchClear = () => { setSearchInput(''); setAppliedQuery(''); };
+  const handleSearchKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') handleSearch();
+  };
 
   // Guest user: show sign-up CTA
   if (!user) {
@@ -79,8 +95,12 @@ export default function BrowseSharedPage() {
   const systemItems = items.filter((i) => i.isSystem);
   const filteredUserItems = items.filter((i) => {
     if (i.isSystem) return false;
-    if (tagFilter) {
-      return i.tags.some((tag) => tag.toLowerCase().includes(tagFilter.toLowerCase()));
+    if (appliedQuery) {
+      const q = appliedQuery.toLowerCase();
+      return (
+        i.name.toLowerCase().includes(q) ||
+        i.tags.some((tag) => tag.toLowerCase().includes(q))
+      );
     }
     return true;
   });
@@ -91,48 +111,59 @@ export default function BrowseSharedPage() {
       <Header title={t.wordbooks.findShared} showBack />
 
       {loading ? (
-        <div className="py-8 text-center text-muted-foreground">
-          {t.common.loading}
+        <div className="flex flex-1 flex-col items-center justify-center gap-2 text-muted-foreground">
+          <LoadingSpinner className="size-8" />
+          <span className="text-sm">{t.common.loading}</span>
         </div>
       ) : items.length === 0 ? (
         <div className="animate-fade-in flex flex-1 flex-col items-center justify-center text-center text-muted-foreground">
           {t.wordbooks.noWordbooks}
         </div>
       ) : (
-        <div className="space-y-6 p-4">
-          {systemItems.length > 0 && (
-            <section className="animate-fade-in">
-              <h2 className="mb-2 text-sm font-medium text-muted-foreground">
-                {t.wordbooks.defaultWordbooks}
-              </h2>
-              <div className="space-y-2">
-                {systemItems.map((item, i) => (
-                  <div
-                    key={item.id}
-                    className="animate-stagger"
-                    style={{ '--stagger': Math.min(i, 15) } as React.CSSProperties}
-                  >
-                    <SharedWordbookCard
-                      item={item}
-                      onSelect={() => setSelected(item)}
-                    />
-                  </div>
-                ))}
-              </div>
-            </section>
-          )}
+        <Tabs defaultValue="user" className="flex min-h-0 flex-1 flex-col">
+          <div className="animate-slide-down-fade sticky top-14 z-[9] bg-background px-4 pt-2">
+            <TabsList className="w-full">
+              <TabsTrigger value="user" data-testid="browse-tab-user">
+                {t.wordbooks.tabUserWordbooks}
+              </TabsTrigger>
+              <TabsTrigger value="system" data-testid="browse-tab-system">
+                {t.wordbooks.tabSystemWordbooks}
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
-          {(filteredUserItems.length > 0 || tagFilter) && (
-            <section className="animate-fade-in" style={{ animationDelay: '100ms' }}>
-              <h2 className="mb-2 text-sm font-medium text-muted-foreground">
-                {t.wordbooks.sharedWordbooks}
-              </h2>
-              <div className="mb-3 flex flex-wrap items-center gap-2">
-                {[
+          <TabsContent value="user" className="flex-1 overflow-y-auto p-4">
+            <div className="animate-fade-in space-y-3">
+              {/* Search input */}
+              <div className="relative">
+                <Search className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
+                  onKeyDown={handleSearchKeyDown}
+                  placeholder={t.wordbooks.searchPlaceholder}
+                  className="pl-8 pr-8"
+                  data-testid="browse-search-input"
+                />
+                {searchInput && (
+                  <button
+                    type="button"
+                    onClick={handleSearchClear}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    data-testid="browse-search-clear"
+                  >
+                    <X className="size-4" />
+                  </button>
+                )}
+              </div>
+
+              {/* Sort pills */}
+              <div className="flex flex-wrap gap-2">
+                {([
                   { value: 'imports' as const, label: t.wordbooks.sortByImports },
                   { value: 'newest' as const, label: t.wordbooks.sortByNewest },
                   { value: 'name' as const, label: t.wordbooks.sortByName },
-                ].map((opt) => (
+                ] as const).map((opt) => (
                   <button
                     key={opt.value}
                     onClick={() => setSortBy(opt.value)}
@@ -145,31 +176,49 @@ export default function BrowseSharedPage() {
                     {opt.label}
                   </button>
                 ))}
-                <input
-                  type="text"
-                  value={tagFilter}
-                  onChange={(e) => setTagFilter(e.target.value)}
-                  placeholder={t.wordbooks.tagsPlaceholder}
-                  className="h-7 rounded-full border bg-background px-3 text-xs outline-none placeholder:text-muted-foreground"
-                />
               </div>
-              <div className="space-y-2">
-                {userItems.map((item, i) => (
-                  <div
-                    key={item.id}
-                    className="animate-stagger"
-                    style={{ '--stagger': Math.min(i + systemItems.length, 15) } as React.CSSProperties}
-                  >
-                    <SharedWordbookCard
-                      item={item}
-                      onSelect={() => setSelected(item)}
-                    />
-                  </div>
-                ))}
-              </div>
-            </section>
-          )}
-        </div>
+
+              {/* User wordbook cards */}
+              {userItems.length === 0 ? (
+                <div className="py-12 text-center text-muted-foreground">
+                  {appliedQuery ? t.wordbooks.noWordbooks : t.wordbooks.noWordbooksYet}
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {userItems.map((item, i) => (
+                    <div
+                      key={item.id}
+                      className="animate-stagger"
+                      style={{ '--stagger': Math.min(i, 15) } as React.CSSProperties}
+                    >
+                      <SharedWordbookCard
+                        item={item}
+                        onSelect={() => setSelected(item)}
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="system" className="flex-1 overflow-y-auto p-4">
+            <div className="animate-fade-in space-y-2">
+              {systemItems.map((item, i) => (
+                <div
+                  key={item.id}
+                  className="animate-stagger"
+                  style={{ '--stagger': Math.min(i, 15) } as React.CSSProperties}
+                >
+                  <SharedWordbookCard
+                    item={item}
+                    onSelect={() => setSelected(item)}
+                  />
+                </div>
+              ))}
+            </div>
+          </TabsContent>
+        </Tabs>
       )}
 
       <ImportWordbookDialog

@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { toast } from 'sonner';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
-import { BookOpen, Camera } from 'lucide-react';
+import { BookOpen, FileImage } from 'lucide-react';
 import { Header } from '@/components/layout/header';
 import { ListToolbar } from '@/components/layout/list-toolbar';
 import { Button } from '@/components/ui/button';
@@ -106,7 +106,7 @@ export default function WordsPage() {
         actions={
           <Link href="/words/scan">
             <Button variant="ghost" size="icon-sm" data-testid="words-scan-button" aria-label="Scan">
-              <Camera className="size-5" />
+              <FileImage className="size-5" />
             </Button>
           </Link>
         }
@@ -133,9 +133,14 @@ export default function WordsPage() {
           {t.common.loading}
         </div>
       ) : words.length === 0 ? (
-        <div className="animate-fade-in flex flex-1 flex-col items-center justify-center text-center text-muted-foreground">
+        <div className="animate-fade-in flex flex-1 flex-col items-center justify-center px-6 text-center text-muted-foreground">
           <BookOpen className="mb-3 size-10 text-muted-foreground/50" />
-          {appliedQuery ? t.words.noWords : t.words.noWordsYet}
+          {appliedQuery ? t.words.noWords : (
+            <>
+              <div className="font-medium">{t.words.noWordsYet}</div>
+              <div className="mt-1 text-sm">{t.words.noWordsYetHint}</div>
+            </>
+          )}
         </div>
       ) : (
         <div ref={parentRef} className="flex-1 overflow-y-auto">
@@ -185,7 +190,7 @@ export default function WordsPage() {
         </div>
       )}
 
-      {!loading && words.length > 0 && (
+      {!loading && (
         <div className="shrink-0 bg-background px-4 pb-3">
           <div className="mb-3 h-px bg-border" />
           <Link href="/words/new">

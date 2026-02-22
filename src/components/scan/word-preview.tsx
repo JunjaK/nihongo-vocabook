@@ -5,29 +5,25 @@ import { Button } from '@/components/ui/button';
 import { useTranslation } from '@/lib/i18n';
 import type { ExtractedWord } from '@/lib/ocr/llm-vision';
 
-interface OcrPreviewProps {
-  mode: 'ocr';
-  words: string[];
-  onConfirm: (selectedWords: string[]) => void;
-  onRetry: () => void;
-}
-
-interface LlmPreviewProps {
-  mode: 'llm';
+interface WordPreviewProps {
   words: ExtractedWord[];
   userJlptLevel?: number | null;
   onConfirm: (selectedWords: ExtractedWord[]) => void;
   onRetry: () => void;
 }
 
-type WordPreviewProps = OcrPreviewProps | LlmPreviewProps;
-
-export function WordPreview(props: WordPreviewProps) {
+export function WordPreview({
+  words,
+  userJlptLevel,
+  onConfirm,
+  onRetry,
+}: WordPreviewProps) {
   const { t } = useTranslation();
-  const { mode, onRetry } = props;
-  const wordCount = props.words.length;
+  const wordCount = words.length;
   const [checked, setChecked] = useState<boolean[]>(() =>
-    Array(wordCount).fill(true),
+    userJlptLevel
+      ? words.map((w) => w.jlptLevel === null || w.jlptLevel <= userJlptLevel)
+      : Array(wordCount).fill(true),
   );
 
   if (wordCount === 0) {
@@ -41,11 +37,16 @@ export function WordPreview(props: WordPreviewProps) {
     );
   }
 
-  const allSelected = checked.every(Boolean);
   const selectedCount = checked.filter(Boolean).length;
 
-  const toggleAll = () => {
-    setChecked(Array(wordCount).fill(!allSelected));
+  const selectAll = () => setChecked(Array(wordCount).fill(true));
+  const deselectAll = () => setChecked(Array(wordCount).fill(false));
+
+  const filterByLevel = () => {
+    if (!userJlptLevel) return;
+    setChecked(
+      words.map((w) => w.jlptLevel === null || w.jlptLevel <= userJlptLevel),
+    );
   };
 
   const toggle = (i: number) => {
@@ -56,41 +57,35 @@ export function WordPreview(props: WordPreviewProps) {
     });
   };
 
-  const filterByLevel = () => {
-    if (mode !== 'llm') return;
-    const userLevel = props.userJlptLevel;
-    if (!userLevel) return;
-    setChecked(
-      props.words.map((w) => w.jlptLevel === null || w.jlptLevel >= userLevel),
-    );
-  };
-
   const handleConfirm = () => {
-    const selectedIndices = checked
+    const selected = checked
       .map((c, i) => (c ? i : -1))
-      .filter((i) => i >= 0);
-
-    if (mode === 'ocr') {
-      const selected = selectedIndices.map((i) => props.words[i]);
-      props.onConfirm(selected);
-    } else {
-      const selected = selectedIndices.map((i) => props.words[i]);
-      props.onConfirm(selected);
-    }
+      .filter((i) => i >= 0)
+      .map((i) => words[i]);
+    onConfirm(selected);
   };
-
-  const showFilterButton = mode === 'llm' && props.userJlptLevel;
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="flex-1 overflow-y-auto p-4">
-        <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-lg font-semibold">{t.scan.previewTitle}</h2>
-          <div className="flex items-center gap-1">
-            {showFilterButton && (
+      {/* Sticky selection toolbar — matches ListToolbar pattern */}
+      <div className="animate-slide-down-fade sticky top-14 z-[9] bg-background">
+        <div className="flex items-center gap-2 px-4 py-2">
+          <span className="text-sm text-muted-foreground">
+            {t.scan.extractedCount(wordCount)}
+          </span>
+          <div className="ml-auto flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="xs"
+              onClick={selectAll}
+              data-testid="scan-select-all"
+            >
+              {t.scan.selectAll}
+            </Button>
+            {userJlptLevel && (
               <Button
                 variant="ghost"
-                size="sm"
+                size="xs"
                 onClick={filterByLevel}
                 data-testid="scan-filter-by-level"
               >
@@ -99,64 +94,54 @@ export function WordPreview(props: WordPreviewProps) {
             )}
             <Button
               variant="ghost"
-              size="sm"
-              onClick={toggleAll}
-              data-testid="scan-toggle-all"
+              size="xs"
+              onClick={deselectAll}
+              data-testid="scan-deselect-all"
             >
-              {allSelected ? t.scan.deselectAll : t.scan.selectAll}
+              {t.scan.deselectAll}
             </Button>
           </div>
         </div>
+        <div className="mx-4 h-px bg-border" />
+      </div>
 
+      <div className="flex-1 overflow-y-auto p-4">
         <div className="space-y-1">
-          {mode === 'ocr'
-            ? props.words.map((word, i) => (
-                <label
-                  key={i}
-                  className="animate-stagger flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-colors hover:bg-accent"
-                  style={{ '--stagger': i } as React.CSSProperties}
-                >
-                  <input
-                    type="checkbox"
-                    checked={checked[i]}
-                    onChange={() => toggle(i)}
-                    className="size-4 rounded border-gray-300"
-                    data-testid={`scan-word-check-${i}`}
-                  />
-                  <span className="text-lg">{word}</span>
-                </label>
-              ))
-            : props.words.map((word, i) => (
-                <label
-                  key={i}
-                  className="animate-stagger flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-colors hover:bg-accent"
-                  style={{ '--stagger': i } as React.CSSProperties}
-                >
-                  <input
-                    type="checkbox"
-                    checked={checked[i]}
-                    onChange={() => toggle(i)}
-                    className="size-4 rounded border-gray-300"
-                    data-testid={`scan-word-check-${i}`}
-                  />
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2 font-bold">
-                      {word.term}
-                      <span className="text-sm font-normal text-muted-foreground">
-                        {word.reading}
-                      </span>
-                      {word.jlptLevel && (
-                        <span className="rounded bg-primary/10 px-1.5 py-0.5 text-xs font-medium text-primary">
-                          N{word.jlptLevel}
-                        </span>
-                      )}
-                    </div>
-                    <div className="text-sm text-muted-foreground">
-                      {word.meaning}
-                    </div>
-                  </div>
-                </label>
-              ))}
+          {words.map((word, i) => (
+            <label
+              key={i}
+              className="animate-stagger flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-colors hover:bg-accent"
+              style={{ '--stagger': Math.min(i, 15) } as React.CSSProperties}
+            >
+              <input
+                type="checkbox"
+                checked={checked[i]}
+                onChange={() => toggle(i)}
+                className="size-4 rounded border-gray-300"
+                data-testid={`scan-word-check-${i}`}
+              />
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2 font-bold">
+                  {word.term}
+                  {word.reading ? (
+                    <span className="text-sm font-normal text-muted-foreground">
+                      {word.reading}
+                    </span>
+                  ) : null}
+                  {word.jlptLevel && (
+                    <span className="rounded bg-primary/10 px-1.5 py-0.5 text-xs font-medium text-primary">
+                      N{word.jlptLevel}
+                    </span>
+                  )}
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  {word.meaning || (
+                    <span className="italic">{t.scan.notFound}</span>
+                  )}
+                </div>
+              </div>
+            </label>
+          ))}
         </div>
       </div>
 
@@ -168,7 +153,7 @@ export function WordPreview(props: WordPreviewProps) {
           onClick={handleConfirm}
           data-testid="scan-confirm-selected"
         >
-          {mode === 'ocr' ? t.scan.confirmSelected : t.scan.addSelected} ({selectedCount})
+          {t.scan.addSelected} ({selectedCount})
         </Button>
       </div>
     </div>

@@ -10,7 +10,9 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
-    "seed:jlpt": "tsx supabase/seed-jlpt.ts"
+    "seed:jlpt": "tsx supabase/seed-jlpt.ts",
+    "seed:dictionary": "npx tsx supabase/seed-dictionary.ts",
+    "seed:jlpt-ko": "npx tsx supabase/seed-jlpt-ko.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.2.0",

@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
+import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -25,22 +26,44 @@ export function WordbookForm({ initialValues, onSubmit, submitLabel, showShareTo
   const [name, setName] = useState(initialValues?.name ?? '');
   const [description, setDescription] = useState(initialValues?.description ?? '');
   const [isShared, setIsShared] = useState(initialValues?.isShared ?? false);
-  const [tagsInput, setTagsInput] = useState(initialValues?.tags?.join(', ') ?? '');
+  const [tags, setTags] = useState<string[]>(initialValues?.tags ?? []);
+  const [tagInput, setTagInput] = useState('');
   const [saving, setSaving] = useState(false);
+  const tagInputRef = useRef<HTMLInputElement>(null);
+
+  const addTag = (value: string) => {
+    const trimmed = value.trim();
+    if (trimmed && !tags.includes(trimmed)) {
+      setTags((prev) => [...prev, trimmed]);
+    }
+    setTagInput('');
+  };
+
+  const removeTag = (index: number) => {
+    setTags((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleTagKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (tagInput.trim()) addTag(tagInput);
+    } else if (e.key === 'Backspace' && !tagInput && tags.length > 0) {
+      removeTag(tags.length - 1);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
     setSaving(true);
     try {
-      const tags = tagsInput
-        .split(',')
-        .map((t) => t.trim())
-        .filter(Boolean);
+      const finalTags = tagInput.trim()
+        ? [...tags, tagInput.trim()].filter((v, i, arr) => arr.indexOf(v) === i)
+        : tags;
       await onSubmit({
         name: name.trim(),
         description: description.trim() || null,
-        tags,
+        tags: finalTags,
         ...(showShareToggle ? { isShared } : {}),
       });
     } finally {
@@ -73,14 +96,38 @@ export function WordbookForm({ initialValues, onSubmit, submitLabel, showShareTo
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="wordbook-tags">{t.wordbooks.tags}</Label>
-          <Input
-            id="wordbook-tags"
-            value={tagsInput}
-            onChange={(e) => setTagsInput(e.target.value)}
-            placeholder={t.wordbooks.tagsPlaceholder}
-            data-testid="wordbook-tags-input"
-          />
+          <Label>{t.wordbooks.tags}</Label>
+          <div
+            className="border-input focus-within:border-ring focus-within:ring-ring/50 flex min-h-9 flex-wrap items-center gap-1.5 rounded-md border px-3 py-1.5 focus-within:ring-[3px]"
+            onClick={() => tagInputRef.current?.focus()}
+          >
+            {tags.map((tag, i) => (
+              <span
+                key={tag}
+                className="inline-flex items-center gap-1 rounded-md bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary"
+              >
+                {tag}
+                <button
+                  type="button"
+                  onClick={(e) => { e.stopPropagation(); removeTag(i); }}
+                  className="rounded-sm text-primary/60 hover:text-primary"
+                  data-testid={`wordbook-tag-remove-${i}`}
+                >
+                  <X className="size-3" />
+                </button>
+              </span>
+            ))}
+            <input
+              ref={tagInputRef}
+              value={tagInput}
+              onChange={(e) => setTagInput(e.target.value)}
+              onKeyDown={handleTagKeyDown}
+              onBlur={() => { if (tagInput.trim()) addTag(tagInput); }}
+              placeholder={tags.length === 0 ? t.wordbooks.tagsPlaceholder : ''}
+              className="min-w-[80px] flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+              data-testid="wordbook-tags-input"
+            />
+          </div>
         </div>
         {showShareToggle && (
           <div className="flex items-center gap-2">

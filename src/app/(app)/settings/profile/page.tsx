@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { Header } from '@/components/layout/header';
 import { Input } from '@/components/ui/input';
@@ -11,11 +12,31 @@ import { useTranslation } from '@/lib/i18n';
 import { useAuthStore } from '@/stores/auth-store';
 import { createClient } from '@/lib/supabase/client';
 import { fetchProfile, saveProfile } from '@/lib/profile/fetch';
+import {
+  Combobox,
+  ComboboxInput,
+  ComboboxContent,
+  ComboboxList,
+  ComboboxItem,
+} from '@/components/ui/combobox';
 
 type StudyPurpose = 'certification' | 'study' | 'other';
-const JLPT_LEVELS = [5, 4, 3, 2, 1] as const;
+
+interface JlptOption {
+  level: number;
+  label: string;
+}
+
+const JLPT_OPTIONS: JlptOption[] = [
+  { level: 5, label: 'N5' },
+  { level: 4, label: 'N4' },
+  { level: 3, label: 'N3' },
+  { level: 2, label: 'N2' },
+  { level: 1, label: 'N1' },
+];
 
 export default function ProfilePage() {
+  const router = useRouter();
   const { t } = useTranslation();
   const user = useAuthStore((s) => s.user);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -32,6 +53,7 @@ export default function ProfilePage() {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [changingPassword, setChangingPassword] = useState(false);
+  const [deletingAccount, setDeletingAccount] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -115,6 +137,25 @@ export default function ProfilePage() {
     }
   };
 
+  const handleDeleteAccount = async () => {
+    if (!window.confirm(t.profile.deleteAccountConfirm)) return;
+
+    setDeletingAccount(true);
+    try {
+      const res = await fetch('/api/account', { method: 'DELETE' });
+      if (!res.ok) throw new Error();
+
+      const supabase = createClient();
+      await supabase.auth.signOut();
+      toast.success(t.profile.accountDeleted);
+      router.push('/');
+    } catch {
+      toast.error('Failed to delete account');
+    } finally {
+      setDeletingAccount(false);
+    }
+  };
+
   const passwordValid = newPassword.length >= 8 && /[a-zA-Z]/.test(newPassword) && /\d/.test(newPassword);
   const passwordMismatch = confirmPassword.length > 0 && newPassword !== confirmPassword;
 
@@ -172,73 +213,98 @@ export default function ProfilePage() {
 
           <Separator />
 
-          {/* Nickname */}
-          <section className="space-y-2">
-            <Label>{t.profile.nickname}</Label>
-            <Input
-              value={nickname}
-              onChange={(e) => setNickname(e.target.value)}
-              placeholder={t.profile.nicknamePlaceholder}
-              data-testid="profile-nickname-input"
-            />
-          </section>
-
-          <Separator />
-
-          {/* JLPT Level */}
-          <section className="space-y-2">
-            <Label>{t.profile.jlptLevel}</Label>
-            <div className="flex gap-2">
-              {JLPT_LEVELS.map((level) => (
-                <Button
-                  key={level}
-                  type="button"
-                  variant={jlptLevel === level ? 'default' : 'outline'}
-                  size="sm"
-                  className="flex-1"
-                  onClick={() => setJlptLevel(level)}
-                  data-testid={`profile-jlpt-n${level}`}
-                >
-                  N{level}
-                </Button>
-              ))}
+          {/* Profile fields — grouped without separators */}
+          <section className="space-y-5">
+            {/* Email (read-only) */}
+            <div className="space-y-1.5">
+              <Label>{t.profile.email}</Label>
+              <div className="text-sm text-muted-foreground">
+                {user?.email}
+              </div>
             </div>
-          </section>
 
-          <Separator />
-
-          {/* Study Purpose */}
-          <section className="space-y-2">
-            <Label>{t.profile.studyPurpose}</Label>
-            <div className="flex gap-2">
-              {purposeOptions.map((opt) => (
-                <Button
-                  key={opt.value}
-                  type="button"
-                  variant={studyPurpose === opt.value ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setStudyPurpose(opt.value)}
-                  data-testid={`profile-purpose-${opt.value}`}
-                >
-                  {opt.label}
-                </Button>
-              ))}
-            </div>
-            {studyPurpose === 'other' && (
+            {/* Nickname */}
+            <div className="space-y-1.5">
+              <Label>{t.profile.nickname}</Label>
               <Input
-                value={otherPurpose}
-                onChange={(e) => setOtherPurpose(e.target.value)}
-                placeholder={t.profile.purposeOtherPlaceholder}
-                data-testid="profile-purpose-other-input"
+                value={nickname}
+                onChange={(e) => setNickname(e.target.value)}
+                placeholder={t.profile.nicknamePlaceholder}
+                data-testid="profile-nickname-input"
               />
-            )}
+            </div>
+
+            {/* JLPT Level */}
+            <div className="space-y-1.5">
+              <Label>{t.profile.jlptLevel}</Label>
+              <Combobox
+                value={JLPT_OPTIONS.find((o) => o.level === jlptLevel) ?? null}
+                onValueChange={(val: JlptOption | null) => {
+                  if (val) setJlptLevel(val.level);
+                }}
+                itemToStringLabel={(item: JlptOption) => item.label}
+              >
+                <ComboboxInput
+                  placeholder={t.profile.jlptLevel}
+                  data-testid="profile-jlpt-select"
+                />
+                <ComboboxContent>
+                  <ComboboxList>
+                    {JLPT_OPTIONS.map((opt) => (
+                      <ComboboxItem key={opt.level} value={opt}>
+                        {opt.label}
+                      </ComboboxItem>
+                    ))}
+                  </ComboboxList>
+                </ComboboxContent>
+              </Combobox>
+            </div>
+
+            {/* Study Purpose */}
+            <div className="space-y-1.5">
+              <Label>{t.profile.studyPurpose}</Label>
+              <div className="flex gap-2">
+                {purposeOptions.map((opt) => (
+                  <Button
+                    key={opt.value}
+                    type="button"
+                    variant={studyPurpose === opt.value ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setStudyPurpose(opt.value)}
+                    data-testid={`profile-purpose-${opt.value}`}
+                  >
+                    {opt.label}
+                  </Button>
+                ))}
+              </div>
+              {studyPurpose === 'other' && (
+                <Input
+                  value={otherPurpose}
+                  onChange={(e) => setOtherPurpose(e.target.value)}
+                  placeholder={t.profile.purposeOtherPlaceholder}
+                  data-testid="profile-purpose-other-input"
+                />
+              )}
+            </div>
           </section>
 
           <Separator />
 
           {/* Change Password */}
           <section className="space-y-3">
-            <Label className="text-sm font-semibold">{t.profile.changePassword}</Label>
+            <div className="flex items-center gap-3">
+              <span className="shrink-0 text-sm font-medium">{t.profile.changePassword}</span>
+              <div className="flex-1" />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleChangePassword}
+                disabled={changingPassword || !passwordValid || passwordMismatch}
+                data-testid="profile-change-password-button"
+              >
+                {t.profile.changePassword}
+              </Button>
+            </div>
             <div className="space-y-2">
               <Input
                 type="password"
@@ -257,16 +323,28 @@ export default function ProfilePage() {
               {passwordMismatch && (
                 <p className="text-sm text-destructive">{t.auth.passwordMismatch}</p>
               )}
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleChangePassword}
-                disabled={changingPassword || !passwordValid || passwordMismatch}
-                data-testid="profile-change-password-button"
-              >
-                {t.profile.changePassword}
-              </Button>
             </div>
+          </section>
+
+          <Separator />
+
+          {/* Delete Account */}
+          <section className="space-y-3 rounded-lg border border-destructive/20 bg-destructive/5 p-4">
+            <Label className="text-sm font-semibold text-destructive">
+              {t.profile.deleteAccount}
+            </Label>
+            <p className="text-sm text-muted-foreground">
+              {t.profile.deleteAccountWarning}
+            </p>
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={handleDeleteAccount}
+              disabled={deletingAccount}
+              data-testid="profile-delete-account-button"
+            >
+              {t.profile.deleteAccount}
+            </Button>
           </section>
         </div>
 

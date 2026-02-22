@@ -264,6 +264,28 @@ class SupabaseStudyRepository implements StudyRepository {
     return dbProgressToProgress(data as DbStudyProgress);
   }
 
+  async getDueCount(): Promise<number> {
+    const now = new Date().toISOString();
+
+    // Count words with progress where next_review <= now (excluding mastered)
+    const { count: dueWithProgress, error: e1 } = await this.supabase
+      .from('study_progress')
+      .select('*, words!inner(*)', { count: 'exact', head: true })
+      .lte('next_review', now)
+      .eq('words.mastered', false);
+    if (e1) throw e1;
+
+    // Count non-mastered words with no study_progress row
+    const { count: noProgress, error: e2 } = await this.supabase
+      .from('words')
+      .select('*, study_progress(*)', { count: 'exact', head: true })
+      .eq('mastered', false)
+      .is('study_progress', null);
+    if (e2) throw e2;
+
+    return (dueWithProgress ?? 0) + (noProgress ?? 0);
+  }
+
   async getDueWords(limit = 20): Promise<WordWithProgress[]> {
     const now = new Date().toISOString();
 

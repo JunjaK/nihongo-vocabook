@@ -39,3 +39,28 @@ export async function searchDictionary(
   const data: JishoApiResponse = await res.json();
   return data.data.map(mapResult);
 }
+
+interface BatchResponse {
+  found: Record<string, JishoResult[]>;
+  missing: string[];
+}
+
+export async function searchDictionaryBatch(
+  terms: string[],
+): Promise<{ found: Map<string, DictionaryEntry[]>; missing: string[] }> {
+  const res = await fetch('/api/dictionary/batch', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ terms }),
+  });
+  if (!res.ok) throw new Error('Batch dictionary search failed');
+
+  const data: BatchResponse = await res.json();
+
+  const found = new Map<string, DictionaryEntry[]>();
+  for (const [term, results] of Object.entries(data.found)) {
+    found.set(term, results.map(mapResult));
+  }
+
+  return { found, missing: data.missing };
+}

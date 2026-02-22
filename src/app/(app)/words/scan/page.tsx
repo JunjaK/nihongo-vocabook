@@ -1,23 +1,25 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
+import { Camera } from 'lucide-react';
 import { Header } from '@/components/layout/header';
-import { ImageCapture } from '@/components/scan/image-capture';
+import { ImageCapture, type ImageCaptureHandle } from '@/components/scan/image-capture';
 import { WordPreview } from '@/components/scan/word-preview';
-import { WordConfirm } from '@/components/scan/word-confirm';
 import { ScanComplete } from '@/components/scan/scan-complete';
 import { Button } from '@/components/ui/button';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { useRepository } from '@/lib/repository/provider';
 import { useTranslation } from '@/lib/i18n';
 import { useAuthStore } from '@/stores/auth-store';
 import { getLocalOcrMode, fetchOcrSettings } from '@/lib/ocr/settings';
-import { extractWordsFromImage, type ExtractionResult } from '@/lib/ocr/extract';
+import { extractWordsFromImage } from '@/lib/ocr/extract';
 import { fetchProfile } from '@/lib/profile/fetch';
+import { searchDictionary, searchDictionaryBatch } from '@/lib/dictionary/jisho';
 import type { ExtractedWord } from '@/lib/ocr/llm-vision';
 import Link from 'next/link';
 
-type Step = 'capture' | 'preview' | 'confirm' | 'done';
+type Step = 'capture' | 'preview' | 'done';
 
 export default function ScanPage() {
   const repo = useRepository();
@@ -25,15 +27,16 @@ export default function ScanPage() {
   const user = useAuthStore((s) => s.user);
   const [step, setStep] = useState<Step>('capture');
   const [extracting, setExtracting] = useState(false);
-  const [extractionResult, setExtractionResult] = useState<ExtractionResult | null>(null);
-
-  // OCR flow state
-  const [selectedOcrWords, setSelectedOcrWords] = useState<string[]>([]);
-  const [currentConfirmIndex, setCurrentConfirmIndex] = useState(0);
   const [addedCount, setAddedCount] = useState(0);
+  const imageCaptureRef = useRef<ImageCaptureHandle>(null);
 
-  // LLM flow state
-  const [selectedLlmWords, setSelectedLlmWords] = useState<ExtractedWord[]>([]);
+  // Enriched words for preview (used by both OCR and LLM modes)
+  const [enrichedWords, setEnrichedWords] = useState<ExtractedWord[]>([]);
+
+  // OCR enrichment state
+  const [enriching, setEnriching] = useState(false);
+  const [enrichProgress, setEnrichProgress] = useState({ current: 0, total: 0 });
+  const enrichCancelledRef = useRef(false);
 
   // User JLPT level for filtering
   const [userJlptLevel, setUserJlptLevel] = useState<number | null>(null);
@@ -66,29 +69,104 @@ export default function ScanPage() {
       .catch(() => {});
   }, [user]);
 
-  const handleExtract = useCallback(async (imageDataUrl: string) => {
-    const currentMode = getLocalOcrMode();
-    setExtracting(true);
-    try {
-      const result = await extractWordsFromImage(imageDataUrl, currentMode);
-      setExtractionResult(result);
+  const toExtractedWord = (raw: string, entries: { japanese: { word?: string; reading: string }[]; senses: { englishDefinitions: string[]; partsOfSpeech: string[] }[]; jlptLevels: string[] }[]): ExtractedWord => {
+    if (entries.length === 0) {
+      return { term: raw, reading: '', meaning: '', jlptLevel: null };
+    }
+    const entry = entries[0];
+    const jp = entry.japanese[0];
+    const sense = entry.senses[0];
+    const jlptMatch = entry.jlptLevels[0]?.match(/\d/);
+    return {
+      term: jp?.word ?? jp?.reading ?? raw,
+      reading: jp?.reading ?? '',
+      meaning: sense?.englishDefinitions.slice(0, 3).join(', ') ?? '',
+      jlptLevel: jlptMatch ? Number(jlptMatch[0]) : null,
+    };
+  };
+
+  const enrichOcrWords = useCallback(async (rawWords: string[]) => {
+    setEnriching(true);
+    setEnrichProgress({ current: 0, total: rawWords.length });
+    enrichCancelledRef.current = false;
+
+    // 1. Batch lookup from DB
+    const batchResult = await searchDictionaryBatch(rawWords);
+    if (enrichCancelledRef.current) return;
+
+    // Build a map of raw word → ExtractedWord for found entries
+    const resultMap = new Map<string, ExtractedWord>();
+    for (const [term, entries] of batchResult.found) {
+      resultMap.set(term, toExtractedWord(term, entries));
+    }
+
+    const batchFoundCount = batchResult.found.size;
+    setEnrichProgress({ current: batchFoundCount, total: rawWords.length });
+
+    // 2. Sequential Jisho lookups for misses only
+    for (let i = 0; i < batchResult.missing.length; i++) {
+      if (enrichCancelledRef.current) return;
+
+      const raw = batchResult.missing[i];
+      if (i > 0) await new Promise((r) => setTimeout(r, 200));
+
+      try {
+        const entries = await searchDictionary(raw);
+        resultMap.set(raw, toExtractedWord(raw, entries));
+      } catch {
+        resultMap.set(raw, { term: raw, reading: '', meaning: '', jlptLevel: null });
+      }
+      setEnrichProgress({ current: batchFoundCount + i + 1, total: rawWords.length });
+    }
+
+    if (!enrichCancelledRef.current) {
+      // Preserve original order
+      const results = rawWords.map((raw) => resultMap.get(raw) ?? { term: raw, reading: '', meaning: '', jlptLevel: null });
+      setEnrichedWords(results);
+      setEnriching(false);
       setStep('preview');
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Extraction failed';
-      toast.error(message);
-    } finally {
-      setExtracting(false);
     }
   }, []);
 
-  const handleOcrConfirm = (words: string[]) => {
-    setSelectedOcrWords(words);
-    setCurrentConfirmIndex(0);
-    setStep('confirm');
-  };
+  const handleExtract = useCallback(async (imageDataUrls: string[]) => {
+    const currentMode = getLocalOcrMode();
+    setExtracting(true);
+    try {
+      const allOcrWords: string[] = [];
+      const allLlmWords: ExtractedWord[] = [];
 
-  const handleLlmConfirm = async (words: ExtractedWord[]) => {
-    setSelectedLlmWords(words);
+      for (const imageDataUrl of imageDataUrls) {
+        const result = await extractWordsFromImage(imageDataUrl, currentMode);
+        if (result.mode === 'ocr') {
+          allOcrWords.push(...result.words);
+        } else {
+          allLlmWords.push(...result.words);
+        }
+      }
+
+      if (allOcrWords.length > 0) {
+        setExtracting(false);
+        await enrichOcrWords(allOcrWords);
+      } else {
+        // Deduplicate LLM words by term
+        const seen = new Set<string>();
+        const unique = allLlmWords.filter((w) => {
+          if (seen.has(w.term)) return false;
+          seen.add(w.term);
+          return true;
+        });
+        setEnrichedWords(unique);
+        setExtracting(false);
+        setStep('preview');
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Extraction failed';
+      toast.error(message);
+      setExtracting(false);
+    }
+  }, [enrichOcrWords]);
+
+  const handleBulkAdd = async (words: ExtractedWord[]) => {
     let count = 0;
     for (const word of words) {
       try {
@@ -113,47 +191,34 @@ export default function ScanPage() {
     toast.success(t.scan.wordsAdded(count));
   };
 
-  const handleWordAdd = async (data: {
-    term: string;
-    reading: string;
-    meaning: string;
-    jlptLevel: number | null;
-  }) => {
-    await repo.words.create({
-      term: data.term,
-      reading: data.reading,
-      meaning: data.meaning,
-      jlptLevel: data.jlptLevel,
-    });
-    setAddedCount((c) => c + 1);
-
-    if (currentConfirmIndex + 1 >= selectedOcrWords.length) {
-      setStep('done');
-    } else {
-      setCurrentConfirmIndex((i) => i + 1);
-    }
-  };
-
-  const handleSkip = () => {
-    if (currentConfirmIndex + 1 >= selectedOcrWords.length) {
-      setStep('done');
-    } else {
-      setCurrentConfirmIndex((i) => i + 1);
-    }
-  };
-
   const handleReset = () => {
+    enrichCancelledRef.current = true;
     setStep('capture');
-    setExtractionResult(null);
-    setSelectedOcrWords([]);
-    setSelectedLlmWords([]);
-    setCurrentConfirmIndex(0);
+    setEnrichedWords([]);
+    setEnriching(false);
+    setEnrichProgress({ current: 0, total: 0 });
     setAddedCount(0);
   };
 
   return (
     <>
-      <Header title={t.scan.title} showBack />
+      <Header
+        title={t.scan.title}
+        showBack
+        actions={
+          step === 'capture' && !guardLoading && !needsApiKey && !enriching ? (
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              aria-label={t.scan.takePhoto}
+              onClick={() => imageCaptureRef.current?.openCamera()}
+              disabled={extracting}
+            >
+              <Camera className="size-5" />
+            </Button>
+          ) : undefined
+        }
+      />
 
       {guardLoading ? (
         <div className="animate-page p-4 text-center text-sm text-muted-foreground">
@@ -168,31 +233,24 @@ export default function ScanPage() {
             <Button variant="outline">{t.settings.goToSettings}</Button>
           </Link>
         </div>
+      ) : enriching ? (
+        <div className="flex flex-1 flex-col items-center justify-center gap-3 text-muted-foreground">
+          <LoadingSpinner className="size-8" />
+          <div className="text-sm">
+            {t.scan.enrichingWords}
+          </div>
+          <div className="text-lg font-medium text-foreground">
+            {enrichProgress.current} / {enrichProgress.total}
+          </div>
+        </div>
       ) : step === 'capture' ? (
-        <ImageCapture onExtract={handleExtract} extracting={extracting} />
-      ) : step === 'preview' && extractionResult ? (
-        extractionResult.mode === 'ocr' ? (
-          <WordPreview
-            mode="ocr"
-            words={extractionResult.words}
-            onConfirm={handleOcrConfirm}
-            onRetry={handleReset}
-          />
-        ) : (
-          <WordPreview
-            mode="llm"
-            words={extractionResult.words}
-            userJlptLevel={userJlptLevel}
-            onConfirm={handleLlmConfirm}
-            onRetry={handleReset}
-          />
-        )
-      ) : step === 'confirm' ? (
-        <WordConfirm
-          words={selectedOcrWords}
-          currentIndex={currentConfirmIndex}
-          onAdd={handleWordAdd}
-          onSkip={handleSkip}
+        <ImageCapture ref={imageCaptureRef} onExtract={handleExtract} extracting={extracting} />
+      ) : step === 'preview' ? (
+        <WordPreview
+          words={enrichedWords}
+          userJlptLevel={userJlptLevel}
+          onConfirm={handleBulkAdd}
+          onRetry={handleReset}
         />
       ) : step === 'done' ? (
         <ScanComplete addedCount={addedCount} onAddMore={handleReset} />

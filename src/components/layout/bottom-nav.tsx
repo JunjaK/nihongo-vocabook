@@ -1,13 +1,26 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { useTranslation } from '@/lib/i18n';
+import { useRepository } from '@/lib/repository/provider';
 
 export function BottomNav() {
   const pathname = usePathname();
   const { t } = useTranslation();
+  const repo = useRepository();
+  const [dueCount, setDueCount] = useState(0);
+
+  useEffect(() => {
+    const fetchCount = () => {
+      repo.study.getDueCount().then(setDueCount).catch(() => {});
+    };
+    fetchCount();
+    const interval = setInterval(fetchCount, 60_000);
+    return () => clearInterval(interval);
+  }, [repo]);
 
   const navItems = [
     { href: '/words', label: t.nav.words, icon: BookIcon },
@@ -22,6 +35,7 @@ export function BottomNav() {
       <div className="flex h-14">
         {navItems.map(({ href, label, icon: Icon }) => {
           const isActive = pathname.startsWith(href);
+          const showBadge = href === '/quiz' && dueCount > 0;
           return (
             <Link
               key={href}
@@ -33,7 +47,14 @@ export function BottomNav() {
                   : 'text-muted-foreground hover:text-foreground',
               )}
             >
-              <Icon className="h-5 w-5" />
+              <div className="relative">
+                <Icon className="h-5 w-5" />
+                {showBadge && (
+                  <span className="absolute -top-1 -right-1.5 flex size-4 items-center justify-center rounded-full bg-primary text-[10px] font-medium text-primary-foreground">
+                    {dueCount > 99 ? '99' : dueCount}
+                  </span>
+                )}
+              </div>
               <span>{label}</span>
             </Link>
           );

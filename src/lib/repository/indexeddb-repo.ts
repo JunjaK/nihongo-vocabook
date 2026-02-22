@@ -182,6 +182,25 @@ class IndexedDBStudyRepository implements StudyRepository {
     );
   }
 
+  async getDueCount(): Promise<number> {
+    const now = new Date();
+    const allWords = await db.words
+      .filter((w) => !w.mastered)
+      .toArray();
+    let count = 0;
+    for (const word of allWords) {
+      const w = word as LocalWord & { id: number };
+      const progress = await db.studyProgress
+        .where('wordId')
+        .equals(w.id)
+        .first();
+      if (!progress || progress.nextReview <= now) {
+        count++;
+      }
+    }
+    return count;
+  }
+
   async getDueWords(limit = 20): Promise<WordWithProgress[]> {
     const now = new Date();
     const allWords = await db.words

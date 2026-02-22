@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import { Header } from '@/components/layout/header';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import { ChevronRight } from 'lucide-react';
 import { useAuthStore } from '@/stores/auth-store';
 import { useRepository } from '@/lib/repository/provider';
 import { createClient } from '@/lib/supabase/client';
@@ -156,13 +157,25 @@ export default function SettingsPage() {
       <Header title={t.settings.title} />
       <div className="animate-page flex-1 space-y-6 overflow-y-auto p-4">
         {/* Account */}
-        <section className="space-y-2">
+        <section className="space-y-3">
           <h2 className="text-sm font-semibold text-foreground">{t.settings.account}</h2>
           {user ? (
-            <div className="space-y-2">
-              <div className="text-sm">
-                {t.settings.signedInAs(user.email ?? '')}
-              </div>
+            <div className="space-y-3">
+              <Link
+                href="/settings/profile"
+                className="flex items-center justify-between rounded-lg border p-3 active:bg-accent/50"
+                data-testid="settings-profile-link"
+              >
+                <div>
+                  {profileNickname && (
+                    <div className="text-sm font-medium">{profileNickname}</div>
+                  )}
+                  <div className={profileNickname ? 'text-xs text-muted-foreground' : 'text-sm'}>
+                    {user.email}
+                  </div>
+                </div>
+                <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
+              </Link>
               <Button
                 variant="outline"
                 size="sm"
@@ -194,26 +207,6 @@ export default function SettingsPage() {
         </section>
 
         <Separator />
-
-        {/* Profile */}
-        {user && (
-          <>
-            <section className="space-y-2">
-              <h2 className="text-sm font-semibold text-foreground">{t.profile.title}</h2>
-              <div className="flex items-center justify-between">
-                <div className="text-sm text-muted-foreground">
-                  {profileNickname || user.email}
-                </div>
-                <Link href="/settings/profile">
-                  <Button variant="outline" size="sm" data-testid="settings-profile-link">
-                    {t.common.edit}
-                  </Button>
-                </Link>
-              </div>
-            </section>
-            <Separator />
-          </>
-        )}
 
         {/* Language */}
         <section className="space-y-2">
