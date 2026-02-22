@@ -3,7 +3,7 @@
 import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { Trash2 } from 'lucide-react';
+import { Pencil, Trash2, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Header } from '@/components/layout/header';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
@@ -111,9 +111,15 @@ export default function WordDetailPage({
       <>
         <Header
           title={t.words.editWord}
+          showBack
           actions={
-            <Button variant="ghost" size="sm" onClick={() => setEditing(false)}>
-              {t.common.cancel}
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              onClick={() => setEditing(false)}
+              aria-label={t.common.cancel}
+            >
+              <X className="size-5" />
             </Button>
           }
         />
@@ -135,20 +141,22 @@ export default function WordDetailPage({
           <div className="flex gap-1">
             <Button
               variant="ghost"
-              size="sm"
-              onClick={() => setEditing(true)}
-              data-testid="word-edit-button"
-            >
-              {t.common.edit}
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
+              size="icon-sm"
               className="text-destructive"
               onClick={() => setShowDeleteConfirm(true)}
               data-testid="word-delete-button"
+              aria-label={t.common.delete}
             >
-              {t.common.delete}
+              <Trash2 className="size-5" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              onClick={() => setEditing(true)}
+              data-testid="word-edit-button"
+              aria-label={t.common.edit}
+            >
+              <Pencil className="size-5" />
             </Button>
           </div>
         }

@@ -8,19 +8,20 @@ interface HeaderProps {
   title: string;
   actions?: ReactNode;
   showBack?: boolean;
+  onBack?: () => void;
 }
 
-export function Header({ title, actions, showBack }: HeaderProps) {
+export function Header({ title, actions, showBack, onBack }: HeaderProps) {
   const router = useRouter();
 
   return (
     <header className="sticky top-0 z-10 flex h-14 items-center justify-between border-b bg-background px-4">
       <div className="flex items-center gap-1">
-        {showBack && (
+        {(showBack || onBack) && (
           <Button
             variant="ghost"
             size="icon-sm"
-            onClick={() => router.back()}
+            onClick={onBack ?? (() => router.back())}
             aria-label="Go back"
             className="-ml-2"
           >
