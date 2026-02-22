@@ -146,8 +146,10 @@ export default function WordsPage() {
               return (
                 <div
                   key={word.id}
+                  ref={virtualizer.measureElement}
+                  data-index={vr.index}
                   className="absolute left-4 right-4 pb-2"
-                  style={{ height: vr.size, transform: `translateY(${vr.start}px)` }}
+                  style={{ transform: `translateY(${vr.start}px)` }}
                 >
                   <SwipeableWordCard
                     word={word}

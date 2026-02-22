@@ -27,6 +27,9 @@ export function WordCard({ word, showReading, showMeaning }: WordCardProps) {
           {word.priority === 1 && (
             <span className="size-2 shrink-0 rounded-full bg-red-500" />
           )}
+          {word.priority === 2 && (
+            <span className="size-2 shrink-0 rounded-full bg-primary" />
+          )}
           {word.priority === 3 && (
             <span className="size-2 shrink-0 rounded-full bg-gray-300 dark:bg-gray-600" />
           )}
