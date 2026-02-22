@@ -5,6 +5,7 @@ import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import { useTranslation } from '@/lib/i18n';
 
 interface WordbookFormValues {
@@ -130,13 +131,11 @@ export function WordbookForm({ initialValues, onSubmit, submitLabel, showShareTo
           </div>
         </div>
         {showShareToggle && (
-          <div className="flex items-center gap-2">
-            <input
-              type="checkbox"
+          <div className="flex items-center gap-3">
+            <Switch
               id="wordbook-shared"
               checked={isShared}
-              onChange={(e) => setIsShared(e.target.checked)}
-              className="h-4 w-4 rounded border-gray-300"
+              onCheckedChange={setIsShared}
               data-testid="wordbook-share-toggle"
             />
             <Label htmlFor="wordbook-shared" className="cursor-pointer">

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
+import { X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
@@ -35,7 +36,9 @@ export function WordForm({
   const [reading, setReading] = useState(initialValues?.reading ?? '');
   const [meaning, setMeaning] = useState(initialValues?.meaning ?? '');
   const [notes, setNotes] = useState(initialValues?.notes ?? '');
-  const [tags, setTags] = useState(initialValues?.tags.join(', ') ?? '');
+  const [tags, setTags] = useState<string[]>(initialValues?.tags ?? []);
+  const [tagInput, setTagInput] = useState('');
+  const tagInputRef = useRef<HTMLInputElement>(null);
   const [jlptLevel, setJlptLevel] = useState<string>(
     initialValues?.jlptLevel?.toString() ?? '',
   );
@@ -56,21 +59,42 @@ export function WordForm({
     setTimeout(() => meaningRef.current?.focus(), 0);
   };
 
+  const addTag = (value: string) => {
+    const trimmed = value.trim();
+    if (trimmed && !tags.includes(trimmed)) {
+      setTags((prev) => [...prev, trimmed]);
+    }
+    setTagInput('');
+  };
+
+  const removeTag = (index: number) => {
+    setTags((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleTagKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (tagInput.trim()) addTag(tagInput);
+    } else if (e.key === 'Backspace' && !tagInput && tags.length > 0) {
+      removeTag(tags.length - 1);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!term.trim() || !reading.trim() || !meaning.trim()) return;
 
     setSubmitting(true);
     try {
+      const finalTags = tagInput.trim()
+        ? [...tags, tagInput.trim()].filter((v, i, arr) => arr.indexOf(v) === i)
+        : tags;
       await onSubmit({
         term: term.trim(),
         reading: reading.trim(),
         meaning: meaning.trim(),
         notes: notes.trim() || null,
-        tags: tags
-          .split(',')
-          .map((t) => t.trim())
-          .filter(Boolean),
+        tags: finalTags,
         jlptLevel: jlptLevel ? Number(jlptLevel) : null,
       });
     } finally {
@@ -160,14 +184,38 @@ export function WordForm({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="tags">{t.wordForm.tags}</Label>
-          <Input
-            id="tags"
-            value={tags}
-            onChange={(e) => setTags(e.target.value)}
-            placeholder="동사, 일상"
-            data-testid="word-form-tags"
-          />
+          <Label>{t.wordForm.tags}</Label>
+          <div
+            className="border-input focus-within:border-ring focus-within:ring-ring/50 flex min-h-9 flex-wrap items-center gap-1.5 rounded-md border px-3 py-1.5 focus-within:ring-[3px]"
+            onClick={() => tagInputRef.current?.focus()}
+          >
+            {tags.map((tag, i) => (
+              <span
+                key={tag}
+                className="inline-flex items-center gap-1 rounded-md bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary"
+              >
+                {tag}
+                <button
+                  type="button"
+                  onClick={(e) => { e.stopPropagation(); removeTag(i); }}
+                  className="rounded-sm text-primary/60 hover:text-primary"
+                  data-testid={`word-tag-remove-${i}`}
+                >
+                  <X className="size-3" />
+                </button>
+              </span>
+            ))}
+            <input
+              ref={tagInputRef}
+              value={tagInput}
+              onChange={(e) => setTagInput(e.target.value)}
+              onKeyDown={handleTagKeyDown}
+              onBlur={() => { if (tagInput.trim()) addTag(tagInput); }}
+              placeholder={tags.length === 0 ? t.wordbooks.tagsPlaceholder : ''}
+              className="min-w-[80px] flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+              data-testid="word-form-tags"
+            />
+          </div>
         </div>
 
         <div className="space-y-2">
