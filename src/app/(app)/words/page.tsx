@@ -193,7 +193,7 @@ export default function WordsPage() {
       {!loading && (
         <div className="shrink-0 bg-background px-4 pb-3">
           <div className="mb-3 h-px bg-border" />
-          <Link href="/words/new">
+          <Link href="/words/create">
             <Button className="w-full" data-testid="words-add-button">
               {t.words.addWord}
             </Button>
