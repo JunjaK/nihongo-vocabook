@@ -14,6 +14,7 @@ import type {
   WordbookWithCount,
   SharedWordbookListItem,
 } from '@/types/wordbook';
+import type { QuizSettings, DailyStats, Achievement } from '@/types/quiz';
 
 export interface WordRepository {
   getAll(): Promise<Word[]>;
@@ -32,6 +33,13 @@ export interface StudyRepository {
   getDueCount(): Promise<number>;
   getDueWords(limit?: number): Promise<WordWithProgress[]>;
   recordReview(wordId: string, quality: number): Promise<void>;
+  getQuizSettings(): Promise<QuizSettings>;
+  updateQuizSettings(settings: Partial<QuizSettings>): Promise<void>;
+  getDailyStats(date: string): Promise<DailyStats | null>;
+  incrementDailyStats(date: string, isNew: boolean, isAgain: boolean): Promise<void>;
+  getStreakDays(): Promise<number>;
+  getAchievements(): Promise<Achievement[]>;
+  unlockAchievement(type: string): Promise<Achievement | null>;
 }
 
 export interface WordbookRepository {

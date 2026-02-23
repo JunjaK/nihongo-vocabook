@@ -120,9 +120,24 @@ export interface Translations {
     again: string;
     hard: string;
     good: string;
+    easy: string;
     reviewed: (n: number) => string;
     reviewCount: (n: number) => string;
     wordbookQuiz: string;
+    sessionComplete: string;
+    cardsReviewed: string;
+    newCards: string;
+    reviewedCards: string;
+    accuracy: string;
+    streak: string;
+    streakDays: (n: number) => string;
+    greatJob: string;
+    keepGoing: string;
+    needsPractice: string;
+    perfectScore: string;
+    continueStudying: string;
+    backToHome: string;
+    dailyLimitReached: string;
   };
   settings: {
     title: string;
@@ -167,6 +182,19 @@ export interface Translations {
     developer: string;
     sourceCode: string;
     openSource: string;
+    quizSettings: string;
+    newPerDay: string;
+    maxReviewsPerDay: string;
+    jlptFilter: string;
+    priorityFilter: string;
+    newCardOrder: string;
+    orderRecent: string;
+    orderPriority: string;
+    orderJlpt: string;
+    allLevels: string;
+    allPriorities: string;
+    achievements: string;
+    viewAchievements: string;
   };
   wordbooks: {
     title: string;
@@ -228,6 +256,7 @@ export interface Translations {
     addWords: string;
     addNWords: (n: number) => string;
     selectWords: string;
+    progressLabel: (mastered: number, total: number) => string;
   };
   scan: {
     title: string;
@@ -300,5 +329,17 @@ export interface Translations {
     unmaster: string;
     wordMastered: string;
     wordUnmastered: string;
+  };
+  achievements: {
+    title: string;
+    firstQuiz: string;
+    words100: string;
+    words500: string;
+    words1000: string;
+    streak7: string;
+    streak30: string;
+    unlocked: string;
+    noAchievements: string;
+    locked: string;
   };
 }

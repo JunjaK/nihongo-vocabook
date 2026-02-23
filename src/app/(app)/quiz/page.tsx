@@ -1,14 +1,17 @@
 'use client';
 
 import { Suspense, useState, useEffect, useCallback, useRef } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
-import { BookOpenCheck } from 'lucide-react';
+import { BookOpenCheck, Flame } from 'lucide-react';
 import { Header } from '@/components/layout/header';
 import { Flashcard } from '@/components/quiz/flashcard';
+import { SessionReport } from '@/components/quiz/session-report';
 import { useRepository } from '@/lib/repository/provider';
 import { useTranslation } from '@/lib/i18n';
+import { isNewCard } from '@/lib/spaced-repetition';
+import { checkAndUnlockAchievements } from '@/lib/quiz/achievements';
 import type { WordWithProgress } from '@/types/word';
 
 export default function QuizPage() {
@@ -20,6 +23,7 @@ export default function QuizPage() {
 }
 
 function QuizContent() {
+  const router = useRouter();
   const repo = useRepository();
   const { t } = useTranslation();
   const searchParams = useSearchParams();
@@ -31,7 +35,16 @@ function QuizContent() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [completed, setCompleted] = useState(0);
+  const [streak, setStreak] = useState(0);
+  const [showReport, setShowReport] = useState(false);
   const loadStart = useRef(0);
+
+  // Session tracking
+  const [sessionStats, setSessionStats] = useState({
+    totalReviewed: 0,
+    newCards: 0,
+    againCount: 0,
+  });
 
   const loadDueWords = useCallback(async () => {
     setLoading(true);
@@ -69,6 +82,10 @@ function QuizContent() {
     loadDueWords();
   }, [loadDueWords]);
 
+  useEffect(() => {
+    repo.study.getStreakDays().then(setStreak).catch(() => {});
+  }, [repo]);
+
   const advanceToNext = async () => {
     if (currentIndex + 1 < dueWords.length) {
       setCurrentIndex((i) => i + 1);
@@ -83,14 +100,47 @@ function QuizContent() {
       } else if (wordbookId) {
         await loadDueWords();
       } else {
-        await loadDueWords();
+        // General quiz — show report if we reviewed any cards
+        if (sessionStats.totalReviewed > 0 || completed > 0) {
+          setShowReport(true);
+          // Check achievements after session
+          try {
+            const newAchievements = await checkAndUnlockAchievements(repo);
+            for (const type of newAchievements) {
+              const achievementNames: Record<string, string> = {
+                first_quiz: t.achievements.firstQuiz,
+                words_100: t.achievements.words100,
+                words_500: t.achievements.words500,
+                words_1000: t.achievements.words1000,
+                streak_7: t.achievements.streak7,
+                streak_30: t.achievements.streak30,
+              };
+              toast.success(`🏆 ${achievementNames[type] ?? type}`);
+            }
+          } catch {
+            // Achievement check is non-critical
+          }
+          // Refresh streak
+          const newStreak = await repo.study.getStreakDays();
+          setStreak(newStreak);
+        } else {
+          await loadDueWords();
+        }
       }
     }
   };
 
   const handleRate = async (quality: number) => {
     const currentWord = dueWords[currentIndex];
+    const wasNew = isNewCard(currentWord.progress);
+
     await repo.study.recordReview(currentWord.id, quality);
+
+    setSessionStats((prev) => ({
+      totalReviewed: prev.totalReviewed + 1,
+      newCards: prev.newCards + (wasNew ? 1 : 0),
+      againCount: prev.againCount + (quality === 0 ? 1 : 0),
+    }));
     setCompleted((c) => c + 1);
     await advanceToNext();
   };
@@ -103,6 +153,16 @@ function QuizContent() {
     if (currentIndex >= dueWords.length - 1) {
       setCurrentIndex(0);
     }
+  };
+
+  const handleContinueStudying = async () => {
+    setShowReport(false);
+    setSessionStats({ totalReviewed: 0, newCards: 0, againCount: 0 });
+    await loadDueWords();
+  };
+
+  const handleBackToHome = () => {
+    router.push('/words');
   };
 
   const currentWord = dueWords[currentIndex];
@@ -118,15 +178,39 @@ function QuizContent() {
       : `${currentIndex + 1} / ${dueWords.length}${completed > 0 ? ` · ${t.quiz.reviewCount(completed)}` : ''}`
     : undefined;
 
+  if (showReport && sessionStats.totalReviewed > 0) {
+    return (
+      <>
+        <Header title={t.quiz.sessionComplete} />
+        <SessionReport
+          totalReviewed={sessionStats.totalReviewed}
+          newCards={sessionStats.newCards}
+          againCount={sessionStats.againCount}
+          streak={streak}
+          onContinue={handleContinueStudying}
+          onHome={handleBackToHome}
+        />
+      </>
+    );
+  }
+
   return (
     <>
       <Header
         title={title}
         showBack={!!(wordId || wordbookId)}
         actions={
-          progressText && (
-            <span className="text-sm text-muted-foreground">{progressText}</span>
-          )
+          <div className="flex items-center gap-2">
+            {streak > 0 && (
+              <span className="flex items-center gap-1 text-sm text-orange-500">
+                <Flame className="size-4" />
+                {streak}
+              </span>
+            )}
+            {progressText && (
+              <span className="text-sm text-muted-foreground">{progressText}</span>
+            )}
+          </div>
         }
       />
       {loading ? (

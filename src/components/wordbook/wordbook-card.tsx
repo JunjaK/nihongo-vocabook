@@ -12,6 +12,10 @@ interface WordbookCardProps {
 export function WordbookCard({ wordbook, subscribed }: WordbookCardProps) {
   const { t } = useTranslation();
 
+  const progressPercent = wordbook.wordCount > 0
+    ? Math.round((wordbook.masteredCount / wordbook.wordCount) * 100)
+    : 0;
+
   return (
     <Link
       href={`/wordbooks/${wordbook.id}`}
@@ -41,6 +45,20 @@ export function WordbookCard({ wordbook, subscribed }: WordbookCardProps) {
           {t.wordbooks.wordCount(wordbook.wordCount)}
         </div>
       </div>
+
+      {wordbook.wordCount > 0 && (
+        <div className="mt-3">
+          <div className="h-1.5 overflow-hidden rounded-full bg-muted">
+            <div
+              className="h-full rounded-full bg-primary transition-all"
+              style={{ width: `${progressPercent}%` }}
+            />
+          </div>
+          <div className="mt-1 text-xs text-muted-foreground">
+            {t.wordbooks.progressLabel(wordbook.masteredCount, wordbook.wordCount)}
+          </div>
+        </div>
+      )}
     </Link>
   );
 }

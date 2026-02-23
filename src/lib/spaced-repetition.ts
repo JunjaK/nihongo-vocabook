@@ -1,45 +1,97 @@
+import {
+  fsrs,
+  generatorParameters,
+  createEmptyCard,
+  Rating,
+  State,
+  type Card,
+  type Grade,
+} from 'ts-fsrs';
 import type { StudyProgress } from '@/types/word';
 
-function addDays(date: Date, days: number): Date {
-  const result = new Date(date);
-  result.setDate(result.getDate() + days);
-  return result;
-}
+const params = generatorParameters();
+const f = fsrs(params);
 
 /**
- * SM-2 spaced repetition algorithm.
- * @param quality 0-5 (0=forgot completely, 5=perfect recall)
- * @param progress current study progress
- * @returns updated study progress
+ * Convert StudyProgress to ts-fsrs Card.
  */
-export function sm2(quality: number, progress: StudyProgress): StudyProgress {
-  let { easeFactor, intervalDays, reviewCount } = progress;
-
-  if (quality >= 3) {
-    if (reviewCount === 0) intervalDays = 1;
-    else if (reviewCount === 1) intervalDays = 6;
-    else intervalDays = Math.round(intervalDays * easeFactor);
-    reviewCount++;
-  } else {
-    reviewCount = 0;
-    intervalDays = 1;
-  }
-
-  easeFactor = Math.max(
-    1.3,
-    easeFactor + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02)),
-  );
-
+export function progressToCard(progress: StudyProgress): Card {
+  const card = createEmptyCard(progress.lastReviewedAt ?? new Date());
   return {
-    ...progress,
-    easeFactor,
-    intervalDays,
-    reviewCount,
-    nextReview: addDays(new Date(), intervalDays),
-    lastReviewedAt: new Date(),
+    ...card,
+    due: progress.nextReview,
+    stability: progress.stability,
+    difficulty: progress.difficulty,
+    elapsed_days: progress.elapsedDays,
+    scheduled_days: progress.scheduledDays,
+    reps: progress.reviewCount,
+    lapses: progress.lapses,
+    state: progress.cardState as State,
+    last_review: progress.lastReviewedAt ?? undefined,
   };
 }
 
+/**
+ * Convert ts-fsrs Card fields back to StudyProgress partial fields.
+ */
+export function cardToProgress(card: Card): Pick<
+  StudyProgress,
+  'nextReview' | 'intervalDays' | 'easeFactor' | 'reviewCount' | 'lastReviewedAt' |
+  'stability' | 'difficulty' | 'elapsedDays' | 'scheduledDays' | 'learningSteps' | 'lapses' | 'cardState'
+> {
+  return {
+    nextReview: card.due instanceof Date ? card.due : new Date(card.due),
+    intervalDays: card.scheduled_days,
+    easeFactor: 2.5, // kept for backward compat, not used by FSRS
+    reviewCount: card.reps,
+    lastReviewedAt: card.last_review ? (card.last_review instanceof Date ? card.last_review : new Date(card.last_review)) : null,
+    stability: card.stability,
+    difficulty: card.difficulty,
+    elapsedDays: card.elapsed_days,
+    scheduledDays: card.scheduled_days,
+    learningSteps: 0,
+    lapses: card.lapses,
+    cardState: card.state as number,
+  };
+}
+
+/**
+ * Map quality (0-5) to ts-fsrs Rating.
+ * 0 = Again, 3 = Hard, 4 = Good, 5 = Easy
+ */
+export function mapQualityToRating(quality: number): Grade {
+  switch (quality) {
+    case 0: return Rating.Again;
+    case 3: return Rating.Hard;
+    case 4: return Rating.Good;
+    case 5: return Rating.Easy;
+    default: return quality <= 2 ? Rating.Again : Rating.Good;
+  }
+}
+
+/**
+ * Review a card with FSRS algorithm.
+ * @param quality 0=Again, 3=Hard, 4=Good, 5=Easy
+ * @param progress current study progress
+ * @param wordId the word ID
+ * @returns updated study progress
+ */
+export function reviewCard(quality: number, progress: StudyProgress): StudyProgress {
+  const card = progressToCard(progress);
+  const rating = mapQualityToRating(quality);
+  const now = new Date();
+  const result = f.next(card, now, rating);
+  const updated = cardToProgress(result.card);
+
+  return {
+    ...progress,
+    ...updated,
+  };
+}
+
+/**
+ * Create initial study progress for a new word.
+ */
 export function createInitialProgress(wordId: string): StudyProgress {
   return {
     id: crypto.randomUUID(),
@@ -49,5 +101,56 @@ export function createInitialProgress(wordId: string): StudyProgress {
     easeFactor: 2.5,
     reviewCount: 0,
     lastReviewedAt: null,
+    stability: 0,
+    difficulty: 0,
+    elapsedDays: 0,
+    scheduledDays: 0,
+    learningSteps: 0,
+    lapses: 0,
+    cardState: 0, // New
+  };
+}
+
+/**
+ * Check if a card is new (never reviewed).
+ */
+export function isNewCard(progress: StudyProgress | null): boolean {
+  if (!progress) return true;
+  return progress.cardState === 0 && progress.reviewCount === 0;
+}
+
+/**
+ * Get preview of next interval for all 4 ratings.
+ * Returns human-readable strings like "1m", "10m", "1d", "4d".
+ */
+export function getReviewPreview(progress: StudyProgress | null): {
+  again: string;
+  hard: string;
+  good: string;
+  easy: string;
+} {
+  const card = progress
+    ? progressToCard(progress)
+    : createEmptyCard(new Date());
+  const now = new Date();
+
+  const formatInterval = (nextCard: Card): string => {
+    const diffMs = (nextCard.due instanceof Date ? nextCard.due.getTime() : new Date(nextCard.due).getTime()) - now.getTime();
+    const diffMin = Math.round(diffMs / 60000);
+    if (diffMin < 1) return '<1m';
+    if (diffMin < 60) return `${diffMin}m`;
+    const diffHours = Math.round(diffMin / 60);
+    if (diffHours < 24) return `${diffHours}h`;
+    const diffDays = Math.round(diffHours / 24);
+    if (diffDays < 30) return `${diffDays}d`;
+    const diffMonths = Math.round(diffDays / 30);
+    return `${diffMonths}mo`;
+  };
+
+  return {
+    again: formatInterval(f.next(card, now, Rating.Again).card),
+    hard: formatInterval(f.next(card, now, Rating.Hard).card),
+    good: formatInterval(f.next(card, now, Rating.Good).card),
+    easy: formatInterval(f.next(card, now, Rating.Easy).card),
   };
 }

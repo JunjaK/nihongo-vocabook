@@ -3,8 +3,12 @@ import {
   type LocalWord,
   type LocalStudyProgress,
   type LocalWordbook,
+  type LocalDailyStats,
+  type LocalQuizSettings,
+  type LocalAchievement,
 } from '@/lib/db/dexie';
-import { sm2, createInitialProgress } from '@/lib/spaced-repetition';
+import { reviewCard, createInitialProgress, isNewCard } from '@/lib/spaced-repetition';
+import { getLocalDateString } from '@/lib/quiz/date-utils';
 import type {
   Word,
   CreateWordInput,
@@ -21,6 +25,8 @@ import type {
   WordbookWithCount,
   SharedWordbookListItem,
 } from '@/types/wordbook';
+import type { QuizSettings, DailyStats, Achievement } from '@/types/quiz';
+import { DEFAULT_QUIZ_SETTINGS } from '@/types/quiz';
 import type {
   DataRepository,
   WordRepository,
@@ -56,6 +62,13 @@ function localProgressToProgress(
     easeFactor: local.easeFactor,
     reviewCount: local.reviewCount,
     lastReviewedAt: local.lastReviewedAt,
+    stability: local.stability ?? 0,
+    difficulty: local.difficulty ?? 0,
+    elapsedDays: local.elapsedDays ?? 0,
+    scheduledDays: local.scheduledDays ?? 0,
+    learningSteps: local.learningSteps ?? 0,
+    lapses: local.lapses ?? 0,
+    cardState: local.cardState ?? 0,
   };
 }
 
@@ -238,21 +251,30 @@ class IndexedDBStudyRepository implements StudyRepository {
       .equals(numWordId)
       .first();
 
+    const wasNew = !existing || (existing.reviewCount === 0 && (existing.cardState ?? 0) === 0);
+
     if (existing) {
       const current = localProgressToProgress(
         existing as LocalStudyProgress & { id: number },
       );
-      const updated = sm2(quality, current);
+      const updated = reviewCard(quality, current);
       await db.studyProgress.update(existing.id!, {
         nextReview: updated.nextReview,
         intervalDays: updated.intervalDays,
         easeFactor: updated.easeFactor,
         reviewCount: updated.reviewCount,
         lastReviewedAt: updated.lastReviewedAt,
+        stability: updated.stability,
+        difficulty: updated.difficulty,
+        elapsedDays: updated.elapsedDays,
+        scheduledDays: updated.scheduledDays,
+        learningSteps: updated.learningSteps,
+        lapses: updated.lapses,
+        cardState: updated.cardState,
       });
     } else {
       const initial = createInitialProgress(wordId);
-      const updated = sm2(quality, initial);
+      const updated = reviewCard(quality, initial);
       await db.studyProgress.add({
         wordId: numWordId,
         nextReview: updated.nextReview,
@@ -260,8 +282,120 @@ class IndexedDBStudyRepository implements StudyRepository {
         easeFactor: updated.easeFactor,
         reviewCount: updated.reviewCount,
         lastReviewedAt: updated.lastReviewedAt,
+        stability: updated.stability,
+        difficulty: updated.difficulty,
+        elapsedDays: updated.elapsedDays,
+        scheduledDays: updated.scheduledDays,
+        learningSteps: updated.learningSteps,
+        lapses: updated.lapses,
+        cardState: updated.cardState,
       });
     }
+
+    // Track daily stats
+    const today = getLocalDateString();
+    await this.incrementDailyStats(today, wasNew, quality === 0);
+  }
+
+  async getQuizSettings(): Promise<QuizSettings> {
+    const settings = await db.quizSettings.toCollection().first();
+    if (!settings) return { ...DEFAULT_QUIZ_SETTINGS };
+    return {
+      newPerDay: settings.newPerDay,
+      maxReviewsPerDay: settings.maxReviewsPerDay,
+      jlptFilter: settings.jlptFilter,
+      priorityFilter: settings.priorityFilter,
+      newCardOrder: settings.newCardOrder as QuizSettings['newCardOrder'],
+    };
+  }
+
+  async updateQuizSettings(update: Partial<QuizSettings>): Promise<void> {
+    const existing = await db.quizSettings.toCollection().first();
+    if (existing) {
+      await db.quizSettings.update(existing.id!, update);
+    } else {
+      await db.quizSettings.add({
+        ...DEFAULT_QUIZ_SETTINGS,
+        ...update,
+      });
+    }
+  }
+
+  async getDailyStats(date: string): Promise<DailyStats | null> {
+    const stat = await db.dailyStats.where('date').equals(date).first();
+    if (!stat) return null;
+    return {
+      id: String(stat.id!),
+      date: stat.date,
+      newCount: stat.newCount,
+      reviewCount: stat.reviewCount,
+      againCount: stat.againCount,
+    };
+  }
+
+  async incrementDailyStats(date: string, isNew: boolean, isAgain: boolean): Promise<void> {
+    const existing = await db.dailyStats.where('date').equals(date).first();
+    if (existing) {
+      await db.dailyStats.update(existing.id!, {
+        newCount: existing.newCount + (isNew ? 1 : 0),
+        reviewCount: existing.reviewCount + 1,
+        againCount: existing.againCount + (isAgain ? 1 : 0),
+      });
+    } else {
+      await db.dailyStats.add({
+        date,
+        newCount: isNew ? 1 : 0,
+        reviewCount: 1,
+        againCount: isAgain ? 1 : 0,
+      });
+    }
+  }
+
+  async getStreakDays(): Promise<number> {
+    const stats = await db.dailyStats.orderBy('date').reverse().limit(100).toArray();
+    if (stats.length === 0) return 0;
+
+    let streak = 0;
+    let checkDate = getLocalDateString();
+
+    // If today has no stats, check if yesterday does
+    if (stats[0].date !== checkDate) {
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      checkDate = getLocalDateString(yesterday);
+      if (stats[0].date !== checkDate) return 0;
+    }
+
+    const dateSet = new Set(stats.map((s) => s.date));
+    const current = new Date(checkDate + 'T00:00:00');
+    while (dateSet.has(getLocalDateString(current))) {
+      streak++;
+      current.setDate(current.getDate() - 1);
+    }
+
+    return streak;
+  }
+
+  async getAchievements(): Promise<Achievement[]> {
+    const achievements = await db.achievements.orderBy('unlockedAt').reverse().toArray();
+    return achievements.map((a) => ({
+      id: String(a.id!),
+      type: a.type as Achievement['type'],
+      unlockedAt: a.unlockedAt,
+    }));
+  }
+
+  async unlockAchievement(type: string): Promise<Achievement | null> {
+    const existing = await db.achievements.where('type').equals(type).first();
+    if (existing) return null;
+
+    const now = new Date();
+    const id = await db.achievements.add({ type, unlockedAt: now });
+    return {
+      id: String(id),
+      type: type as Achievement['type'],
+      unlockedAt: now,
+    };
   }
 }
 
@@ -271,11 +405,20 @@ class IndexedDBWordbookRepository implements WordbookRepository {
     const result: WordbookWithCount[] = [];
     for (const wb of wordbooks) {
       const typedWb = wb as LocalWordbook & { id: number };
-      const wordCount = await db.wordbookItems
+      const items = await db.wordbookItems
         .where('wordbookId')
         .equals(typedWb.id)
-        .count();
-      result.push({ ...localWordbookToWordbook(typedWb), wordCount, importCount: 0 });
+        .toArray();
+      const wordCount = items.length;
+
+      // Count mastered words
+      let masteredCount = 0;
+      for (const item of items) {
+        const word = await db.words.get(item.wordId);
+        if (word?.mastered) masteredCount++;
+      }
+
+      result.push({ ...localWordbookToWordbook(typedWb), wordCount, importCount: 0, masteredCount });
     }
     return result;
   }
@@ -470,6 +613,13 @@ export class IndexedDBRepository implements DataRepository {
               lastReviewedAt: progress.lastReviewedAt
                 ? new Date(progress.lastReviewedAt)
                 : null,
+              stability: 0,
+              difficulty: 0,
+              elapsedDays: 0,
+              scheduledDays: 0,
+              learningSteps: 0,
+              lapses: 0,
+              cardState: 0,
             });
           }
         }

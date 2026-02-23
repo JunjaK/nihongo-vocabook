@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useTranslation } from '@/lib/i18n';
+import { getReviewPreview } from '@/lib/spaced-repetition';
 import type { WordWithProgress } from '@/types/word';
 
 interface FlashcardProps {
@@ -16,6 +17,8 @@ interface FlashcardProps {
 export function Flashcard({ word, onRate, onMaster, showMaster = true }: FlashcardProps) {
   const { t } = useTranslation();
   const [revealed, setRevealed] = useState(false);
+
+  const preview = useMemo(() => getReviewPreview(word.progress), [word.progress]);
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
@@ -67,39 +70,51 @@ export function Flashcard({ word, onRate, onMaster, showMaster = true }: Flashca
         <div className="flex gap-2" data-testid="flashcard-rating">
           <Button
             variant="outline"
-            className="flex-1 border-destructive text-destructive hover:bg-destructive/10"
+            className="flex-1 flex-col gap-0 border-destructive py-1.5 text-destructive hover:bg-destructive/10"
             onClick={() => { onRate(0); setRevealed(false); }}
             data-testid="flashcard-rate-0"
           >
-            {t.quiz.again}
+            <span className="text-sm">{t.quiz.again}</span>
+            <span className="text-[10px] opacity-60">{preview.again}</span>
           </Button>
           <Button
             variant="outline"
-            className="flex-1"
+            className="flex-1 flex-col gap-0 py-1.5"
             onClick={() => { onRate(3); setRevealed(false); }}
             data-testid="flashcard-rate-3"
           >
-            {t.quiz.hard}
+            <span className="text-sm">{t.quiz.hard}</span>
+            <span className="text-[10px] opacity-60">{preview.hard}</span>
           </Button>
           <Button
             variant="outline"
-            className="flex-1"
+            className="flex-1 flex-col gap-0 py-1.5"
             onClick={() => { onRate(4); setRevealed(false); }}
             data-testid="flashcard-rate-4"
           >
-            {t.quiz.good}
+            <span className="text-sm">{t.quiz.good}</span>
+            <span className="text-[10px] opacity-60">{preview.good}</span>
           </Button>
-          {showMaster && (
-            <Button
-              variant="outline"
-              className="flex-1 border-primary text-primary hover:bg-primary/10"
-              onClick={() => { onMaster(); setRevealed(false); }}
-              data-testid="flashcard-rate-master"
-            >
-              {t.wordDetail.markMastered}
-            </Button>
-          )}
+          <Button
+            variant="outline"
+            className="flex-1 flex-col gap-0 border-primary py-1.5 text-primary hover:bg-primary/10"
+            onClick={() => { onRate(5); setRevealed(false); }}
+            data-testid="flashcard-rate-5"
+          >
+            <span className="text-sm">{t.quiz.easy}</span>
+            <span className="text-[10px] opacity-60">{preview.easy}</span>
+          </Button>
         </div>
+        {showMaster && (
+          <Button
+            variant="outline"
+            className="mt-2 w-full"
+            onClick={() => { onMaster(); setRevealed(false); }}
+            data-testid="flashcard-rate-master"
+          >
+            {t.wordDetail.markMastered}
+          </Button>
+        )}
       </div>
     </div>
   );

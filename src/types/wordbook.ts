@@ -27,6 +27,7 @@ export interface UpdateWordbookInput {
 export interface WordbookWithCount extends Wordbook {
   wordCount: number;
   importCount: number;
+  masteredCount: number;
 }
 
 export interface SharedWordbookListItem extends WordbookWithCount {

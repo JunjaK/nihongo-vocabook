@@ -9,7 +9,7 @@ import { Header } from '@/components/layout/header';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { ChevronRight, ArrowRightLeft, ExternalLink } from 'lucide-react';
+import { ChevronRight, ArrowRightLeft, ExternalLink, Trophy, SlidersHorizontal } from 'lucide-react';
 import { useAuthStore } from '@/stores/auth-store';
 import { useRepository } from '@/lib/repository/provider';
 import { createClient } from '@/lib/supabase/client';
@@ -251,6 +251,35 @@ export default function SettingsPage() {
               </Button>
             ))}
           </div>
+        </section>
+
+        <Separator />
+
+        {/* Quiz & Achievements */}
+        <section className="space-y-3">
+          <h2 className="text-sm font-semibold text-foreground">{t.nav.quiz}</h2>
+          <Link
+            href="/settings/quiz"
+            className="flex items-center justify-between rounded-lg border p-3 active:bg-accent/50"
+            data-testid="settings-quiz-link"
+          >
+            <div className="flex items-center gap-3">
+              <SlidersHorizontal className="size-4 text-muted-foreground" />
+              <span className="text-sm">{t.settings.quizSettings}</span>
+            </div>
+            <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
+          </Link>
+          <Link
+            href="/settings/achievements"
+            className="flex items-center justify-between rounded-lg border p-3 active:bg-accent/50"
+            data-testid="settings-achievements-link"
+          >
+            <div className="flex items-center gap-3">
+              <Trophy className="size-4 text-muted-foreground" />
+              <span className="text-sm">{t.settings.achievements}</span>
+            </div>
+            <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
+          </Link>
         </section>
 
         <Separator />

@@ -1,5 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { sm2, createInitialProgress } from '@/lib/spaced-repetition';
+import { reviewCard, createInitialProgress, isNewCard } from '@/lib/spaced-repetition';
+import { getLocalDateString } from '@/lib/quiz/date-utils';
 import type {
   Word,
   CreateWordInput,
@@ -16,6 +17,8 @@ import type {
   WordbookWithCount,
   SharedWordbookListItem,
 } from '@/types/wordbook';
+import type { QuizSettings, DailyStats, Achievement } from '@/types/quiz';
+import { DEFAULT_QUIZ_SETTINGS } from '@/types/quiz';
 import type {
   DataRepository,
   WordRepository,
@@ -48,6 +51,13 @@ interface DbStudyProgress {
   ease_factor: number;
   review_count: number;
   last_reviewed_at: string | null;
+  stability: number;
+  difficulty: number;
+  elapsed_days: number;
+  scheduled_days: number;
+  learning_steps: number;
+  lapses: number;
+  card_state: number;
 }
 
 interface DbWordbook {
@@ -98,6 +108,13 @@ function dbProgressToProgress(row: DbStudyProgress): StudyProgress {
     lastReviewedAt: row.last_reviewed_at
       ? new Date(row.last_reviewed_at)
       : null,
+    stability: row.stability ?? 0,
+    difficulty: row.difficulty ?? 0,
+    elapsedDays: row.elapsed_days ?? 0,
+    scheduledDays: row.scheduled_days ?? 0,
+    learningSteps: row.learning_steps ?? 0,
+    lapses: row.lapses ?? 0,
+    cardState: row.card_state ?? 0,
   };
 }
 
@@ -267,7 +284,6 @@ class SupabaseStudyRepository implements StudyRepository {
   async getDueCount(): Promise<number> {
     const now = new Date().toISOString();
 
-    // Count words with progress where next_review <= now (excluding mastered)
     const { count: dueWithProgress, error: e1 } = await this.supabase
       .from('study_progress')
       .select('*, words!inner(*)', { count: 'exact', head: true })
@@ -275,7 +291,6 @@ class SupabaseStudyRepository implements StudyRepository {
       .eq('words.mastered', false);
     if (e1) throw e1;
 
-    // Count non-mastered words with no study_progress row
     const { count: noProgress, error: e2 } = await this.supabase
       .from('words')
       .select('*, study_progress(*)', { count: 'exact', head: true })
@@ -331,8 +346,10 @@ class SupabaseStudyRepository implements StudyRepository {
     const { data: userData } = await this.supabase.auth.getUser();
     const userId = userData.user!.id;
 
+    const wasNew = isNewCard(existing);
+
     if (existing) {
-      const updated = sm2(quality, existing);
+      const updated = reviewCard(quality, existing);
       const { error } = await this.supabase
         .from('study_progress')
         .update({
@@ -341,12 +358,19 @@ class SupabaseStudyRepository implements StudyRepository {
           ease_factor: updated.easeFactor,
           review_count: updated.reviewCount,
           last_reviewed_at: updated.lastReviewedAt?.toISOString() ?? null,
+          stability: updated.stability,
+          difficulty: updated.difficulty,
+          elapsed_days: updated.elapsedDays,
+          scheduled_days: updated.scheduledDays,
+          learning_steps: updated.learningSteps,
+          lapses: updated.lapses,
+          card_state: updated.cardState,
         })
         .eq('id', existing.id);
       if (error) throw error;
     } else {
       const initial = createInitialProgress(wordId);
-      const updated = sm2(quality, initial);
+      const updated = reviewCard(quality, initial);
       const { error } = await this.supabase.from('study_progress').insert({
         user_id: userId,
         word_id: wordId,
@@ -355,18 +379,175 @@ class SupabaseStudyRepository implements StudyRepository {
         ease_factor: updated.easeFactor,
         review_count: updated.reviewCount,
         last_reviewed_at: updated.lastReviewedAt?.toISOString() ?? null,
+        stability: updated.stability,
+        difficulty: updated.difficulty,
+        elapsed_days: updated.elapsedDays,
+        scheduled_days: updated.scheduledDays,
+        learning_steps: updated.learningSteps,
+        lapses: updated.lapses,
+        card_state: updated.cardState,
       });
       if (error) throw error;
     }
 
-    // Upgrade priority to high when rated "Hard"
-    if (quality === 3) {
+    // Track daily stats
+    const today = getLocalDateString();
+    await this.incrementDailyStats(today, wasNew, quality === 0);
+
+    // Upgrade priority to high when rated "Again"
+    if (quality === 0) {
       await this.supabase
         .from('words')
         .update({ priority: 1 })
         .eq('id', wordId)
         .gt('priority', 1);
     }
+  }
+
+  async getQuizSettings(): Promise<QuizSettings> {
+    const { data, error } = await this.supabase
+      .from('quiz_settings')
+      .select('*')
+      .single();
+    if (error) {
+      if (error.code === 'PGRST116') return { ...DEFAULT_QUIZ_SETTINGS };
+      throw error;
+    }
+    return {
+      newPerDay: data.new_per_day,
+      maxReviewsPerDay: data.max_reviews_per_day,
+      jlptFilter: data.jlpt_filter,
+      priorityFilter: data.priority_filter,
+      newCardOrder: data.new_card_order,
+    };
+  }
+
+  async updateQuizSettings(settings: Partial<QuizSettings>): Promise<void> {
+    const { data: userData } = await this.supabase.auth.getUser();
+    const userId = userData.user!.id;
+
+    const updateData: Record<string, unknown> = { updated_at: new Date().toISOString() };
+    if (settings.newPerDay !== undefined) updateData.new_per_day = settings.newPerDay;
+    if (settings.maxReviewsPerDay !== undefined) updateData.max_reviews_per_day = settings.maxReviewsPerDay;
+    if (settings.jlptFilter !== undefined) updateData.jlpt_filter = settings.jlptFilter;
+    if (settings.priorityFilter !== undefined) updateData.priority_filter = settings.priorityFilter;
+    if (settings.newCardOrder !== undefined) updateData.new_card_order = settings.newCardOrder;
+
+    const { error } = await this.supabase
+      .from('quiz_settings')
+      .upsert({ user_id: userId, ...updateData }, { onConflict: 'user_id' });
+    if (error) throw error;
+  }
+
+  async getDailyStats(date: string): Promise<DailyStats | null> {
+    const { data, error } = await this.supabase
+      .from('daily_stats')
+      .select('*')
+      .eq('stat_date', date)
+      .single();
+    if (error) {
+      if (error.code === 'PGRST116') return null;
+      throw error;
+    }
+    return {
+      id: data.id,
+      date: data.stat_date,
+      newCount: data.new_count,
+      reviewCount: data.review_count,
+      againCount: data.again_count,
+    };
+  }
+
+  async incrementDailyStats(date: string, isNew: boolean, isAgain: boolean): Promise<void> {
+    const { data: userData } = await this.supabase.auth.getUser();
+    const userId = userData.user!.id;
+
+    const existing = await this.getDailyStats(date);
+    if (existing) {
+      const { error } = await this.supabase
+        .from('daily_stats')
+        .update({
+          new_count: existing.newCount + (isNew ? 1 : 0),
+          review_count: existing.reviewCount + 1,
+          again_count: existing.againCount + (isAgain ? 1 : 0),
+        })
+        .eq('id', existing.id);
+      if (error) throw error;
+    } else {
+      const { error } = await this.supabase
+        .from('daily_stats')
+        .insert({
+          user_id: userId,
+          stat_date: date,
+          new_count: isNew ? 1 : 0,
+          review_count: 1,
+          again_count: isAgain ? 1 : 0,
+        });
+      if (error) throw error;
+    }
+  }
+
+  async getStreakDays(): Promise<number> {
+    const { data, error } = await this.supabase
+      .from('daily_stats')
+      .select('stat_date')
+      .order('stat_date', { ascending: false })
+      .limit(100);
+    if (error) throw error;
+    if (!data || data.length === 0) return 0;
+
+    let streak = 0;
+    let checkDate = getLocalDateString();
+
+    // If today has no stats, check if yesterday does (streak not broken yet today)
+    if (data[0].stat_date !== checkDate) {
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      checkDate = getLocalDateString(yesterday);
+      if (data[0].stat_date !== checkDate) return 0;
+    }
+
+    const dateSet = new Set(data.map((d: { stat_date: string }) => d.stat_date));
+    const current = new Date(checkDate + 'T00:00:00');
+    while (dateSet.has(getLocalDateString(current))) {
+      streak++;
+      current.setDate(current.getDate() - 1);
+    }
+
+    return streak;
+  }
+
+  async getAchievements(): Promise<Achievement[]> {
+    const { data, error } = await this.supabase
+      .from('achievements')
+      .select('*')
+      .order('unlocked_at', { ascending: false });
+    if (error) throw error;
+    return (data ?? []).map((a: { id: string; type: string; unlocked_at: string }) => ({
+      id: a.id,
+      type: a.type as Achievement['type'],
+      unlockedAt: new Date(a.unlocked_at),
+    }));
+  }
+
+  async unlockAchievement(type: string): Promise<Achievement | null> {
+    const { data: userData } = await this.supabase.auth.getUser();
+    const userId = userData.user!.id;
+
+    const { data, error } = await this.supabase
+      .from('achievements')
+      .insert({ user_id: userId, type })
+      .select()
+      .single();
+    if (error) {
+      if (error.code === '23505') return null; // already unlocked
+      throw error;
+    }
+    return {
+      id: data.id,
+      type: data.type as Achievement['type'],
+      unlockedAt: new Date(data.unlocked_at),
+    };
   }
 }
 
@@ -384,16 +565,33 @@ class SupabaseWordbookRepository implements WordbookRepository {
       .order('created_at', { ascending: false });
     if (error) throw error;
 
-    return (data ?? []).map((row) => {
+    const results: WordbookWithCount[] = [];
+    for (const row of data ?? []) {
       const wb = row as unknown as DbWordbook & {
         wordbook_items: [{ count: number }];
       };
-      return {
+      const wordCount = wb.wordbook_items[0]?.count ?? 0;
+
+      // Count mastered words in this wordbook
+      let masteredCount = 0;
+      if (wordCount > 0) {
+        const { count, error: mcErr } = await this.supabase
+          .from('wordbook_items')
+          .select('word_id, words!inner(mastered)', { count: 'exact', head: true })
+          .eq('wordbook_id', wb.id)
+          .eq('words.mastered', true);
+        if (!mcErr) masteredCount = count ?? 0;
+      }
+
+      results.push({
         ...dbWordbookToWordbook(wb),
-        wordCount: wb.wordbook_items[0]?.count ?? 0,
+        wordCount,
         importCount: wb.import_count ?? 0,
-      };
-    });
+        masteredCount,
+      });
+    }
+
+    return results;
   }
 
   async getById(id: string): Promise<Wordbook | null> {
@@ -482,7 +680,7 @@ class SupabaseWordbookRepository implements WordbookRepository {
       .from('wordbook_items')
       .insert({ wordbook_id: wordbookId, word_id: wordId });
     if (error) {
-      if (error.code === '23505') return; // unique constraint — already exists
+      if (error.code === '23505') return;
       throw error;
     }
   }
@@ -527,6 +725,7 @@ class SupabaseWordbookRepository implements WordbookRepository {
         ...dbWordbookToWordbook(wb),
         wordCount: wb.wordbook_items[0]?.count ?? 0,
         importCount: wb.import_count ?? 0,
+        masteredCount: 0,
       };
     });
   }
@@ -563,6 +762,7 @@ class SupabaseWordbookRepository implements WordbookRepository {
         ...dbWordbookToWordbook(wb),
         wordCount: wb.wordbook_items[0]?.count ?? 0,
         importCount: wb.import_count ?? 0,
+        masteredCount: 0,
         ownerEmail: (emailData as string) ?? '',
         isSubscribed,
       });
@@ -580,7 +780,7 @@ class SupabaseWordbookRepository implements WordbookRepository {
         subscriber_id: userData.user!.id,
       });
     if (error) {
-      if (error.code === '23505') return; // already subscribed
+      if (error.code === '23505') return;
       throw error;
     }
 
@@ -614,20 +814,16 @@ class SupabaseWordbookRepository implements WordbookRepository {
     const { data: userData } = await this.supabase.auth.getUser();
     const userId = userData.user!.id;
 
-    // Fetch the source wordbook
     const source = await this.getById(wordbookId);
     if (!source) throw new Error('Wordbook not found');
 
-    // Fetch the source words
     const sourceWords = await this.getWords(wordbookId);
 
-    // Create the new wordbook
     const newWb = await this.create({
       name: source.name,
       description: source.description,
     });
 
-    // Get existing user words to dedup by (term, reading)
     const { data: existingWords } = await this.supabase
       .from('words')
       .select('id, term, reading')
@@ -639,7 +835,6 @@ class SupabaseWordbookRepository implements WordbookRepository {
       ),
     );
 
-    // Copy words and link to new wordbook
     for (const word of sourceWords) {
       const key = `${word.term}|${word.reading}`;
       let wordId = existingMap.get(key);

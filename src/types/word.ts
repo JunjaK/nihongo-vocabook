@@ -41,6 +41,14 @@ export interface StudyProgress {
   easeFactor: number;
   reviewCount: number;
   lastReviewedAt: Date | null;
+  // FSRS fields
+  stability: number;
+  difficulty: number;
+  elapsedDays: number;
+  scheduledDays: number;
+  learningSteps: number;
+  lapses: number;
+  cardState: number; // 0=New, 1=Learning, 2=Review, 3=Relearning
 }
 
 export interface WordWithProgress extends Word {

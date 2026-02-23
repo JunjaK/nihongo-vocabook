@@ -31,6 +31,7 @@ export default function WordbookDetailPage({
   const { t, locale } = useTranslation();
   const [wordbook, setWordbook] = useState<Wordbook | null>(null);
   const [words, setWords] = useState<Word[]>([]);
+  const [masteredCount, setMasteredCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
   const [showReading, setShowReading] = useState(false);
@@ -54,6 +55,7 @@ export default function WordbookDetailPage({
       ]);
       setWordbook(wb);
       setWords(wds);
+      setMasteredCount(wds.filter((w) => w.mastered).length);
     } finally {
       const remaining = 300 - (Date.now() - loadStart.current);
       if (remaining > 0) await new Promise((r) => setTimeout(r, remaining));
@@ -237,6 +239,20 @@ export default function WordbookDetailPage({
         </div>
       ) : (
         <div className="min-h-0 flex-1 overflow-y-auto p-4">
+          {words.length > 0 && (
+            <div className="animate-fade-in mb-4">
+              <div className="h-1.5 overflow-hidden rounded-full bg-muted">
+                <div
+                  className="h-full rounded-full bg-primary transition-all"
+                  style={{ width: `${words.length > 0 ? Math.round((masteredCount / words.length) * 100) : 0}%` }}
+                />
+              </div>
+              <div className="mt-1 text-xs text-muted-foreground">
+                {t.wordbooks.progressLabel(masteredCount, words.length)}
+              </div>
+            </div>
+          )}
+
           {wordbook.description && (
             <div className="animate-fade-in mb-4 text-sm text-muted-foreground">{wordbook.description}</div>
           )}
