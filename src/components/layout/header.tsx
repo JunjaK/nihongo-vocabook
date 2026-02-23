@@ -6,17 +6,18 @@ import { Button } from '@/components/ui/button';
 
 interface HeaderProps {
   title: string;
+  desc?: string;
   actions?: ReactNode;
   showBack?: boolean;
   onBack?: () => void;
 }
 
-export function Header({ title, actions, showBack, onBack }: HeaderProps) {
+export function Header({ title, desc, actions, showBack, onBack }: HeaderProps) {
   const router = useRouter();
 
   return (
     <header className="sticky top-0 z-10 flex h-14 items-center justify-between border-b bg-background px-4">
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-2">
         {(showBack || onBack) && (
           <Button
             variant="ghost"
@@ -29,6 +30,9 @@ export function Header({ title, actions, showBack, onBack }: HeaderProps) {
           </Button>
         )}
         <h1 className="text-lg font-semibold">{title}</h1>
+        {desc && (
+          <span className="self-end pb-0.5 text-xs text-muted-foreground">{desc}</span>
+        )}
       </div>
       {actions && <div className="flex items-center gap-2">{actions}</div>}
     </header>

@@ -10,10 +10,14 @@ import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { Skeleton } from '@/components/ui/skeleton';
 import { WordForm } from '@/components/word/word-form';
 import { AddToWordbookDialog } from '@/components/wordbook/add-to-wordbook-dialog';
 import { useRepository } from '@/lib/repository/provider';
+import { useAuthStore } from '@/stores/auth-store';
 import { useTranslation } from '@/lib/i18n';
+import { invalidateListCache } from '@/lib/list-cache';
+import { bottomBar, bottomSep } from '@/lib/styles';
 import type { Word, StudyProgress } from '@/types/word';
 
 export default function WordDetailPage({
@@ -24,6 +28,7 @@ export default function WordDetailPage({
   const { id } = use(params);
   const router = useRouter();
   const repo = useRepository();
+  const authLoading = useAuthStore((s) => s.loading);
   const { t, locale } = useTranslation();
   const [word, setWord] = useState<Word | null>(null);
   const [progress, setProgress] = useState<StudyProgress | null>(null);
@@ -33,6 +38,7 @@ export default function WordDetailPage({
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   useEffect(() => {
+    if (authLoading) return;
     Promise.all([
       repo.words.getById(id),
       repo.study.getProgress(id),
@@ -41,11 +47,13 @@ export default function WordDetailPage({
       setProgress(p);
       setLoading(false);
     });
-  }, [repo, id]);
+  }, [repo, id, authLoading]);
 
   const handleUpdate = async (data: Parameters<typeof repo.words.update>[1]) => {
     try {
       await repo.words.update(id, data);
+      invalidateListCache('words');
+      invalidateListCache('mastered');
       toast.success(t.words.wordUpdated);
       setEditing(false);
       const updated = await repo.words.getById(id);
@@ -62,6 +70,8 @@ export default function WordDetailPage({
   const handleDelete = async () => {
     setShowDeleteConfirm(false);
     await repo.words.delete(id);
+    invalidateListCache('words');
+    invalidateListCache('mastered');
     toast.success(t.words.wordDeleted);
     router.push('/words');
   };
@@ -69,6 +79,8 @@ export default function WordDetailPage({
   const handleToggleMastered = async () => {
     if (!word) return;
     const updated = await repo.words.setMastered(id, !word.mastered);
+    invalidateListCache('words');
+    invalidateListCache('mastered');
     setWord(updated);
   };
 
@@ -90,7 +102,66 @@ export default function WordDetailPage({
     return (
       <>
         <Header title={t.wordDetail.title} showBack />
-        <div className="py-8 text-center text-muted-foreground">{t.common.loading}</div>
+        <div className="min-h-0 flex-1 overflow-y-auto p-4">
+          <div className="animate-page space-y-5">
+            {/* Term + Reading skeleton */}
+            <div>
+              <Skeleton className="h-8 w-1/3" />
+              <Skeleton className="mt-2 h-5 w-1/4" />
+            </div>
+            <Separator />
+            {/* Meaning skeleton */}
+            <div>
+              <Skeleton className="h-3 w-16" />
+              <Skeleton className="mt-2 h-7 w-2/3" />
+            </div>
+            {/* Difficulty + Priority skeleton */}
+            <div className="flex gap-6">
+              <div className="shrink-0">
+                <Skeleton className="h-3 w-16" />
+                <Skeleton className="mt-2 h-4 w-20" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <Skeleton className="h-3 w-12" />
+                <div className="mt-2 flex gap-1.5">
+                  <Skeleton className="h-6 w-14 rounded-full" />
+                  <Skeleton className="h-6 w-14 rounded-full" />
+                  <Skeleton className="h-6 w-14 rounded-full" />
+                </div>
+              </div>
+            </div>
+            {/* Tags skeleton */}
+            <div>
+              <Skeleton className="h-3 w-10" />
+              <div className="mt-2 flex gap-1">
+                <Skeleton className="h-5 w-12 rounded-full" />
+                <Skeleton className="h-5 w-16 rounded-full" />
+              </div>
+            </div>
+            <Separator />
+            {/* Study progress + Created date skeleton */}
+            <div className="flex gap-6">
+              <div className="flex-1">
+                <Skeleton className="h-3 w-24" />
+                <div className="mt-2 space-y-1">
+                  <Skeleton className="h-4 w-28" />
+                  <Skeleton className="h-4 w-32" />
+                </div>
+              </div>
+              <div className="shrink-0 text-right">
+                <Skeleton className="ml-auto h-3 w-20" />
+                <Skeleton className="ml-auto mt-2 h-4 w-24" />
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className={bottomBar}>
+          <div className={bottomSep} />
+          <div className="flex gap-2">
+            <Button variant="outline" className="flex-1" disabled>{t.wordDetail.markMastered}</Button>
+            <Button className="flex-1" disabled>{t.wordDetail.addToWordbook}</Button>
+          </div>
+        </div>
       </>
     );
   }
@@ -163,7 +234,7 @@ export default function WordDetailPage({
       />
 
       <div className="min-h-0 flex-1 overflow-y-auto p-4">
-        <div className="animate-page space-y-6">
+        <div className="animate-page space-y-5">
           {/* Term + Reading */}
           <div>
             <div className="flex items-center gap-2">
@@ -189,17 +260,43 @@ export default function WordDetailPage({
             </div>
           </div>
 
-          {/* JLPT Level */}
-          {word.jlptLevel && (
-            <div>
+          {/* Difficulty + Priority — compact row */}
+          <div className="flex gap-6">
+            <div className="shrink-0">
               <div className="text-xs font-medium uppercase text-muted-foreground">
-                {t.wordDetail.jlptLevel}
+                {t.wordDetail.difficulty}
               </div>
-              <div className="mt-1">
-                <Badge variant="secondary">N{word.jlptLevel}</Badge>
+              <div className="mt-1 text-sm font-medium">
+                {word.jlptLevel ? `JLPT N${word.jlptLevel}` : t.wordDetail.unclassified}
               </div>
             </div>
-          )}
+            <div className="min-w-0 flex-1">
+              <div className="text-xs font-medium uppercase text-muted-foreground">
+                {t.priority.title}
+              </div>
+              <div className="mt-1 flex gap-1.5">
+                {[
+                  { value: 1, label: t.priority.high, color: 'bg-red-500' },
+                  { value: 2, label: t.priority.medium, color: 'bg-primary' },
+                  { value: 3, label: t.priority.low, color: 'bg-gray-300' },
+                ].map((p) => (
+                  <button
+                    key={p.value}
+                    onClick={() => handleSetPriority(p.value)}
+                    className={cn(
+                      'flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs transition-colors',
+                      word.priority === p.value
+                        ? 'border-primary bg-primary/10 font-medium text-primary'
+                        : 'border-border text-muted-foreground hover:bg-accent',
+                    )}
+                  >
+                    <span className={cn('size-1.5 rounded-full', p.color)} />
+                    {p.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
 
           {/* Tags */}
           {word.tags.length > 0 && (
@@ -209,7 +306,7 @@ export default function WordDetailPage({
               </div>
               <div className="mt-1 flex flex-wrap gap-1">
                 {word.tags.map((tag) => (
-                  <Badge key={tag} variant="outline">
+                  <Badge key={tag} variant="outline" className="text-xs">
                     #{tag}
                   </Badge>
                 ))}
@@ -229,94 +326,63 @@ export default function WordDetailPage({
             </div>
           )}
 
-          {/* Priority */}
-          <div>
-            <div className="text-xs font-medium uppercase text-muted-foreground">
-              {t.priority.title}
-            </div>
-            <div className="mt-2 flex gap-2">
-              {[
-                { value: 1, label: t.priority.high, color: 'bg-red-500' },
-                { value: 2, label: t.priority.medium, color: 'bg-primary' },
-                { value: 3, label: t.priority.low, color: 'bg-gray-300' },
-              ].map((p) => (
-                <button
-                  key={p.value}
-                  onClick={() => handleSetPriority(p.value)}
-                  className={cn(
-                    'flex items-center gap-1.5 rounded-full border px-3 py-1 text-sm transition-colors',
-                    word.priority === p.value
-                      ? 'border-primary bg-primary/10 font-medium text-primary'
-                      : 'border-border text-muted-foreground hover:bg-accent',
-                  )}
-                >
-                  <span className={cn('size-2 rounded-full', p.color)} />
-                  {p.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
           <Separator />
 
-          {/* Study Progress */}
-          <div>
-            <div className="text-xs font-medium uppercase text-muted-foreground">
-              {t.wordDetail.studyProgress}
-            </div>
-            <div className="mt-2 flex gap-6 text-sm">
-              <div>
-                <span className="text-muted-foreground">{t.wordDetail.reviews}: </span>
-                <span className="font-medium">{progress?.reviewCount ?? 0}</span>
+          {/* Study Progress + Created At — compact row */}
+          <div className="flex gap-6 text-sm">
+            <div className="flex-1">
+              <div className="text-xs font-medium uppercase text-muted-foreground">
+                {t.wordDetail.studyProgress}
               </div>
-              <div>
-                <span className="text-muted-foreground">{t.wordDetail.nextReview}: </span>
-                <span className="font-medium">
-                  {progress ? formatNextReview(progress.nextReview) : t.wordDetail.notStarted}
-                </span>
+              <div className="mt-1 space-y-0.5">
+                <div>
+                  <span className="text-muted-foreground">{t.wordDetail.reviews}: </span>
+                  <span className="font-medium">{progress?.reviewCount ?? 0}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">{t.wordDetail.nextReview}: </span>
+                  <span className="font-medium">
+                    {progress ? formatNextReview(progress.nextReview) : t.wordDetail.notStarted}
+                  </span>
+                </div>
               </div>
             </div>
-          </div>
-
-          {/* Created At */}
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">{t.common.createdAt}</span>
-            <span>{word.createdAt.toLocaleDateString(locale === 'ko' ? 'ko-KR' : 'en-US')}</span>
+            <div className="shrink-0 text-right">
+              <div className="text-xs font-medium uppercase text-muted-foreground">
+                {t.common.createdAt}
+              </div>
+              <div className="mt-1 font-medium">
+                {word.createdAt.toLocaleDateString(locale === 'ko' ? 'ko-KR' : 'en-US')}
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Action Buttons — fixed outside scroll */}
-      <div className="shrink-0 bg-background px-4 pb-3">
-        <div className="mb-3 h-px bg-border" />
-        <div className="space-y-2">
-        <Button
-          className="w-full"
-          onClick={() => router.push(`/quiz?wordId=${word.id}`)}
-          data-testid="word-practice-button"
-        >
-          {t.wordDetail.practiceWord}
-        </Button>
-
-        <Button
-          variant={word.mastered ? 'outline' : 'secondary'}
-          className="w-full"
-          onClick={handleToggleMastered}
-          data-testid="word-mastered-button"
-        >
-          {word.mastered ? t.wordDetail.unmarkMastered : t.wordDetail.markMastered}
-        </Button>
-
+      <div className={bottomBar}>
+        <div className={bottomSep} />
+        <div className="flex gap-2">
         {!word.mastered && (
+            <Button
+              variant="outline"
+              className="flex-1"
+              onClick={() => setWordbookDialogOpen(true)}
+              data-testid="word-add-to-wordbook-button"
+            >
+              {t.wordDetail.addToWordbook}
+            </Button>
+          )}
+          
           <Button
-            variant="outline"
-            className="w-full"
-            onClick={() => setWordbookDialogOpen(true)}
-            data-testid="word-add-to-wordbook-button"
+            className="flex-1"
+            onClick={handleToggleMastered}
+            data-testid="word-mastered-button"
           >
-            {t.wordDetail.addToWordbook}
+            {word.mastered ? t.wordDetail.unmarkMastered : t.wordDetail.markMastered}
           </Button>
-        )}
+
+          
         </div>
       </div>
 

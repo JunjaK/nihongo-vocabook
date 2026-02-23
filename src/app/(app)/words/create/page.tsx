@@ -6,6 +6,7 @@ import { Header } from '@/components/layout/header';
 import { WordForm } from '@/components/word/word-form';
 import { useRepository } from '@/lib/repository/provider';
 import { useTranslation } from '@/lib/i18n';
+import { invalidateListCache } from '@/lib/list-cache';
 
 export default function CreateWordPage() {
   const router = useRouter();
@@ -15,6 +16,7 @@ export default function CreateWordPage() {
   const handleSubmit = async (data: Parameters<typeof repo.words.create>[0]) => {
     try {
       await repo.words.create(data);
+      invalidateListCache('words');
       toast.success(t.words.wordAdded);
       router.push('/words');
     } catch (err) {

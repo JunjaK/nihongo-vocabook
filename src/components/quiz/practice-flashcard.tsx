@@ -6,17 +6,17 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Crown } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n';
 import { bottomSep } from '@/lib/styles';
-import type { WordWithProgress } from '@/types/word';
+import type { Word } from '@/types/word';
 
-interface FlashcardProps {
-  word?: WordWithProgress;
-  onRate: (quality: number) => void;
-  onMaster: () => void;
+interface PracticeFlashcardProps {
+  word?: Word;
+  onSetPriority: (wordId: string, priority: number) => void;
+  onMaster: (wordId: string) => void;
   progress: { current: number; total: number };
   isLoading?: boolean;
 }
 
-export function Flashcard({ word, onRate, onMaster, progress, isLoading = false }: FlashcardProps) {
+export function PracticeFlashcard({ word, onSetPriority, onMaster, progress, isLoading = false }: PracticeFlashcardProps) {
   const { t } = useTranslation();
   const [revealed, setRevealed] = useState(false);
 
@@ -34,10 +34,9 @@ export function Flashcard({ word, onRate, onMaster, progress, isLoading = false 
         <div className="shrink-0 px-4 pb-3 pt-3">
           <div className={bottomSep} />
           <div className="flex gap-2">
-            <Button variant="outline" disabled className="h-8 flex-1 rounded-lg border-rose-500/30 bg-rose-500/5 text-sm text-rose-300">{t.quiz.again}</Button>
-            <Button variant="outline" disabled className="h-8 flex-1 rounded-lg border-primary/40 bg-primary/15 text-sm text-primary">{t.quiz.hard}</Button>
-            <Button variant="outline" disabled className="h-8 flex-1 rounded-lg border-amber-500/30 bg-amber-500/5 text-sm text-amber-300">{t.quiz.good}</Button>
-            <Button variant="outline" disabled className="h-8 flex-1 rounded-lg border-emerald-500/30 bg-emerald-500/5 text-sm text-emerald-300">{t.quiz.easy}</Button>
+            <Button variant="outline" disabled className="h-8 flex-1 rounded-lg border-rose-500/30 bg-rose-500/5 text-rose-300">{t.quiz.priorityHigh}</Button>
+            <Button variant="outline" disabled className="h-8 flex-1 rounded-lg border-amber-500/30 bg-amber-500/5 text-amber-300">{t.quiz.priorityNormal}</Button>
+            <Button variant="outline" disabled className="h-8 flex-1 rounded-lg border-emerald-500/30 bg-emerald-500/5 text-emerald-300">{t.quiz.priorityLow}</Button>
           </div>
           <Button variant="outline" size="sm" disabled className="h-8 mt-2 w-full gap-1.5 text-xs">
             <Crown className="size-3.5" />
@@ -66,7 +65,7 @@ export function Flashcard({ word, onRate, onMaster, progress, isLoading = false 
       <div
         className="animate-card-enter relative min-h-0 flex-1 cursor-pointer px-4"
         onClick={() => setRevealed((v) => !v)}
-        data-testid="flashcard"
+        data-testid="practice-flashcard"
       >
         {/* Term — absolutely centered, never moves */}
         <div className="absolute inset-x-4 top-1/2 -translate-y-1/2 text-center">
@@ -108,49 +107,41 @@ export function Flashcard({ word, onRate, onMaster, progress, isLoading = false 
         </div>
       </div>
 
-      {/* Rating buttons + master */}
+      {/* Priority buttons + master */}
       <div className="shrink-0 px-4 pb-3 pt-3">
         <div className={bottomSep} />
-        <div className="flex gap-2" data-testid="flashcard-rating">
+        <div className="flex gap-2" data-testid="practice-priority">
           <Button
-            variant="outline"
-            className="h-8 flex-1 rounded-lg border-rose-500/30 bg-rose-500/5 text-sm text-rose-300 hover:border-rose-400/40 hover:bg-rose-500/10"
-            onClick={() => { onRate(0); setRevealed(false); }}
-            data-testid="flashcard-rate-0"
+            variant={word.priority === 1 ? 'default' : 'outline'}
+            className={`h-8 flex-1 rounded-lg ${word.priority === 1 ? 'border-rose-400/60 bg-rose-500/20 text-rose-200 hover:border-rose-300/70 hover:bg-rose-500/25' : 'border-rose-500/30 bg-rose-500/5 text-rose-300 hover:border-rose-400/40 hover:bg-rose-500/10'}`}
+            onClick={() => onSetPriority(word.id, 1)}
+            data-testid="practice-priority-high"
           >
-            {t.quiz.again}
+            {t.quiz.priorityHigh}
           </Button>
           <Button
-            variant="outline"
-            className="h-8 flex-1 rounded-lg border-primary/40 bg-primary/15 text-sm text-primary hover:border-primary hover:bg-primary/25"
-            onClick={() => { onRate(3); setRevealed(false); }}
-            data-testid="flashcard-rate-3"
+            variant={word.priority === 2 ? 'default' : 'outline'}
+            className={`h-8 flex-1 rounded-lg ${word.priority === 2 ? 'border-amber-400/60 bg-amber-500/20 text-amber-200 hover:border-amber-300/70 hover:bg-amber-500/25' : 'border-amber-500/30 bg-amber-500/5 text-amber-300 hover:border-amber-400/40 hover:bg-amber-500/10'}`}
+            onClick={() => onSetPriority(word.id, 2)}
+            data-testid="practice-priority-normal"
           >
-            {t.quiz.hard}
+            {t.quiz.priorityNormal}
           </Button>
           <Button
-            variant="outline"
-            className="h-8 flex-1 rounded-lg border-amber-500/30 bg-amber-500/5 text-sm text-amber-300 hover:border-amber-400/40 hover:bg-amber-500/10"
-            onClick={() => { onRate(4); setRevealed(false); }}
-            data-testid="flashcard-rate-4"
+            variant={word.priority === 3 ? 'default' : 'outline'}
+            className={`h-8 flex-1 rounded-lg ${word.priority === 3 ? 'border-emerald-400/60 bg-emerald-500/20 text-emerald-200 hover:border-emerald-300/70 hover:bg-emerald-500/25' : 'border-emerald-500/30 bg-emerald-500/5 text-emerald-300 hover:border-emerald-400/40 hover:bg-emerald-500/10'}`}
+            onClick={() => onSetPriority(word.id, 3)}
+            data-testid="practice-priority-low"
           >
-            {t.quiz.good}
-          </Button>
-          <Button
-            variant="outline"
-            className="h-8 flex-1 rounded-lg border-emerald-500/30 bg-emerald-500/5 text-sm text-emerald-300 hover:border-emerald-400/40 hover:bg-emerald-500/10"
-            onClick={() => { onRate(5); setRevealed(false); }}
-            data-testid="flashcard-rate-5"
-          >
-            {t.quiz.easy}
+            {t.quiz.priorityLow}
           </Button>
         </div>
         <Button
           variant="outline"
           size="sm"
-          className="h-8 mt-2 w-full gap-1.5 text-xs"
-          onClick={() => { onMaster(); setRevealed(false); }}
-          data-testid="flashcard-rate-master"
+          className="mt-2 w-full gap-1.5 text-xs"
+          onClick={() => onMaster(word.id)}
+          data-testid="practice-master"
         >
           <Crown className="size-3.5" />
           {t.wordDetail.markMastered}

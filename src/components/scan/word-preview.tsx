@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useTranslation } from '@/lib/i18n';
+import { bottomBar, bottomSep } from '@/lib/styles';
 import type { ExtractedWord } from '@/lib/ocr/llm-vision';
 
 interface WordPreviewProps {
@@ -145,8 +146,8 @@ export function WordPreview({
         </div>
       </div>
 
-      <div className="shrink-0 bg-background px-4 pb-3">
-        <div className="mb-3 h-px bg-border" />
+      <div className={bottomBar}>
+        <div className={bottomSep} />
         <Button
           className="w-full"
           disabled={selectedCount === 0}

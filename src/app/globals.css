@@ -176,6 +176,26 @@
   animation-delay: calc(var(--stagger, 0) * 40ms);
 }
 
+/* Card enter transition (quiz flashcard) */
+@keyframes card-enter {
+  from { opacity: 0; transform: translateX(24px) scale(0.97); }
+  to { opacity: 1; transform: translateX(0) scale(1); }
+}
+
+.animate-card-enter {
+  animation: card-enter 0.3s ease-out both;
+}
+
+/* Reveal-up for quiz answer display */
+@keyframes reveal-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-reveal-up {
+  animation: reveal-up 0.35s ease-out both;
+}
+
 /* Page content entrance */
 .animate-page {
   animation: slide-up 0.25s ease-out both;

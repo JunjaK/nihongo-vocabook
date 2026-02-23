@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { ChevronRight } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n';
 import type { WordbookWithCount } from '@/types/wordbook';
 
@@ -12,74 +13,31 @@ interface WordbookCardProps {
 export function WordbookCard({ wordbook, subscribed }: WordbookCardProps) {
   const { t } = useTranslation();
 
-  const progressPercent = wordbook.wordCount > 0
-    ? Math.round((wordbook.masteredCount / wordbook.wordCount) * 100)
-    : 0;
-
   return (
     <Link
       href={`/wordbooks/${wordbook.id}`}
-      className="block rounded-lg border p-4 transition-colors hover:bg-accent"
+      className="flex items-center gap-3 rounded-lg border px-4 py-3 transition-colors hover:bg-accent"
       data-testid="wordbook-card"
     >
-      <div className="flex items-center justify-between">
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
-            <span className="text-lg font-semibold">{wordbook.name}</span>
-            {wordbook.isShared && !subscribed && (
-              <ShareIcon className="h-4 w-4 text-muted-foreground" />
-            )}
-            {subscribed && (
-              <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
-                {t.wordbooks.subscribedWordbooks}
-              </span>
-            )}
-          </div>
-          {wordbook.description && (
-            <div className="mt-0.5 truncate text-sm text-muted-foreground">
-              {wordbook.description}
-            </div>
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-2">
+          <span className="truncate font-semibold">{wordbook.name}</span>
+          {subscribed && (
+            <span className="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+              {t.wordbooks.subscribedWordbooks}
+            </span>
           )}
         </div>
-        <div className="ml-4 shrink-0 text-sm text-muted-foreground">
-          {t.wordbooks.wordCount(wordbook.wordCount)}
-        </div>
+        {wordbook.description && (
+          <div className="mt-0.5 truncate text-sm text-muted-foreground">
+            {wordbook.description}
+          </div>
+        )}
       </div>
-
-      {wordbook.wordCount > 0 && (
-        <div className="mt-3">
-          <div className="h-1.5 overflow-hidden rounded-full bg-muted">
-            <div
-              className="h-full rounded-full bg-primary transition-all"
-              style={{ width: `${progressPercent}%` }}
-            />
-          </div>
-          <div className="mt-1 text-xs text-muted-foreground">
-            {t.wordbooks.progressLabel(wordbook.masteredCount, wordbook.wordCount)}
-          </div>
-        </div>
-      )}
+      <div className="flex shrink-0 items-center gap-1 text-sm text-muted-foreground">
+        <span>{t.wordbooks.wordCount(wordbook.wordCount)}</span>
+        <ChevronRight className="size-4" />
+      </div>
     </Link>
-  );
-}
-
-function ShareIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={2}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-    >
-      <circle cx="18" cy="5" r="3" />
-      <circle cx="6" cy="12" r="3" />
-      <circle cx="18" cy="19" r="3" />
-      <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
-      <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
-    </svg>
   );
 }

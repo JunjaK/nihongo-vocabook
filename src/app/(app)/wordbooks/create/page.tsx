@@ -7,6 +7,7 @@ import { WordbookForm } from '@/components/wordbook/wordbook-form';
 import { useRepository } from '@/lib/repository/provider';
 import { useAuthStore } from '@/stores/auth-store';
 import { useTranslation } from '@/lib/i18n';
+import { invalidateListCache } from '@/lib/list-cache';
 
 export default function CreateWordbookPage() {
   const router = useRouter();
@@ -17,6 +18,7 @@ export default function CreateWordbookPage() {
   const handleSubmit = async (values: { name: string; description: string | null; isShared?: boolean; tags?: string[] }) => {
     try {
       await repo.wordbooks.create(values);
+      invalidateListCache('wordbooks');
       toast.success(t.wordbooks.wordbookCreated);
       router.push('/wordbooks');
     } catch (err) {

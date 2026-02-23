@@ -8,10 +8,16 @@ export interface LocalWord {
   notes: string | null;
   tags: string[];
   jlptLevel: number | null;
-  mastered: boolean;
-  masteredAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
+}
+
+export interface LocalUserWordState {
+  id?: number;
+  wordId: number;
+  mastered: boolean;
+  masteredAt: Date | null;
+  priority: number;
 }
 
 export interface LocalStudyProgress {
@@ -71,6 +77,7 @@ export interface LocalAchievement {
 
 class VocaBookDB extends Dexie {
   words!: Table<LocalWord, number>;
+  userWordState!: Table<LocalUserWordState, number>;
   studyProgress!: Table<LocalStudyProgress, number>;
   wordbooks!: Table<LocalWordbook, number>;
   wordbookItems!: Table<LocalWordbookItem, number>;
@@ -129,6 +136,37 @@ class VocaBookDB extends Dexie {
               progress.cardState = progress.reviewCount > 0 ? 2 : 0;
             }
           });
+      });
+
+    this.version(4)
+      .stores({
+        words: '++id, term, reading, meaning, *tags, jlptLevel, createdAt',
+        userWordState: '++id, wordId, mastered',
+        studyProgress: '++id, wordId, nextReview',
+        wordbooks: '++id, name, createdAt',
+        wordbookItems: '++id, wordbookId, wordId, [wordbookId+wordId]',
+        quizSettings: '++id',
+        dailyStats: '++id, date',
+        achievements: '++id, type',
+      })
+      .upgrade(async (tx) => {
+        // Migrate mastered/masteredAt from words → userWordState, set default priority=2
+        const words = tx.table('words');
+        const uws = tx.table('userWordState');
+        await words.toCollection().each(async (word) => {
+          await uws.add({
+            wordId: word.id,
+            mastered: word.mastered ?? false,
+            masteredAt: word.masteredAt ?? null,
+            priority: (word as Record<string, unknown>).priority as number ?? 2,
+          });
+        });
+        // Remove mastered/masteredAt from words rows
+        await words.toCollection().modify((word) => {
+          delete word.mastered;
+          delete word.masteredAt;
+          delete (word as Record<string, unknown>).priority;
+        });
       });
   }
 }

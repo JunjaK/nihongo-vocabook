@@ -54,6 +54,9 @@ const migrations = [
   '006_dedup_priority_tags.sql',
   '007_dictionary_entries.sql',
   '008_shared_wordbook_items_rls.sql',
+  '009_quiz_upgrade.sql',
+  '010_user_word_state.sql',
+  '011_non_mastered_view.sql',
 ];
 
 async function run() {

@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { useRepository } from '@/lib/repository/provider';
 import { useTranslation } from '@/lib/i18n';
+import { invalidateListCache } from '@/lib/list-cache';
 import type { SharedWordbookListItem } from '@/types/wordbook';
 
 interface ImportWordbookDialogProps {
@@ -25,6 +26,7 @@ export function ImportWordbookDialog({ wordbook, open, onClose, onDone }: Import
     setLoading(true);
     try {
       await repo.wordbooks.subscribe(wordbook.id);
+      invalidateListCache('wordbooks');
       toast.success(t.wordbooks.subscribed);
       onDone();
     } catch {
@@ -38,6 +40,8 @@ export function ImportWordbookDialog({ wordbook, open, onClose, onDone }: Import
     setLoading(true);
     try {
       await repo.wordbooks.copySharedWordbook(wordbook.id);
+      invalidateListCache('wordbooks');
+      invalidateListCache('words');
       toast.success(t.wordbooks.copied);
       onDone();
     } catch {

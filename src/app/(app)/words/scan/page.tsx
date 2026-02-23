@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { useRepository } from '@/lib/repository/provider';
 import { useTranslation } from '@/lib/i18n';
+import { invalidateListCache } from '@/lib/list-cache';
 import { useAuthStore } from '@/stores/auth-store';
 import { getLocalOcrMode, fetchOcrSettings } from '@/lib/ocr/settings';
 import { extractWordsFromImage } from '@/lib/ocr/extract';
@@ -187,6 +188,7 @@ export default function ScanPage() {
       }
     }
     setAddedCount(count);
+    if (count > 0) invalidateListCache('words');
     setStep('done');
     toast.success(t.scan.wordsAdded(count));
   };

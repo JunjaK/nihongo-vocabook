@@ -1,26 +1,50 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { useTranslation } from '@/lib/i18n';
 import { useRepository } from '@/lib/repository/provider';
+import { useAuthStore } from '@/stores/auth-store';
+import { getDueCountRefreshEventName } from '@/lib/quiz/due-count-sync';
 
 export function BottomNav() {
   const pathname = usePathname();
   const { t } = useTranslation();
   const repo = useRepository();
+  const authLoading = useAuthStore((s) => s.loading);
   const [dueCount, setDueCount] = useState(0);
+  const fetchCount = useCallback(() => {
+    repo.study.getDueCount().then(setDueCount).catch(() => {});
+  }, [repo]);
 
   useEffect(() => {
-    const fetchCount = () => {
-      repo.study.getDueCount().then(setDueCount).catch(() => {});
-    };
+    if (authLoading) return;
     fetchCount();
     const interval = setInterval(fetchCount, 60_000);
-    return () => clearInterval(interval);
-  }, [repo]);
+    const onRefresh = () => fetchCount();
+    const onFocus = () => fetchCount();
+    const onVisibility = () => {
+      if (document.visibilityState === 'visible') fetchCount();
+    };
+
+    window.addEventListener(getDueCountRefreshEventName(), onRefresh);
+    window.addEventListener('focus', onFocus);
+    document.addEventListener('visibilitychange', onVisibility);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener(getDueCountRefreshEventName(), onRefresh);
+      window.removeEventListener('focus', onFocus);
+      document.removeEventListener('visibilitychange', onVisibility);
+    };
+  }, [authLoading, fetchCount]);
+
+  useEffect(() => {
+    if (authLoading) return;
+    fetchCount();
+  }, [pathname, authLoading, fetchCount]);
 
   const navItems = [
     { href: '/words', label: t.nav.words, icon: BookIcon },

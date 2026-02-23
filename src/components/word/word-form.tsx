@@ -5,6 +5,7 @@ import { X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
+import { bottomBar, bottomSep } from '@/lib/styles';
 import {
   Combobox,
   ComboboxContent,
@@ -231,8 +232,8 @@ export function WordForm({
       </div>
 
       {/* Submit button — fixed outside scroll */}
-      <div className="shrink-0 bg-background px-4 pb-3">
-        <div className="mb-3 h-px bg-border" />
+      <div className={bottomBar}>
+        <div className={bottomSep} />
         <Button
           type="submit"
           className="w-full"

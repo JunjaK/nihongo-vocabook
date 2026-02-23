@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { BookOpen, Brain, Share2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTranslation } from '@/lib/i18n';
+import { bottomSep } from '@/lib/styles';
 
 export default function LandingPage() {
   const { t } = useTranslation();
@@ -55,7 +56,7 @@ export default function LandingPage() {
 
       {/* CTA */}
       <div className="animate-slide-up relative shrink-0 px-4 pb-3" style={{ animationDelay: '200ms' }}>
-        <div className="mb-3 h-px bg-border" />
+        <div className={bottomSep} />
         <div className="flex flex-col gap-2">
           <Link href="/words">
             <Button className="w-full" data-testid="landing-start-button">

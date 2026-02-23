@@ -3,6 +3,7 @@
 import { Button } from '@/components/ui/button';
 import { Flame, BookOpenCheck, Target, Sparkles } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n';
+import { bottomBar, bottomSep } from '@/lib/styles';
 
 interface SessionReportProps {
   totalReviewed: number;
@@ -94,8 +95,8 @@ export function SessionReport({
         </div>
       </div>
 
-      <div className="shrink-0 bg-background px-4 pb-3">
-        <div className="mb-3 h-px bg-border" />
+      <div className={bottomBar}>
+        <div className={bottomSep} />
         <div className="flex gap-2">
           <Button
             variant="outline"

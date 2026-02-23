@@ -13,6 +13,7 @@ import { useTranslation } from '@/lib/i18n';
 import { useAuthStore } from '@/stores/auth-store';
 import { createClient } from '@/lib/supabase/client';
 import { fetchProfile, saveProfile } from '@/lib/profile/fetch';
+import { bottomBar, bottomSep, settingsScroll, settingsSection, settingsHeading } from '@/lib/styles';
 import {
   Combobox,
   ComboboxInput,
@@ -171,8 +172,12 @@ export default function ProfilePage() {
     return (
       <>
         <Header title={t.profile.title} showBack />
-        <div className="p-4 text-center text-sm text-muted-foreground">
+        <div className="flex flex-1 flex-col items-center justify-center text-sm text-muted-foreground">
           {t.common.loading}
+        </div>
+        <div className={bottomBar}>
+          <div className={bottomSep} />
+          <Button className="w-full" disabled>{t.common.save}</Button>
         </div>
       </>
     );
@@ -351,8 +356,8 @@ export default function ProfilePage() {
         </div>
 
         {/* Bottom save button */}
-        <div className="shrink-0 bg-background px-4 pb-3">
-          <div className="mb-3 h-px bg-border" />
+        <div className={bottomBar}>
+          <div className={bottomSep} />
           <Button
             className="w-full"
             onClick={handleSave}

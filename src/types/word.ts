@@ -68,7 +68,14 @@ export interface WordbookExportItem {
   addedAt: string;
 }
 
-export interface ExportData {
+export interface UserWordStateExport {
+  wordId: string;
+  mastered: boolean;
+  masteredAt: string | null;
+  priority: number;
+}
+
+export interface ExportDataV2 {
   version: 2;
   exportedAt: string;
   words: Word[];
@@ -77,7 +84,17 @@ export interface ExportData {
   wordbookItems: WordbookExportItem[];
 }
 
-export type ImportData = ExportData | ExportDataV1;
+export interface ExportData {
+  version: 3;
+  exportedAt: string;
+  words: Word[];
+  studyProgress: StudyProgress[];
+  wordbooks: { id: string; name: string; description: string | null; createdAt: string; updatedAt: string }[];
+  wordbookItems: WordbookExportItem[];
+  userWordState: UserWordStateExport[];
+}
+
+export type ImportData = ExportData | ExportDataV2 | ExportDataV1;
 
 export interface DictionaryEntry {
   slug: string;

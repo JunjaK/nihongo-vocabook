@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { searchDictionary } from '@/lib/dictionary/jisho';
 import { useTranslation } from '@/lib/i18n';
+import { bottomBar, bottomSep } from '@/lib/styles';
 import type { DictionaryEntry } from '@/types/word';
 
 interface WordConfirmProps {
@@ -186,8 +187,8 @@ export function WordConfirm({
       </div>
 
       {/* Bottom buttons */}
-      <div className="shrink-0 bg-background px-4 pb-3">
-        <div className="mb-3 h-px bg-border" />
+      <div className={bottomBar}>
+        <div className={bottomSep} />
         <div className="flex gap-2">
           <Button
             variant="outline"

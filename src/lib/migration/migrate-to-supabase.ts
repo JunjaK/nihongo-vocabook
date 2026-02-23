@@ -34,8 +34,6 @@ export async function migrateToSupabase(supabase: SupabaseClient): Promise<{
         notes: word.notes,
         tags: word.tags,
         jlpt_level: word.jlptLevel,
-        mastered: word.mastered ?? false,
-        mastered_at: word.masteredAt?.toISOString() ?? null,
       })
       .select('id')
       .single();
@@ -47,6 +45,18 @@ export async function migrateToSupabase(supabase: SupabaseClient): Promise<{
 
     wordCount++;
     wordIdMap.set(word.id!, inserted.id);
+
+    // Migrate mastered/priority from userWordState table
+    const state = await db.userWordState.where('wordId').equals(word.id!).first();
+    await supabase
+      .from('user_word_state')
+      .insert({
+        user_id: userId,
+        word_id: inserted.id,
+        mastered: state?.mastered ?? false,
+        mastered_at: state?.masteredAt?.toISOString() ?? null,
+        priority: state?.priority ?? 2,
+      });
 
     const progress = localProgress.find((p) => p.wordId === word.id!);
     if (progress) {
@@ -98,6 +108,7 @@ export async function migrateToSupabase(supabase: SupabaseClient): Promise<{
   }
 
   // Clear local data after successful migration
+  await db.userWordState.clear();
   await db.wordbookItems.clear();
   await db.wordbooks.clear();
   await db.studyProgress.clear();

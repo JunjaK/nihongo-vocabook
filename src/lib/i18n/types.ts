@@ -66,6 +66,7 @@ export interface Translations {
   words: {
     title: string;
     addWord: string;
+    startQuiz: string;
     editWord: string;
     searchPlaceholder: string;
     noWords: string;
@@ -79,6 +80,8 @@ export interface Translations {
     wordDeleted: string;
     deleteConfirm: string;
     duplicateWord: string;
+    totalWordCount: (n: number) => string;
+    loadMore: string;
   };
   wordForm: {
     dictionarySearch: string;
@@ -95,7 +98,8 @@ export interface Translations {
   wordDetail: {
     title: string;
     meaning: string;
-    jlptLevel: string;
+    difficulty: string;
+    unclassified: string;
     tags: string;
     notes: string;
     studyProgress: string;
@@ -123,6 +127,14 @@ export interface Translations {
     easy: string;
     reviewed: (n: number) => string;
     reviewCount: (n: number) => string;
+    completedCount: (n: number) => string;
+    nextInterval: {
+      lessThanMinute: string;
+      minutes: (n: number) => string;
+      hours: (n: number) => string;
+      days: (n: number) => string;
+      months: (n: number) => string;
+    };
     wordbookQuiz: string;
     sessionComplete: string;
     cardsReviewed: string;
@@ -138,6 +150,14 @@ export interface Translations {
     continueStudying: string;
     backToHome: string;
     dailyLimitReached: string;
+    priorityHigh: string;
+    priorityNormal: string;
+    priorityLow: string;
+    practiceComplete: string;
+    practicedCount: (n: number) => string;
+    masteredInSession: (n: number) => string;
+    practiceAgain: string;
+    backToWordbook: string;
   };
   settings: {
     title: string;
@@ -195,11 +215,18 @@ export interface Translations {
     allPriorities: string;
     achievements: string;
     viewAchievements: string;
+    ratingGuide: string;
+    ratingGuideDesc: string;
+    ratingAgainDesc: string;
+    ratingHardDesc: string;
+    ratingGoodDesc: string;
+    ratingEasyDesc: string;
   };
   wordbooks: {
     title: string;
     createWordbook: string;
     editWordbook: string;
+    wordbookInfo: string;
     name: string;
     namePlaceholder: string;
     description: string;
@@ -207,6 +234,7 @@ export interface Translations {
     noWordbooks: string;
     noWordbooksYet: string;
     noWordbooksYetHint: string;
+    noSubscribed: string;
     wordCount: (n: number) => string;
     startQuiz: string;
     removeWord: string;

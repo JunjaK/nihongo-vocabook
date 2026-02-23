@@ -1,6 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { reviewCard, createInitialProgress, isNewCard } from '@/lib/spaced-repetition';
 import { getLocalDateString } from '@/lib/quiz/date-utils';
+import { selectDueWords } from '@/lib/quiz/word-scoring';
 import type {
   Word,
   CreateWordInput,
@@ -9,6 +10,7 @@ import type {
   WordWithProgress,
   ExportData,
   ImportData,
+  UserWordStateExport,
 } from '@/types/word';
 import type {
   Wordbook,
@@ -35,11 +37,16 @@ interface DbWord {
   notes: string | null;
   tags: string[];
   jlpt_level: number | null;
-  priority: number;
-  mastered: boolean;
-  mastered_at: string | null;
   created_at: string;
   updated_at: string;
+}
+
+interface DbUserWordState {
+  user_id: string;
+  word_id: string;
+  mastered: boolean;
+  mastered_at: string | null;
+  priority: number;
 }
 
 interface DbStudyProgress {
@@ -80,7 +87,7 @@ interface DbWordbookItem {
   added_at: string;
 }
 
-function dbWordToWord(row: DbWord): Word {
+function dbWordToWord(row: DbWord, state?: DbUserWordState | null): Word {
   return {
     id: row.id,
     term: row.term,
@@ -89,9 +96,9 @@ function dbWordToWord(row: DbWord): Word {
     notes: row.notes,
     tags: row.tags,
     jlptLevel: row.jlpt_level,
-    priority: row.priority ?? 2,
-    mastered: row.mastered ?? false,
-    masteredAt: row.mastered_at ? new Date(row.mastered_at) : null,
+    priority: state?.priority ?? 2,
+    mastered: state?.mastered ?? false,
+    masteredAt: state?.mastered_at ? new Date(state.mastered_at) : null,
     createdAt: new Date(row.created_at),
     updatedAt: new Date(row.updated_at),
   };
@@ -118,6 +125,19 @@ function dbProgressToProgress(row: DbStudyProgress): StudyProgress {
   };
 }
 
+function isValidDate(value: Date): boolean {
+  return !Number.isNaN(value.getTime());
+}
+
+function toValidDate(value: Date | null, fallback: Date): Date {
+  if (!value) return fallback;
+  return isValidDate(value) ? value : fallback;
+}
+
+function toFiniteNumber(value: number, fallback = 0): number {
+  return Number.isFinite(value) ? value : fallback;
+}
+
 function dbWordbookToWordbook(row: DbWordbook): Wordbook {
   return {
     id: row.id,
@@ -132,76 +152,154 @@ function dbWordbookToWordbook(row: DbWordbook): Wordbook {
   };
 }
 
+/** Extract user_word_state from a nested select row */
+function extractState(row: Record<string, unknown>): DbUserWordState | null {
+  const arr = row.user_word_state as DbUserWordState[] | null;
+  if (Array.isArray(arr) && arr.length > 0) return arr[0];
+  return null;
+}
+
 class SupabaseWordRepository implements WordRepository {
   constructor(private supabase: SupabaseClient) {}
 
   async getAll(): Promise<Word[]> {
     const { data, error } = await this.supabase
       .from('words')
-      .select('*')
-      .order('priority', { ascending: true })
+      .select('*, user_word_state(*)')
       .order('created_at', { ascending: false });
     if (error) throw error;
-    return (data as DbWord[]).map(dbWordToWord);
+    const words = (data ?? []).map((row: Record<string, unknown>) => {
+      const state = extractState(row);
+      return dbWordToWord(row as unknown as DbWord, state);
+    });
+    // Sort by priority asc, then created_at desc (already fetched desc)
+    words.sort((a, b) => a.priority - b.priority);
+    return words;
   }
 
   async getNonMastered(): Promise<Word[]> {
     const { data, error } = await this.supabase
       .from('words')
-      .select('*')
-      .eq('mastered', false)
-      .order('priority', { ascending: true })
+      .select('*, user_word_state(*)')
       .order('created_at', { ascending: false });
     if (error) throw error;
-    return (data as DbWord[]).map(dbWordToWord);
+    const words = (data ?? [])
+      .map((row: Record<string, unknown>) => {
+        const state = extractState(row);
+        return dbWordToWord(row as unknown as DbWord, state);
+      })
+      .filter((w) => !w.mastered);
+    words.sort((a, b) => a.priority - b.priority);
+    return words;
+  }
+
+  async getNonMasteredPaginated(opts: {
+    sort: import('./types').WordSortOrder;
+    limit: number;
+    offset: number;
+  }): Promise<import('./types').PaginatedWords> {
+    let query = this.supabase
+      .from('v_words_active')
+      .select('*', { count: 'exact' });
+
+    // Server-side sorting
+    if (opts.sort === 'newest') {
+      query = query.order('created_at', { ascending: false });
+    } else if (opts.sort === 'alphabetical') {
+      query = query.order('term', { ascending: true });
+    } else {
+      // priority (default)
+      query = query
+        .order('priority', { ascending: true })
+        .order('created_at', { ascending: false });
+    }
+
+    query = query.range(opts.offset, opts.offset + opts.limit - 1);
+
+    const { data, count, error } = await query;
+    if (error) throw error;
+
+    const words = (data ?? []).map((row: Record<string, unknown>) => {
+      // v_words_active already has flattened priority/mastered columns
+      const dbRow = row as unknown as DbWord & { priority: number; mastered: boolean; mastered_at: string | null };
+      return {
+        id: dbRow.id,
+        term: dbRow.term,
+        reading: dbRow.reading,
+        meaning: dbRow.meaning,
+        notes: dbRow.notes,
+        tags: dbRow.tags,
+        jlptLevel: dbRow.jlpt_level,
+        priority: dbRow.priority ?? 2,
+        mastered: dbRow.mastered ?? false,
+        masteredAt: dbRow.mastered_at ? new Date(dbRow.mastered_at) : null,
+        createdAt: new Date(dbRow.created_at),
+        updatedAt: new Date(dbRow.updated_at),
+      } satisfies Word;
+    });
+
+    return { words, totalCount: count ?? 0 };
   }
 
   async getMastered(): Promise<Word[]> {
+    // Query from user_word_state where mastered=true, joining words
+    // This returns both owned + subscribed mastered words
     const { data, error } = await this.supabase
-      .from('words')
-      .select('*')
+      .from('user_word_state')
+      .select('*, words(*)')
       .eq('mastered', true)
       .order('mastered_at', { ascending: false });
     if (error) throw error;
-    return (data as DbWord[]).map(dbWordToWord);
+    return (data ?? []).map((row: Record<string, unknown>) => {
+      const state = row as unknown as DbUserWordState;
+      const word = row.words as DbWord;
+      return dbWordToWord(word, state);
+    });
   }
 
   async getById(id: string): Promise<Word | null> {
     const { data, error } = await this.supabase
       .from('words')
-      .select('*')
+      .select('*, user_word_state(*)')
       .eq('id', id)
       .single();
     if (error) {
       if (error.code === 'PGRST116') return null;
       throw error;
     }
-    return dbWordToWord(data as DbWord);
+    const row = data as Record<string, unknown>;
+    const state = extractState(row);
+    return dbWordToWord(row as unknown as DbWord, state);
   }
 
   async search(query: string): Promise<Word[]> {
     const { data, error } = await this.supabase
       .from('words')
-      .select('*')
+      .select('*, user_word_state(*)')
       .or(`term.ilike.%${query}%,reading.ilike.%${query}%,meaning.ilike.%${query}%`)
       .order('created_at', { ascending: false });
     if (error) throw error;
-    return (data as DbWord[]).map(dbWordToWord);
+    return (data ?? []).map((row: Record<string, unknown>) => {
+      const state = extractState(row);
+      return dbWordToWord(row as unknown as DbWord, state);
+    });
   }
 
   async create(input: CreateWordInput): Promise<Word> {
     const { data: userData } = await this.supabase.auth.getUser();
+    const userId = userData.user!.id;
+
+    // Insert word (without priority — that lives in user_word_state)
     const { data, error } = await this.supabase
       .from('words')
       .insert({
-        user_id: userData.user!.id,
+        user_id: userId,
         term: input.term,
         reading: input.reading,
         meaning: input.meaning,
         notes: input.notes ?? null,
         tags: input.tags ?? [],
         jlpt_level: input.jlptLevel ?? null,
-        priority: input.priority ?? 2,
       })
       .select()
       .single();
@@ -209,10 +307,62 @@ class SupabaseWordRepository implements WordRepository {
       if (error.code === '23505') throw new Error('DUPLICATE_WORD');
       throw error;
     }
-    return dbWordToWord(data as DbWord);
+    const word = data as DbWord;
+
+    // Insert user_word_state row for owned word
+    const priority = input.priority ?? 2;
+    const { error: stateError } = await this.supabase
+      .from('user_word_state')
+      .insert({
+        user_id: userId,
+        word_id: word.id,
+        mastered: false,
+        mastered_at: null,
+        priority,
+      });
+    if (stateError) throw stateError;
+
+    return dbWordToWord(word, { user_id: userId, word_id: word.id, mastered: false, mastered_at: null, priority });
   }
 
   async update(id: string, input: UpdateWordInput): Promise<Word> {
+    const updatesWordContent =
+      input.term !== undefined ||
+      input.reading !== undefined ||
+      input.meaning !== undefined ||
+      input.notes !== undefined ||
+      input.tags !== undefined ||
+      input.jlptLevel !== undefined;
+
+    // Priority-only updates must not PATCH words table.
+    // Shared/subscribed words are not updatable in words, but user_word_state is.
+    if (!updatesWordContent && input.priority !== undefined) {
+      const { data: userData } = await this.supabase.auth.getUser();
+      const userId = userData.user!.id;
+
+      const { error: stateError } = await this.supabase
+        .from('user_word_state')
+        .upsert(
+          {
+            user_id: userId,
+            word_id: id,
+            priority: input.priority,
+          },
+          { onConflict: 'user_id,word_id' },
+        );
+      if (stateError) throw stateError;
+
+      const { data: refreshed, error: refreshError } = await this.supabase
+        .from('words')
+        .select('*, user_word_state(*)')
+        .eq('id', id)
+        .single();
+      if (refreshError) throw refreshError;
+
+      const row = refreshed as Record<string, unknown>;
+      return dbWordToWord(row as unknown as DbWord, extractState(row));
+    }
+
     const updateData: Record<string, unknown> = { updated_at: new Date().toISOString() };
     if (input.term !== undefined) updateData.term = input.term;
     if (input.reading !== undefined) updateData.reading = input.reading;
@@ -220,19 +370,56 @@ class SupabaseWordRepository implements WordRepository {
     if (input.notes !== undefined) updateData.notes = input.notes;
     if (input.tags !== undefined) updateData.tags = input.tags;
     if (input.jlptLevel !== undefined) updateData.jlpt_level = input.jlptLevel;
-    if (input.priority !== undefined) updateData.priority = input.priority;
 
     const { data, error } = await this.supabase
       .from('words')
       .update(updateData)
       .eq('id', id)
-      .select()
+      .select('*, user_word_state(*)')
       .single();
     if (error) {
       if (error.code === '23505') throw new Error('DUPLICATE_WORD');
       throw error;
     }
-    return dbWordToWord(data as DbWord);
+
+    // Update priority in user_word_state if provided
+    if (input.priority !== undefined) {
+      const { data: userData } = await this.supabase.auth.getUser();
+      await this.supabase
+        .from('user_word_state')
+        .upsert(
+          {
+            user_id: userData.user!.id,
+            word_id: id,
+            priority: input.priority,
+          },
+          { onConflict: 'user_id,word_id' },
+        );
+    }
+
+    const row = data as Record<string, unknown>;
+    let state = extractState(row);
+    if (input.priority !== undefined && state) {
+      state = { ...state, priority: input.priority };
+    }
+    return dbWordToWord(row as unknown as DbWord, state);
+  }
+
+  async setPriority(id: string, priority: number): Promise<void> {
+    const { data: userData } = await this.supabase.auth.getUser();
+    const userId = userData.user!.id;
+
+    const { error } = await this.supabase
+      .from('user_word_state')
+      .upsert(
+        {
+          user_id: userId,
+          word_id: id,
+          priority,
+        },
+        { onConflict: 'user_id,word_id' },
+      );
+    if (error) throw error;
   }
 
   async delete(id: string): Promise<void> {
@@ -241,18 +428,20 @@ class SupabaseWordRepository implements WordRepository {
   }
 
   async setMastered(id: string, mastered: boolean): Promise<Word> {
+    const { data: userData } = await this.supabase.auth.getUser();
+    const userId = userData.user!.id;
     const now = new Date().toISOString();
-    const { data, error } = await this.supabase
-      .from('words')
-      .update({
+
+    // Upsert into user_word_state (works for owned + subscribed)
+    const { error: stateError } = await this.supabase
+      .from('user_word_state')
+      .upsert({
+        user_id: userId,
+        word_id: id,
         mastered,
         mastered_at: mastered ? now : null,
-        updated_at: now,
-      })
-      .eq('id', id)
-      .select()
-      .single();
-    if (error) throw error;
+      }, { onConflict: 'user_id,word_id' });
+    if (stateError) throw stateError;
 
     if (mastered) {
       await this.supabase
@@ -261,12 +450,43 @@ class SupabaseWordRepository implements WordRepository {
         .eq('word_id', id);
     }
 
-    return dbWordToWord(data as DbWord);
+    // Re-fetch word with state
+    const { data, error } = await this.supabase
+      .from('words')
+      .select('*, user_word_state(*)')
+      .eq('id', id)
+      .single();
+    if (error) throw error;
+    const row = data as Record<string, unknown>;
+    return dbWordToWord(row as unknown as DbWord, extractState(row));
   }
 }
 
 class SupabaseStudyRepository implements StudyRepository {
+  private _cache = new Map<string, { data: unknown; expiry: number }>();
+  private _inflight = new Map<string, Promise<unknown>>();
+
   constructor(private supabase: SupabaseClient) {}
+
+  /** Dedup concurrent calls + short-lived cache */
+  private async cached<T>(key: string, ttlMs: number, fn: () => Promise<T>): Promise<T> {
+    const hit = this._cache.get(key);
+    if (hit && hit.expiry > Date.now()) return hit.data as T;
+
+    const pending = this._inflight.get(key);
+    if (pending) return pending as Promise<T>;
+
+    const promise = fn().then((data) => {
+      this._cache.set(key, { data, expiry: Date.now() + ttlMs });
+      this._inflight.delete(key);
+      return data;
+    }).catch((e) => {
+      this._inflight.delete(key);
+      throw e;
+    });
+    this._inflight.set(key, promise);
+    return promise;
+  }
 
   async getProgress(wordId: string): Promise<StudyProgress | null> {
     const { data, error } = await this.supabase
@@ -282,63 +502,108 @@ class SupabaseStudyRepository implements StudyRepository {
   }
 
   async getDueCount(): Promise<number> {
+    return this.cached('due_count', 5_000, () => this._getDueCountImpl());
+  }
+
+  private async _getDueCountImpl(): Promise<number> {
     const now = new Date().toISOString();
+    const settings = await this.getQuizSettings();
+    const todayStats = await this.getDailyStats(getLocalDateString());
 
-    const { count: dueWithProgress, error: e1 } = await this.supabase
+    // Review-due: have progress, past due, not mastered
+    const { data: dueData, error: e1 } = await this.supabase
       .from('study_progress')
-      .select('*, words!inner(*)', { count: 'exact', head: true })
-      .lte('next_review', now)
-      .eq('words.mastered', false);
+      .select('word_id, words!inner(id, user_word_state(mastered))')
+      .lte('next_review', now);
     if (e1) throw e1;
+    const reviewDue = (dueData ?? []).filter((row: Record<string, unknown>) => {
+      const word = row.words as Record<string, unknown>;
+      const states = word.user_word_state as Array<{ mastered: boolean }> | null;
+      return !states?.[0]?.mastered;
+    }).length;
 
-    const { count: noProgress, error: e2 } = await this.supabase
+    // New words: no progress, not mastered
+    const { data: newData, error: e2 } = await this.supabase
       .from('words')
-      .select('*, study_progress(*)', { count: 'exact', head: true })
-      .eq('mastered', false)
-      .is('study_progress', null);
+      .select('id, study_progress(id), user_word_state(mastered)');
     if (e2) throw e2;
+    const totalNew = (newData ?? []).filter((row: Record<string, unknown>) => {
+      const sp = row.study_progress as Array<{ id: string }> | null;
+      const states = row.user_word_state as Array<{ mastered: boolean }> | null;
+      return (!sp || sp.length === 0) && !states?.[0]?.mastered;
+    }).length;
 
-    return (dueWithProgress ?? 0) + (noProgress ?? 0);
+    const remainingNew = Math.max(0, settings.newPerDay - (todayStats?.newCount ?? 0));
+    const cappedNew = Math.min(totalNew, remainingNew);
+    const totalDue = reviewDue + cappedNew;
+    const remainingReviews = Math.max(0, settings.maxReviewsPerDay - (todayStats?.reviewCount ?? 0));
+
+    return Math.min(totalDue, remainingReviews);
   }
 
   async getDueWords(limit = 20): Promise<WordWithProgress[]> {
     const now = new Date().toISOString();
+    const settings = await this.getQuizSettings();
+    const todayStats = await this.getDailyStats(getLocalDateString());
 
+    // Fetch review-due words (have progress, past due)
     const { data: dueProgress, error: progressError } = await this.supabase
       .from('study_progress')
-      .select('*, words(*)')
-      .lte('next_review', now)
-      .limit(limit);
+      .select('*, words(*, user_word_state(*))')
+      .lte('next_review', now);
     if (progressError) throw progressError;
 
-    const result: WordWithProgress[] = (dueProgress ?? [])
+    const reviewWords: WordWithProgress[] = (dueProgress ?? [])
       .filter((row) => {
-        const word = (row as Record<string, unknown>).words as DbWord;
-        return !word.mastered;
+        const word = (row as Record<string, unknown>).words as Record<string, unknown>;
+        const state = extractState(word);
+        return !state?.mastered;
       })
-      .map((row) => ({
-        ...dbWordToWord((row as Record<string, unknown>).words as DbWord),
-        progress: dbProgressToProgress(row as unknown as DbStudyProgress),
-      }));
+      .map((row) => {
+        const wordRow = (row as Record<string, unknown>).words as Record<string, unknown>;
+        const state = extractState(wordRow);
+        return {
+          ...dbWordToWord(wordRow as unknown as DbWord, state),
+          progress: dbProgressToProgress(row as unknown as DbStudyProgress),
+        };
+      });
 
-    if (result.length < limit) {
-      const { data: allWords, error: wordsError } = await this.supabase
-        .from('words')
-        .select('*, study_progress(*)')
-        .eq('mastered', false)
-        .is('study_progress', null)
-        .limit(limit - result.length);
-      if (wordsError) throw wordsError;
+    // Fetch new words (no progress), cap at remainingNew
+    const remainingNew = Math.max(0, settings.newPerDay - (todayStats?.newCount ?? 0));
 
-      for (const row of allWords ?? []) {
-        result.push({
-          ...dbWordToWord(row as unknown as DbWord),
-          progress: null,
-        });
-      }
+    let newWordsQuery = this.supabase
+      .from('words')
+      .select('*, study_progress(id), user_word_state(*)')
+      .is('study_progress', null);
+
+    if (settings.jlptFilter !== null) {
+      newWordsQuery = newWordsQuery.eq('jlpt_level', settings.jlptFilter);
     }
 
-    return result;
+    const { data: newWordsData, error: wordsError } = await newWordsQuery.limit(remainingNew * 3);
+    if (wordsError) throw wordsError;
+
+    const newWords: WordWithProgress[] = (newWordsData ?? [])
+      .filter((row: Record<string, unknown>) => {
+        const state = extractState(row);
+        if (state?.mastered) return false;
+        if (settings.priorityFilter !== null && (state?.priority ?? 2) !== settings.priorityFilter) return false;
+        return true;
+      })
+      .slice(0, remainingNew)
+      .map((row: Record<string, unknown>) => {
+        const state = extractState(row);
+        return {
+          ...dbWordToWord(row as unknown as DbWord, state),
+          progress: null,
+        };
+      });
+
+    const candidates = [...reviewWords, ...newWords];
+    const remainingReviews = Math.max(0, settings.maxReviewsPerDay - (todayStats?.reviewCount ?? 0));
+    const effectiveLimit = Math.min(limit, remainingReviews);
+
+    return selectDueWords(candidates, effectiveLimit, settings.jlptFilter);
   }
 
   async recordReview(wordId: string, quality: number): Promise<void> {
@@ -347,9 +612,44 @@ class SupabaseStudyRepository implements StudyRepository {
     const userId = userData.user!.id;
 
     const wasNew = isNewCard(existing);
+    const now = new Date();
+
+    const baseProgress = existing
+      ? {
+          ...existing,
+          nextReview: toValidDate(existing.nextReview, now),
+          lastReviewedAt: existing.lastReviewedAt ? toValidDate(existing.lastReviewedAt, now) : null,
+          intervalDays: toFiniteNumber(existing.intervalDays, 0),
+          easeFactor: toFiniteNumber(existing.easeFactor, 2.5),
+          reviewCount: toFiniteNumber(existing.reviewCount, 0),
+          stability: toFiniteNumber(existing.stability, 0),
+          difficulty: toFiniteNumber(existing.difficulty, 0),
+          elapsedDays: toFiniteNumber(existing.elapsedDays, 0),
+          scheduledDays: toFiniteNumber(existing.scheduledDays, 0),
+          learningSteps: toFiniteNumber(existing.learningSteps, 0),
+          lapses: toFiniteNumber(existing.lapses, 0),
+          cardState: toFiniteNumber(existing.cardState, 0),
+        }
+      : createInitialProgress(wordId);
+
+    const reviewed = reviewCard(quality, baseProgress);
+    const updated = {
+      ...reviewed,
+      nextReview: toValidDate(reviewed.nextReview, now),
+      lastReviewedAt: reviewed.lastReviewedAt ? toValidDate(reviewed.lastReviewedAt, now) : now,
+      intervalDays: toFiniteNumber(reviewed.intervalDays, 0),
+      easeFactor: toFiniteNumber(reviewed.easeFactor, 2.5),
+      reviewCount: toFiniteNumber(reviewed.reviewCount, 0),
+      stability: toFiniteNumber(reviewed.stability, 0),
+      difficulty: toFiniteNumber(reviewed.difficulty, 0),
+      elapsedDays: toFiniteNumber(reviewed.elapsedDays, 0),
+      scheduledDays: toFiniteNumber(reviewed.scheduledDays, 0),
+      learningSteps: toFiniteNumber(reviewed.learningSteps, 0),
+      lapses: toFiniteNumber(reviewed.lapses, 0),
+      cardState: toFiniteNumber(reviewed.cardState, 0),
+    };
 
     if (existing) {
-      const updated = reviewCard(quality, existing);
       const { error } = await this.supabase
         .from('study_progress')
         .update({
@@ -369,8 +669,6 @@ class SupabaseStudyRepository implements StudyRepository {
         .eq('id', existing.id);
       if (error) throw error;
     } else {
-      const initial = createInitialProgress(wordId);
-      const updated = reviewCard(quality, initial);
       const { error } = await this.supabase.from('study_progress').insert({
         user_id: userId,
         word_id: wordId,
@@ -394,32 +692,36 @@ class SupabaseStudyRepository implements StudyRepository {
     const today = getLocalDateString();
     await this.incrementDailyStats(today, wasNew, quality === 0);
 
-    // Upgrade priority to high when rated "Again"
+    // Upgrade priority to high when rated "Again" — now in user_word_state
     if (quality === 0) {
       await this.supabase
-        .from('words')
+        .from('user_word_state')
         .update({ priority: 1 })
-        .eq('id', wordId)
+        .eq('user_id', userId)
+        .eq('word_id', wordId)
         .gt('priority', 1);
     }
+    this._cache.delete('due_count');
   }
 
   async getQuizSettings(): Promise<QuizSettings> {
-    const { data, error } = await this.supabase
-      .from('quiz_settings')
-      .select('*')
-      .single();
-    if (error) {
-      if (error.code === 'PGRST116') return { ...DEFAULT_QUIZ_SETTINGS };
-      throw error;
-    }
-    return {
-      newPerDay: data.new_per_day,
-      maxReviewsPerDay: data.max_reviews_per_day,
-      jlptFilter: data.jlpt_filter,
-      priorityFilter: data.priority_filter,
-      newCardOrder: data.new_card_order,
-    };
+    return this.cached('quiz_settings', 30_000, async () => {
+      const { data, error } = await this.supabase
+        .from('quiz_settings')
+        .select('*')
+        .single();
+      if (error) {
+        if (error.code === 'PGRST116') return { ...DEFAULT_QUIZ_SETTINGS };
+        throw error;
+      }
+      return {
+        newPerDay: data.new_per_day,
+        maxReviewsPerDay: data.max_reviews_per_day,
+        jlptFilter: data.jlpt_filter,
+        priorityFilter: data.priority_filter,
+        newCardOrder: data.new_card_order,
+      };
+    });
   }
 
   async updateQuizSettings(settings: Partial<QuizSettings>): Promise<void> {
@@ -437,25 +739,28 @@ class SupabaseStudyRepository implements StudyRepository {
       .from('quiz_settings')
       .upsert({ user_id: userId, ...updateData }, { onConflict: 'user_id' });
     if (error) throw error;
+    this._cache.delete('quiz_settings');
   }
 
   async getDailyStats(date: string): Promise<DailyStats | null> {
-    const { data, error } = await this.supabase
-      .from('daily_stats')
-      .select('*')
-      .eq('stat_date', date)
-      .single();
-    if (error) {
-      if (error.code === 'PGRST116') return null;
-      throw error;
-    }
-    return {
-      id: data.id,
-      date: data.stat_date,
-      newCount: data.new_count,
-      reviewCount: data.review_count,
-      againCount: data.again_count,
-    };
+    return this.cached(`daily_stats:${date}`, 10_000, async () => {
+      const { data, error } = await this.supabase
+        .from('daily_stats')
+        .select('*')
+        .eq('stat_date', date)
+        .single();
+      if (error) {
+        if (error.code === 'PGRST116') return null;
+        throw error;
+      }
+      return {
+        id: data.id,
+        date: data.stat_date,
+        newCount: data.new_count,
+        reviewCount: data.review_count,
+        againCount: data.again_count,
+      };
+    });
   }
 
   async incrementDailyStats(date: string, isNew: boolean, isAgain: boolean): Promise<void> {
@@ -485,6 +790,7 @@ class SupabaseStudyRepository implements StudyRepository {
         });
       if (error) throw error;
     }
+    this._cache.delete(`daily_stats:${date}`);
   }
 
   async getStreakDays(): Promise<number> {
@@ -572,15 +878,12 @@ class SupabaseWordbookRepository implements WordbookRepository {
       };
       const wordCount = wb.wordbook_items[0]?.count ?? 0;
 
-      // Count mastered words in this wordbook
+      // Count mastered words via RPC (works for both owned + subscribed)
       let masteredCount = 0;
       if (wordCount > 0) {
-        const { count, error: mcErr } = await this.supabase
-          .from('wordbook_items')
-          .select('word_id, words!inner(mastered)', { count: 'exact', head: true })
-          .eq('wordbook_id', wb.id)
-          .eq('words.mastered', true);
-        if (!mcErr) masteredCount = count ?? 0;
+        const { data: rpcData, error: rpcErr } = await this.supabase
+          .rpc('get_wordbook_mastered_count', { wb_id: wb.id });
+        if (!rpcErr) masteredCount = (rpcData as number) ?? 0;
       }
 
       results.push({
@@ -655,30 +958,137 @@ class SupabaseWordbookRepository implements WordbookRepository {
   }
 
   async getWords(wordbookId: string): Promise<Word[]> {
-    const { data, error } = await this.supabase
+    const PAGE_SIZE = 1000;
+    const allWords: Word[] = [];
+    let offset = 0;
+    while (true) {
+      const { data, error } = await this.supabase
+        .from('wordbook_items')
+        .select('word_id, words(*, user_word_state(*))')
+        .eq('wordbook_id', wordbookId)
+        .range(offset, offset + PAGE_SIZE - 1);
+      if (error) throw error;
+      const rows = (data ?? []).map((row) => {
+        const wordRow = (row as Record<string, unknown>).words as Record<string, unknown>;
+        const state = extractState(wordRow);
+        return dbWordToWord(wordRow as unknown as DbWord, state);
+      });
+      allWords.push(...rows);
+      if (rows.length < PAGE_SIZE) break;
+      offset += PAGE_SIZE;
+    }
+    return allWords;
+  }
+
+  async getWordsPaginated(
+    wordbookId: string,
+    opts: { sort: import('./types').WordSortOrder; limit: number; offset: number },
+  ): Promise<import('./types').PaginatedWords> {
+    let query = this.supabase
       .from('wordbook_items')
-      .select('word_id, words(*)')
+      .select('word_id, words(*, user_word_state(*))', { count: 'exact' })
       .eq('wordbook_id', wordbookId);
+
+    if (opts.sort === 'alphabetical') {
+      query = query.order('term', { ascending: true, foreignTable: 'words' });
+    } else {
+      query = query.order('created_at', { ascending: false, foreignTable: 'words' });
+    }
+
+    const { data, count, error } = await query.range(opts.offset, opts.offset + opts.limit - 1);
     if (error) throw error;
-    return (data ?? []).map((row) =>
-      dbWordToWord((row as Record<string, unknown>).words as DbWord),
-    );
+    const words = (data ?? []).map((row) => {
+      const wordRow = (row as Record<string, unknown>).words as Record<string, unknown>;
+      const state = extractState(wordRow);
+      return dbWordToWord(wordRow as unknown as DbWord, state);
+    });
+    return { words, totalCount: count ?? 0 };
   }
 
   async addWord(wordbookId: string, wordId: string): Promise<void> {
-    const { data: wordData, error: wordError } = await this.supabase
+    const { data: userData } = await this.supabase.auth.getUser();
+    const userId = userData.user!.id;
+
+    // Ensure destination wordbook is owned by current user.
+    const { data: targetWordbook, error: targetWordbookError } = await this.supabase
+      .from('wordbooks')
+      .select('id, user_id')
+      .eq('id', wordbookId)
+      .single();
+    if (targetWordbookError) throw targetWordbookError;
+    if ((targetWordbook as { user_id: string }).user_id !== userId) {
+      throw new Error('Cannot add words to non-owned wordbook');
+    }
+
+    // Resolve source word. For subscribed/shared words, create or reuse
+    // an owned copy so the added item remains stable after unsubscribe.
+    const { data: sourceWord, error: sourceWordError } = await this.supabase
       .from('words')
-      .select('mastered')
+      .select('id, user_id, term, reading, meaning, notes, tags, jlpt_level')
       .eq('id', wordId)
       .single();
-    if (wordError) throw wordError;
-    if ((wordData as { mastered: boolean }).mastered) {
+    if (sourceWordError) throw sourceWordError;
+
+    const source = sourceWord as DbWord;
+    let effectiveWordId = wordId;
+    if (source.user_id !== userId) {
+      const { data: existingOwned, error: existingOwnedError } = await this.supabase
+        .from('words')
+        .select('id')
+        .eq('user_id', userId)
+        .eq('term', source.term)
+        .eq('reading', source.reading)
+        .maybeSingle();
+      if (existingOwnedError) throw existingOwnedError;
+
+      if (existingOwned) {
+        effectiveWordId = (existingOwned as { id: string }).id;
+      } else {
+        const { data: createdOwned, error: createdOwnedError } = await this.supabase
+          .from('words')
+          .insert({
+            user_id: userId,
+            term: source.term,
+            reading: source.reading,
+            meaning: source.meaning,
+            notes: source.notes,
+            tags: source.tags,
+            jlpt_level: source.jlpt_level,
+          })
+          .select('id')
+          .single();
+        if (createdOwnedError) throw createdOwnedError;
+        effectiveWordId = (createdOwned as { id: string }).id;
+      }
+    }
+
+    // Ensure current user has user_word_state row for the effective word.
+    const { error: stateUpsertError } = await this.supabase
+      .from('user_word_state')
+      .upsert(
+        {
+          user_id: userId,
+          word_id: effectiveWordId,
+        },
+        { onConflict: 'user_id,word_id' },
+      );
+    if (stateUpsertError) throw stateUpsertError;
+
+    // Check mastered status scoped to current user only.
+    const { data: stateData, error: stateError } = await this.supabase
+      .from('user_word_state')
+      .select('mastered')
+      .eq('user_id', userId)
+      .eq('word_id', effectiveWordId)
+      .maybeSingle();
+    if (stateError) throw stateError;
+    if ((stateData as { mastered: boolean } | null)?.mastered) {
       throw new Error('Cannot add mastered word to wordbook');
     }
 
     const { error } = await this.supabase
       .from('wordbook_items')
-      .insert({ wordbook_id: wordbookId, word_id: wordId });
+      .insert({ wordbook_id: wordbookId, word_id: effectiveWordId });
     if (error) {
       if (error.code === '23505') return;
       throw error;
@@ -717,17 +1127,30 @@ class SupabaseWordbookRepository implements WordbookRepository {
       .eq('subscriber_id', userId);
     if (error) throw error;
 
-    return (data ?? []).map((row) => {
+    const results: WordbookWithCount[] = [];
+    for (const row of data ?? []) {
       const wb = (row as Record<string, unknown>).wordbooks as unknown as DbWordbook & {
         wordbook_items: [{ count: number }];
       };
-      return {
+      const wordCount = wb.wordbook_items[0]?.count ?? 0;
+
+      // Count mastered words via RPC
+      let masteredCount = 0;
+      if (wordCount > 0) {
+        const { data: rpcData, error: rpcErr } = await this.supabase
+          .rpc('get_wordbook_mastered_count', { wb_id: wb.id });
+        if (!rpcErr) masteredCount = (rpcData as number) ?? 0;
+      }
+
+      results.push({
         ...dbWordbookToWordbook(wb),
-        wordCount: wb.wordbook_items[0]?.count ?? 0,
+        wordCount,
         importCount: wb.import_count ?? 0,
-        masteredCount: 0,
-      };
-    });
+        masteredCount,
+      });
+    }
+
+    return results;
   }
 
   async browseShared(): Promise<SharedWordbookListItem[]> {
@@ -856,6 +1279,16 @@ class SupabaseWordbookRepository implements WordbookRepository {
         if (created.error) throw created.error;
         wordId = (created.data as { id: string }).id;
         existingMap.set(key, wordId);
+
+        // Create user_word_state for the newly copied word
+        await this.supabase
+          .from('user_word_state')
+          .insert({
+            user_id: userId,
+            word_id: wordId,
+            mastered: false,
+            priority: 2,
+          });
       }
 
       await this.supabase
@@ -918,13 +1351,26 @@ export class SupabaseRepository implements DataRepository {
       addedAt: item.added_at,
     }));
 
+    // Export user_word_state
+    const { data: uwsData } = await this.supabase
+      .from('user_word_state')
+      .select('*')
+      .eq('user_id', userId);
+    const userWordState: UserWordStateExport[] = (uwsData ?? []).map((row: DbUserWordState) => ({
+      wordId: row.word_id,
+      mastered: row.mastered,
+      masteredAt: row.mastered_at,
+      priority: row.priority,
+    }));
+
     return {
-      version: 2,
+      version: 3,
       exportedAt: new Date().toISOString(),
       words,
       studyProgress,
       wordbooks,
       wordbookItems,
+      userWordState,
     };
   }
 
@@ -947,11 +1393,17 @@ export class SupabaseRepository implements DataRepository {
         throw err;
       }
 
-      if (word.mastered) {
-        await this.words.setMastered(created.id, true);
-      }
-
       wordIdMap.set(word.id, created.id);
+
+      // Handle mastered state
+      if (data.version === 3) {
+        // v3: mastered info is in userWordState array — handled below
+      } else {
+        // v1/v2: mastered info is on the word object
+        if (word.mastered) {
+          await this.words.setMastered(created.id, true);
+        }
+      }
 
       const progress = data.studyProgress.find((p) => p.wordId === word.id);
       if (progress) {
@@ -968,7 +1420,27 @@ export class SupabaseRepository implements DataRepository {
       }
     }
 
-    if (data.version === 2) {
+    // Import user_word_state for v3
+    if (data.version === 3 && data.userWordState) {
+      const { data: userData } = await this.supabase.auth.getUser();
+      const userId = userData.user!.id;
+
+      for (const uws of data.userWordState) {
+        const newWordId = wordIdMap.get(uws.wordId);
+        if (!newWordId) continue;
+        await this.supabase
+          .from('user_word_state')
+          .upsert({
+            user_id: userId,
+            word_id: newWordId,
+            mastered: uws.mastered,
+            mastered_at: uws.masteredAt,
+            priority: uws.priority,
+          }, { onConflict: 'user_id,word_id' });
+      }
+    }
+
+    if (data.version === 2 || data.version === 3) {
       const wordbookIdMap = new Map<string, string>();
       for (const wb of data.wordbooks) {
         const created = await this.wordbooks.create({

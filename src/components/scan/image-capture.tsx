@@ -4,6 +4,7 @@ import { useRef, useState, useImperativeHandle, forwardRef } from 'react';
 import { ImagePlus, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTranslation } from '@/lib/i18n';
+import { bottomBar, bottomSep } from '@/lib/styles';
 
 interface ImageCaptureProps {
   onExtract: (imageDataUrls: string[]) => void;
@@ -129,8 +130,8 @@ export const ImageCapture = forwardRef<ImageCaptureHandle, ImageCaptureProps>(
           )}
         </div>
 
-        <div className="shrink-0 bg-background px-4 pb-3">
-          <div className="mb-3 h-px bg-border" />
+        <div className={bottomBar}>
+          <div className={bottomSep} />
           <Button
             className="w-full"
             onClick={handleExtract}

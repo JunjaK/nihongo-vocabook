@@ -2,11 +2,13 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { toast } from 'sonner';
+import { Info } from 'lucide-react';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { Header } from '@/components/layout/header';
 import { Button } from '@/components/ui/button';
 import { useRepository } from '@/lib/repository/provider';
 import { useTranslation } from '@/lib/i18n';
+import { bottomBar, bottomSep, settingsScroll, settingsSection, settingsHeading } from '@/lib/styles';
 import type { QuizSettings } from '@/types/quiz';
 import { DEFAULT_QUIZ_SETTINGS } from '@/types/quiz';
 
@@ -56,6 +58,10 @@ export default function QuizSettingsPage() {
           <LoadingSpinner className="size-8" />
           {t.common.loading}
         </div>
+        <div className={bottomBar}>
+          <div className={bottomSep} />
+          <Button className="w-full" disabled>{t.common.save}</Button>
+        </div>
       </>
     );
   }
@@ -72,7 +78,7 @@ export default function QuizSettingsPage() {
               {NEW_PER_DAY_OPTIONS.map((n) => (
                 <Button
                   key={n}
-                  variant={settings.newPerDay === n ? 'default' : 'outline'}
+                  variant={settings.newPerDay === n ? 'secondary' : 'outline'}
                   size="sm"
                   onClick={() => setSettings((s) => ({ ...s, newPerDay: n }))}
                 >
@@ -89,7 +95,7 @@ export default function QuizSettingsPage() {
               {MAX_REVIEWS_OPTIONS.map((n) => (
                 <Button
                   key={n}
-                  variant={settings.maxReviewsPerDay === n ? 'default' : 'outline'}
+                  variant={settings.maxReviewsPerDay === n ? 'secondary' : 'outline'}
                   size="sm"
                   onClick={() => setSettings((s) => ({ ...s, maxReviewsPerDay: n }))}
                 >
@@ -104,7 +110,7 @@ export default function QuizSettingsPage() {
             <h2 className="text-sm font-semibold">{t.settings.jlptFilter}</h2>
             <div className="flex flex-wrap gap-2">
               <Button
-                variant={settings.jlptFilter === null ? 'default' : 'outline'}
+                variant={settings.jlptFilter === null ? 'secondary' : 'outline'}
                 size="sm"
                 onClick={() => setSettings((s) => ({ ...s, jlptFilter: null }))}
               >
@@ -113,7 +119,7 @@ export default function QuizSettingsPage() {
               {[5, 4, 3, 2, 1].map((n) => (
                 <Button
                   key={n}
-                  variant={settings.jlptFilter === n ? 'default' : 'outline'}
+                  variant={settings.jlptFilter === n ? 'secondary' : 'outline'}
                   size="sm"
                   onClick={() => setSettings((s) => ({ ...s, jlptFilter: n }))}
                 >
@@ -128,7 +134,7 @@ export default function QuizSettingsPage() {
             <h2 className="text-sm font-semibold">{t.settings.priorityFilter}</h2>
             <div className="flex flex-wrap gap-2">
               <Button
-                variant={settings.priorityFilter === null ? 'default' : 'outline'}
+                variant={settings.priorityFilter === null ? 'secondary' : 'outline'}
                 size="sm"
                 onClick={() => setSettings((s) => ({ ...s, priorityFilter: null }))}
               >
@@ -141,7 +147,7 @@ export default function QuizSettingsPage() {
               ].map(({ value, label }) => (
                 <Button
                   key={value}
-                  variant={settings.priorityFilter === value ? 'default' : 'outline'}
+                  variant={settings.priorityFilter === value ? 'secondary' : 'outline'}
                   size="sm"
                   onClick={() => setSettings((s) => ({ ...s, priorityFilter: value }))}
                 >
@@ -162,7 +168,7 @@ export default function QuizSettingsPage() {
               ]).map(({ value, label }) => (
                 <Button
                   key={value}
-                  variant={settings.newCardOrder === value ? 'default' : 'outline'}
+                  variant={settings.newCardOrder === value ? 'secondary' : 'outline'}
                   size="sm"
                   onClick={() => setSettings((s) => ({ ...s, newCardOrder: value }))}
                 >
@@ -171,10 +177,25 @@ export default function QuizSettingsPage() {
               ))}
             </div>
           </section>
+
+          {/* Rating guide — informational block at bottom */}
+          <section className="rounded-lg bg-muted/50 p-3">
+            <div className="mb-2 flex items-center gap-1.5 text-sm font-semibold">
+              <Info className="size-4 text-muted-foreground" />
+              {t.settings.ratingGuide}
+            </div>
+            <p className="text-sm text-muted-foreground">{t.settings.ratingGuideDesc}</p>
+            <ul className="mt-2 space-y-1 text-sm text-muted-foreground">
+              <li>{t.settings.ratingAgainDesc}</li>
+              <li>{t.settings.ratingHardDesc}</li>
+              <li>{t.settings.ratingGoodDesc}</li>
+              <li>{t.settings.ratingEasyDesc}</li>
+            </ul>
+          </section>
         </div>
 
-        <div className="shrink-0 bg-background px-4 pb-3">
-          <div className="mb-3 h-px bg-border" />
+        <div className={bottomBar}>
+          <div className={bottomSep} />
           <Button
             className="w-full"
             onClick={handleSave}

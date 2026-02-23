@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { useTranslation } from '@/lib/i18n';
+import { bottomBar, bottomSep } from '@/lib/styles';
 
 interface WordbookFormValues {
   name: string;
@@ -20,10 +21,11 @@ interface WordbookFormProps {
   onSubmit: (values: WordbookFormValues) => Promise<void>;
   submitLabel: string;
   showShareToggle?: boolean;
+  createdAt?: Date;
 }
 
-export function WordbookForm({ initialValues, onSubmit, submitLabel, showShareToggle }: WordbookFormProps) {
-  const { t } = useTranslation();
+export function WordbookForm({ initialValues, onSubmit, submitLabel, showShareToggle, createdAt }: WordbookFormProps) {
+  const { t, locale } = useTranslation();
   const [name, setName] = useState(initialValues?.name ?? '');
   const [description, setDescription] = useState(initialValues?.description ?? '');
   const [isShared, setIsShared] = useState(initialValues?.isShared ?? false);
@@ -143,10 +145,15 @@ export function WordbookForm({ initialValues, onSubmit, submitLabel, showShareTo
             </Label>
           </div>
         )}
+        {createdAt && (
+          <div className="text-xs text-muted-foreground">
+            {t.common.createdAt}: {createdAt.toLocaleDateString(locale === 'ko' ? 'ko-KR' : 'en-US')}
+          </div>
+        )}
       </div>
 
-      <div className="shrink-0 bg-background px-4 pb-3">
-        <div className="mb-3 h-px bg-border" />
+      <div className={bottomBar}>
+        <div className={bottomSep} />
         <Button
           type="submit"
           className="w-full"

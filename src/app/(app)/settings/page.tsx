@@ -9,6 +9,7 @@ import { Header } from '@/components/layout/header';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import { Skeleton } from '@/components/ui/skeleton';
 import { ChevronRight, ArrowRightLeft, ExternalLink, Trophy, SlidersHorizontal } from 'lucide-react';
 import { useAuthStore } from '@/stores/auth-store';
 import { useRepository } from '@/lib/repository/provider';
@@ -18,8 +19,15 @@ import {
   migrateToSupabase,
 } from '@/lib/migration/migrate-to-supabase';
 import { useTranslation, type Locale } from '@/lib/i18n';
+import { invalidateListCache } from '@/lib/list-cache';
 import { getLocalOcrMode } from '@/lib/ocr/settings';
 import { fetchProfile } from '@/lib/profile/fetch';
+import {
+  settingsScroll,
+  settingsSection,
+  settingsHeading,
+  settingsNavLink,
+} from '@/lib/styles';
 import type { ImportData } from '@/types/word';
 
 export default function SettingsPage() {
@@ -34,6 +42,7 @@ export default function SettingsPage() {
   const [showMigrateConfirm, setShowMigrateConfirm] = useState(false);
   const [ocrModeLabel, setOcrModeLabel] = useState('');
   const [profileNickname, setProfileNickname] = useState<string | null>(null);
+  const [profileLoading, setProfileLoading] = useState(true);
 
   useEffect(() => {
     const mode = getLocalOcrMode();
@@ -41,10 +50,15 @@ export default function SettingsPage() {
   }, [t]);
 
   useEffect(() => {
-    if (!user) return;
+    if (!user) {
+      setProfileLoading(false);
+      return;
+    }
+    setProfileLoading(true);
     fetchProfile()
       .then((p) => setProfileNickname(p.nickname))
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => setProfileLoading(false));
   }, [user]);
 
   const handleExportJSON = async () => {
@@ -115,6 +129,7 @@ export default function SettingsPage() {
       toast.error(t.settings.importError);
     }
 
+    invalidateListCache();
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
@@ -158,24 +173,33 @@ export default function SettingsPage() {
   return (
     <>
       <Header title={t.settings.title} />
-      <div className="animate-page flex-1 space-y-6 overflow-y-auto p-4">
+      <div className={settingsScroll}>
         {/* Account */}
-        <section className="space-y-3">
-          <h2 className="text-sm font-semibold text-foreground">{t.settings.account}</h2>
+        <section className={settingsSection}>
+          <h2 className={settingsHeading}>{t.settings.account}</h2>
           {user ? (
             <div className="space-y-3">
               <Link
                 href="/settings/profile"
-                className="flex items-center justify-between rounded-lg border p-3 active:bg-accent/50"
+                className={settingsNavLink}
                 data-testid="settings-profile-link"
               >
                 <div>
-                  {profileNickname && (
-                    <div className="text-sm font-medium">{profileNickname}</div>
+                  {profileLoading ? (
+                    <div className="space-y-1.5">
+                      <Skeleton className="h-4 w-24" />
+                      <Skeleton className="h-3 w-36" />
+                    </div>
+                  ) : (
+                    <>
+                      {profileNickname && (
+                        <div className="text-sm font-medium">{profileNickname}</div>
+                      )}
+                      <div className={profileNickname ? 'text-xs text-muted-foreground' : 'text-sm'}>
+                        {user.email}
+                      </div>
+                    </>
                   )}
-                  <div className={profileNickname ? 'text-xs text-muted-foreground' : 'text-sm'}>
-                    {user.email}
-                  </div>
                 </div>
                 <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
               </Link>
@@ -212,8 +236,8 @@ export default function SettingsPage() {
         <Separator />
 
         {/* Language */}
-        <section className="space-y-2">
-          <h2 className="text-sm font-semibold text-foreground">{t.settings.language}</h2>
+        <section className={settingsSection}>
+          <h2 className={settingsHeading}>{t.settings.language}</h2>
           <div className="flex gap-2">
             {languageOptions.map((opt) => (
               <Button
@@ -232,8 +256,8 @@ export default function SettingsPage() {
         <Separator />
 
         {/* Theme */}
-        <section className="space-y-2">
-          <h2 className="text-sm font-semibold text-foreground">{t.settings.theme}</h2>
+        <section className={settingsSection}>
+          <h2 className={settingsHeading}>{t.settings.theme}</h2>
           <div className="flex gap-2">
             {([
               { value: 'system', label: t.settings.themeSystem },
@@ -256,11 +280,11 @@ export default function SettingsPage() {
         <Separator />
 
         {/* Quiz & Achievements */}
-        <section className="space-y-3">
-          <h2 className="text-sm font-semibold text-foreground">{t.nav.quiz}</h2>
+        <section className={settingsSection}>
+          <h2 className={settingsHeading}>{t.nav.quiz}</h2>
           <Link
             href="/settings/quiz"
-            className="flex items-center justify-between rounded-lg border p-3 active:bg-accent/50"
+            className={settingsNavLink}
             data-testid="settings-quiz-link"
           >
             <div className="flex items-center gap-3">
@@ -271,7 +295,7 @@ export default function SettingsPage() {
           </Link>
           <Link
             href="/settings/achievements"
-            className="flex items-center justify-between rounded-lg border p-3 active:bg-accent/50"
+            className={settingsNavLink}
             data-testid="settings-achievements-link"
           >
             <div className="flex items-center gap-3">
@@ -285,8 +309,8 @@ export default function SettingsPage() {
         <Separator />
 
         {/* OCR / AI */}
-        <section className="space-y-2">
-          <h2 className="text-sm font-semibold text-foreground">
+        <section className={settingsSection}>
+          <h2 className={settingsHeading}>
             {t.settings.ocrTitle}
           </h2>
           {user ? (
@@ -310,8 +334,8 @@ export default function SettingsPage() {
         {/* Data Migration */}
         {user && (
           <>
-            <section className="space-y-2">
-              <h2 className="text-sm font-semibold text-foreground">
+            <section className={settingsSection}>
+              <h2 className={settingsHeading}>
                 {t.settings.migration}
               </h2>
               <div className="text-sm text-muted-foreground">
@@ -332,8 +356,8 @@ export default function SettingsPage() {
         )}
 
         {/* Import/Export */}
-        <section className="space-y-2">
-          <h2 className="text-sm font-semibold text-foreground">
+        <section className={settingsSection}>
+          <h2 className={settingsHeading}>
             {t.settings.importExport}
           </h2>
           <div className="flex flex-wrap gap-2">
@@ -374,8 +398,8 @@ export default function SettingsPage() {
         <Separator />
 
         {/* About */}
-        <section className="space-y-3">
-          <h2 className="text-sm font-semibold text-foreground">{t.settings.about}</h2>
+        <section className={settingsSection}>
+          <h2 className={settingsHeading}>{t.settings.about}</h2>
 
           <div className="space-y-2">
             <div className="flex items-center justify-between text-sm">
@@ -407,7 +431,7 @@ export default function SettingsPage() {
 
           <Link
             href="/settings/licenses"
-            className="flex items-center justify-between rounded-lg border p-3 active:bg-accent/50"
+            className={settingsNavLink}
           >
             <span className="text-sm">{t.settings.openSource}</span>
             <ChevronRight className="size-4 shrink-0 text-muted-foreground" />

@@ -59,6 +59,20 @@ Repository auto-selects implementation based on auth state:
 
 ---
 
+## Style Constants (`src/lib/styles.ts`)
+
+All common layout class strings are centralized in `@/lib/styles`. **Never write raw repeated Tailwind strings** — always import the constant.
+
+```tsx
+import { pageWrapper, scrollArea, bottomBar, bottomSep, listContainer } from '@/lib/styles';
+```
+
+Key constants: `pageWrapper`, `scrollArea`, `bottomBar`, `bottomSep`, `listContainer`, `listGap`, `tabsBar`, `inlineSep`, `toolbarRow`, `skeletonWordList`, `skeletonCardList`, `emptyState`, `emptyIcon`, `settingsScroll`, `settingsSection`, `settingsHeading`, `settingsNavLink`.
+
+Use `cn()` from `@/lib/utils` when combining with overrides: `cn(scrollArea, 'p-4')`.
+
+---
+
 ## Bottom Fixed Button Pattern
 
 All primary action buttons at the bottom of a page/step MUST use the bottom fixed pattern. This keeps the button always visible regardless of scroll position.
@@ -66,26 +80,26 @@ All primary action buttons at the bottom of a page/step MUST use the bottom fixe
 **Required structure:**
 
 ```tsx
-{/* Parent must be flex column with min-h-0 flex-1 */}
-<div className="flex min-h-0 flex-1 flex-col">
-  {/* Scrollable content area */}
-  <div className="flex-1 overflow-y-auto p-4">
+import { pageWrapper, scrollArea, bottomBar, bottomSep } from '@/lib/styles';
+
+<div className={pageWrapper}>
+  <div className={scrollArea}>
     {/* ... content ... */}
   </div>
 
   {/* Fixed bottom button — OUTSIDE the scrollable area */}
-  <div className="shrink-0 bg-background px-4 pb-3">
-    <div className="mb-3 h-px bg-border" />
+  <div className={bottomBar}>
+    <div className={bottomSep} />
     <Button className="w-full" ...>Action</Button>
   </div>
 </div>
 ```
 
 **Rules:**
-- The button container uses `shrink-0 bg-background px-4 pb-3`
-- A separator `<div className="mb-3 h-px bg-border" />` sits above the button
+- Bottom bar: `bottomBar` constant (`shrink-0 bg-background px-4 pb-3`)
+- Separator: `bottomSep` constant (`mb-3 h-px bg-border`)
 - The button container is a **sibling** of the scrollable content, never nested inside it
-- The parent container must be `flex min-h-0 flex-1 flex-col` so the scroll area fills remaining space
+- The parent container must use `pageWrapper` (`flex min-h-0 flex-1 flex-col`)
 - Applies to: forms, wizard steps, detail pages with action buttons, confirmation dialogs
 
 ---
@@ -274,3 +288,25 @@ useRepository() → DataRepository
 ```
 
 Never call Supabase or Dexie directly from components — always go through `useRepository()`.
+
+---
+
+## Database Migrations
+
+Migration files live in `supabase/migrations/` with naming convention `NNN_description.sql` (e.g. `009_quiz_upgrade.sql`).
+
+### Running Migrations
+
+```bash
+bun run scripts/run-migrations.ts
+```
+
+- Reads `NEXT_PRIVATE_SUPABASE_DB_LINK_SESSION` from `.env.local`
+- Runs all migrations in order; skips already-applied ones (`already exists` / `duplicate`)
+- Uses the `postgres` package (NOT `pg`)
+
+### Adding a New Migration
+
+1. Create `supabase/migrations/NNN_description.sql`
+2. Add the filename to the `migrations` array in `scripts/run-migrations.ts`
+3. Run `bun run scripts/run-migrations.ts`

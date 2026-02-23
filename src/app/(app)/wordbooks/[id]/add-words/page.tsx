@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { useRepository } from '@/lib/repository/provider';
 import { useTranslation } from '@/lib/i18n';
+import { bottomBar, bottomSep } from '@/lib/styles';
 import type { Word } from '@/types/word';
 
 export default function AddWordsPage({
@@ -195,8 +196,8 @@ export default function AddWordsPage({
         </div>
       )}
 
-      <div className="shrink-0 bg-background px-4 pb-3">
-        <div className="mb-3 h-px bg-border" />
+      <div className={bottomBar}>
+        <div className={bottomSep} />
         <Button
           className="w-full"
           disabled={selectedIds.size === 0 || adding}

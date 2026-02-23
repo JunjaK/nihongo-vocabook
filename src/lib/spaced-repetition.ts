@@ -119,11 +119,22 @@ export function isNewCard(progress: StudyProgress | null): boolean {
   return progress.cardState === 0 && progress.reviewCount === 0;
 }
 
+export type IntervalFormatter = {
+  lessThanMinute: string;
+  minutes: (n: number) => string;
+  hours: (n: number) => string;
+  days: (n: number) => string;
+  months: (n: number) => string;
+};
+
 /**
  * Get preview of next interval for all 4 ratings.
- * Returns human-readable strings like "1m", "10m", "1d", "4d".
+ * Uses the provided formatter for localized, human-readable labels.
  */
-export function getReviewPreview(progress: StudyProgress | null): {
+export function getReviewPreview(
+  progress: StudyProgress | null,
+  fmt: IntervalFormatter,
+): {
   again: string;
   hard: string;
   good: string;
@@ -137,14 +148,14 @@ export function getReviewPreview(progress: StudyProgress | null): {
   const formatInterval = (nextCard: Card): string => {
     const diffMs = (nextCard.due instanceof Date ? nextCard.due.getTime() : new Date(nextCard.due).getTime()) - now.getTime();
     const diffMin = Math.round(diffMs / 60000);
-    if (diffMin < 1) return '<1m';
-    if (diffMin < 60) return `${diffMin}m`;
+    if (diffMin < 1) return fmt.lessThanMinute;
+    if (diffMin < 60) return fmt.minutes(diffMin);
     const diffHours = Math.round(diffMin / 60);
-    if (diffHours < 24) return `${diffHours}h`;
+    if (diffHours < 24) return fmt.hours(diffHours);
     const diffDays = Math.round(diffHours / 24);
-    if (diffDays < 30) return `${diffDays}d`;
+    if (diffDays < 30) return fmt.days(diffDays);
     const diffMonths = Math.round(diffDays / 30);
-    return `${diffMonths}mo`;
+    return fmt.months(diffMonths);
   };
 
   return {

@@ -11,14 +11,16 @@ const RepositoryContext = createContext<DataRepository | null>(null);
 
 export function RepositoryProvider({ children }: { children: ReactNode }) {
   const user = useAuthStore((s) => s.user);
+  const userId = user?.id ?? null;
 
   const repo = useMemo<DataRepository>(() => {
-    if (user) {
+    if (userId) {
       const supabase = createClient();
       return new SupabaseRepository(supabase);
     }
     return new IndexedDBRepository();
-  }, [user]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId]);
 
   return (
     <RepositoryContext.Provider value={repo}>

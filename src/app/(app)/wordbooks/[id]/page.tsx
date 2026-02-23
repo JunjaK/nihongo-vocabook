@@ -1,12 +1,13 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef, use } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef, use } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { BookOpen, Link2Off, Pencil, Trash2, X } from 'lucide-react';
-import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { useVirtualizer } from '@tanstack/react-virtual';
+import { BookOpen, Info, Link2Off, Pencil, Trash2, X } from 'lucide-react';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Header } from '@/components/layout/header';
 import { ListToolbar } from '@/components/layout/list-toolbar';
 import { Button } from '@/components/ui/button';
@@ -16,8 +17,18 @@ import { WordbookForm } from '@/components/wordbook/wordbook-form';
 import { useRepository } from '@/lib/repository/provider';
 import { useAuthStore } from '@/stores/auth-store';
 import { useTranslation } from '@/lib/i18n';
+import { invalidateListCache } from '@/lib/list-cache';
+import {
+  bottomBar,
+  bottomSep,
+  emptyState,
+  emptyIcon,
+} from '@/lib/styles';
 import type { Word } from '@/types/word';
+import type { WordSortOrder } from '@/lib/repository/types';
 import type { Wordbook } from '@/types/wordbook';
+
+const PAGE_SIZE = 100;
 
 export default function WordbookDetailPage({
   params,
@@ -28,47 +39,92 @@ export default function WordbookDetailPage({
   const router = useRouter();
   const repo = useRepository();
   const user = useAuthStore((s) => s.user);
+  const authLoading = useAuthStore((s) => s.loading);
   const { t, locale } = useTranslation();
   const [wordbook, setWordbook] = useState<Wordbook | null>(null);
   const [words, setWords] = useState<Word[]>([]);
-  const [masteredCount, setMasteredCount] = useState(0);
+  const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [editing, setEditing] = useState(false);
   const [showReading, setShowReading] = useState(false);
   const [showMeaning, setShowMeaning] = useState(false);
   const [searchInput, setSearchInput] = useState('');
   const [appliedQuery, setAppliedQuery] = useState('');
+  const [sortOrder, setSortOrder] = useState<WordSortOrder>('newest');
+  const [showInfo, setShowInfo] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const isOwned = wordbook && user && wordbook.userId === user.id;
   const isSubscribed = wordbook && user && wordbook.userId !== user.id;
 
   const loadStart = useRef(0);
+  const parentRef = useRef<HTMLDivElement>(null);
+  const hasMore = !appliedQuery && sortOrder !== 'priority' && words.length < totalCount;
 
   const loadData = useCallback(async () => {
+    if (authLoading) return;
+
     setLoading(true);
     loadStart.current = Date.now();
     try {
-      const [wb, wds] = await Promise.all([
+      const shouldLoadAll = appliedQuery || sortOrder === 'priority';
+      const [wb, loadedWords] = await Promise.all([
         repo.wordbooks.getById(id),
-        repo.wordbooks.getWords(id),
+        shouldLoadAll
+          ? repo.wordbooks.getWords(id)
+          : repo.wordbooks.getWordsPaginated(id, {
+            limit: PAGE_SIZE,
+            offset: 0,
+            sort: sortOrder,
+          }).then((result) => {
+            setTotalCount(result.totalCount);
+            return result.words;
+          }),
       ]);
       setWordbook(wb);
-      setWords(wds);
-      setMasteredCount(wds.filter((w) => w.mastered).length);
+      if (sortOrder === 'priority') {
+        const sorted = [...loadedWords].sort((a, b) => {
+          if (a.priority !== b.priority) return a.priority - b.priority;
+          return b.createdAt.getTime() - a.createdAt.getTime();
+        });
+        setWords(sorted);
+      } else {
+        setWords(loadedWords);
+      }
+      if (shouldLoadAll) {
+        setTotalCount(loadedWords.length);
+      }
     } finally {
       const remaining = 300 - (Date.now() - loadStart.current);
       if (remaining > 0) await new Promise((r) => setTimeout(r, remaining));
       setLoading(false);
     }
-  }, [repo, id]);
+  }, [repo, id, authLoading, appliedQuery, sortOrder]);
 
   useEffect(() => {
     loadData();
   }, [loadData]);
 
+  const loadMore = useCallback(async () => {
+    if (loadingMore || !hasMore) return;
+    setLoadingMore(true);
+    try {
+      const result = await repo.wordbooks.getWordsPaginated(id, {
+        limit: PAGE_SIZE,
+        offset: words.length,
+        sort: sortOrder,
+      });
+      setWords((prev) => [...prev, ...result.words]);
+      setTotalCount(result.totalCount);
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [repo, id, words.length, sortOrder, loadingMore, hasMore]);
+
   const handleUpdate = async (values: { name: string; description: string | null; isShared?: boolean; tags?: string[] }) => {
     await repo.wordbooks.update(id, values);
+    invalidateListCache('wordbooks');
     toast.success(t.wordbooks.wordbookUpdated);
     setEditing(false);
     const updated = await repo.wordbooks.getById(id);
@@ -78,18 +134,23 @@ export default function WordbookDetailPage({
   const handleDelete = async () => {
     setShowDeleteConfirm(false);
     await repo.wordbooks.delete(id);
+    invalidateListCache('wordbooks');
     toast.success(t.wordbooks.wordbookDeleted);
     router.push('/wordbooks');
   };
 
   const handleUnsubscribe = async () => {
     await repo.wordbooks.unsubscribe(id);
+    invalidateListCache('wordbooks');
     toast.success(t.wordbooks.unsubscribed);
     router.push('/wordbooks');
   };
 
   const handleMasterWord = async (wordId: string) => {
     await repo.words.setMastered(wordId, true);
+    invalidateListCache('words');
+    invalidateListCache('mastered');
+    invalidateListCache('wordbooks');
     setWords((prev) => prev.filter((w) => w.id !== wordId));
   };
 
@@ -108,30 +169,54 @@ export default function WordbookDetailPage({
     setAppliedQuery('');
   };
 
-  const filteredWords = appliedQuery
-    ? words.filter((w) => {
-        const lower = appliedQuery.toLowerCase();
-        return (
-          w.term.toLowerCase().includes(lower) ||
-          w.reading.toLowerCase().includes(lower) ||
-          w.meaning.toLowerCase().includes(lower)
-        );
-      })
-    : words;
+  const sortOptions = [
+    { value: 'priority', label: t.priority.sortByPriority },
+    { value: 'newest', label: t.priority.sortByNewest },
+    { value: 'alphabetical', label: t.priority.sortByAlphabetical },
+  ];
 
-  if (loading) {
-    return (
-      <>
-        <Header title={t.wordbooks.title} showBack />
-        <div className="flex flex-1 flex-col items-center justify-center gap-3 text-muted-foreground">
-          <LoadingSpinner className="size-8" />
-          {t.common.loading}
-        </div>
-      </>
+  const sortedWords = useMemo(() => {
+    if (!appliedQuery) return words;
+    const result = [...words];
+    if (sortOrder === 'alphabetical') {
+      result.sort((a, b) => a.term.localeCompare(b.term, 'ja'));
+    } else if (sortOrder === 'priority') {
+      result.sort((a, b) => {
+        if (a.priority !== b.priority) return a.priority - b.priority;
+        return b.createdAt.getTime() - a.createdAt.getTime();
+      });
+    } else {
+      result.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+    }
+    return result;
+  }, [words, sortOrder]);
+
+  const filteredWords = useMemo(() => {
+    if (!appliedQuery) return words;
+    const lower = appliedQuery.toLowerCase();
+    return sortedWords.filter((w) =>
+      w.term.toLowerCase().includes(lower) ||
+      w.reading.toLowerCase().includes(lower) ||
+      w.meaning.toLowerCase().includes(lower)
     );
-  }
+  }, [words, sortedWords, appliedQuery]);
 
-  if (!wordbook) {
+  const virtualizer = useVirtualizer({
+    count: filteredWords.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 72,
+    overscan: 5,
+  });
+
+  const handleScroll = useCallback(() => {
+    if (!parentRef.current || !hasMore || loadingMore) return;
+    const { scrollTop, scrollHeight, clientHeight } = parentRef.current;
+    if (scrollHeight - scrollTop - clientHeight < 300) {
+      loadMore();
+    }
+  }, [hasMore, loadingMore, loadMore]);
+
+  if (!loading && !wordbook) {
     return (
       <>
         <Header title={t.wordbooks.title} showBack />
@@ -142,7 +227,7 @@ export default function WordbookDetailPage({
     );
   }
 
-  if (editing) {
+  if (!loading && wordbook && editing) {
     return (
       <>
         <Header
@@ -179,6 +264,7 @@ export default function WordbookDetailPage({
             isShared: wordbook.isShared,
             tags: wordbook.tags,
           }}
+          createdAt={wordbook.createdAt}
           onSubmit={handleUpdate}
           submitLabel={t.common.update}
           showShareToggle={!!user}
@@ -187,22 +273,141 @@ export default function WordbookDetailPage({
     );
   }
 
-  return (
-    <>
-      <Header
-        title={wordbook.name}
-        showBack
-        actions={
-          isSubscribed ? (
+  if (!loading && wordbook && showInfo) {
+    return (
+      <>
+        <Header
+          title={t.wordbooks.wordbookInfo}
+          showBack
+          actions={
             <Button
               variant="ghost"
               size="icon-sm"
-              className="text-destructive"
+              onClick={() => setShowInfo(false)}
+              aria-label={t.common.cancel}
+            >
+              <X className="size-5" />
+            </Button>
+          }
+        />
+        <div className="flex min-h-0 flex-1 flex-col">
+          <div className="flex-1 space-y-4 overflow-y-auto p-4">
+            <div className="rounded-lg bg-muted px-3 py-2 text-sm text-muted-foreground">
+              {t.wordbooks.readOnly}
+            </div>
+            <div className="space-y-1">
+              <div className="text-sm font-medium text-muted-foreground">{t.wordbooks.name}</div>
+              <div className="text-base">{wordbook.name}</div>
+            </div>
+            {wordbook.description && (
+              <div className="space-y-1">
+                <div className="text-sm font-medium text-muted-foreground">{t.wordbooks.description}</div>
+                <div className="text-sm">{wordbook.description}</div>
+              </div>
+            )}
+            {wordbook.tags && wordbook.tags.length > 0 && (
+              <div className="space-y-1">
+                <div className="text-sm font-medium text-muted-foreground">{t.wordbooks.tags}</div>
+                <div className="flex flex-wrap gap-1.5">
+                  {wordbook.tags.map((tag) => (
+                    <span key={tag} className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+            <div className="space-y-1">
+              <div className="text-sm font-medium text-muted-foreground">{t.common.createdAt}</div>
+              <div className="text-sm">
+                {wordbook.createdAt.toLocaleDateString(locale === 'ko' ? 'ko-KR' : 'en-US')}
+              </div>
+            </div>
+          </div>
+          <div className={bottomBar}>
+            <div className={bottomSep} />
+            <Button
+              variant="outline"
+              className="w-full text-destructive hover:text-destructive"
               onClick={handleUnsubscribe}
               data-testid="wordbook-unsubscribe-button"
-              aria-label={t.wordbooks.unsubscribe}
             >
-              <Link2Off className="size-5" />
+              <Link2Off className="mr-2 size-4" />
+              {t.wordbooks.unsubscribe}
+            </Button>
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  const renderWordCard = (word: Word) => {
+    if (isOwned) {
+      return (
+        <SwipeableWordCard
+          word={word}
+          showReading={showReading}
+          showMeaning={showMeaning}
+          onSwipeAction={handleMasterWord}
+          swipeLabel={t.wordDetail.markMastered}
+          swipeColor="green"
+          contextMenuActions={[
+            {
+              label: t.wordDetail.markMastered,
+              onAction: handleMasterWord,
+            },
+            {
+              label: t.wordbooks.removeWord,
+              onAction: handleRemoveWord,
+              variant: 'destructive',
+            },
+          ]}
+        />
+      );
+    }
+    if (isSubscribed) {
+      return (
+        <SwipeableWordCard
+          word={word}
+          showReading={showReading}
+          showMeaning={showMeaning}
+          onSwipeAction={handleMasterWord}
+          swipeLabel={t.wordDetail.markMastered}
+          swipeColor="green"
+          contextMenuActions={[
+            {
+              label: t.wordDetail.markMastered,
+              onAction: handleMasterWord,
+            },
+          ]}
+        />
+      );
+    }
+    return (
+      <WordCard
+        word={word}
+        showReading={showReading}
+        showMeaning={showMeaning}
+      />
+    );
+  };
+
+  return (
+    <>
+      <Header
+        title={wordbook?.name ?? ''}
+        desc={!loading && totalCount > 0 ? t.wordbooks.wordCount(totalCount) : undefined}
+        showBack
+        actions={
+          loading ? undefined : isSubscribed ? (
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              onClick={() => setShowInfo(true)}
+              data-testid="wordbook-info-button"
+              aria-label={t.wordbooks.wordbookInfo}
+            >
+              <Info className="size-5" />
             </Button>
           ) : (
             <Button
@@ -218,105 +423,81 @@ export default function WordbookDetailPage({
         }
       />
 
-      {words.length > 0 && (
-        <ListToolbar
-          searchValue={searchInput}
-          onSearchChange={setSearchInput}
-          onSearchSubmit={handleSearch}
-          onSearchClear={handleSearchClear}
-          searchPlaceholder={t.words.searchPlaceholder}
-          showReading={showReading}
-          onToggleReading={() => setShowReading((v) => !v)}
-          showMeaning={showMeaning}
-          onToggleMeaning={() => setShowMeaning((v) => !v)}
-        />
-      )}
+      <ListToolbar
+        searchValue={searchInput}
+        onSearchChange={setSearchInput}
+        onSearchSubmit={handleSearch}
+        onSearchClear={handleSearchClear}
+        searchPlaceholder={t.words.searchPlaceholder}
+        showReading={showReading}
+        onToggleReading={() => setShowReading((v) => !v)}
+        showMeaning={showMeaning}
+        onToggleMeaning={() => setShowMeaning((v) => !v)}
+        sortValue={sortOrder}
+        sortOptions={sortOptions}
+        onSortChange={(v) => setSortOrder(v as WordSortOrder)}
+      />
 
-      {words.length === 0 ? (
-        <div className="animate-fade-in flex flex-1 flex-col items-center justify-center text-center text-muted-foreground">
-          <BookOpen className="mb-3 size-10 text-muted-foreground/50" />
+      {loading ? (
+        <div className="animate-page flex-1 space-y-2 overflow-y-auto px-4 pt-2">
+          {Array.from({ length: 20 }).map((_, i) => (
+            <Skeleton key={i} className="h-[60px] w-full rounded-lg" />
+          ))}
+        </div>
+      ) : totalCount === 0 ? (
+        <div className={emptyState}>
+          <BookOpen className={emptyIcon} />
           {t.wordbooks.noWords}
         </div>
       ) : (
-        <div className="min-h-0 flex-1 overflow-y-auto p-4">
-          {words.length > 0 && (
-            <div className="animate-fade-in mb-4">
-              <div className="h-1.5 overflow-hidden rounded-full bg-muted">
-                <div
-                  className="h-full rounded-full bg-primary transition-all"
-                  style={{ width: `${words.length > 0 ? Math.round((masteredCount / words.length) * 100) : 0}%` }}
-                />
-              </div>
-              <div className="mt-1 text-xs text-muted-foreground">
-                {t.wordbooks.progressLabel(masteredCount, words.length)}
-              </div>
-            </div>
-          )}
-
-          {wordbook.description && (
-            <div className="animate-fade-in mb-4 text-sm text-muted-foreground">{wordbook.description}</div>
-          )}
-
-          <div className="mb-4 flex items-center gap-2 text-xs text-muted-foreground">
-            <span>{t.common.createdAt}</span>
-            <span>{wordbook.createdAt.toLocaleDateString(locale === 'ko' ? 'ko-KR' : 'en-US')}</span>
-          </div>
-
-          {isSubscribed && (
-            <div className="mb-4 rounded-lg bg-muted px-3 py-2 text-sm text-muted-foreground">
-              {t.wordbooks.readOnly}
-            </div>
-          )}
-
+        <div ref={parentRef} className="min-h-0 flex-1 overflow-y-auto" onScroll={handleScroll}>
           {filteredWords.length === 0 ? (
             <div className="py-8 text-center text-muted-foreground">
               {t.words.noWords}
             </div>
           ) : (
-            <div className="space-y-2">
-              {filteredWords.map((word, i) => (
-                <div
-                  key={word.id}
-                  className="animate-stagger"
-                  style={{ '--stagger': Math.min(i, 15) } as React.CSSProperties}
-                >
-                  {isOwned ? (
-                    <SwipeableWordCard
-                      word={word}
-                      showReading={showReading}
-                      showMeaning={showMeaning}
-                      onSwipeAction={handleMasterWord}
-                      swipeLabel={t.wordDetail.markMastered}
-                      swipeColor="green"
-                      contextMenuActions={[
-                        {
-                          label: t.wordDetail.markMastered,
-                          onAction: handleMasterWord,
-                        },
-                        {
-                          label: t.wordbooks.removeWord,
-                          onAction: handleRemoveWord,
-                          variant: 'destructive',
-                        },
-                      ]}
-                    />
-                  ) : (
-                    <WordCard
-                      word={word}
-                      showReading={showReading}
-                      showMeaning={showMeaning}
-                    />
-                  )}
-                </div>
-              ))}
+            <div
+              className="relative px-4 pt-2 pb-2"
+              style={{ height: virtualizer.getTotalSize() }}
+            >
+              {virtualizer.getVirtualItems().map((vr) => {
+                const word = filteredWords[vr.index];
+                return (
+                  <div
+                    key={word.id}
+                    ref={virtualizer.measureElement}
+                    data-index={vr.index}
+                    className="absolute left-4 right-4 pb-2"
+                    style={{ transform: `translateY(${vr.start}px)` }}
+                  >
+                    {renderWordCard(word)}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+          {loadingMore && (
+            <div className="flex justify-center py-4">
+              <div className="text-sm text-muted-foreground">{t.common.loading}</div>
             </div>
           )}
         </div>
       )}
 
-      <div className="shrink-0 bg-background px-4 pb-3">
-        <div className="mb-3 h-px bg-border" />
-        {isOwned ? (
+      <div className={bottomBar}>
+        <div className={bottomSep} />
+        {loading ? (
+          isOwned ? (
+            <div className="flex gap-2">
+              <Button variant="outline" className="flex-1" disabled>{t.wordbooks.startQuiz}</Button>
+              <Button className="flex-1" disabled>{t.wordbooks.addWords}</Button>
+            </div>
+          ) : (
+            <Button className="w-full" disabled>
+              {t.wordbooks.startQuiz}
+            </Button>
+          )
+        ) : isOwned ? (
           <div className="flex gap-2">
             {words.length > 0 && (
               <Button
@@ -341,11 +522,7 @@ export default function WordbookDetailPage({
           <Button
             className="w-full"
             disabled={words.length === 0}
-            onClick={() =>
-              router.push(
-                `/quiz?wordbookId=${id}${isSubscribed ? '&subscribed=true' : ''}`,
-              )
-            }
+            onClick={() => router.push(`/quiz?wordbookId=${id}`)}
             data-testid="wordbook-start-quiz"
           >
             {t.wordbooks.startQuiz}

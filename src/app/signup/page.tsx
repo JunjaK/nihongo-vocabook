@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { bottomSep } from '@/lib/styles';
 import { createClient } from '@/lib/supabase/client';
 import { useTranslation } from '@/lib/i18n';
 
@@ -151,7 +152,7 @@ export default function SignupPage() {
 
         {/* Bottom buttons */}
         <div className="relative shrink-0 px-4 pb-3">
-          <div className="mb-3 h-px bg-border" />
+          <div className={bottomSep} />
           <div className="flex flex-col gap-2">
             <Button
               type="submit"

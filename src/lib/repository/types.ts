@@ -16,14 +16,27 @@ import type {
 } from '@/types/wordbook';
 import type { QuizSettings, DailyStats, Achievement } from '@/types/quiz';
 
+export type WordSortOrder = 'priority' | 'newest' | 'alphabetical';
+
+export interface PaginatedWords {
+  words: Word[];
+  totalCount: number;
+}
+
 export interface WordRepository {
   getAll(): Promise<Word[]>;
   getNonMastered(): Promise<Word[]>;
+  getNonMasteredPaginated(opts: {
+    sort: WordSortOrder;
+    limit: number;
+    offset: number;
+  }): Promise<PaginatedWords>;
   getMastered(): Promise<Word[]>;
   getById(id: string): Promise<Word | null>;
   search(query: string): Promise<Word[]>;
   create(word: CreateWordInput): Promise<Word>;
   update(id: string, word: UpdateWordInput): Promise<Word>;
+  setPriority(id: string, priority: number): Promise<void>;
   delete(id: string): Promise<void>;
   setMastered(id: string, mastered: boolean): Promise<Word>;
 }
@@ -49,6 +62,11 @@ export interface WordbookRepository {
   update(id: string, input: UpdateWordbookInput): Promise<Wordbook>;
   delete(id: string): Promise<void>;
   getWords(wordbookId: string): Promise<Word[]>;
+  getWordsPaginated(wordbookId: string, opts: {
+    sort: WordSortOrder;
+    limit: number;
+    offset: number;
+  }): Promise<PaginatedWords>;
   addWord(wordbookId: string, wordId: string): Promise<void>;
   removeWord(wordbookId: string, wordId: string): Promise<void>;
   getWordbooksForWord(wordId: string): Promise<Wordbook[]>;

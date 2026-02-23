@@ -1,4 +1,4 @@
-import type { WordWithProgress } from '@/types/word';
+import type { Word, WordWithProgress } from '@/types/word';
 
 /**
  * Weight based on priority: 1 (high) = 1.0, 2 (mid) = 0.7, 3 (low) = 0.4
@@ -50,6 +50,26 @@ export function calcQuizScore(word: WordWithProgress, userJlpt: number | null): 
     jlptWeight(userJlpt, word.jlptLevel) *
     overdueFactor(word.progress)
   );
+}
+
+/**
+ * Select words for practice mode (no SRS).
+ * Weighted random using priority + JLPT weights.
+ */
+export function selectPracticeWords(
+  words: Word[],
+  limit: number,
+  userJlpt: number | null,
+): Word[] {
+  const scored = words.map((w) => ({
+    word: w,
+    score:
+      priorityWeight(w.priority) *
+      jlptWeight(userJlpt, w.jlptLevel) *
+      (0.5 + Math.random()),
+  }));
+  scored.sort((a, b) => b.score - a.score);
+  return scored.slice(0, limit).map((s) => s.word);
 }
 
 /**
