@@ -503,7 +503,7 @@ export default function WordbookDetailPage({
               <Button
                 variant="outline"
                 className="flex-1"
-                onClick={() => router.push(`/quiz?wordbookId=${id}`)}
+                onClick={() => router.push(`/wordbooks/${id}/practice`)}
                 data-testid="wordbook-start-quiz"
               >
                 {t.wordbooks.startQuiz}
@@ -522,7 +522,7 @@ export default function WordbookDetailPage({
           <Button
             className="w-full"
             disabled={words.length === 0}
-            onClick={() => router.push(`/quiz?wordbookId=${id}`)}
+            onClick={() => router.push(`/wordbooks/${id}/practice`)}
             data-testid="wordbook-start-quiz"
           >
             {t.wordbooks.startQuiz}
