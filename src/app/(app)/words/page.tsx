@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useVirtualizer } from '@tanstack/react-virtual';
@@ -16,6 +16,7 @@ import { useAuthStore } from '@/stores/auth-store';
 import { useTranslation } from '@/lib/i18n';
 import { useLoader } from '@/hooks/use-loader';
 import { useSearch } from '@/hooks/use-search';
+import { getListCache, setListCache } from '@/lib/list-cache';
 import { markWordMastered } from '@/lib/actions/mark-mastered';
 import { PAGE_SIZE, getWordSortOptions } from '@/lib/constants';
 import {
@@ -29,6 +30,12 @@ import {
 import type { Word } from '@/types/word';
 import type { WordSortOrder } from '@/lib/repository/types';
 
+interface WordsCacheData {
+  words: Word[];
+  totalCount: number;
+  sortOrder: WordSortOrder;
+}
+
 export default function WordsPage() {
   const router = useRouter();
   const repo = useRepository();
@@ -40,13 +47,33 @@ export default function WordsPage() {
   const [showReading, setShowReading] = useState(false);
   const [showMeaning, setShowMeaning] = useState(false);
   const [wordbookDialogWordId, setWordbookDialogWordId] = useState<string | null>(null);
-  const [sortOrder, setSortOrder] = useState<WordSortOrder>('priority');
+  const [sortOrder, setSortOrder] = useState<WordSortOrder>(() => {
+    const cached = getListCache<WordsCacheData>('words');
+    return cached?.data.sortOrder ?? 'priority';
+  });
   const parentRef = useRef<HTMLDivElement>(null);
   const loadGenRef = useRef(0); // generation counter to cancel stale loadMore
+  const scrollOffsetRef = useRef(0);
+  const pendingScrollRef = useRef<number | null>(null);
 
   const { searchInput, appliedQuery, setSearchInput, handleSearch, handleSearchClear } = useSearch();
 
   const hasMore = words.length < totalCount;
+
+  // Keep a ref that always reflects the latest state so the unmount cleanup
+  // can save the correct data without stale closure issues.
+  const cacheRef = useRef({ words: [] as Word[], totalCount: 0, sortOrder: 'priority' as WordSortOrder, appliedQuery: '' });
+  cacheRef.current = { words, totalCount, sortOrder, appliedQuery };
+
+  // Save list data + scroll offset to cache on unmount
+  useEffect(() => {
+    return () => {
+      const { words: w, totalCount: tc, sortOrder: so, appliedQuery: aq } = cacheRef.current;
+      if (w.length > 0 && !aq) {
+        setListCache('words', { words: w, totalCount: tc, sortOrder: so }, scrollOffsetRef.current);
+      }
+    };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const [loading] = useLoader(async () => {
     loadGenRef.current += 1; // invalidate in-flight loadMore
@@ -55,6 +82,14 @@ export default function WordsPage() {
       setWords(data);
       setTotalCount(data.length);
     } else {
+      // Try restoring from cache (e.g. back-navigation from detail page)
+      const cached = getListCache<WordsCacheData>('words');
+      if (cached && cached.data.sortOrder === sortOrder) {
+        setWords(cached.data.words);
+        setTotalCount(cached.data.totalCount);
+        pendingScrollRef.current = cached.scrollOffset;
+        return true; // skip minimum delay — data from cache
+      }
       const result = await repo.words.getNonMasteredPaginated({
         sort: sortOrder,
         limit: PAGE_SIZE,
@@ -64,6 +99,19 @@ export default function WordsPage() {
       setTotalCount(result.totalCount);
     }
   }, [repo, appliedQuery, sortOrder], { skip: authLoading });
+
+  // Restore scroll position after cache-based render
+  useEffect(() => {
+    if (!loading && pendingScrollRef.current !== null && parentRef.current) {
+      const scrollTo = pendingScrollRef.current;
+      pendingScrollRef.current = null;
+      requestAnimationFrame(() => {
+        if (parentRef.current) {
+          parentRef.current.scrollTop = scrollTo;
+        }
+      });
+    }
+  }, [loading]);
 
   const loadMore = useCallback(async () => {
     if (loadingMore || !hasMore || appliedQuery) return;
@@ -86,7 +134,9 @@ export default function WordsPage() {
 
   // Infinite scroll: load more when near bottom
   const handleScroll = useCallback(() => {
-    if (!parentRef.current || !hasMore || loadingMore || appliedQuery) return;
+    if (!parentRef.current) return;
+    scrollOffsetRef.current = parentRef.current.scrollTop;
+    if (!hasMore || loadingMore || appliedQuery) return;
     const { scrollTop, scrollHeight, clientHeight } = parentRef.current;
     if (scrollHeight - scrollTop - clientHeight < 300) {
       loadMore();
