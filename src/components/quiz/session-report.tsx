@@ -9,6 +9,8 @@ interface SessionReportProps {
   totalReviewed: number;
   newCards: number;
   againCount: number;
+  reviewAgainCount?: number;
+  newAgainCount?: number;
   streak: number;
   onContinue: () => void;
   onHome: () => void;
@@ -18,6 +20,8 @@ export function SessionReport({
   totalReviewed,
   newCards,
   againCount,
+  reviewAgainCount,
+  newAgainCount,
   streak,
   onContinue,
   onHome,
@@ -27,6 +31,14 @@ export function SessionReport({
   const accuracy = totalReviewed > 0
     ? Math.round(((totalReviewed - againCount) / totalReviewed) * 100)
     : 100;
+
+  const reviewCards = totalReviewed - newCards;
+  const reviewAccuracy = reviewCards > 0 && reviewAgainCount !== undefined
+    ? Math.round(((reviewCards - reviewAgainCount) / reviewCards) * 100)
+    : null;
+  const newAccuracy = newCards > 0 && newAgainCount !== undefined
+    ? Math.round(((newCards - newAgainCount) / newCards) * 100)
+    : null;
 
   const feedbackMessage = (() => {
     if (accuracy === 100) return t.quiz.perfectScore;
@@ -68,14 +80,26 @@ export function SessionReport({
           </div>
 
           <div
-            className="animate-stagger flex items-center justify-between rounded-lg border p-4"
+            className="animate-stagger flex flex-col rounded-lg border p-4"
             style={{ '--stagger': 2 } as React.CSSProperties}
           >
-            <div className="flex items-center gap-3">
-              <Target className="size-5 text-green-500" />
-              <span className="text-sm">{t.quiz.accuracy}</span>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Target className="size-5 text-green-500" />
+                <span className="text-sm">{t.quiz.accuracy}</span>
+              </div>
+              <span className="text-lg font-semibold">{accuracy}%</span>
             </div>
-            <span className="text-lg font-semibold">{accuracy}%</span>
+            {(reviewAccuracy !== null || newAccuracy !== null) && (
+              <div className="mt-2 flex gap-4 pl-8 text-xs text-muted-foreground">
+                {reviewAccuracy !== null && (
+                  <span>{t.quiz.reviewAccuracy} {reviewAccuracy}%</span>
+                )}
+                {newAccuracy !== null && (
+                  <span>{t.quiz.newCardAccuracy} {newAccuracy}%</span>
+                )}
+              </div>
+            )}
           </div>
 
           {streak > 0 && (

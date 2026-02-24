@@ -15,6 +15,8 @@ export type QuizSessionSnapshot = {
     totalReviewed: number;
     newCards: number;
     againCount: number;
+    reviewAgainCount: number;
+    newAgainCount: number;
   };
 };
 
@@ -35,6 +37,11 @@ export function readSession(mode: QuizMode): QuizSessionSnapshot | null {
     if (storedDate !== getLocalDateString()) {
       window.localStorage.removeItem(sessionKey(mode));
       return null;
+    }
+    // Backfill split accuracy fields for old sessions
+    if (parsed.sessionStats.reviewAgainCount === undefined) {
+      parsed.sessionStats.reviewAgainCount = 0;
+      parsed.sessionStats.newAgainCount = 0;
     }
     return parsed;
   } catch {

@@ -3,7 +3,7 @@
 import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { Pencil, Trash2, X, LinkIcon } from 'lucide-react';
+import { Pencil, Trash2, X, LinkIcon, AlertTriangle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Header } from '@/components/layout/header';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
@@ -243,6 +243,12 @@ export default function WordDetailPage({
               {word.mastered && (
                 <Badge variant="secondary" className="bg-green-100 text-green-700">
                   {t.nav.mastered}
+                </Badge>
+              )}
+              {word.isLeech && (
+                <Badge variant="secondary" className="bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400">
+                  <AlertTriangle className="mr-1 size-3" />
+                  {t.wordDetail.leech}
                 </Badge>
               )}
               {!word.isOwned && (

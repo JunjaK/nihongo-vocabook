@@ -14,6 +14,7 @@ import { markWordMastered } from '@/lib/actions/mark-mastered';
 import { invalidateListCache } from '@/lib/list-cache';
 import { selectPracticeWords } from '@/lib/quiz/word-scoring';
 import { requestDueCountRefresh } from '@/lib/quiz/due-count-sync';
+import { getLocalDateString } from '@/lib/quiz/session-store';
 import type { Word } from '@/types/word';
 import type { CardDirection } from '@/types/quiz';
 
@@ -31,7 +32,7 @@ export default function PracticePage({
   const [wordbookName, setWordbookName] = useState('');
   const [practiceWords, setPracticeWords] = useState<Word[]>([]);
   const [practiceIndex, setPracticeIndex] = useState(0);
-  const [practiceStats, setPracticeStats] = useState({ total: 0, masteredCount: 0 });
+  const [practiceStats, setPracticeStats] = useState({ total: 0, knownCount: 0, masteredCount: 0 });
   const [practiceComplete, setPracticeComplete] = useState(false);
   const [cardDirection, setCardDirection] = useState<CardDirection>('term_first');
 
@@ -44,10 +45,10 @@ export default function PracticePage({
     if (wb) setWordbookName(wb.name);
     setCardDirection(settings.cardDirection);
     const nonMastered = allWords.filter((w) => !w.mastered);
-    const selected = selectPracticeWords(nonMastered, settings.newPerDay, settings.jlptFilter);
+    const selected = selectPracticeWords(nonMastered, settings.sessionSize, settings.jlptFilter);
     setPracticeWords(selected);
     setPracticeIndex(0);
-    setPracticeStats({ total: selected.length, masteredCount: 0 });
+    setPracticeStats({ total: selected.length, knownCount: 0, masteredCount: 0 });
     setPracticeComplete(false);
   }, [repo, wordbookId], { skip: authLoading });
 
@@ -70,16 +71,23 @@ export default function PracticePage({
     });
   }, []);
 
-  const handleSetPriority = async (wId: string, priority: number) => {
+  const handleRecall = async (wId: string, known: boolean) => {
     try {
-      await repo.words.setPriority(wId, priority);
-      invalidateListCache('words');
-      setPracticeWords((prev) =>
-        prev.map((w) => (w.id === wId ? { ...w, priority } : w)),
-      );
-      setTimeout(advancePractice, 300);
+      if (!known) {
+        await repo.words.setPriority(wId, 1);
+        invalidateListCache('words');
+        setPracticeWords((prev) =>
+          prev.map((w) => (w.id === wId ? { ...w, priority: 1 } : w)),
+        );
+      }
+      await repo.study.incrementPracticeStats(getLocalDateString(), known);
+      setPracticeStats((prev) => ({
+        ...prev,
+        knownCount: prev.knownCount + (known ? 1 : 0),
+      }));
+      advancePractice();
     } catch (error) {
-      console.error('Failed to update priority', error);
+      console.error('Failed to record practice recall', error);
     }
   };
 
@@ -120,6 +128,9 @@ export default function PracticePage({
           </div>
           <div className="animate-slide-up mt-2 text-muted-foreground" style={{ animationDelay: '200ms' }}>
             {t.quiz.practicedCount(practiceStats.total)}
+          </div>
+          <div className="animate-slide-up mt-1 text-muted-foreground" style={{ animationDelay: '250ms' }}>
+            {t.quiz.knownCount(practiceStats.knownCount)}
           </div>
           {practiceStats.masteredCount > 0 && (
             <div className="animate-slide-up mt-1 text-muted-foreground" style={{ animationDelay: '300ms' }}>
@@ -170,7 +181,7 @@ export default function PracticePage({
         <PracticeFlashcard
           key={currentWord?.id ?? 'practice-loading'}
           word={currentWord}
-          onSetPriority={handleSetPriority}
+          onRecall={handleRecall}
           onMaster={handleMaster}
           progress={{ current: practiceIndex + 1, total: practiceWords.length }}
           isLoading={loading}

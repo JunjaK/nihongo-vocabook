@@ -36,6 +36,9 @@ export function WordCard({ word, showReading, showMeaning, onClick }: WordCardPr
           {word.priority === 3 && (
             <span className="size-2 shrink-0 rounded-full bg-gray-300 dark:bg-gray-600" />
           )}
+          {word.isLeech && (
+            <span className="size-2 shrink-0 rounded-full bg-orange-500" title="Leech" />
+          )}
           <span className="text-xl font-bold">{word.term}</span>
         </div>
         {readingVisible && (

@@ -40,7 +40,7 @@ async function tryRestoreSession(
   words: WordWithProgress[];
   index: number;
   completed: number;
-  stats: { totalReviewed: number; newCards: number; againCount: number };
+  stats: { totalReviewed: number; newCards: number; againCount: number; reviewAgainCount: number; newAgainCount: number };
 } | null> {
   const saved = readSession(mode);
   if (!saved) return null;
@@ -100,6 +100,8 @@ function QuizContent() {
     totalReviewed: 0,
     newCards: 0,
     againCount: 0,
+    reviewAgainCount: 0,
+    newAgainCount: 0,
   });
 
   const [loading, reload] = useLoader(async () => {
@@ -138,13 +140,13 @@ function QuizContent() {
       setDueWords(withProgress);
       setCurrentIndex(0);
       setCompleted(0);
-      setSessionStats({ totalReviewed: 0, newCards: 0, againCount: 0 });
+      setSessionStats({ totalReviewed: 0, newCards: 0, againCount: 0, reviewAgainCount: 0, newAgainCount: 0 });
     } else {
-      const words = await repo.study.getDueWords(20);
+      const words = await repo.study.getDueWords(settings.sessionSize);
       setDueWords(shuffleArray([...words]));
       setCurrentIndex(0);
       setCompleted(0);
-      setSessionStats({ totalReviewed: 0, newCards: 0, againCount: 0 });
+      setSessionStats({ totalReviewed: 0, newCards: 0, againCount: 0, reviewAgainCount: 0, newAgainCount: 0 });
     }
   }, [repo, quickStart], { skip: authLoading });
 
@@ -230,10 +232,13 @@ function QuizContent() {
     try {
       await repo.study.recordReview(currentWord.id, quality);
 
+      const isAgain = quality === 0;
       setSessionStats((prev) => ({
         totalReviewed: prev.totalReviewed + 1,
         newCards: prev.newCards + (wasNew ? 1 : 0),
-        againCount: prev.againCount + (quality === 0 ? 1 : 0),
+        againCount: prev.againCount + (isAgain ? 1 : 0),
+        reviewAgainCount: prev.reviewAgainCount + (!wasNew && isAgain ? 1 : 0),
+        newAgainCount: prev.newAgainCount + (wasNew && isAgain ? 1 : 0),
       }));
       requestDueCountRefresh();
       setCompleted((c) => c + 1);
@@ -272,7 +277,7 @@ function QuizContent() {
       return;
     }
     setShowReport(false);
-    setSessionStats({ totalReviewed: 0, newCards: 0, againCount: 0 });
+    setSessionStats({ totalReviewed: 0, newCards: 0, againCount: 0, reviewAgainCount: 0, newAgainCount: 0 });
     await reload();
   };
 
@@ -296,6 +301,8 @@ function QuizContent() {
           totalReviewed={sessionStats.totalReviewed}
           newCards={sessionStats.newCards}
           againCount={sessionStats.againCount}
+          reviewAgainCount={sessionStats.reviewAgainCount}
+          newAgainCount={sessionStats.newAgainCount}
           streak={streak ?? 0}
           onContinue={handleContinueStudying}
           onHome={handleBackToHome}

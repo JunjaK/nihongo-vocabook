@@ -131,6 +131,8 @@ export interface Translations {
     unmarkMastered: string;
     addToWordbook: string;
     subscribedWord: string;
+    leech: string;
+    leechDesc: string;
   };
   quiz: {
     title: string;
@@ -171,8 +173,14 @@ export interface Translations {
     priorityHigh: string;
     priorityNormal: string;
     priorityLow: string;
+    didntKnow: string;
+    knewIt: string;
+    reviewAccuracy: string;
+    newCardAccuracy: string;
     practiceComplete: string;
+    practiceAccuracy: string;
     practicedCount: (n: number) => string;
+    knownCount: (n: number) => string;
     masteredInSession: (n: number) => string;
     practiceAgain: string;
     backToWordbook: string;
@@ -235,6 +243,9 @@ export interface Translations {
     ratingHardDesc: string;
     ratingGoodDesc: string;
     ratingEasyDesc: string;
+    sessionSize: string;
+    leechThreshold: string;
+    leechThresholdDesc: string;
     cardDirection: string;
     termFirst: string;
     meaningFirst: string;

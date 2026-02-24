@@ -15,6 +15,8 @@ import { DEFAULT_QUIZ_SETTINGS } from '@/types/quiz';
 
 const NEW_PER_DAY_OPTIONS = [5, 10, 15, 20, 30, 50];
 const MAX_REVIEWS_OPTIONS = [50, 100, 150, 200, 9999];
+const SESSION_SIZE_OPTIONS = [10, 15, 20, 30, 50];
+const LEECH_THRESHOLD_OPTIONS = [4, 6, 8, 10, 15];
 
 export default function QuizSettingsPage() {
   const repo = useRepository();
@@ -111,6 +113,41 @@ export default function QuizSettingsPage() {
                   onClick={() => setSettings((s) => ({ ...s, jlptFilter: n }))}
                 >
                   N{n}
+                </Button>
+              ))}
+            </div>
+          </section>
+
+          {/* Session size */}
+          <section className="space-y-2">
+            <h2 className="text-sm font-semibold">{t.settings.sessionSize}</h2>
+            <div className="flex flex-wrap gap-2">
+              {SESSION_SIZE_OPTIONS.map((n) => (
+                <Button
+                  key={n}
+                  variant={settings.sessionSize === n ? 'secondary' : 'outline'}
+                  size="sm"
+                  onClick={() => setSettings((s) => ({ ...s, sessionSize: n }))}
+                >
+                  {n}
+                </Button>
+              ))}
+            </div>
+          </section>
+
+          {/* Leech threshold */}
+          <section className="space-y-2">
+            <h2 className="text-sm font-semibold">{t.settings.leechThreshold}</h2>
+            <p className="text-xs text-muted-foreground">{t.settings.leechThresholdDesc}</p>
+            <div className="flex flex-wrap gap-2">
+              {LEECH_THRESHOLD_OPTIONS.map((n) => (
+                <Button
+                  key={n}
+                  variant={settings.leechThreshold === n ? 'secondary' : 'outline'}
+                  size="sm"
+                  onClick={() => setSettings((s) => ({ ...s, leechThreshold: n }))}
+                >
+                  {n}
                 </Button>
               ))}
             </div>
