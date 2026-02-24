@@ -240,6 +240,10 @@ const en: Translations = {
     ratingHardDesc: 'Hard — Recalled with difficulty, slightly longer interval',
     ratingGoodDesc: 'Good — Recalled without trouble, normal interval increase',
     ratingEasyDesc: 'Easy — Instantly recalled, much longer interval',
+    cardDirection: 'Card direction',
+    termFirst: 'Term → Meaning',
+    meaningFirst: 'Meaning → Term',
+    randomDirection: 'Random',
   },
   wordbooks: {
     title: 'Wordbooks',

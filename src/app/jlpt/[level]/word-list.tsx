@@ -45,6 +45,7 @@ function toWord(w: JlptWord, i: number): Word {
     masteredAt: null,
     isLeech: false,
     leechAt: null,
+    isOwned: true,
     createdAt: now,
     updatedAt: now,
   };

@@ -233,6 +233,10 @@ export interface Translations {
     ratingHardDesc: string;
     ratingGoodDesc: string;
     ratingEasyDesc: string;
+    cardDirection: string;
+    termFirst: string;
+    meaningFirst: string;
+    randomDirection: string;
   };
   wordbooks: {
     title: string;

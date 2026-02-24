@@ -26,6 +26,7 @@ import {
 } from '@/lib/quiz/session-store';
 import type { DataRepository } from '@/lib/repository/types';
 import type { WordWithProgress } from '@/types/word';
+import type { CardDirection } from '@/types/quiz';
 
 /**
  * Try restoring a saved quiz session from localStorage.
@@ -93,6 +94,7 @@ function QuizContent() {
   const [streak, setStreak] = useState<number | null>(null);
   const [showReport, setShowReport] = useState(false);
 
+  const [cardDirection, setCardDirection] = useState<CardDirection>('term_first');
   const [sessionStats, setSessionStats] = useState({
     totalReviewed: 0,
     newCards: 0,
@@ -111,9 +113,11 @@ function QuizContent() {
       return;
     }
 
+    const settings = await repo.study.getQuizSettings();
+    setCardDirection(settings.cardDirection);
+
     if (quickStart) {
-      const [settings, todayStats, all] = await Promise.all([
-        repo.study.getQuizSettings(),
+      const [todayStats, all] = await Promise.all([
         repo.study.getDailyStats(getLocalDateString()),
         repo.words.getNonMastered(),
       ]);
@@ -352,6 +356,7 @@ function QuizContent() {
           onMaster={handleMaster}
           progress={{ current: currentIndex + 1, total: dueWords.length }}
           isLoading={loading}
+          cardDirection={cardDirection}
         />
       )}
     </>

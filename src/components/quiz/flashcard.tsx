@@ -5,6 +5,7 @@ import { Crown } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n';
 import { BaseFlashcard } from './base-flashcard';
 import type { WordWithProgress } from '@/types/word';
+import type { CardDirection } from '@/types/quiz';
 
 interface FlashcardProps {
   word?: WordWithProgress;
@@ -12,9 +13,10 @@ interface FlashcardProps {
   onMaster: () => void;
   progress: { current: number; total: number };
   isLoading?: boolean;
+  cardDirection?: CardDirection;
 }
 
-export function Flashcard({ word, onRate, onMaster, progress, isLoading = false }: FlashcardProps) {
+export function Flashcard({ word, onRate, onMaster, progress, isLoading = false, cardDirection }: FlashcardProps) {
   const { t } = useTranslation();
 
   return (
@@ -22,6 +24,7 @@ export function Flashcard({ word, onRate, onMaster, progress, isLoading = false 
       word={word}
       progress={progress}
       isLoading={isLoading}
+      cardDirection={cardDirection}
       testId="flashcard"
       renderLoadingActions={() => (
         <>

@@ -15,6 +15,7 @@ import { invalidateListCache } from '@/lib/list-cache';
 import { selectPracticeWords } from '@/lib/quiz/word-scoring';
 import { requestDueCountRefresh } from '@/lib/quiz/due-count-sync';
 import type { Word } from '@/types/word';
+import type { CardDirection } from '@/types/quiz';
 
 export default function PracticePage({
   params,
@@ -32,6 +33,7 @@ export default function PracticePage({
   const [practiceIndex, setPracticeIndex] = useState(0);
   const [practiceStats, setPracticeStats] = useState({ total: 0, masteredCount: 0 });
   const [practiceComplete, setPracticeComplete] = useState(false);
+  const [cardDirection, setCardDirection] = useState<CardDirection>('term_first');
 
   const [loading, reload] = useLoader(async () => {
     const [settings, wb, allWords] = await Promise.all([
@@ -40,6 +42,7 @@ export default function PracticePage({
       repo.wordbooks.getWords(wordbookId),
     ]);
     if (wb) setWordbookName(wb.name);
+    setCardDirection(settings.cardDirection);
     const nonMastered = allWords.filter((w) => !w.mastered);
     const selected = selectPracticeWords(nonMastered, settings.newPerDay, settings.jlptFilter);
     setPracticeWords(selected);

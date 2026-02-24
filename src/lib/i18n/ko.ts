@@ -240,6 +240,10 @@ const ko: Translations = {
     ratingHardDesc: '어려움 — 기억은 했지만 어려웠음, 간격 소폭 증가',
     ratingGoodDesc: '좋음 — 무리 없이 기억함, 간격 정상 증가',
     ratingEasyDesc: '쉬움 — 즉시 떠올림, 간격 크게 증가',
+    cardDirection: '카드 방향',
+    termFirst: '단어 → 뜻',
+    meaningFirst: '뜻 → 단어',
+    randomDirection: '랜덤',
   },
   wordbooks: {
     title: '단어장',
