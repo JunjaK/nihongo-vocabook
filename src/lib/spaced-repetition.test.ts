@@ -7,9 +7,18 @@ import {
   mapQualityToRating,
   progressToCard,
   cardToProgress,
+  type IntervalFormatter,
 } from './spaced-repetition';
 import { Rating } from 'ts-fsrs';
 import type { StudyProgress } from '@/types/word';
+
+const testFmt: IntervalFormatter = {
+  lessThanMinute: '<1m',
+  minutes: (n) => `${n}m`,
+  hours: (n) => `${n}h`,
+  days: (n) => `${n}d`,
+  months: (n) => `${n}mo`,
+};
 
 function makeProgress(overrides?: Partial<StudyProgress>): StudyProgress {
   return {
@@ -170,7 +179,7 @@ describe('progressToCard / cardToProgress roundtrip', () => {
 
 describe('getReviewPreview', () => {
   it('returns all 4 interval strings for null progress', () => {
-    const preview = getReviewPreview(null);
+    const preview = getReviewPreview(null, testFmt);
     expect(preview).toHaveProperty('again');
     expect(preview).toHaveProperty('hard');
     expect(preview).toHaveProperty('good');
@@ -192,7 +201,7 @@ describe('getReviewPreview', () => {
       elapsedDays: 10,
       lastReviewedAt: new Date(Date.now() - 86400000 * 10),
     });
-    const preview = getReviewPreview(progress);
+    const preview = getReviewPreview(progress, testFmt);
     expect(typeof preview.again).toBe('string');
     expect(typeof preview.hard).toBe('string');
     expect(typeof preview.good).toBe('string');
@@ -200,7 +209,7 @@ describe('getReviewPreview', () => {
   });
 
   it('formats intervals with proper units', () => {
-    const preview = getReviewPreview(null);
+    const preview = getReviewPreview(null, testFmt);
     // Each should end with m, h, d, or mo
     const validPattern = /^(<1m|\d+(m|h|d|mo))$/;
     expect(preview.again).toMatch(validPattern);

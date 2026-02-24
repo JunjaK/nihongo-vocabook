@@ -32,6 +32,7 @@ const en: Translations = {
     feature1: 'Search and save Japanese words with Jisho dictionary',
     feature2: 'Review with FSRS spaced repetition flashcards',
     feature3: 'Wordbook sharing (sign-in required)',
+    feature4: 'Extract words from images via OCR/AI',
   },
   auth: {
     signIn: 'Sign In',
@@ -228,10 +229,6 @@ const en: Translations = {
     maxReviewsPerDay: 'Max reviews per day',
     jlptFilter: 'JLPT Level Filter',
     priorityFilter: 'Priority Filter',
-    newCardOrder: 'New card order',
-    orderRecent: 'Most recent',
-    orderPriority: 'By priority',
-    orderJlpt: 'By JLPT level',
     allLevels: 'All levels',
     allPriorities: 'All priorities',
     achievements: 'Achievements',

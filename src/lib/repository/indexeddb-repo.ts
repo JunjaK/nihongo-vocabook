@@ -173,6 +173,19 @@ class IndexedDBWordRepository implements WordRepository {
     return localWordToWord(word as LocalWord & { id: number }, state);
   }
 
+  async getByIds(ids: string[]): Promise<Word[]> {
+    const numIds = ids.map(Number);
+    const words = await db.words.bulkGet(numIds);
+    const result: Word[] = [];
+    for (const word of words) {
+      if (!word) continue;
+      const typed = word as LocalWord & { id: number };
+      const state = await getState(typed.id);
+      result.push(localWordToWord(typed, state));
+    }
+    return result;
+  }
+
   async search(query: string): Promise<Word[]> {
     const lower = query.toLowerCase();
     const words = await db.words
@@ -309,6 +322,21 @@ class IndexedDBStudyRepository implements StudyRepository {
     return localProgressToProgress(
       progress as LocalStudyProgress & { id: number },
     );
+  }
+
+  async getProgressByIds(wordIds: string[]): Promise<Map<string, StudyProgress>> {
+    const map = new Map<string, StudyProgress>();
+    if (wordIds.length === 0) return map;
+    const numIds = wordIds.map(Number);
+    const rows = await db.studyProgress
+      .where('wordId')
+      .anyOf(numIds)
+      .toArray();
+    for (const row of rows) {
+      const progress = localProgressToProgress(row as LocalStudyProgress & { id: number });
+      map.set(progress.wordId, progress);
+    }
+    return map;
   }
 
   async getDueCount(): Promise<number> {
@@ -462,7 +490,6 @@ class IndexedDBStudyRepository implements StudyRepository {
       maxReviewsPerDay: settings.maxReviewsPerDay,
       jlptFilter: settings.jlptFilter,
       priorityFilter: settings.priorityFilter,
-      newCardOrder: settings.newCardOrder as QuizSettings['newCardOrder'],
     };
   }
 

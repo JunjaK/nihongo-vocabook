@@ -1,11 +1,9 @@
 'use client';
 
-import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
 import { Crown } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n';
-import { bottomSep } from '@/lib/styles';
+import { BaseFlashcard } from './base-flashcard';
 import type { WordWithProgress } from '@/types/word';
 
 interface FlashcardProps {
@@ -18,21 +16,15 @@ interface FlashcardProps {
 
 export function Flashcard({ word, onRate, onMaster, progress, isLoading = false }: FlashcardProps) {
   const { t } = useTranslation();
-  const [revealed, setRevealed] = useState(false);
 
-  const pct = progress.total > 0 ? (progress.current / progress.total) * 100 : 0;
-
-  if (isLoading) {
-    return (
-      <div className="flex min-h-0 flex-1 flex-col">
-        <div className="h-0.5 w-full bg-muted" />
-        <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-4 px-4">
-          <Skeleton className="h-5 w-24 rounded" />
-          <Skeleton className="h-10 w-48 rounded" />
-          <Skeleton className="mt-2 h-5 w-32 rounded" />
-        </div>
-        <div className="shrink-0 px-4 pb-3 pt-3">
-          <div className={bottomSep} />
+  return (
+    <BaseFlashcard
+      word={word}
+      progress={progress}
+      isLoading={isLoading}
+      testId="flashcard"
+      renderLoadingActions={() => (
+        <>
           <div className="flex gap-2">
             <Button variant="outline" disabled className="h-8 flex-1 rounded-lg border-rose-500/30 bg-rose-500/5 text-sm text-rose-300">{t.quiz.again}</Button>
             <Button variant="outline" disabled className="h-8 flex-1 rounded-lg border-primary/40 bg-primary/15 text-sm text-primary">{t.quiz.hard}</Button>
@@ -43,119 +35,56 @@ export function Flashcard({ word, onRate, onMaster, progress, isLoading = false 
             <Crown className="size-3.5" />
             {t.wordDetail.markMastered}
           </Button>
-        </div>
-      </div>
-    );
-  }
-
-  if (!word) {
-    return null;
-  }
-
-  return (
-    <div className="flex min-h-0 flex-1 flex-col">
-      {/* Progress bar */}
-      <div className="h-0.5 w-full bg-muted">
-        <div
-          className="h-full bg-primary transition-all duration-300 ease-out"
-          style={{ width: `${pct}%` }}
-        />
-      </div>
-
-      {/* Tap zone */}
-      <div
-        className="animate-card-enter relative min-h-0 flex-1 cursor-pointer px-4"
-        onClick={() => setRevealed((v) => !v)}
-        data-testid="flashcard"
-      >
-        {/* Term — absolutely centered, never moves */}
-        <div className="absolute inset-x-4 top-1/2 -translate-y-1/2 text-center">
-          <div className="text-4xl font-bold md:text-5xl">
-            {word.term}
+        </>
+      )}
+      renderActions={({ onAdvance }) => (
+        <>
+          <div className="flex gap-2" data-testid="flashcard-rating">
+            <Button
+              variant="outline"
+              className="h-8 flex-1 rounded-lg border-rose-500/30 bg-rose-500/5 text-sm text-rose-300 hover:border-rose-400/40 hover:bg-rose-500/10"
+              onClick={() => { onRate(0); onAdvance(); }}
+              data-testid="flashcard-rate-0"
+            >
+              {t.quiz.again}
+            </Button>
+            <Button
+              variant="outline"
+              className="h-8 flex-1 rounded-lg border-primary/40 bg-primary/15 text-sm text-primary hover:border-primary hover:bg-primary/25"
+              onClick={() => { onRate(3); onAdvance(); }}
+              data-testid="flashcard-rate-3"
+            >
+              {t.quiz.hard}
+            </Button>
+            <Button
+              variant="outline"
+              className="h-8 flex-1 rounded-lg border-amber-500/30 bg-amber-500/5 text-sm text-amber-300 hover:border-amber-400/40 hover:bg-amber-500/10"
+              onClick={() => { onRate(4); onAdvance(); }}
+              data-testid="flashcard-rate-4"
+            >
+              {t.quiz.good}
+            </Button>
+            <Button
+              variant="outline"
+              className="h-8 flex-1 rounded-lg border-emerald-500/30 bg-emerald-500/5 text-sm text-emerald-300 hover:border-emerald-400/40 hover:bg-emerald-500/10"
+              onClick={() => { onRate(5); onAdvance(); }}
+              data-testid="flashcard-rate-5"
+            >
+              {t.quiz.easy}
+            </Button>
           </div>
-        </div>
-
-        {/* Reading (above center) */}
-        <div className="absolute inset-x-4 top-1/2 -translate-y-[calc(100%+2rem)] text-center">
-          {revealed && word.reading ? (
-            <div className="animate-fade-in text-lg text-muted-foreground">
-              {word.reading}
-            </div>
-          ) : null}
-        </div>
-
-        {/* Meaning + notes (below center) */}
-        <div className="absolute inset-x-4 top-1/2 translate-y-8 text-center md:translate-y-10">
-          {revealed ? (
-            <>
-              <div className="animate-reveal-up text-2xl font-semibold text-primary">
-                {word.meaning}
-              </div>
-              {word.notes && (
-                <div
-                  className="animate-reveal-up mt-2 text-sm text-muted-foreground"
-                  style={{ animationDelay: '100ms' }}
-                >
-                  {word.notes}
-                </div>
-              )}
-            </>
-          ) : (
-            <div className="text-sm text-muted-foreground">
-              {t.quiz.tapToReveal}
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Rating buttons + master */}
-      <div className="shrink-0 px-4 pb-3 pt-3">
-        <div className={bottomSep} />
-        <div className="flex gap-2" data-testid="flashcard-rating">
           <Button
             variant="outline"
-            className="h-8 flex-1 rounded-lg border-rose-500/30 bg-rose-500/5 text-sm text-rose-300 hover:border-rose-400/40 hover:bg-rose-500/10"
-            onClick={() => { onRate(0); setRevealed(false); }}
-            data-testid="flashcard-rate-0"
+            size="sm"
+            className="h-8 mt-2 w-full gap-1.5 text-xs"
+            onClick={() => { onMaster(); onAdvance(); }}
+            data-testid="flashcard-rate-master"
           >
-            {t.quiz.again}
+            <Crown className="size-3.5" />
+            {t.wordDetail.markMastered}
           </Button>
-          <Button
-            variant="outline"
-            className="h-8 flex-1 rounded-lg border-primary/40 bg-primary/15 text-sm text-primary hover:border-primary hover:bg-primary/25"
-            onClick={() => { onRate(3); setRevealed(false); }}
-            data-testid="flashcard-rate-3"
-          >
-            {t.quiz.hard}
-          </Button>
-          <Button
-            variant="outline"
-            className="h-8 flex-1 rounded-lg border-amber-500/30 bg-amber-500/5 text-sm text-amber-300 hover:border-amber-400/40 hover:bg-amber-500/10"
-            onClick={() => { onRate(4); setRevealed(false); }}
-            data-testid="flashcard-rate-4"
-          >
-            {t.quiz.good}
-          </Button>
-          <Button
-            variant="outline"
-            className="h-8 flex-1 rounded-lg border-emerald-500/30 bg-emerald-500/5 text-sm text-emerald-300 hover:border-emerald-400/40 hover:bg-emerald-500/10"
-            onClick={() => { onRate(5); setRevealed(false); }}
-            data-testid="flashcard-rate-5"
-          >
-            {t.quiz.easy}
-          </Button>
-        </div>
-        <Button
-          variant="outline"
-          size="sm"
-          className="h-8 mt-2 w-full gap-1.5 text-xs"
-          onClick={() => { onMaster(); setRevealed(false); }}
-          data-testid="flashcard-rate-master"
-        >
-          <Crown className="size-3.5" />
-          {t.wordDetail.markMastered}
-        </Button>
-      </div>
-    </div>
+        </>
+      )}
+    />
   );
 }

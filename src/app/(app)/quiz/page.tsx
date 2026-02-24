@@ -43,21 +43,19 @@ async function tryRestoreSession(
   const saved = readSession(mode);
   if (!saved) return null;
 
-  const words = (
-    await Promise.all(saved.wordIds.map((id) => repo.words.getById(id)))
-  ).filter((w): w is NonNullable<typeof w> => w !== null && !w.mastered);
+  const allWords = await repo.words.getByIds(saved.wordIds);
+  const words = allWords.filter((w) => !w.mastered);
 
   if (words.length === 0) {
     clearSession(mode);
     return null;
   }
 
-  const withProgress = await Promise.all(
-    words.map(async (w) => ({
-      ...w,
-      progress: await repo.study.getProgress(w.id),
-    })),
-  );
+  const progressMap = await repo.study.getProgressByIds(words.map((w) => w.id));
+  const withProgress: WordWithProgress[] = words.map((w) => ({
+    ...w,
+    progress: progressMap.get(w.id) ?? null,
+  }));
 
   const currentWordId = saved.wordIds[saved.currentIndex];
   const restoredIndex = currentWordId
@@ -114,21 +112,24 @@ function QuizContent() {
     }
 
     if (quickStart) {
-      const settings = await repo.study.getQuizSettings();
-      const all = await repo.words.getNonMastered();
-      const take = Math.min(Math.max(settings.newPerDay, 0), all.length);
+      const [settings, todayStats, all] = await Promise.all([
+        repo.study.getQuizSettings(),
+        repo.study.getDailyStats(getLocalDateString()),
+        repo.words.getNonMastered(),
+      ]);
+      const remaining = Math.max(0, settings.newPerDay - (todayStats?.newCount ?? 0));
+      const take = Math.min(remaining, all.length);
       const shuffled = [...all];
       for (let i = shuffled.length - 1; i > 0; i -= 1) {
         const j = Math.floor(Math.random() * (i + 1));
         [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
       }
       const selected = shuffled.slice(0, take);
-      const withProgress = await Promise.all(
-        selected.map(async (w) => ({
-          ...w,
-          progress: await repo.study.getProgress(w.id),
-        })),
-      );
+      const progressMap = await repo.study.getProgressByIds(selected.map((w) => w.id));
+      const withProgress: WordWithProgress[] = selected.map((w) => ({
+        ...w,
+        progress: progressMap.get(w.id) ?? null,
+      }));
       setDueWords(withProgress);
       setCurrentIndex(0);
       setCompleted(0);
@@ -240,14 +241,22 @@ function QuizContent() {
   const handleMaster = async () => {
     const currentWord = dueWords[currentIndex];
     await markWordMastered(repo, currentWord.id);
-    setDueWords((prev) => {
-      const next = prev.filter((_, i) => i !== currentIndex);
-      if (next.length === 0 || currentIndex >= next.length) {
-        setCurrentIndex(0);
-      }
-      return next;
-    });
+    const remaining = dueWords.filter((_, i) => i !== currentIndex);
     setCompleted((c) => c + 1);
+
+    if (remaining.length === 0) {
+      setDueWords(remaining);
+      if (sessionStats.totalReviewed > 0 || completed > 0) {
+        setShowReport(true);
+        const newStreak = await repo.study.getStreakDays();
+        setStreak(newStreak);
+      }
+      return;
+    }
+
+    const nextIndex = currentIndex >= remaining.length ? 0 : currentIndex;
+    setDueWords(remaining);
+    setCurrentIndex(nextIndex);
   };
 
   const handleContinueStudying = async () => {

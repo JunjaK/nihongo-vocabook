@@ -1,3 +1,6 @@
+export { getLocalDateString } from './date-utils';
+import { getLocalDateString } from './date-utils';
+
 export type QuizMode = 'general' | 'quickstart';
 
 export type QuizSessionSnapshot = {
@@ -17,15 +20,6 @@ export type QuizSessionSnapshot = {
 
 function sessionKey(mode: QuizMode): string {
   return `quiz:session:${mode}`;
-}
-
-/** YYYY-MM-DD in browser-local timezone, matching date-utils.getLocalDateString(). */
-export function getLocalDateString(): string {
-  const d = new Date();
-  const year = d.getFullYear();
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
 }
 
 export function readSession(mode: QuizMode): QuizSessionSnapshot | null {

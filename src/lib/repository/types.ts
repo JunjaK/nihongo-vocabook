@@ -33,6 +33,7 @@ export interface WordRepository {
   }): Promise<PaginatedWords>;
   getMastered(): Promise<Word[]>;
   getById(id: string): Promise<Word | null>;
+  getByIds(ids: string[]): Promise<Word[]>;
   search(query: string): Promise<Word[]>;
   create(word: CreateWordInput): Promise<Word>;
   update(id: string, word: UpdateWordInput): Promise<Word>;
@@ -43,6 +44,7 @@ export interface WordRepository {
 
 export interface StudyRepository {
   getProgress(wordId: string): Promise<StudyProgress | null>;
+  getProgressByIds(wordIds: string[]): Promise<Map<string, StudyProgress>>;
   getDueCount(): Promise<number>;
   getDueWords(limit?: number): Promise<WordWithProgress[]>;
   recordReview(wordId: string, quality: number): Promise<void>;

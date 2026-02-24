@@ -3,7 +3,6 @@ export interface QuizSettings {
   maxReviewsPerDay: number;
   jlptFilter: number | null;
   priorityFilter: number | null;
-  newCardOrder: 'recent' | 'priority' | 'jlpt';
 }
 
 export interface DailyStats {
@@ -33,5 +32,4 @@ export const DEFAULT_QUIZ_SETTINGS: QuizSettings = {
   maxReviewsPerDay: 100,
   jlptFilter: null,
   priorityFilter: null,
-  newCardOrder: 'recent',
 };

@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { BookOpen, Brain, Share2 } from 'lucide-react';
+import { BookOpen, Brain, Camera, Share2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTranslation } from '@/lib/i18n';
 import { bottomSep } from '@/lib/styles';
@@ -12,6 +12,7 @@ export default function LandingPage() {
   const features = [
     { icon: BookOpen, text: t.landing.feature1 },
     { icon: Brain, text: t.landing.feature2 },
+    { icon: Camera, text: t.landing.feature4 },
     { icon: Share2, text: t.landing.feature3 },
   ];
 

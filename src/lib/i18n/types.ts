@@ -30,6 +30,7 @@ export interface Translations {
     feature1: string;
     feature2: string;
     feature3: string;
+    feature4: string;
   };
   auth: {
     signIn: string;
@@ -221,10 +222,6 @@ export interface Translations {
     maxReviewsPerDay: string;
     jlptFilter: string;
     priorityFilter: string;
-    newCardOrder: string;
-    orderRecent: string;
-    orderPriority: string;
-    orderJlpt: string;
     allLevels: string;
     allPriorities: string;
     achievements: string;

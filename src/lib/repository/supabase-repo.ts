@@ -272,6 +272,19 @@ class SupabaseWordRepository implements WordRepository {
     return dbWordToWord(row as unknown as DbWord, state);
   }
 
+  async getByIds(ids: string[]): Promise<Word[]> {
+    if (ids.length === 0) return [];
+    const { data, error } = await this.supabase
+      .from('words')
+      .select('*, user_word_state(*)')
+      .in('id', ids);
+    if (error) throw error;
+    return (data ?? []).map((row: Record<string, unknown>) => {
+      const state = extractState(row);
+      return dbWordToWord(row as unknown as DbWord, state);
+    });
+  }
+
   async search(query: string): Promise<Word[]> {
     const { data, error } = await this.supabase
       .from('words')
@@ -501,6 +514,21 @@ class SupabaseStudyRepository implements StudyRepository {
     return dbProgressToProgress(data as DbStudyProgress);
   }
 
+  async getProgressByIds(wordIds: string[]): Promise<Map<string, StudyProgress>> {
+    const map = new Map<string, StudyProgress>();
+    if (wordIds.length === 0) return map;
+    const { data, error } = await this.supabase
+      .from('study_progress')
+      .select('*')
+      .in('word_id', wordIds);
+    if (error) throw error;
+    for (const row of data ?? []) {
+      const progress = dbProgressToProgress(row as DbStudyProgress);
+      map.set(progress.wordId, progress);
+    }
+    return map;
+  }
+
   async getDueCount(): Promise<number> {
     return this.cached('due_count', 5_000, () => this._getDueCountImpl());
   }
@@ -719,7 +747,6 @@ class SupabaseStudyRepository implements StudyRepository {
         maxReviewsPerDay: data.max_reviews_per_day,
         jlptFilter: data.jlpt_filter,
         priorityFilter: data.priority_filter,
-        newCardOrder: data.new_card_order,
       };
     });
   }
@@ -733,7 +760,6 @@ class SupabaseStudyRepository implements StudyRepository {
     if (settings.maxReviewsPerDay !== undefined) updateData.max_reviews_per_day = settings.maxReviewsPerDay;
     if (settings.jlptFilter !== undefined) updateData.jlpt_filter = settings.jlptFilter;
     if (settings.priorityFilter !== undefined) updateData.priority_filter = settings.priorityFilter;
-    if (settings.newCardOrder !== undefined) updateData.new_card_order = settings.newCardOrder;
 
     const { error } = await this.supabase
       .from('quiz_settings')

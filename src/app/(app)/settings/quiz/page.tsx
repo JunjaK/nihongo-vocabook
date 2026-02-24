@@ -144,27 +144,6 @@ export default function QuizSettingsPage() {
             </div>
           </section>
 
-          {/* New card order */}
-          <section className="space-y-2">
-            <h2 className="text-sm font-semibold">{t.settings.newCardOrder}</h2>
-            <div className="flex flex-wrap gap-2">
-              {([
-                { value: 'recent' as const, label: t.settings.orderRecent },
-                { value: 'priority' as const, label: t.settings.orderPriority },
-                { value: 'jlpt' as const, label: t.settings.orderJlpt },
-              ]).map(({ value, label }) => (
-                <Button
-                  key={value}
-                  variant={settings.newCardOrder === value ? 'secondary' : 'outline'}
-                  size="sm"
-                  onClick={() => setSettings((s) => ({ ...s, newCardOrder: value }))}
-                >
-                  {label}
-                </Button>
-              ))}
-            </div>
-          </section>
-
           {/* Rating guide — informational block at bottom */}
           <section className="rounded-lg bg-muted/50 p-3">
             <div className="mb-2 flex items-center gap-1.5 text-sm font-semibold">

@@ -32,6 +32,7 @@ const ko: Translations = {
     feature1: 'Jisho 사전으로 일본어 단어 검색 및 저장',
     feature2: 'FSRS 간격반복 플래시카드로 복습',
     feature3: '단어장 공유 기능 (로그인 필수)',
+    feature4: '이미지에서 OCR/AI로 단어 자동 추출',
   },
   auth: {
     signIn: '로그인',
@@ -228,10 +229,6 @@ const ko: Translations = {
     maxReviewsPerDay: '하루 최대 복습 수',
     jlptFilter: 'JLPT 레벨 필터',
     priorityFilter: '우선순위 필터',
-    newCardOrder: '새 카드 순서',
-    orderRecent: '최신순',
-    orderPriority: '중요도순',
-    orderJlpt: 'JLPT 레벨순',
     allLevels: '전체 레벨',
     allPriorities: '전체 우선순위',
     achievements: '업적',

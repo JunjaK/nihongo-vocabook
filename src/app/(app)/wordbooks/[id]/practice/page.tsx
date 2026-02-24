@@ -1,6 +1,6 @@
 'use client';
 
-import { use, useState, useRef, useEffect } from 'react';
+import { use, useState, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { BookOpenCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -33,12 +33,6 @@ export default function PracticePage({
   const [practiceStats, setPracticeStats] = useState({ total: 0, masteredCount: 0 });
   const [practiceComplete, setPracticeComplete] = useState(false);
 
-  // Refs to avoid stale closures in setTimeout
-  const practiceWordsRef = useRef(practiceWords);
-  const practiceIndexRef = useRef(practiceIndex);
-  useEffect(() => { practiceWordsRef.current = practiceWords; }, [practiceWords]);
-  useEffect(() => { practiceIndexRef.current = practiceIndex; }, [practiceIndex]);
-
   const [loading, reload] = useLoader(async () => {
     const [settings, wb, allWords] = await Promise.all([
       repo.study.getQuizSettings(),
@@ -60,6 +54,19 @@ export default function PracticePage({
     };
   }, []);
 
+  const advancePractice = useCallback(() => {
+    setPracticeWords((words) => {
+      setPracticeIndex((idx) => {
+        if (idx + 1 < words.length) {
+          return idx + 1;
+        }
+        setPracticeComplete(true);
+        return idx;
+      });
+      return words;
+    });
+  }, []);
+
   const handleSetPriority = async (wId: string, priority: number) => {
     try {
       await repo.words.setPriority(wId, priority);
@@ -67,13 +74,7 @@ export default function PracticePage({
       setPracticeWords((prev) =>
         prev.map((w) => (w.id === wId ? { ...w, priority } : w)),
       );
-      setTimeout(() => {
-        if (practiceIndexRef.current + 1 < practiceWordsRef.current.length) {
-          setPracticeIndex((i) => i + 1);
-        } else {
-          setPracticeComplete(true);
-        }
-      }, 300);
+      setTimeout(advancePractice, 300);
     } catch (error) {
       console.error('Failed to update priority', error);
     }

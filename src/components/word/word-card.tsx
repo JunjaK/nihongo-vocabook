@@ -8,21 +8,24 @@ interface WordCardProps {
   word: Word;
   showReading: boolean;
   showMeaning: boolean;
+  /** When provided, renders a clickable div instead of a Link */
+  onClick?: () => void;
 }
 
-export function WordCard({ word, showReading, showMeaning }: WordCardProps) {
+export function WordCard({ word, showReading, showMeaning, onClick }: WordCardProps) {
   const [revealed, setRevealed] = useState(false);
 
   const readingVisible = showReading || revealed;
   const meaningVisible = showMeaning || revealed;
 
+  const Wrapper = onClick ? 'button' : Link;
+  const wrapperProps = onClick
+    ? { onClick, type: 'button' as const, className: 'min-w-0 flex-1 p-4 text-left', 'data-testid': 'word-card' }
+    : { href: `/words/${word.id}`, className: 'min-w-0 flex-1 p-4', 'data-testid': 'word-card' };
+
   return (
-    <div className="flex items-center rounded-lg border transition-colors hover:bg-accent">
-      <Link
-        href={`/words/${word.id}`}
-        className="min-w-0 flex-1 p-4"
-        data-testid="word-card"
-      >
+    <div className="flex items-start rounded-lg border transition-colors hover:bg-accent">
+      <Wrapper {...(wrapperProps as any)}>
         <div className="flex items-center gap-1.5">
           {word.priority === 1 && (
             <span className="size-2 shrink-0 rounded-full bg-red-500" />
@@ -41,7 +44,7 @@ export function WordCard({ word, showReading, showMeaning }: WordCardProps) {
         {meaningVisible && (
           <div className="mt-1 text-base text-primary">{word.meaning}</div>
         )}
-      </Link>
+      </Wrapper>
       {(!showReading || !showMeaning) && (
         <button
           onClick={(e) => {

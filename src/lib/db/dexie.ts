@@ -58,7 +58,7 @@ export interface LocalQuizSettings {
   maxReviewsPerDay: number;
   jlptFilter: number | null;
   priorityFilter: number | null;
-  newCardOrder: string;
+  newCardOrder?: string; // deprecated, kept for backward compat with existing DB rows
 }
 
 export interface LocalDailyStats {
