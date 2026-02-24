@@ -52,6 +52,8 @@ export interface StudyRepository {
   updateQuizSettings(settings: Partial<QuizSettings>): Promise<void>;
   getDailyStats(date: string): Promise<DailyStats | null>;
   incrementDailyStats(date: string, isNew: boolean, isAgain: boolean): Promise<void>;
+  incrementPracticeStats(date: string, known: boolean): Promise<void>;
+  checkAndMarkLeech(wordId: string): Promise<boolean>;
   getStreakDays(): Promise<number>;
   getAchievements(): Promise<Achievement[]>;
   unlockAchievement(type: string): Promise<Achievement | null>;

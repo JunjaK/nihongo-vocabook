@@ -9,8 +9,22 @@ export interface Word {
   priority: number;
   mastered: boolean;
   masteredAt: Date | null;
+  isLeech: boolean;
+  leechAt: Date | null;
+  /** true when the word was created by the current user; false for subscribed wordbook words */
+  isOwned: boolean;
   createdAt: Date;
   updatedAt: Date;
+}
+
+export interface WordExample {
+  id: string;
+  wordId: string;
+  sentenceJa: string;
+  sentenceReading: string | null;
+  sentenceMeaning: string | null;
+  source: string;
+  createdAt: Date;
 }
 
 export interface CreateWordInput {

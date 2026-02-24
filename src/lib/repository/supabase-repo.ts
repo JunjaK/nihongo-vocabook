@@ -47,6 +47,8 @@ interface DbUserWordState {
   mastered: boolean;
   mastered_at: string | null;
   priority: number;
+  is_leech: boolean;
+  leech_at: string | null;
 }
 
 interface DbStudyProgress {
@@ -87,7 +89,7 @@ interface DbWordbookItem {
   added_at: string;
 }
 
-function dbWordToWord(row: DbWord, state?: DbUserWordState | null): Word {
+function dbWordToWord(row: DbWord, state?: DbUserWordState | null, currentUserId?: string): Word {
   return {
     id: row.id,
     term: row.term,
@@ -99,6 +101,9 @@ function dbWordToWord(row: DbWord, state?: DbUserWordState | null): Word {
     priority: state?.priority ?? 2,
     mastered: state?.mastered ?? false,
     masteredAt: state?.mastered_at ? new Date(state.mastered_at) : null,
+    isLeech: state?.is_leech ?? false,
+    leechAt: state?.leech_at ? new Date(state.leech_at) : null,
+    isOwned: currentUserId ? row.user_id === currentUserId : true,
     createdAt: new Date(row.created_at),
     updatedAt: new Date(row.updated_at),
   };
@@ -160,9 +165,16 @@ function extractState(row: Record<string, unknown>): DbUserWordState | null {
 }
 
 class SupabaseWordRepository implements WordRepository {
+  private _userIdCache = { userId: null as string | null };
+
   constructor(private supabase: SupabaseClient) {}
 
+  private getUserId(): Promise<string> {
+    return resolveUserId(this.supabase, this._userIdCache);
+  }
+
   async getAll(): Promise<Word[]> {
+    const userId = await this.getUserId();
     const { data, error } = await this.supabase
       .from('words')
       .select('*, user_word_state(*)')
@@ -170,7 +182,7 @@ class SupabaseWordRepository implements WordRepository {
     if (error) throw error;
     const words = (data ?? []).map((row: Record<string, unknown>) => {
       const state = extractState(row);
-      return dbWordToWord(row as unknown as DbWord, state);
+      return dbWordToWord(row as unknown as DbWord, state, userId);
     });
     // Sort by priority asc, then created_at desc (already fetched desc)
     words.sort((a, b) => a.priority - b.priority);
@@ -178,6 +190,7 @@ class SupabaseWordRepository implements WordRepository {
   }
 
   async getNonMastered(): Promise<Word[]> {
+    const userId = await this.getUserId();
     const { data, error } = await this.supabase
       .from('words')
       .select('*, user_word_state(*)')
@@ -186,7 +199,7 @@ class SupabaseWordRepository implements WordRepository {
     const words = (data ?? [])
       .map((row: Record<string, unknown>) => {
         const state = extractState(row);
-        return dbWordToWord(row as unknown as DbWord, state);
+        return dbWordToWord(row as unknown as DbWord, state, userId);
       })
       .filter((w) => !w.mastered);
     words.sort((a, b) => a.priority - b.priority);
@@ -198,6 +211,7 @@ class SupabaseWordRepository implements WordRepository {
     limit: number;
     offset: number;
   }): Promise<import('./types').PaginatedWords> {
+    const userId = await this.getUserId();
     let query = this.supabase
       .from('v_words_active')
       .select('*', { count: 'exact' });
@@ -221,7 +235,7 @@ class SupabaseWordRepository implements WordRepository {
 
     const words = (data ?? []).map((row: Record<string, unknown>) => {
       // v_words_active already has flattened priority/mastered columns
-      const dbRow = row as unknown as DbWord & { priority: number; mastered: boolean; mastered_at: string | null };
+      const dbRow = row as unknown as DbWord & { priority: number; mastered: boolean; mastered_at: string | null; is_leech: boolean; leech_at: string | null };
       return {
         id: dbRow.id,
         term: dbRow.term,
@@ -233,6 +247,9 @@ class SupabaseWordRepository implements WordRepository {
         priority: dbRow.priority ?? 2,
         mastered: dbRow.mastered ?? false,
         masteredAt: dbRow.mastered_at ? new Date(dbRow.mastered_at) : null,
+        isLeech: dbRow.is_leech ?? false,
+        leechAt: dbRow.leech_at ? new Date(dbRow.leech_at) : null,
+        isOwned: dbRow.user_id === userId,
         createdAt: new Date(dbRow.created_at),
         updatedAt: new Date(dbRow.updated_at),
       } satisfies Word;
@@ -242,6 +259,7 @@ class SupabaseWordRepository implements WordRepository {
   }
 
   async getMastered(): Promise<Word[]> {
+    const userId = await this.getUserId();
     // Query from user_word_state where mastered=true, joining words
     // This returns both owned + subscribed mastered words
     const { data, error } = await this.supabase
@@ -253,11 +271,12 @@ class SupabaseWordRepository implements WordRepository {
     return (data ?? []).map((row: Record<string, unknown>) => {
       const state = row as unknown as DbUserWordState;
       const word = row.words as DbWord;
-      return dbWordToWord(word, state);
+      return dbWordToWord(word, state, userId);
     });
   }
 
   async getById(id: string): Promise<Word | null> {
+    const userId = await this.getUserId();
     const { data, error } = await this.supabase
       .from('words')
       .select('*, user_word_state(*)')
@@ -269,11 +288,12 @@ class SupabaseWordRepository implements WordRepository {
     }
     const row = data as Record<string, unknown>;
     const state = extractState(row);
-    return dbWordToWord(row as unknown as DbWord, state);
+    return dbWordToWord(row as unknown as DbWord, state, userId);
   }
 
   async getByIds(ids: string[]): Promise<Word[]> {
     if (ids.length === 0) return [];
+    const userId = await this.getUserId();
     const { data, error } = await this.supabase
       .from('words')
       .select('*, user_word_state(*)')
@@ -281,11 +301,12 @@ class SupabaseWordRepository implements WordRepository {
     if (error) throw error;
     return (data ?? []).map((row: Record<string, unknown>) => {
       const state = extractState(row);
-      return dbWordToWord(row as unknown as DbWord, state);
+      return dbWordToWord(row as unknown as DbWord, state, userId);
     });
   }
 
   async search(query: string): Promise<Word[]> {
+    const userId = await this.getUserId();
     const { data, error } = await this.supabase
       .from('words')
       .select('*, user_word_state(*)')
@@ -294,13 +315,12 @@ class SupabaseWordRepository implements WordRepository {
     if (error) throw error;
     return (data ?? []).map((row: Record<string, unknown>) => {
       const state = extractState(row);
-      return dbWordToWord(row as unknown as DbWord, state);
+      return dbWordToWord(row as unknown as DbWord, state, userId);
     });
   }
 
   async create(input: CreateWordInput): Promise<Word> {
-    const { data: userData } = await this.supabase.auth.getUser();
-    const userId = userData.user!.id;
+    const userId = await this.getUserId();
 
     // Insert word (without priority — that lives in user_word_state)
     const { data, error } = await this.supabase
@@ -335,10 +355,11 @@ class SupabaseWordRepository implements WordRepository {
       });
     if (stateError) throw stateError;
 
-    return dbWordToWord(word, { user_id: userId, word_id: word.id, mastered: false, mastered_at: null, priority });
+    return dbWordToWord(word, { user_id: userId, word_id: word.id, mastered: false, mastered_at: null, priority, is_leech: false, leech_at: null }, userId);
   }
 
   async update(id: string, input: UpdateWordInput): Promise<Word> {
+    const userId = await this.getUserId();
     const updatesWordContent =
       input.term !== undefined ||
       input.reading !== undefined ||
@@ -350,9 +371,6 @@ class SupabaseWordRepository implements WordRepository {
     // Priority-only updates must not PATCH words table.
     // Shared/subscribed words are not updatable in words, but user_word_state is.
     if (!updatesWordContent && input.priority !== undefined) {
-      const { data: userData } = await this.supabase.auth.getUser();
-      const userId = userData.user!.id;
-
       const { error: stateError } = await this.supabase
         .from('user_word_state')
         .upsert(
@@ -373,7 +391,7 @@ class SupabaseWordRepository implements WordRepository {
       if (refreshError) throw refreshError;
 
       const row = refreshed as Record<string, unknown>;
-      return dbWordToWord(row as unknown as DbWord, extractState(row));
+      return dbWordToWord(row as unknown as DbWord, extractState(row), userId);
     }
 
     const updateData: Record<string, unknown> = { updated_at: new Date().toISOString() };
@@ -397,12 +415,11 @@ class SupabaseWordRepository implements WordRepository {
 
     // Update priority in user_word_state if provided
     if (input.priority !== undefined) {
-      const { data: userData } = await this.supabase.auth.getUser();
       await this.supabase
         .from('user_word_state')
         .upsert(
           {
-            user_id: userData.user!.id,
+            user_id: userId,
             word_id: id,
             priority: input.priority,
           },
@@ -415,12 +432,11 @@ class SupabaseWordRepository implements WordRepository {
     if (input.priority !== undefined && state) {
       state = { ...state, priority: input.priority };
     }
-    return dbWordToWord(row as unknown as DbWord, state);
+    return dbWordToWord(row as unknown as DbWord, state, userId);
   }
 
   async setPriority(id: string, priority: number): Promise<void> {
-    const { data: userData } = await this.supabase.auth.getUser();
-    const userId = userData.user!.id;
+    const userId = await this.getUserId();
 
     const { error } = await this.supabase
       .from('user_word_state')
@@ -441,8 +457,7 @@ class SupabaseWordRepository implements WordRepository {
   }
 
   async setMastered(id: string, mastered: boolean): Promise<Word> {
-    const { data: userData } = await this.supabase.auth.getUser();
-    const userId = userData.user!.id;
+    const userId = await this.getUserId();
     const now = new Date().toISOString();
 
     // Upsert into user_word_state (works for owned + subscribed)
@@ -471,15 +486,29 @@ class SupabaseWordRepository implements WordRepository {
       .single();
     if (error) throw error;
     const row = data as Record<string, unknown>;
-    return dbWordToWord(row as unknown as DbWord, extractState(row));
+    return dbWordToWord(row as unknown as DbWord, extractState(row), userId);
   }
+}
+
+/** Cached userId helper shared across repositories */
+async function resolveUserId(supabase: SupabaseClient, cache: { userId: string | null }): Promise<string> {
+  if (!cache.userId) {
+    const { data } = await supabase.auth.getUser();
+    cache.userId = data.user!.id;
+  }
+  return cache.userId;
 }
 
 class SupabaseStudyRepository implements StudyRepository {
   private _cache = new Map<string, { data: unknown; expiry: number }>();
   private _inflight = new Map<string, Promise<unknown>>();
+  private _userIdCache = { userId: null as string | null };
 
   constructor(private supabase: SupabaseClient) {}
+
+  private getUserId(): Promise<string> {
+    return resolveUserId(this.supabase, this._userIdCache);
+  }
 
   /** Dedup concurrent calls + short-lived cache */
   private async cached<T>(key: string, ttlMs: number, fn: () => Promise<T>): Promise<T> {
@@ -581,6 +610,7 @@ class SupabaseStudyRepository implements StudyRepository {
       .lte('next_review', now);
     if (progressError) throw progressError;
 
+    const currentUserId = await this.getUserId();
     const reviewWords: WordWithProgress[] = (dueProgress ?? [])
       .filter((row) => {
         const word = (row as Record<string, unknown>).words as Record<string, unknown>;
@@ -591,7 +621,7 @@ class SupabaseStudyRepository implements StudyRepository {
         const wordRow = (row as Record<string, unknown>).words as Record<string, unknown>;
         const state = extractState(wordRow);
         return {
-          ...dbWordToWord(wordRow as unknown as DbWord, state),
+          ...dbWordToWord(wordRow as unknown as DbWord, state, currentUserId),
           progress: dbProgressToProgress(row as unknown as DbStudyProgress),
         };
       });
@@ -622,7 +652,7 @@ class SupabaseStudyRepository implements StudyRepository {
       .map((row: Record<string, unknown>) => {
         const state = extractState(row);
         return {
-          ...dbWordToWord(row as unknown as DbWord, state),
+          ...dbWordToWord(row as unknown as DbWord, state, currentUserId),
           progress: null,
         };
       });
@@ -728,6 +758,8 @@ class SupabaseStudyRepository implements StudyRepository {
         .eq('user_id', userId)
         .eq('word_id', wordId)
         .gt('priority', 1);
+      // Check leech threshold
+      await this.checkAndMarkLeech(wordId);
     }
     this._cache.delete('due_count');
   }
@@ -747,6 +779,9 @@ class SupabaseStudyRepository implements StudyRepository {
         maxReviewsPerDay: data.max_reviews_per_day,
         jlptFilter: data.jlpt_filter,
         priorityFilter: data.priority_filter,
+        cardDirection: data.card_direction ?? 'term_first',
+        sessionSize: data.session_size ?? 20,
+        leechThreshold: data.leech_threshold ?? 8,
       };
     });
   }
@@ -760,6 +795,9 @@ class SupabaseStudyRepository implements StudyRepository {
     if (settings.maxReviewsPerDay !== undefined) updateData.max_reviews_per_day = settings.maxReviewsPerDay;
     if (settings.jlptFilter !== undefined) updateData.jlpt_filter = settings.jlptFilter;
     if (settings.priorityFilter !== undefined) updateData.priority_filter = settings.priorityFilter;
+    if (settings.cardDirection !== undefined) updateData.card_direction = settings.cardDirection;
+    if (settings.sessionSize !== undefined) updateData.session_size = settings.sessionSize;
+    if (settings.leechThreshold !== undefined) updateData.leech_threshold = settings.leechThreshold;
 
     const { error } = await this.supabase
       .from('quiz_settings')
@@ -785,6 +823,10 @@ class SupabaseStudyRepository implements StudyRepository {
         newCount: data.new_count,
         reviewCount: data.review_count,
         againCount: data.again_count,
+        reviewAgainCount: data.review_again_count ?? 0,
+        newAgainCount: data.new_again_count ?? 0,
+        practiceCount: data.practice_count ?? 0,
+        practiceKnownCount: data.practice_known_count ?? 0,
       };
     });
   }
@@ -801,6 +843,8 @@ class SupabaseStudyRepository implements StudyRepository {
           new_count: existing.newCount + (isNew ? 1 : 0),
           review_count: existing.reviewCount + 1,
           again_count: existing.againCount + (isAgain ? 1 : 0),
+          review_again_count: existing.reviewAgainCount + (!isNew && isAgain ? 1 : 0),
+          new_again_count: existing.newAgainCount + (isNew && isAgain ? 1 : 0),
         })
         .eq('id', existing.id);
       if (error) throw error;
@@ -813,10 +857,58 @@ class SupabaseStudyRepository implements StudyRepository {
           new_count: isNew ? 1 : 0,
           review_count: 1,
           again_count: isAgain ? 1 : 0,
+          review_again_count: !isNew && isAgain ? 1 : 0,
+          new_again_count: isNew && isAgain ? 1 : 0,
         });
       if (error) throw error;
     }
     this._cache.delete(`daily_stats:${date}`);
+  }
+
+  async incrementPracticeStats(date: string, known: boolean): Promise<void> {
+    const { data: userData } = await this.supabase.auth.getUser();
+    const userId = userData.user!.id;
+
+    const existing = await this.getDailyStats(date);
+    if (existing) {
+      const { error } = await this.supabase
+        .from('daily_stats')
+        .update({
+          practice_count: existing.practiceCount + 1,
+          practice_known_count: existing.practiceKnownCount + (known ? 1 : 0),
+        })
+        .eq('id', existing.id);
+      if (error) throw error;
+    } else {
+      const { error } = await this.supabase
+        .from('daily_stats')
+        .insert({
+          user_id: userId,
+          stat_date: date,
+          practice_count: 1,
+          practice_known_count: known ? 1 : 0,
+        });
+      if (error) throw error;
+    }
+    this._cache.delete(`daily_stats:${date}`);
+  }
+
+  async checkAndMarkLeech(wordId: string): Promise<boolean> {
+    const settings = await this.getQuizSettings();
+    const progress = await this.getProgress(wordId);
+    if (!progress || progress.lapses < settings.leechThreshold) return false;
+
+    const { data: userData } = await this.supabase.auth.getUser();
+    const userId = userData.user!.id;
+
+    const { error } = await this.supabase
+      .from('user_word_state')
+      .update({ is_leech: true, leech_at: new Date().toISOString() })
+      .eq('user_id', userId)
+      .eq('word_id', wordId)
+      .eq('is_leech', false);
+    if (error) throw error;
+    return true;
   }
 
   async getStreakDays(): Promise<number> {
@@ -884,7 +976,13 @@ class SupabaseStudyRepository implements StudyRepository {
 }
 
 class SupabaseWordbookRepository implements WordbookRepository {
+  private _userIdCache = { userId: null as string | null };
+
   constructor(private supabase: SupabaseClient) {}
+
+  private getUserId(): Promise<string> {
+    return resolveUserId(this.supabase, this._userIdCache);
+  }
 
   async getAll(): Promise<WordbookWithCount[]> {
     const { data: userData } = await this.supabase.auth.getUser();
@@ -984,6 +1082,7 @@ class SupabaseWordbookRepository implements WordbookRepository {
   }
 
   async getWords(wordbookId: string): Promise<Word[]> {
+    const userId = await this.getUserId();
     const PAGE_SIZE = 1000;
     const allWords: Word[] = [];
     let offset = 0;
@@ -997,7 +1096,7 @@ class SupabaseWordbookRepository implements WordbookRepository {
       const rows = (data ?? []).map((row) => {
         const wordRow = (row as Record<string, unknown>).words as Record<string, unknown>;
         const state = extractState(wordRow);
-        return dbWordToWord(wordRow as unknown as DbWord, state);
+        return dbWordToWord(wordRow as unknown as DbWord, state, userId);
       });
       allWords.push(...rows);
       if (rows.length < PAGE_SIZE) break;
@@ -1010,6 +1109,7 @@ class SupabaseWordbookRepository implements WordbookRepository {
     wordbookId: string,
     opts: { sort: import('./types').WordSortOrder; limit: number; offset: number },
   ): Promise<import('./types').PaginatedWords> {
+    const userId = await this.getUserId();
     let query = this.supabase
       .from('wordbook_items')
       .select('word_id, words(*, user_word_state(*))', { count: 'exact' })
@@ -1026,7 +1126,7 @@ class SupabaseWordbookRepository implements WordbookRepository {
     const words = (data ?? []).map((row) => {
       const wordRow = (row as Record<string, unknown>).words as Record<string, unknown>;
       const state = extractState(wordRow);
-      return dbWordToWord(wordRow as unknown as DbWord, state);
+      return dbWordToWord(wordRow as unknown as DbWord, state, userId);
     });
     return { words, totalCount: count ?? 0 };
   }

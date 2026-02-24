@@ -21,6 +21,8 @@ function makeWord(overrides: Partial<WordWithProgress> = {}): WordWithProgress {
     priority: 2,
     mastered: false,
     masteredAt: null,
+    isLeech: false,
+    leechAt: null,
     createdAt: new Date(),
     updatedAt: new Date(),
     progress: null,

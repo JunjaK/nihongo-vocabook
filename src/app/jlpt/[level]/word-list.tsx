@@ -43,6 +43,8 @@ function toWord(w: JlptWord, i: number): Word {
     priority: 2,
     mastered: false,
     masteredAt: null,
+    isLeech: false,
+    leechAt: null,
     createdAt: now,
     updatedAt: now,
   };

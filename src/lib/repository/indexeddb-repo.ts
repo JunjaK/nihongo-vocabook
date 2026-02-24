@@ -49,6 +49,9 @@ function localWordToWord(local: LocalWord & { id: number }, state?: LocalUserWor
     priority: state?.priority ?? 2,
     mastered: state?.mastered ?? false,
     masteredAt: state?.masteredAt ?? null,
+    isLeech: state?.isLeech ?? false,
+    leechAt: state?.leechAt ?? null,
+    isOwned: true, // IndexedDB = guest mode, all words are owned
     createdAt: local.createdAt,
     updatedAt: local.updatedAt,
   };
@@ -227,6 +230,8 @@ class IndexedDBWordRepository implements WordRepository {
       mastered: false,
       masteredAt: null,
       priority,
+      isLeech: false,
+      leechAt: null,
     });
 
     const state = await getState(numId);
@@ -270,6 +275,8 @@ class IndexedDBWordRepository implements WordRepository {
       mastered: false,
       masteredAt: null,
       priority,
+      isLeech: false,
+      leechAt: null,
     });
   }
 
@@ -298,6 +305,8 @@ class IndexedDBWordRepository implements WordRepository {
         mastered,
         masteredAt: mastered ? now : null,
         priority: 2,
+        isLeech: false,
+        leechAt: null,
       });
     }
 
@@ -479,6 +488,8 @@ class IndexedDBStudyRepository implements StudyRepository {
       if (state && state.priority > 1) {
         await db.userWordState.update(state.id, { priority: 1 });
       }
+      // Check leech threshold
+      await this.checkAndMarkLeech(wordId);
     }
   }
 
@@ -490,6 +501,9 @@ class IndexedDBStudyRepository implements StudyRepository {
       maxReviewsPerDay: settings.maxReviewsPerDay,
       jlptFilter: settings.jlptFilter,
       priorityFilter: settings.priorityFilter,
+      cardDirection: (settings.cardDirection ?? 'term_first') as QuizSettings['cardDirection'],
+      sessionSize: settings.sessionSize ?? 20,
+      leechThreshold: settings.leechThreshold ?? 8,
     };
   }
 
@@ -514,6 +528,10 @@ class IndexedDBStudyRepository implements StudyRepository {
       newCount: stat.newCount,
       reviewCount: stat.reviewCount,
       againCount: stat.againCount,
+      reviewAgainCount: stat.reviewAgainCount ?? 0,
+      newAgainCount: stat.newAgainCount ?? 0,
+      practiceCount: stat.practiceCount ?? 0,
+      practiceKnownCount: stat.practiceKnownCount ?? 0,
     };
   }
 
@@ -524,6 +542,8 @@ class IndexedDBStudyRepository implements StudyRepository {
         newCount: existing.newCount + (isNew ? 1 : 0),
         reviewCount: existing.reviewCount + 1,
         againCount: existing.againCount + (isAgain ? 1 : 0),
+        reviewAgainCount: (existing.reviewAgainCount ?? 0) + (!isNew && isAgain ? 1 : 0),
+        newAgainCount: (existing.newAgainCount ?? 0) + (isNew && isAgain ? 1 : 0),
       });
     } else {
       await db.dailyStats.add({
@@ -531,8 +551,49 @@ class IndexedDBStudyRepository implements StudyRepository {
         newCount: isNew ? 1 : 0,
         reviewCount: 1,
         againCount: isAgain ? 1 : 0,
+        reviewAgainCount: !isNew && isAgain ? 1 : 0,
+        newAgainCount: isNew && isAgain ? 1 : 0,
+        practiceCount: 0,
+        practiceKnownCount: 0,
       });
     }
+  }
+
+  async incrementPracticeStats(date: string, known: boolean): Promise<void> {
+    const existing = await db.dailyStats.where('date').equals(date).first();
+    if (existing) {
+      await db.dailyStats.update(existing.id!, {
+        practiceCount: (existing.practiceCount ?? 0) + 1,
+        practiceKnownCount: (existing.practiceKnownCount ?? 0) + (known ? 1 : 0),
+      });
+    } else {
+      await db.dailyStats.add({
+        date,
+        newCount: 0,
+        reviewCount: 0,
+        againCount: 0,
+        reviewAgainCount: 0,
+        newAgainCount: 0,
+        practiceCount: 1,
+        practiceKnownCount: known ? 1 : 0,
+      });
+    }
+  }
+
+  async checkAndMarkLeech(wordId: string): Promise<boolean> {
+    const settings = await this.getQuizSettings();
+    const progress = await this.getProgress(wordId);
+    if (!progress || progress.lapses < settings.leechThreshold) return false;
+
+    const numWordId = Number(wordId);
+    const state = await getState(numWordId);
+    if (!state || state.isLeech) return false;
+
+    await db.userWordState.update(state.id, {
+      isLeech: true,
+      leechAt: new Date(),
+    });
+    return true;
   }
 
   async getStreakDays(): Promise<number> {
@@ -820,6 +881,8 @@ export class IndexedDBRepository implements DataRepository {
               mastered: word.mastered ?? false,
               masteredAt: word.masteredAt ? new Date(word.masteredAt) : null,
               priority: word.priority ?? 2,
+              isLeech: false,
+              leechAt: null,
             });
           }
 
@@ -855,6 +918,8 @@ export class IndexedDBRepository implements DataRepository {
               mastered: uws.mastered,
               masteredAt: uws.masteredAt ? new Date(uws.masteredAt) : null,
               priority: uws.priority,
+              isLeech: false,
+              leechAt: null,
             });
           }
         }

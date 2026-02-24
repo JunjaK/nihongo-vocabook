@@ -3,7 +3,7 @@
 import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { Pencil, Trash2, X } from 'lucide-react';
+import { Pencil, Trash2, X, LinkIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Header } from '@/components/layout/header';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
@@ -209,7 +209,7 @@ export default function WordDetailPage({
       <Header
         title={t.wordDetail.title}
         showBack
-        actions={
+        actions={word.isOwned ? (
           <div className="flex gap-1">
             <Button
               variant="ghost"
@@ -231,7 +231,7 @@ export default function WordDetailPage({
               <Pencil className="size-5" />
             </Button>
           </div>
-        }
+        ) : undefined}
       />
 
       <div className="min-h-0 flex-1 overflow-y-auto p-4">
@@ -243,6 +243,12 @@ export default function WordDetailPage({
               {word.mastered && (
                 <Badge variant="secondary" className="bg-green-100 text-green-700">
                   {t.nav.mastered}
+                </Badge>
+              )}
+              {!word.isOwned && (
+                <Badge variant="secondary" className="bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+                  <LinkIcon className="mr-1 size-3" />
+                  {t.wordDetail.subscribedWord}
                 </Badge>
               )}
             </div>

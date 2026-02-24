@@ -18,6 +18,8 @@ export interface LocalUserWordState {
   mastered: boolean;
   masteredAt: Date | null;
   priority: number;
+  isLeech: boolean;
+  leechAt: Date | null;
 }
 
 export interface LocalStudyProgress {
@@ -59,6 +61,9 @@ export interface LocalQuizSettings {
   jlptFilter: number | null;
   priorityFilter: number | null;
   newCardOrder?: string; // deprecated, kept for backward compat with existing DB rows
+  cardDirection: string;
+  sessionSize: number;
+  leechThreshold: number;
 }
 
 export interface LocalDailyStats {
@@ -67,6 +72,20 @@ export interface LocalDailyStats {
   newCount: number;
   reviewCount: number;
   againCount: number;
+  reviewAgainCount: number;
+  newAgainCount: number;
+  practiceCount: number;
+  practiceKnownCount: number;
+}
+
+export interface LocalWordExample {
+  id?: number;
+  wordId: number;
+  sentenceJa: string;
+  sentenceReading: string | null;
+  sentenceMeaning: string | null;
+  source: string;
+  createdAt: Date;
 }
 
 export interface LocalAchievement {
@@ -84,6 +103,7 @@ class VocaBookDB extends Dexie {
   quizSettings!: Table<LocalQuizSettings, number>;
   dailyStats!: Table<LocalDailyStats, number>;
   achievements!: Table<LocalAchievement, number>;
+  wordExamples!: Table<LocalWordExample, number>;
 
   constructor() {
     super('nihongo-vocabook');
@@ -166,6 +186,45 @@ class VocaBookDB extends Dexie {
           delete word.mastered;
           delete word.masteredAt;
           delete (word as Record<string, unknown>).priority;
+        });
+      });
+
+    this.version(5)
+      .stores({
+        words: '++id, term, reading, meaning, *tags, jlptLevel, createdAt',
+        userWordState: '++id, wordId, mastered',
+        studyProgress: '++id, wordId, nextReview',
+        wordbooks: '++id, name, createdAt',
+        wordbookItems: '++id, wordbookId, wordId, [wordbookId+wordId]',
+        quizSettings: '++id',
+        dailyStats: '++id, date',
+        achievements: '++id, type',
+        wordExamples: '++id, wordId',
+      })
+      .upgrade(async (tx) => {
+        // Add leech fields to userWordState
+        await tx.table('userWordState').toCollection().modify((state) => {
+          if (state.isLeech === undefined) {
+            state.isLeech = false;
+            state.leechAt = null;
+          }
+        });
+        // Add new fields to quizSettings
+        await tx.table('quizSettings').toCollection().modify((settings) => {
+          if (settings.cardDirection === undefined) {
+            settings.cardDirection = 'term_first';
+            settings.sessionSize = 20;
+            settings.leechThreshold = 8;
+          }
+        });
+        // Add new fields to dailyStats
+        await tx.table('dailyStats').toCollection().modify((stats) => {
+          if (stats.reviewAgainCount === undefined) {
+            stats.reviewAgainCount = 0;
+            stats.newAgainCount = 0;
+            stats.practiceCount = 0;
+            stats.practiceKnownCount = 0;
+          }
         });
       });
   }
