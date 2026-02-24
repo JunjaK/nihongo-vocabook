@@ -132,6 +132,7 @@ const en: Translations = {
     markMastered: 'Master',
     unmarkMastered: 'Unmark Mastered',
     addToWordbook: 'Add to Wordbook',
+    subscribedWord: 'Subscribed',
   },
   quiz: {
     title: 'Quiz',

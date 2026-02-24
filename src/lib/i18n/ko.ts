@@ -132,6 +132,7 @@ const ko: Translations = {
     markMastered: '암기 완료',
     unmarkMastered: '암기 완료 해제',
     addToWordbook: '단어장에 추가',
+    subscribedWord: '구독 단어장',
   },
   quiz: {
     title: '퀴즈',

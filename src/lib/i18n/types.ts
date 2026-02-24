@@ -128,6 +128,7 @@ export interface Translations {
     markMastered: string;
     unmarkMastered: string;
     addToWordbook: string;
+    subscribedWord: string;
   };
   quiz: {
     title: string;
