@@ -7,11 +7,12 @@ export interface ExtractedWord {
 
 export async function extractWithLlm(
   imageDataUrl: string,
+  locale?: string,
 ): Promise<ExtractedWord[]> {
   const res = await fetch('/api/ocr/vision', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ imageBase64: imageDataUrl }),
+    body: JSON.stringify({ imageBase64: imageDataUrl, locale }),
   });
 
   if (!res.ok) {

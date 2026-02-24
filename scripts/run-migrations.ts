@@ -57,6 +57,7 @@ const migrations = [
   '009_quiz_upgrade.sql',
   '010_user_word_state.sql',
   '011_non_mastered_view.sql',
+  '012_dictionary_meanings_ko.sql',
 ];
 
 async function run() {

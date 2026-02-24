@@ -13,12 +13,13 @@ interface WordSearchProps {
     term: string;
     reading: string;
     englishMeaning: string;
+    koreanMeaning?: string;
     jlptLevel: number | null;
   }) => void;
 }
 
 export function WordSearch({ onSelect }: WordSearchProps) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<DictionaryEntry[]>([]);
   const [loading, setLoading] = useState(false);
@@ -40,14 +41,14 @@ export function WordSearch({ onSelect }: WordSearchProps) {
     setLoading(true);
     try {
       const kanaQuery = toKana(trimmed);
-      const data = await searchDictionary(kanaQuery || trimmed);
+      const data = await searchDictionary(kanaQuery || trimmed, locale);
       setResults(data.slice(0, 10));
     } catch {
       setResults([]);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [locale]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
@@ -65,11 +66,26 @@ export function WordSearch({ onSelect }: WordSearchProps) {
       term: jp?.word ?? jp?.reading ?? '',
       reading: jp?.reading ?? '',
       englishMeaning: sense?.englishDefinitions.join(', ') ?? '',
+      koreanMeaning: sense?.koreanDefinitions?.join(', '),
       jlptLevel: jlptMatch ? Number(jlptMatch[0]) : null,
     });
 
     setResults([]);
     setQuery('');
+  };
+
+  const getMeaningDisplay = (sense: DictionaryEntry['senses'][0]) => {
+    if (locale === 'ko' && sense.koreanDefinitions && sense.koreanDefinitions.length > 0) {
+      return sense.koreanDefinitions.slice(0, 3).join(', ');
+    }
+    return sense.englishDefinitions.slice(0, 3).join(', ');
+  };
+
+  const getSecondaryMeaning = (sense: DictionaryEntry['senses'][0]) => {
+    if (locale === 'ko' && sense.koreanDefinitions && sense.koreanDefinitions.length > 0) {
+      return sense.englishDefinitions.slice(0, 3).join(', ');
+    }
+    return null;
   };
 
   return (
@@ -114,8 +130,13 @@ export function WordSearch({ onSelect }: WordSearchProps) {
                     )}
                   </div>
                   <div className="text-sm text-muted-foreground">
-                    {sense?.englishDefinitions.slice(0, 3).join(', ')}
+                    {sense && getMeaningDisplay(sense)}
                   </div>
+                  {sense && getSecondaryMeaning(sense) && (
+                    <div className="text-xs text-muted-foreground/70">
+                      {getSecondaryMeaning(sense)}
+                    </div>
+                  )}
                   <div className="text-xs text-muted-foreground">
                     {sense?.partsOfSpeech.join(', ')}
                   </div>

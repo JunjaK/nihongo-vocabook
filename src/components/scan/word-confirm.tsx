@@ -27,7 +27,7 @@ export function WordConfirm({
   onSkip,
   currentIndex,
 }: WordConfirmProps) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const currentWord = words[currentIndex];
   const [results, setResults] = useState<DictionaryEntry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -46,14 +46,15 @@ export function WordConfirm({
     setMeaning('');
     setJlptLevel(null);
     try {
-      const data = await searchDictionary(query);
+      const data = await searchDictionary(query, locale);
       setResults(data.slice(0, 5));
     } catch {
       setResults([]);
     } finally {
       setLoading(false);
     }
-  }, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [locale]);
 
   useEffect(() => {
     doSearch(currentWord);
@@ -70,9 +71,12 @@ export function WordConfirm({
     setJlptLevel(jlptMatch ? Number(jlptMatch[0]) : null);
     setSelected(true);
 
-    // Store the english definition as reference (not direct meaning)
-    const english = sense?.englishDefinitions.slice(0, 3).join(', ') ?? '';
-    setMeaning(english);
+    // Prefer Korean meaning when locale=ko
+    if (locale === 'ko' && sense?.koreanDefinitions && sense.koreanDefinitions.length > 0) {
+      setMeaning(sense.koreanDefinitions.slice(0, 3).join(', '));
+    } else {
+      setMeaning(sense?.englishDefinitions.slice(0, 3).join(', ') ?? '');
+    }
   };
 
   const handleAdd = () => {
@@ -128,7 +132,9 @@ export function WordConfirm({
                         )}
                       </div>
                       <div className="text-sm text-muted-foreground">
-                        {sense?.englishDefinitions.slice(0, 3).join(', ')}
+                        {locale === 'ko' && sense?.koreanDefinitions && sense.koreanDefinitions.length > 0
+                          ? sense.koreanDefinitions.slice(0, 3).join(', ')
+                          : sense?.englishDefinitions.slice(0, 3).join(', ')}
                       </div>
                     </div>
                     {entry.jlptLevels[0] && (

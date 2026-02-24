@@ -11,6 +11,9 @@ export interface Translations {
     update: string;
     saving: string;
     createdAt: string;
+    previous: string;
+    next: string;
+    complete: string;
   };
   nav: {
     words: string;
@@ -316,6 +319,9 @@ export interface Translations {
     enrichingWords: string;
     notFound: string;
     extractedCount: (n: number) => string;
+    editAndAdd: string;
+    editWordProgress: (current: number, total: number) => string;
+    apiKeyRequired: string;
   };
   profile: {
     title: string;

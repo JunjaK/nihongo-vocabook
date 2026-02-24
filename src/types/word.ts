@@ -104,6 +104,7 @@ export interface DictionaryEntry {
   }[];
   senses: {
     englishDefinitions: string[];
+    koreanDefinitions?: string[];
     partsOfSpeech: string[];
   }[];
   jlptLevels: string[];

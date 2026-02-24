@@ -9,6 +9,7 @@ interface JishoResult {
   japanese: { word?: string; reading: string }[];
   senses: {
     english_definitions: string[];
+    korean_definitions?: string[];
     parts_of_speech: string[];
   }[];
   jlpt: string[];
@@ -23,6 +24,7 @@ function mapResult(result: JishoResult): DictionaryEntry {
     })),
     senses: result.senses.map((s) => ({
       englishDefinitions: s.english_definitions,
+      koreanDefinitions: s.korean_definitions,
       partsOfSpeech: s.parts_of_speech,
     })),
     jlptLevels: result.jlpt,
@@ -31,10 +33,12 @@ function mapResult(result: JishoResult): DictionaryEntry {
 
 export async function searchDictionary(
   query: string,
+  locale?: string,
 ): Promise<DictionaryEntry[]> {
-  const res = await fetch(
-    `/api/dictionary?q=${encodeURIComponent(query)}`,
-  );
+  const params = new URLSearchParams({ q: query });
+  if (locale) params.set('locale', locale);
+
+  const res = await fetch(`/api/dictionary?${params}`);
   if (!res.ok) throw new Error('Dictionary search failed');
   const data: JishoApiResponse = await res.json();
   return data.data.map(mapResult);
@@ -47,11 +51,12 @@ interface BatchResponse {
 
 export async function searchDictionaryBatch(
   terms: string[],
+  locale?: string,
 ): Promise<{ found: Map<string, DictionaryEntry[]>; missing: string[] }> {
   const res = await fetch('/api/dictionary/batch', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ terms }),
+    body: JSON.stringify({ terms, locale }),
   });
   if (!res.ok) throw new Error('Batch dictionary search failed');
 

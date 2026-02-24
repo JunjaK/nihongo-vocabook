@@ -5,6 +5,7 @@ interface DictionaryRow {
   term: string;
   reading: string;
   meanings: string[];
+  meanings_ko: string[];
   parts_of_speech: string[];
   jlpt_level: number | null;
 }
@@ -14,6 +15,7 @@ interface JishoResult {
   japanese: { word?: string; reading: string }[];
   senses: {
     english_definitions: string[];
+    korean_definitions?: string[];
     parts_of_speech: string[];
   }[];
   jlpt: string[];
@@ -26,6 +28,10 @@ function mapRowToJisho(row: DictionaryRow): JishoResult {
     senses: [
       {
         english_definitions: row.meanings,
+        korean_definitions:
+          row.meanings_ko && row.meanings_ko.length > 0
+            ? row.meanings_ko
+            : undefined,
         parts_of_speech: row.parts_of_speech,
       },
     ],
@@ -36,7 +42,7 @@ function mapRowToJisho(row: DictionaryRow): JishoResult {
 const MAX_TERMS = 200;
 
 export async function POST(request: NextRequest) {
-  let body: { terms?: string[] };
+  let body: { terms?: string[]; locale?: string };
   try {
     body = await request.json();
   } catch {
@@ -67,7 +73,7 @@ export async function POST(request: NextRequest) {
 
   const { data: rows, error } = await supabase
     .from('dictionary_entries')
-    .select('term, reading, meanings, parts_of_speech, jlpt_level')
+    .select('term, reading, meanings, meanings_ko, parts_of_speech, jlpt_level')
     .in('term', uniqueTerms);
 
   if (error) {

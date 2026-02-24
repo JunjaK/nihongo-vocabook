@@ -9,10 +9,11 @@ export async function extractWordsFromImage(
   imageDataUrl: string,
   mode: OcrMode,
   onProgress?: (progress: number) => void,
+  locale?: string,
 ): Promise<ExtractionResult> {
   if (mode === 'llm') {
     const { extractWithLlm } = await import('./llm-vision');
-    const words = await extractWithLlm(imageDataUrl);
+    const words = await extractWithLlm(imageDataUrl, locale);
     return { mode: 'llm', words };
   }
 

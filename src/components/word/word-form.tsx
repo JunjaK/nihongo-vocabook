@@ -20,16 +20,25 @@ import type { CreateWordInput, Word } from '@/types/word';
 
 const JLPT_OPTIONS = ['N5', 'N4', 'N3', 'N2', 'N1'];
 
+interface WordFormFooterProps {
+  canSubmit: boolean;
+  submitting: boolean;
+}
+
 interface WordFormProps {
-  initialValues?: Word;
+  initialValues?: Word | Partial<Word>;
   onSubmit: (data: CreateWordInput) => Promise<void>;
   submitLabel?: string;
+  renderFooter?: (props: WordFormFooterProps) => React.ReactNode;
+  showDictionarySearch?: boolean;
 }
 
 export function WordForm({
   initialValues,
   onSubmit,
   submitLabel,
+  renderFooter,
+  showDictionarySearch,
 }: WordFormProps) {
   const { t } = useTranslation();
   const meaningRef = useRef<HTMLInputElement>(null);
@@ -50,11 +59,16 @@ export function WordForm({
     term: string;
     reading: string;
     englishMeaning: string;
+    koreanMeaning?: string;
     jlptLevel: number | null;
   }) => {
     setTerm(entry.term);
     setReading(entry.reading);
     setEnglishRef(entry.englishMeaning);
+    // Pre-fill meaning with Korean when available
+    if (entry.koreanMeaning) {
+      setMeaning(entry.koreanMeaning);
+    }
     if (entry.jlptLevel) setJlptLevel(String(entry.jlptLevel));
     // Auto-focus meaning input after dictionary selection
     setTimeout(() => meaningRef.current?.focus(), 0);
@@ -109,7 +123,7 @@ export function WordForm({
   return (
     <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col">
       <div className="flex-1 space-y-4 overflow-y-auto p-4">
-        {!initialValues && (
+        {(showDictionarySearch ?? !initialValues) && (
           <div className="space-y-2">
             <Label>{t.wordForm.dictionarySearch}</Label>
             <WordSearch onSelect={handleDictionarySelect} />
@@ -231,18 +245,22 @@ export function WordForm({
         </div>
       </div>
 
-      {/* Submit button — fixed outside scroll */}
-      <div className={bottomBar}>
-        <div className={bottomSep} />
-        <Button
-          type="submit"
-          className="w-full"
-          disabled={submitting || !canSubmit}
-          data-testid="word-form-submit"
-        >
-          {submitting ? t.common.saving : label}
-        </Button>
-      </div>
+      {/* Footer — fixed outside scroll */}
+      {renderFooter ? (
+        renderFooter({ canSubmit: !!canSubmit, submitting })
+      ) : (
+        <div className={bottomBar}>
+          <div className={bottomSep} />
+          <Button
+            type="submit"
+            className="w-full"
+            disabled={submitting || !canSubmit}
+            data-testid="word-form-submit"
+          >
+            {submitting ? t.common.saving : label}
+          </Button>
+        </div>
+      )}
     </form>
   );
 }

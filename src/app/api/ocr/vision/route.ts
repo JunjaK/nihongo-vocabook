@@ -5,6 +5,7 @@ import type { LlmProvider } from '@/lib/ocr/settings';
 
 interface RequestBody {
   imageBase64: string;
+  locale?: string;
 }
 
 interface ExtractedWord {
@@ -14,8 +15,11 @@ interface ExtractedWord {
   jlptLevel: number | null;
 }
 
-const SYSTEM_PROMPT =
-  'Extract all Japanese words/phrases from this image. For each word, provide the dictionary form (term), reading in hiragana, meaning in Korean, and estimated JLPT level (1-5, where 5=N5 easiest, 1=N1 hardest, or null if unknown). Return ONLY a JSON array of objects: [{"term": "食べる", "reading": "たべる", "meaning": "먹다", "jlptLevel": 4}]. No explanation.';
+function buildSystemPrompt(locale: string): string {
+  const meaningLang = locale === 'ko' ? 'Korean' : 'English';
+  const example = locale === 'ko' ? '먹다' : 'to eat';
+  return `Extract all Japanese words/phrases from this image. For each word, provide the dictionary form (term), reading in hiragana, meaning in ${meaningLang}, and estimated JLPT level (1-5, where 5=N5 easiest, 1=N1 hardest, or null if unknown). Return ONLY a JSON array of objects: [{"term": "食べる", "reading": "たべる", "meaning": "${example}", "jlptLevel": 4}]. No explanation.`;
+}
 
 export async function POST(req: NextRequest) {
   const supabase = await createClient();
@@ -25,7 +29,7 @@ export async function POST(req: NextRequest) {
   }
 
   const body = (await req.json()) as RequestBody;
-  const { imageBase64 } = body;
+  const { imageBase64, locale = 'ko' } = body;
 
   // Read provider & API key from DB
   const { data: settings } = await supabase
@@ -41,17 +45,15 @@ export async function POST(req: NextRequest) {
     apiKey = decrypt(settings.encrypted_api_key);
   }
 
-  // Fallback to env var for dev
-  if (!apiKey && provider === 'openai') {
-    apiKey = process.env.NEXT_PRIVATE_OPENAI_API_KEY;
-  }
-
   if (!apiKey) {
-    return NextResponse.json({ error: 'API key is required' }, { status: 400 });
+    return NextResponse.json(
+      { error: 'API_KEY_REQUIRED' },
+      { status: 400 },
+    );
   }
 
   try {
-    const words = await callProvider(provider, apiKey, imageBase64);
+    const words = await callProvider(provider, apiKey, imageBase64, locale);
     return NextResponse.json({ words });
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error';
@@ -63,18 +65,19 @@ async function callProvider(
   provider: LlmProvider,
   apiKey: string,
   imageBase64: string,
+  locale: string,
 ): Promise<ExtractedWord[]> {
   switch (provider) {
     case 'openai':
-      return callOpenAI(apiKey, imageBase64);
+      return callOpenAI(apiKey, imageBase64, locale);
     case 'anthropic':
-      return callAnthropic(apiKey, imageBase64);
+      return callAnthropic(apiKey, imageBase64, locale);
     case 'gemini':
-      return callGemini(apiKey, imageBase64);
+      return callGemini(apiKey, imageBase64, locale);
   }
 }
 
-async function callOpenAI(apiKey: string, imageBase64: string): Promise<ExtractedWord[]> {
+async function callOpenAI(apiKey: string, imageBase64: string, locale: string): Promise<ExtractedWord[]> {
   const res = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
     headers: {
@@ -82,17 +85,18 @@ async function callOpenAI(apiKey: string, imageBase64: string): Promise<Extracte
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: 'gpt-4o-mini',
+      model: 'gpt-5-nano',
       messages: [
         {
           role: 'user',
           content: [
-            { type: 'text', text: SYSTEM_PROMPT },
+            { type: 'text', text: buildSystemPrompt(locale) },
             { type: 'image_url', image_url: { url: imageBase64 } },
           ],
         },
       ],
-      max_tokens: 2048,
+      reasoning_effort: 'low',
+      max_completion_tokens: 2048,
     }),
   });
 
@@ -106,7 +110,7 @@ async function callOpenAI(apiKey: string, imageBase64: string): Promise<Extracte
   return parseJsonArray(content);
 }
 
-async function callAnthropic(apiKey: string, imageBase64: string): Promise<ExtractedWord[]> {
+async function callAnthropic(apiKey: string, imageBase64: string, locale: string): Promise<ExtractedWord[]> {
   const { mediaType, base64Data } = parseDataUrl(imageBase64);
 
   const res = await fetch('https://api.anthropic.com/v1/messages', {
@@ -117,7 +121,7 @@ async function callAnthropic(apiKey: string, imageBase64: string): Promise<Extra
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
+      model: 'claude-sonnet-4-6',
       max_tokens: 2048,
       messages: [
         {
@@ -127,7 +131,7 @@ async function callAnthropic(apiKey: string, imageBase64: string): Promise<Extra
               type: 'image',
               source: { type: 'base64', media_type: mediaType, data: base64Data },
             },
-            { type: 'text', text: SYSTEM_PROMPT },
+            { type: 'text', text: buildSystemPrompt(locale) },
           ],
         },
       ],
@@ -145,10 +149,10 @@ async function callAnthropic(apiKey: string, imageBase64: string): Promise<Extra
   return parseJsonArray(content);
 }
 
-async function callGemini(apiKey: string, imageBase64: string): Promise<ExtractedWord[]> {
+async function callGemini(apiKey: string, imageBase64: string, locale: string): Promise<ExtractedWord[]> {
   const { mediaType, base64Data } = parseDataUrl(imageBase64);
 
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
   const res = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -156,11 +160,14 @@ async function callGemini(apiKey: string, imageBase64: string): Promise<Extracte
       contents: [
         {
           parts: [
-            { text: SYSTEM_PROMPT },
+            { text: buildSystemPrompt(locale) },
             { inline_data: { mime_type: mediaType, data: base64Data } },
           ],
         },
       ],
+      generationConfig: {
+        thinkingConfig: { thinkingLevel: 'low' },
+      },
     }),
   });
 
@@ -170,7 +177,10 @@ async function callGemini(apiKey: string, imageBase64: string): Promise<Extracte
   }
 
   const data = await res.json();
-  const content: string = data.candidates?.[0]?.content?.parts?.[0]?.text ?? '[]';
+  // Gemini 3 may return thinking parts alongside text parts — find the text one
+  const parts = data.candidates?.[0]?.content?.parts ?? [];
+  const textPart = parts.find((p: { text?: string }) => typeof p.text === 'string');
+  const content: string = textPart?.text ?? '[]';
   return parseJsonArray(content);
 }
 

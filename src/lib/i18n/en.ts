@@ -13,6 +13,9 @@ const en: Translations = {
     update: 'Update',
     saving: 'Saving...',
     createdAt: 'Created',
+    previous: 'Previous',
+    next: 'Next',
+    complete: 'Complete',
   },
   nav: {
     words: 'Words',
@@ -323,6 +326,9 @@ const en: Translations = {
     enrichingWords: 'Looking up words...',
     notFound: 'Not found',
     extractedCount: (n: number) => `${n} extracted`,
+    editAndAdd: 'Edit and add selected',
+    editWordProgress: (current: number, total: number) => `${current} / ${total}`,
+    apiKeyRequired: 'Please set your AI API key in Settings.',
   },
   profile: {
     title: 'Edit Profile',

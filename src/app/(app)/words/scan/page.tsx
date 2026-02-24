@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { Camera } from 'lucide-react';
 import { Header } from '@/components/layout/header';
@@ -18,13 +19,15 @@ import { extractWordsFromImage } from '@/lib/ocr/extract';
 import { fetchProfile } from '@/lib/profile/fetch';
 import { searchDictionary, searchDictionaryBatch } from '@/lib/dictionary/jisho';
 import type { ExtractedWord } from '@/lib/ocr/llm-vision';
+import type { DictionaryEntry } from '@/types/word';
 import Link from 'next/link';
 
 type Step = 'capture' | 'preview' | 'done';
 
 export default function ScanPage() {
+  const router = useRouter();
   const repo = useRepository();
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const user = useAuthStore((s) => s.user);
   const [step, setStep] = useState<Step>('capture');
   const [extracting, setExtracting] = useState(false);
@@ -70,18 +73,26 @@ export default function ScanPage() {
       .catch(() => {});
   }, [user]);
 
-  const toExtractedWord = (raw: string, entries: { japanese: { word?: string; reading: string }[]; senses: { englishDefinitions: string[]; partsOfSpeech: string[] }[]; jlptLevels: string[] }[]): ExtractedWord => {
+  const getMeaning = (entries: DictionaryEntry[]): string => {
+    if (entries.length === 0) return '';
+    const sense = entries[0].senses[0];
+    if (locale === 'ko' && sense?.koreanDefinitions && sense.koreanDefinitions.length > 0) {
+      return sense.koreanDefinitions.slice(0, 3).join(', ');
+    }
+    return sense?.englishDefinitions.slice(0, 3).join(', ') ?? '';
+  };
+
+  const toExtractedWord = (raw: string, entries: DictionaryEntry[]): ExtractedWord => {
     if (entries.length === 0) {
       return { term: raw, reading: '', meaning: '', jlptLevel: null };
     }
     const entry = entries[0];
     const jp = entry.japanese[0];
-    const sense = entry.senses[0];
     const jlptMatch = entry.jlptLevels[0]?.match(/\d/);
     return {
       term: jp?.word ?? jp?.reading ?? raw,
       reading: jp?.reading ?? '',
-      meaning: sense?.englishDefinitions.slice(0, 3).join(', ') ?? '',
+      meaning: getMeaning(entries),
       jlptLevel: jlptMatch ? Number(jlptMatch[0]) : null,
     };
   };
@@ -92,7 +103,7 @@ export default function ScanPage() {
     enrichCancelledRef.current = false;
 
     // 1. Batch lookup from DB
-    const batchResult = await searchDictionaryBatch(rawWords);
+    const batchResult = await searchDictionaryBatch(rawWords, locale);
     if (enrichCancelledRef.current) return;
 
     // Build a map of raw word → ExtractedWord for found entries
@@ -112,7 +123,7 @@ export default function ScanPage() {
       if (i > 0) await new Promise((r) => setTimeout(r, 200));
 
       try {
-        const entries = await searchDictionary(raw);
+        const entries = await searchDictionary(raw, locale);
         resultMap.set(raw, toExtractedWord(raw, entries));
       } catch {
         resultMap.set(raw, { term: raw, reading: '', meaning: '', jlptLevel: null });
@@ -127,7 +138,8 @@ export default function ScanPage() {
       setEnriching(false);
       setStep('preview');
     }
-  }, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [locale]);
 
   const handleExtract = useCallback(async (imageDataUrls: string[]) => {
     const currentMode = getLocalOcrMode();
@@ -137,7 +149,7 @@ export default function ScanPage() {
       const allLlmWords: ExtractedWord[] = [];
 
       for (const imageDataUrl of imageDataUrls) {
-        const result = await extractWordsFromImage(imageDataUrl, currentMode);
+        const result = await extractWordsFromImage(imageDataUrl, currentMode, undefined, locale);
         if (result.mode === 'ocr') {
           allOcrWords.push(...result.words);
         } else {
@@ -162,10 +174,10 @@ export default function ScanPage() {
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Extraction failed';
-      toast.error(message);
+      toast.error(message === 'API_KEY_REQUIRED' ? t.scan.apiKeyRequired : message);
       setExtracting(false);
     }
-  }, [enrichOcrWords]);
+  }, [enrichOcrWords, locale]);
 
   const handleBulkAdd = async (words: ExtractedWord[]) => {
     let count = 0;
@@ -191,6 +203,11 @@ export default function ScanPage() {
     if (count > 0) invalidateListCache('words');
     setStep('done');
     toast.success(t.scan.wordsAdded(count));
+  };
+
+  const handleEditAndAdd = (words: ExtractedWord[]) => {
+    sessionStorage.setItem('scan-edit-words', JSON.stringify(words));
+    router.push('/words/create-by-image');
   };
 
   const handleReset = () => {
@@ -252,6 +269,7 @@ export default function ScanPage() {
           words={enrichedWords}
           userJlptLevel={userJlptLevel}
           onConfirm={handleBulkAdd}
+          onEditAndAdd={handleEditAndAdd}
           onRetry={handleReset}
         />
       ) : step === 'done' ? (

@@ -10,6 +10,7 @@ interface WordPreviewProps {
   words: ExtractedWord[];
   userJlptLevel?: number | null;
   onConfirm: (selectedWords: ExtractedWord[]) => void;
+  onEditAndAdd?: (selectedWords: ExtractedWord[]) => void;
   onRetry: () => void;
 }
 
@@ -17,6 +18,7 @@ export function WordPreview({
   words,
   userJlptLevel,
   onConfirm,
+  onEditAndAdd,
   onRetry,
 }: WordPreviewProps) {
   const { t } = useTranslation();
@@ -58,13 +60,14 @@ export function WordPreview({
     });
   };
 
-  const handleConfirm = () => {
-    const selected = checked
+  const getSelectedWords = () =>
+    checked
       .map((c, i) => (c ? i : -1))
       .filter((i) => i >= 0)
       .map((i) => words[i]);
-    onConfirm(selected);
-  };
+
+  const handleConfirm = () => onConfirm(getSelectedWords());
+  const handleEditAndAdd = () => onEditAndAdd?.(getSelectedWords());
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
@@ -148,14 +151,27 @@ export function WordPreview({
 
       <div className={bottomBar}>
         <div className={bottomSep} />
-        <Button
-          className="w-full"
-          disabled={selectedCount === 0}
-          onClick={handleConfirm}
-          data-testid="scan-confirm-selected"
-        >
-          {t.scan.addSelected} ({selectedCount})
-        </Button>
+        <div className="flex flex-col gap-2">
+          <Button
+            className="w-full"
+            disabled={selectedCount === 0}
+            onClick={handleConfirm}
+            data-testid="scan-confirm-selected"
+          >
+            {t.scan.addSelected} ({selectedCount})
+          </Button>
+          {onEditAndAdd && (
+            <Button
+              className="w-full"
+              variant="outline"
+              disabled={selectedCount === 0}
+              onClick={handleEditAndAdd}
+              data-testid="scan-edit-and-add"
+            >
+              {t.scan.editAndAdd}
+            </Button>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -13,6 +13,9 @@ const ko: Translations = {
     update: '업데이트',
     saving: '저장 중...',
     createdAt: '생성일',
+    previous: '이전',
+    next: '다음',
+    complete: '완료',
   },
   nav: {
     words: '단어',
@@ -323,6 +326,9 @@ const ko: Translations = {
     enrichingWords: '단어 조회 중...',
     notFound: '결과 없음',
     extractedCount: (n: number) => `${n}개 추출`,
+    editAndAdd: '선택한 단어 수정하여 추가',
+    editWordProgress: (current: number, total: number) => `${current} / ${total}`,
+    apiKeyRequired: '설정에서 AI API 키를 등록해주세요.',
   },
   profile: {
     title: '프로필 수정',

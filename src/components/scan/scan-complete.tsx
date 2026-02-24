@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { useTranslation } from '@/lib/i18n';
+import { pageWrapper, scrollArea, bottomBar, bottomSep } from '@/lib/styles';
 
 interface ScanCompleteProps {
   addedCount: number;
@@ -14,26 +15,34 @@ export function ScanComplete({ addedCount, onAddMore }: ScanCompleteProps) {
   const { t } = useTranslation();
 
   return (
-    <div className="animate-page flex flex-1 flex-col items-center justify-center gap-6 p-4">
-      <CheckCircleIcon className="size-16 text-green-500" />
-      <div className="text-center">
-        <div className="text-2xl font-bold">{t.scan.complete}</div>
-        <div className="mt-1 text-muted-foreground">
-          {t.scan.wordsAdded(addedCount)}
+    <div className={pageWrapper}>
+      <div className={scrollArea}>
+        <div className="animate-page flex flex-1 flex-col items-center justify-center gap-6">
+          <CheckCircleIcon className="size-16 text-green-500" />
+          <div className="text-center">
+            <div className="text-2xl font-bold">{t.scan.complete}</div>
+            <div className="mt-1 text-muted-foreground">
+              {t.scan.wordsAdded(addedCount)}
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className="flex w-full max-w-xs flex-col gap-2">
-        <Button onClick={onAddMore} data-testid="scan-add-more">
-          {t.scan.addMore}
-        </Button>
-        <Button
-          variant="outline"
-          onClick={() => router.push('/words')}
-          data-testid="scan-go-to-words"
-        >
-          {t.scan.goToWords}
-        </Button>
+      <div className={bottomBar}>
+        <div className={bottomSep} />
+        <div className="flex flex-col gap-2">
+          <Button className="w-full" onClick={onAddMore} data-testid="scan-add-more">
+            {t.scan.addMore}
+          </Button>
+          <Button
+            className="w-full"
+            variant="outline"
+            onClick={() => router.push('/words')}
+            data-testid="scan-go-to-words"
+          >
+            {t.scan.goToWords}
+          </Button>
+        </div>
       </div>
     </div>
   );

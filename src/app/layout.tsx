@@ -19,24 +19,36 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Nihongo VocaBook',
-  description: 'Japanese vocabulary study app with spaced repetition',
+  metadataBase: new URL('https://nivoca.jun-devlog.win'),
+  title: {
+    default: '日本語 VocaBook — JLPT 일본어 단어 학습',
+    template: '%s | 日本語 VocaBook',
+  },
+  description: 'JLPT N5~N1 일본어 단어장. 간격 반복(SRS) 퀴즈, 이미지 OCR 단어 추출, 단어장 공유까지.',
+  keywords: ['JLPT', '일본어', '단어장', '일본어 공부', 'Japanese vocabulary', 'SRS', 'spaced repetition', 'VocaBook'],
+  authors: [{ name: 'jun-devlog' }],
+  creator: 'jun-devlog',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
     title: 'VocaBook',
   },
   openGraph: {
-    title: '日本語 VocaBook',
-    description: 'Learn · Review · Share Japanese words',
+    title: '日本語 VocaBook — JLPT 일본어 단어 학습',
+    description: 'JLPT N5~N1 단어장, SRS 퀴즈, 이미지 OCR 단어 추출',
     images: [{ url: '/logo.png', width: 1280, height: 926 }],
     type: 'website',
+    locale: 'ko_KR',
+    siteName: '日本語 VocaBook',
   },
   twitter: {
     card: 'summary_large_image',
-    title: '日本語 VocaBook',
-    description: 'Learn · Review · Share Japanese words',
+    title: '日本語 VocaBook — JLPT 일본어 단어 학습',
+    description: 'JLPT N5~N1 단어장, SRS 퀴즈, 이미지 OCR 단어 추출',
     images: ['/logo.png'],
+  },
+  alternates: {
+    canonical: '/',
   },
 };
 
