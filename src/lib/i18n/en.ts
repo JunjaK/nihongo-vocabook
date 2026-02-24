@@ -25,7 +25,7 @@ const en: Translations = {
     settings: 'Settings',
   },
   landing: {
-    title: '日本語 VocaBook',
+    title: 'NiVoca',
     subtitle: 'Learn · Review · Share Japanese words',
     startLearning: 'Start Learning',
     signIn: 'Sign In',
@@ -69,6 +69,17 @@ const en: Translations = {
     resendEmail: 'Resend verification email',
     resendSuccess: 'Verification email resent!',
     backToLogin: 'Back to login',
+    privacyAgree: 'I agree to the Privacy Policy',
+    privacyRequired: 'You must agree to the Privacy Policy to sign up',
+  },
+  consent: {
+    storageTitle: 'Terms of Service',
+    storageDescription: 'NiVoca stores your wordbooks, study progress, and settings in browser storage (IndexedDB, LocalStorage). Please agree to browser storage usage to continue.',
+    storageAgree: 'Agree and Start',
+    storageDecline: 'Decline',
+    storageDeclinedMessage: 'You cannot use the service without agreeing to browser storage usage.',
+    privacyPolicyTitle: 'Privacy Policy',
+    privacyPolicyDescription: 'We collect your email address during registration and use it solely for service provision. All personal data is permanently deleted when you delete your account.',
   },
   words: {
     title: 'Words',

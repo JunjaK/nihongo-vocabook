@@ -26,13 +26,10 @@ export default function LandingPage() {
       <div className="relative flex flex-1 flex-col items-center justify-center px-6">
         {/* Hero — kanji as visual anchor */}
         <div className="animate-fade-in text-center">
-          <div className="text-6xl font-bold tracking-tight text-primary">
-            日本語
+          <div className="text-5xl font-bold tracking-tight text-primary">
+            NiVoca
           </div>
-          <div className="mt-1 text-xl font-semibold tracking-wide text-foreground/80">
-            VocaBook
-          </div>
-          <p className="mt-3 text-sm text-muted-foreground">
+          <p className="mt-2 text-sm text-muted-foreground">
             {t.landing.subtitle}
           </p>
         </div>

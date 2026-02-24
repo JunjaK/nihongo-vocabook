@@ -39,8 +39,7 @@ function VerifyEmailContent() {
 
       {/* Branding */}
       <div className="relative shrink-0 pb-8 pt-12 text-center">
-        <div className="text-4xl font-bold tracking-tight text-primary">日本語</div>
-        <div className="mt-1 text-base font-semibold tracking-wide text-foreground/80">VocaBook</div>
+        <div className="text-4xl font-bold tracking-tight text-primary">NiVoca</div>
         <p className="mt-2 text-xs text-muted-foreground">{t.landing.subtitle}</p>
       </div>
 

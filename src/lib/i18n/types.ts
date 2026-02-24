@@ -65,6 +65,17 @@ export interface Translations {
     resendEmail: string;
     resendSuccess: string;
     backToLogin: string;
+    privacyAgree: string;
+    privacyRequired: string;
+  };
+  consent: {
+    storageTitle: string;
+    storageDescription: string;
+    storageAgree: string;
+    storageDecline: string;
+    storageDeclinedMessage: string;
+    privacyPolicyTitle: string;
+    privacyPolicyDescription: string;
   };
   words: {
     title: string;

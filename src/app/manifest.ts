@@ -2,8 +2,8 @@ import type { MetadataRoute } from 'next';
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'Nihongo VocaBook',
-    short_name: 'VocaBook',
+    name: 'NiVoca - 일본어 단어 학습',
+    short_name: 'NiVoca',
     description: 'Japanese vocabulary study app with spaced repetition',
     start_url: '/',
     display: 'standalone',

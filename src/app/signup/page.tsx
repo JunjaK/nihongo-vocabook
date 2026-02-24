@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { toast } from 'sonner';
@@ -21,7 +21,17 @@ export default function SignupPage() {
   const [password, setPassword] = useState('');
   const [passwordConfirm, setPasswordConfirm] = useState('');
   const [jlptLevel, setJlptLevel] = useState(3);
+  const [privacyAgreed, setPrivacyAgreed] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  // Auto-check if user agreed on the privacy page
+  useEffect(() => {
+    const agreed = sessionStorage.getItem('vocabook_privacy_agreed');
+    if (agreed === 'true') {
+      setPrivacyAgreed(true);
+      sessionStorage.removeItem('vocabook_privacy_agreed');
+    }
+  }, []);
 
   const passwordHasLetter = /[a-zA-Z]/.test(password);
   const passwordHasNumber = /\d/.test(password);
@@ -32,7 +42,8 @@ export default function SignupPage() {
     email.trim() &&
     passwordValid &&
     passwordConfirm.length > 0 &&
-    !passwordMismatch;
+    !passwordMismatch &&
+    privacyAgreed;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,7 +56,7 @@ export default function SignupPage() {
       email,
       password,
       options: {
-        data: { jlpt_level: jlptLevel },
+        data: { jlpt_level: jlptLevel, privacy_agreed: true },
       },
     });
 
@@ -67,8 +78,7 @@ export default function SignupPage() {
 
       {/* Branding */}
       <div className="relative shrink-0 pb-8 pt-12 text-center">
-        <div className="text-4xl font-bold tracking-tight text-primary">日本語</div>
-        <div className="mt-1 text-base font-semibold tracking-wide text-foreground/80">VocaBook</div>
+        <div className="text-4xl font-bold tracking-tight text-primary">NiVoca</div>
         <p className="mt-2 text-xs text-muted-foreground">{t.landing.subtitle}</p>
       </div>
 
@@ -144,6 +154,24 @@ export default function SignupPage() {
                       N{level}
                     </Button>
                   ))}
+                </div>
+              </div>
+              {/* Privacy consent */}
+              <div className="pt-2">
+                <div className="flex items-start gap-2">
+                  <input
+                    type="checkbox"
+                    checked={privacyAgreed}
+                    onChange={(e) => setPrivacyAgreed(e.target.checked)}
+                    className="mt-0.5 size-4 shrink-0 accent-primary"
+                    data-testid="signup-privacy-checkbox"
+                  />
+                  <Link
+                    href="/privacy?from=signup"
+                    className="text-sm text-primary underline underline-offset-2"
+                  >
+                    {t.auth.privacyAgree}
+                  </Link>
                 </div>
               </div>
             </CardContent>

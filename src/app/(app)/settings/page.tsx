@@ -66,7 +66,7 @@ export default function SettingsPage() {
     const blob = new Blob([JSON.stringify(data, null, 2)], {
       type: 'application/json',
     });
-    downloadBlob(blob, 'nihongo-vocabook-export.json');
+    downloadBlob(blob, 'nivoca-export.json');
     toast.success(t.settings.exportSuccess);
   };
 
@@ -85,7 +85,7 @@ export default function SettingsPage() {
     );
     const csv = [header, ...rows].join('\n');
     const blob = new Blob([csv], { type: 'text/csv' });
-    downloadBlob(blob, 'nihongo-vocabook-export.csv');
+    downloadBlob(blob, 'nivoca-export.csv');
     toast.success(t.settings.exportSuccess);
   };
 

@@ -25,7 +25,7 @@ const ko: Translations = {
     settings: '설정',
   },
   landing: {
-    title: '日本語 VocaBook',
+    title: 'NiVoca',
     subtitle: '일본어 단어 학습 · 복습 · 공유',
     startLearning: '학습 시작',
     signIn: '로그인',
@@ -69,6 +69,17 @@ const ko: Translations = {
     resendEmail: '인증 메일 재전송',
     resendSuccess: '인증 메일을 다시 보냈습니다!',
     backToLogin: '로그인으로 돌아가기',
+    privacyAgree: '개인정보 취급방침에 동의합니다',
+    privacyRequired: '개인정보 취급방침에 동의해야 가입할 수 있습니다',
+  },
+  consent: {
+    storageTitle: '서비스 이용 동의',
+    storageDescription: 'NiVoca는 단어장, 학습 기록, 설정 등을 브라우저 저장소(IndexedDB, LocalStorage)에 저장합니다. 서비스 이용을 위해 브라우저 저장소 사용에 동의해주세요.',
+    storageAgree: '동의하고 시작하기',
+    storageDecline: '동의하지 않음',
+    storageDeclinedMessage: '브라우저 저장소 사용에 동의하지 않으면 서비스를 이용할 수 없습니다.',
+    privacyPolicyTitle: '개인정보 취급방침',
+    privacyPolicyDescription: '회원가입 시 이메일 주소를 수집하며, 서비스 제공 목적으로만 사용합니다. 계정 삭제 시 모든 개인정보가 즉시 삭제됩니다.',
   },
   words: {
     title: '단어',

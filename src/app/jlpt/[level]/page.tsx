@@ -74,14 +74,14 @@ export function generateMetadata({ params }: { params: Promise<{ level: string }
       description: `${data.description} ${data.wordCount} 단어, ${data.kanjiCount} 한자 수록.`,
       keywords: [`JLPT ${data.label}`, '일본어 단어장', `${data.label} 단어`, '일본어 공부', 'Japanese vocabulary'],
       openGraph: {
-        title: `${data.title} — 日本語 VocaBook`,
+        title: `${data.title} — NiVoca`,
         description: `${data.headline}. ${data.wordCount} 단어를 SRS 퀴즈로 효율적으로 학습하세요.`,
         type: 'website',
         locale: 'ko_KR',
       },
       twitter: {
         card: 'summary',
-        title: `${data.title} — 日本語 VocaBook`,
+        title: `${data.title} — NiVoca`,
         description: `${data.headline}. ${data.wordCount} 단어를 SRS 퀴즈로 효율적으로 학습하세요.`,
       },
       alternates: { canonical: `/jlpt/${level}` },
@@ -135,7 +135,7 @@ export default async function JlptLevelPage({ params }: { params: Promise<{ leve
 
       {/* Features */}
       <div className="mt-8 space-y-3">
-        <h2 className="font-semibold">VocaBook으로 학습하면</h2>
+        <h2 className="font-semibold">NiVoca로 학습하면</h2>
         <ul className="space-y-2 text-sm text-muted-foreground">
           <li className="flex items-start gap-2">
             <span className="mt-0.5 text-primary">&#x2713;</span>
@@ -190,7 +190,7 @@ export default async function JlptLevelPage({ params }: { params: Promise<{ leve
 
       {/* Footer */}
       <footer className="mt-16 border-t pt-6 text-center text-xs text-muted-foreground">
-        <p>&copy; 2025 日本語 VocaBook. JLPT 일본어 단어 학습 앱.</p>
+        <p>&copy; 2025 NiVoca. JLPT 일본어 단어 학습 앱.</p>
       </footer>
     </div>
   );
