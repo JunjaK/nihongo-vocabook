@@ -176,12 +176,20 @@ describe('selectDueWords', () => {
     expect(result).toHaveLength(2);
   });
 
-  it('sorts by score descending — high priority first', () => {
+  it('selects high-priority words over low-priority when limit constrains', () => {
+    const low = makeWord({ id: 'low', priority: 3 });
+    const high = makeWord({ id: 'high', priority: 1 });
+    const result = selectDueWords([low, high], 1, null);
+    expect(result).toHaveLength(1);
+    expect(result[0].id).toBe('high');
+  });
+
+  it('includes both words when limit allows (order shuffled)', () => {
     const low = makeWord({ id: 'low', priority: 3 });
     const high = makeWord({ id: 'high', priority: 1 });
     const result = selectDueWords([low, high], 10, null);
-    expect(result[0].id).toBe('high');
-    expect(result[1].id).toBe('low');
+    const ids = result.map((w) => w.id).sort();
+    expect(ids).toEqual(['high', 'low']);
   });
 
   it('handles empty array', () => {

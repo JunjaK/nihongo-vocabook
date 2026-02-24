@@ -275,6 +275,49 @@ class SupabaseWordRepository implements WordRepository {
     });
   }
 
+  async getMasteredPaginated(opts: {
+    sort: import('./types').WordSortOrder;
+    limit: number;
+    offset: number;
+  }): Promise<import('./types').PaginatedWords> {
+    const userId = await this.getUserId();
+
+    // Count total mastered
+    const { count, error: countError } = await this.supabase
+      .from('user_word_state')
+      .select('*', { count: 'exact', head: true })
+      .eq('mastered', true);
+    if (countError) throw countError;
+
+    let query = this.supabase
+      .from('user_word_state')
+      .select('*, words(*)')
+      .eq('mastered', true);
+
+    if (opts.sort === 'alphabetical') {
+      query = query.order('term', { referencedTable: 'words', ascending: true });
+    } else if (opts.sort === 'priority') {
+      query = query.order('priority', { ascending: true })
+        .order('mastered_at', { ascending: false });
+    } else {
+      // newest — sort by mastered_at desc
+      query = query.order('mastered_at', { ascending: false });
+    }
+
+    query = query.range(opts.offset, opts.offset + opts.limit - 1);
+
+    const { data, error } = await query;
+    if (error) throw error;
+
+    const words = (data ?? []).map((row: Record<string, unknown>) => {
+      const state = row as unknown as DbUserWordState;
+      const word = row.words as DbWord;
+      return dbWordToWord(word, state, userId);
+    });
+
+    return { words, totalCount: count ?? 0 };
+  }
+
   async getById(id: string): Promise<Word | null> {
     const userId = await this.getUserId();
     const { data, error } = await this.supabase
@@ -1229,6 +1272,75 @@ class SupabaseWordbookRepository implements WordbookRepository {
     if (error) {
       if (error.code === '23505') return;
       throw error;
+    }
+  }
+
+  async addWords(wordbookId: string, wordIds: string[]): Promise<void> {
+    if (wordIds.length === 0) return;
+    const userId = await this.getUserId();
+
+    // Verify ownership of target wordbook once
+    const { data: targetWordbook, error: targetWordbookError } = await this.supabase
+      .from('wordbooks')
+      .select('id, user_id')
+      .eq('id', wordbookId)
+      .single();
+    if (targetWordbookError) throw targetWordbookError;
+    if ((targetWordbook as { user_id: string }).user_id !== userId) {
+      throw new Error('Cannot add words to non-owned wordbook');
+    }
+
+    // Fetch all source words in one query
+    const { data: sourceWords, error: sourceError } = await this.supabase
+      .from('words')
+      .select('id, user_id, term, reading, meaning, notes, tags, jlpt_level')
+      .in('id', wordIds);
+    if (sourceError) throw sourceError;
+
+    const ownedWordIds: string[] = [];
+    const nonOwnedWords = new Map<string, DbWord>();
+    for (const w of (sourceWords ?? []) as DbWord[]) {
+      if (w.user_id === userId) {
+        ownedWordIds.push(w.id);
+      } else {
+        nonOwnedWords.set(w.id, w);
+      }
+    }
+
+    // Batch-insert owned words directly
+    if (ownedWordIds.length > 0) {
+      // Ensure user_word_state exists for all owned words
+      await this.supabase
+        .from('user_word_state')
+        .upsert(
+          ownedWordIds.map((wid) => ({ user_id: userId, word_id: wid })),
+          { onConflict: 'user_id,word_id' },
+        );
+
+      // Filter out mastered words
+      const { data: masteredStates } = await this.supabase
+        .from('user_word_state')
+        .select('word_id')
+        .eq('user_id', userId)
+        .in('word_id', ownedWordIds)
+        .eq('mastered', true);
+      const masteredIds = new Set((masteredStates ?? []).map((s) => (s as { word_id: string }).word_id));
+      const insertIds = ownedWordIds.filter((id) => !masteredIds.has(id));
+
+      if (insertIds.length > 0) {
+        const { error: insertError } = await this.supabase
+          .from('wordbook_items')
+          .upsert(
+            insertIds.map((wid) => ({ wordbook_id: wordbookId, word_id: wid })),
+            { onConflict: 'wordbook_id,word_id' },
+          );
+        if (insertError) throw insertError;
+      }
+    }
+
+    // Handle non-owned words individually (need copy logic)
+    for (const [wordId] of nonOwnedWords) {
+      await this.addWord(wordbookId, wordId);
     }
   }
 

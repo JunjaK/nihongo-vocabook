@@ -93,9 +93,7 @@ export default function AddWordsPage({
     if (selectedIds.size === 0) return;
     setAdding(true);
     try {
-      await Promise.all(
-        Array.from(selectedIds).map((wordId) => repo.wordbooks.addWord(id, wordId)),
-      );
+      await repo.wordbooks.addWords(id, Array.from(selectedIds));
       toast.success(t.wordbooks.addNWords(selectedIds.size));
       router.back();
     } catch {

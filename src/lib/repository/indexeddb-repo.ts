@@ -98,15 +98,23 @@ async function getState(wordId: number): Promise<(LocalUserWordState & { id: num
   return state ? (state as LocalUserWordState & { id: number }) : null;
 }
 
+/** Batch-load all user_word_state into a Map keyed by wordId */
+async function getAllStates(): Promise<Map<number, LocalUserWordState & { id: number }>> {
+  const states = await db.userWordState.toArray();
+  const map = new Map<number, LocalUserWordState & { id: number }>();
+  for (const s of states) {
+    map.set(s.wordId, s as LocalUserWordState & { id: number });
+  }
+  return map;
+}
+
 class IndexedDBWordRepository implements WordRepository {
   async getAll(): Promise<Word[]> {
-    const words = await db.words.toArray();
-    const result: Word[] = [];
-    for (const w of words) {
+    const [words, stateMap] = await Promise.all([db.words.toArray(), getAllStates()]);
+    const result = words.map((w) => {
       const typed = w as LocalWord & { id: number };
-      const state = await getState(typed.id);
-      result.push(localWordToWord(typed, state));
-    }
+      return localWordToWord(typed, stateMap.get(typed.id) ?? null);
+    });
     result.sort((a, b) => {
       if (a.priority !== b.priority) return a.priority - b.priority;
       return b.createdAt.getTime() - a.createdAt.getTime();
@@ -115,11 +123,11 @@ class IndexedDBWordRepository implements WordRepository {
   }
 
   async getNonMastered(): Promise<Word[]> {
-    const words = await db.words.toArray();
+    const [words, stateMap] = await Promise.all([db.words.toArray(), getAllStates()]);
     const result: Word[] = [];
     for (const w of words) {
       const typed = w as LocalWord & { id: number };
-      const state = await getState(typed.id);
+      const state = stateMap.get(typed.id) ?? null;
       if (state?.mastered) continue;
       result.push(localWordToWord(typed, state));
     }
@@ -152,11 +160,13 @@ class IndexedDBWordRepository implements WordRepository {
 
   async getMastered(): Promise<Word[]> {
     const states = await db.userWordState.where('mastered').equals(1).toArray();
+    const wordIds = states.map((s) => s.wordId);
+    const words = await db.words.bulkGet(wordIds);
     const result: Word[] = [];
-    for (const state of states) {
-      const typed = state as LocalUserWordState & { id: number };
-      const word = await db.words.get(typed.wordId);
+    for (let i = 0; i < states.length; i++) {
+      const word = words[i];
       if (word) {
+        const typed = states[i] as LocalUserWordState & { id: number };
         result.push(localWordToWord(word as LocalWord & { id: number }, typed));
       }
     }
@@ -166,6 +176,27 @@ class IndexedDBWordRepository implements WordRepository {
       return bTime - aTime;
     });
     return result;
+  }
+
+  async getMasteredPaginated(opts: {
+    sort: import('./types').WordSortOrder;
+    limit: number;
+    offset: number;
+  }): Promise<import('./types').PaginatedWords> {
+    const all = await this.getMastered();
+    if (opts.sort === 'alphabetical') {
+      all.sort((a, b) => a.term.localeCompare(b.term, 'ja'));
+    } else if (opts.sort === 'priority') {
+      all.sort((a, b) => {
+        if (a.priority !== b.priority) return a.priority - b.priority;
+        return b.createdAt.getTime() - a.createdAt.getTime();
+      });
+    }
+    // 'newest' is already default sort from getMastered (by masteredAt desc)
+    return {
+      words: all.slice(opts.offset, opts.offset + opts.limit),
+      totalCount: all.length,
+    };
   }
 
   async getById(id: string): Promise<Word | null> {
@@ -191,18 +222,23 @@ class IndexedDBWordRepository implements WordRepository {
 
   async search(query: string): Promise<Word[]> {
     const lower = query.toLowerCase();
-    const words = await db.words
-      .filter(
-        (w) =>
-          w.term.toLowerCase().includes(lower) ||
-          w.reading.toLowerCase().includes(lower) ||
-          w.meaning.toLowerCase().includes(lower),
-      )
-      .toArray();
+    const [words, stateMap] = await Promise.all([
+      db.words
+        .filter(
+          (w) =>
+            w.term.toLowerCase().includes(lower) ||
+            w.reading.toLowerCase().includes(lower) ||
+            w.meaning.toLowerCase().includes(lower),
+        )
+        .toArray(),
+      getAllStates(),
+    ]);
+    // Exclude mastered words (consistent with Supabase search using v_words_active)
     const result: Word[] = [];
     for (const w of words) {
       const typed = w as LocalWord & { id: number };
-      const state = await getState(typed.id);
+      const state = stateMap.get(typed.id) ?? null;
+      if (state?.mastered) continue;
       result.push(localWordToWord(typed, state));
     }
     return result;
@@ -646,26 +682,29 @@ class IndexedDBStudyRepository implements StudyRepository {
 
 class IndexedDBWordbookRepository implements WordbookRepository {
   async getAll(): Promise<WordbookWithCount[]> {
-    const wordbooks = await db.wordbooks.orderBy('createdAt').reverse().toArray();
-    const result: WordbookWithCount[] = [];
-    for (const wb of wordbooks) {
-      const typedWb = wb as LocalWordbook & { id: number };
-      const items = await db.wordbookItems
-        .where('wordbookId')
-        .equals(typedWb.id)
-        .toArray();
-      const wordCount = items.length;
+    const [wordbooks, allItems, stateMap] = await Promise.all([
+      db.wordbooks.orderBy('createdAt').reverse().toArray(),
+      db.wordbookItems.toArray(),
+      getAllStates(),
+    ]);
 
-      // Count mastered words via userWordState
+    // Group items by wordbookId
+    const itemsByWorkbook = new Map<number, typeof allItems>();
+    for (const item of allItems) {
+      const list = itemsByWorkbook.get(item.wordbookId);
+      if (list) list.push(item);
+      else itemsByWorkbook.set(item.wordbookId, [item]);
+    }
+
+    return wordbooks.map((wb) => {
+      const typedWb = wb as LocalWordbook & { id: number };
+      const items = itemsByWorkbook.get(typedWb.id) ?? [];
       let masteredCount = 0;
       for (const item of items) {
-        const state = await getState(item.wordId);
-        if (state?.mastered) masteredCount++;
+        if (stateMap.get(item.wordId)?.mastered) masteredCount++;
       }
-
-      result.push({ ...localWordbookToWordbook(typedWb), wordCount, importCount: 0, masteredCount });
-    }
-    return result;
+      return { ...localWordbookToWordbook(typedWb), wordCount: items.length, importCount: 0, masteredCount };
+    });
   }
 
   async getById(id: string): Promise<Wordbook | null> {
@@ -709,12 +748,19 @@ class IndexedDBWordbookRepository implements WordbookRepository {
       .where('wordbookId')
       .equals(numId)
       .toArray();
+    const wordIds = items.map((item) => item.wordId);
+    const [rawWords, stateMap] = await Promise.all([
+      db.words.bulkGet(wordIds),
+      getAllStates(),
+    ]);
     const words: Word[] = [];
-    for (const item of items) {
-      const word = await db.words.get(item.wordId);
+    for (let i = 0; i < items.length; i++) {
+      const word = rawWords[i];
       if (word) {
-        const state = await getState(item.wordId);
-        words.push(localWordToWord(word as LocalWord & { id: number }, state));
+        words.push(localWordToWord(
+          word as LocalWord & { id: number },
+          stateMap.get(items[i].wordId) ?? null,
+        ));
       }
     }
     return words;
@@ -754,6 +800,26 @@ class IndexedDBWordbookRepository implements WordbookRepository {
     await db.wordbookItems.add({
       wordbookId: Number(wordbookId),
       wordId: numWordId,
+    });
+  }
+
+  async addWords(wordbookId: string, wordIds: string[]): Promise<void> {
+    const numWordbookId = Number(wordbookId);
+    await db.transaction('rw', [db.words, db.wordbookItems, db.userWordState], async () => {
+      for (const wordId of wordIds) {
+        const numWordId = Number(wordId);
+        const word = await db.words.get(numWordId);
+        if (!word) continue;
+        const state = await getState(numWordId);
+        if (state?.mastered) continue;
+        const existing = await db.wordbookItems
+          .where('[wordbookId+wordId]')
+          .equals([numWordbookId, numWordId])
+          .first();
+        if (!existing) {
+          await db.wordbookItems.add({ wordbookId: numWordbookId, wordId: numWordId });
+        }
+      }
     });
   }
 

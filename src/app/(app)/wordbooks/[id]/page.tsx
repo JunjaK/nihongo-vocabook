@@ -148,31 +148,26 @@ export default function WordbookDetailPage({
 
   const sortOptions = getWordSortOptions(t);
 
-  const sortedWords = useMemo(() => {
+  const filteredWords = useMemo(() => {
     if (!appliedQuery) return words;
-    const result = [...words];
+    const lower = appliedQuery.toLowerCase();
+    const filtered = words.filter((w) =>
+      w.term.toLowerCase().includes(lower) ||
+      w.reading.toLowerCase().includes(lower) ||
+      w.meaning.toLowerCase().includes(lower),
+    );
     if (sortOrder === 'alphabetical') {
-      result.sort((a, b) => a.term.localeCompare(b.term, 'ja'));
+      filtered.sort((a, b) => a.term.localeCompare(b.term, 'ja'));
     } else if (sortOrder === 'priority') {
-      result.sort((a, b) => {
+      filtered.sort((a, b) => {
         if (a.priority !== b.priority) return a.priority - b.priority;
         return b.createdAt.getTime() - a.createdAt.getTime();
       });
     } else {
-      result.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+      filtered.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
     }
-    return result;
-  }, [words, sortOrder]);
-
-  const filteredWords = useMemo(() => {
-    if (!appliedQuery) return words;
-    const lower = appliedQuery.toLowerCase();
-    return sortedWords.filter((w) =>
-      w.term.toLowerCase().includes(lower) ||
-      w.reading.toLowerCase().includes(lower) ||
-      w.meaning.toLowerCase().includes(lower)
-    );
-  }, [words, sortedWords, appliedQuery]);
+    return filtered;
+  }, [words, appliedQuery, sortOrder]);
 
   const virtualizer = useVirtualizer({
     count: filteredWords.length,

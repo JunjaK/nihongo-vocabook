@@ -16,6 +16,7 @@ import { markWordMastered } from '@/lib/actions/mark-mastered';
 import { isNewCard } from '@/lib/spaced-repetition';
 import { checkAndUnlockAchievements } from '@/lib/quiz/achievements';
 import { requestDueCountRefresh } from '@/lib/quiz/due-count-sync';
+import { shuffleArray } from '@/lib/quiz/word-scoring';
 import {
   readSession,
   writeSession,
@@ -140,7 +141,7 @@ function QuizContent() {
       setSessionStats({ totalReviewed: 0, newCards: 0, againCount: 0 });
     } else {
       const words = await repo.study.getDueWords(20);
-      setDueWords(words);
+      setDueWords(shuffleArray([...words]));
       setCurrentIndex(0);
       setCompleted(0);
       setSessionStats({ totalReviewed: 0, newCards: 0, againCount: 0 });

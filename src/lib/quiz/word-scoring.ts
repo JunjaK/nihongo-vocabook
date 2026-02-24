@@ -1,5 +1,14 @@
 import type { Word, WordWithProgress } from '@/types/word';
 
+/** Fisher-Yates shuffle (in-place, returns same array). */
+export function shuffleArray<T>(arr: T[]): T[] {
+  for (let i = arr.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
 /**
  * Weight based on priority: 1 (high) = 1.0, 2 (mid) = 0.7, 3 (low) = 0.4
  */
@@ -69,7 +78,8 @@ export function selectPracticeWords(
       (0.5 + Math.random()),
   }));
   scored.sort((a, b) => b.score - a.score);
-  return scored.slice(0, limit).map((s) => s.word);
+  const selected = scored.slice(0, limit).map((s) => s.word);
+  return shuffleArray(selected);
 }
 
 /**
@@ -85,5 +95,6 @@ export function selectDueWords(
     score: calcQuizScore(w, userJlpt),
   }));
   scored.sort((a, b) => b.score - a.score);
-  return scored.slice(0, limit).map((s) => s.word);
+  const selected = scored.slice(0, limit).map((s) => s.word);
+  return shuffleArray(selected);
 }

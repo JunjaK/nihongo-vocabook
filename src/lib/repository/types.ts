@@ -32,6 +32,11 @@ export interface WordRepository {
     offset: number;
   }): Promise<PaginatedWords>;
   getMastered(): Promise<Word[]>;
+  getMasteredPaginated(opts: {
+    sort: WordSortOrder;
+    limit: number;
+    offset: number;
+  }): Promise<PaginatedWords>;
   getById(id: string): Promise<Word | null>;
   getByIds(ids: string[]): Promise<Word[]>;
   search(query: string): Promise<Word[]>;
@@ -72,6 +77,7 @@ export interface WordbookRepository {
     offset: number;
   }): Promise<PaginatedWords>;
   addWord(wordbookId: string, wordId: string): Promise<void>;
+  addWords(wordbookId: string, wordIds: string[]): Promise<void>;
   removeWord(wordbookId: string, wordId: string): Promise<void>;
   getWordbooksForWord(wordId: string): Promise<Wordbook[]>;
   getSubscribed(): Promise<WordbookWithCount[]>;
