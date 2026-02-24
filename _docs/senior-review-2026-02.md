@@ -84,36 +84,39 @@ Comprehensive review from a 10+ year senior Next.js developer perspective across
 
 ---
 
-## Medium (M) — Not Yet Addressed
+## Medium (M) — All Resolved
 
-### M1: `useRouter` Not Used (Words Page)
-- Imported but previously unused (now used for H4 fix)
+### M1: `useRouter` Not Used (Words Page) ✅
+- Fixed implicitly by H4 (now used for programmatic navigation)
 
-### M2: `sortWords` Called Inside Render (Mastered Page)
+### M2: `sortWords` Called Inside Render (Mastered Page) ✅
 - Fixed implicitly by H1 rewrite (pagination handles sort server-side)
 
-### M3: `isOwned` / `isSubscribed` Derived Every Render
-- Minor; could use `useMemo` but cost is negligible
+### M3: `isOwned` / `isSubscribed` Derived Every Render ✅
+- **Fix**: Wrapped with `useMemo` keyed on `[wordbook, user]`
+- **Files**: `wordbooks/[id]/page.tsx`
 
 ### M4: Wordbook Detail Not Using `pageWrapper` Style
-- Inconsistent with other pages but functional
+- Skipped — functional; refactoring conditional return paths would be high churn for low value
 
-### M5: `handleSearch` / `handleSearchClear` Recreated Every Render
-- Using `useSearch` hook now; stable references
+### M5: `handleSearch` / `handleSearchClear` Recreated Every Render ✅
+- Fixed implicitly — `useSearch` hook provides stable references
 
-### M6: No Optimistic UI for Mastered/Delete
-- Could improve perceived performance but not critical
+### M6: No Optimistic UI for Mastered/Delete ✅
+- **Fix**: State update moved before `await` in `handleUnmaster`, `handleDeleteConfirm`, `handleMaster`, `handleMasterWord`, `handleRemoveWord`
+- **Files**: `mastered/page.tsx`, `words/page.tsx`, `wordbooks/[id]/page.tsx`
 
-### M7: `incrementImportCount` TOCTOU Race ✅ (Fixed with C1/C2)
-- Replaced read-then-write with atomic RPC `increment_import_count`
+### M7: `incrementImportCount` TOCTOU Race ✅
+- Fixed with C1/C2 — replaced read-then-write with atomic RPC `increment_import_count`
 
-### M8: Missing `aria-label` on Some Buttons
-- Accessibility improvement
+### M8: Missing `aria-label` on Icon Buttons ✅
+- **Fix**: Added `aria-label` to ComboboxClear ("Clear"), ComboboxTrigger ("Toggle"), ChipRemove ("Remove")
+- **Files**: `components/ui/combobox.tsx`
 
 ### M9: Hard-coded `PAGE_SIZE` Not Configurable
-- Works fine as constant
+- Skipped — works fine as constant; no user-facing need to configure
 
-### M10: No Loading State for `loadMore`
+### M10: No Loading State for `loadMore` ✅
 - Fixed implicitly by H1 (mastered page shows loading indicator)
 
 ---

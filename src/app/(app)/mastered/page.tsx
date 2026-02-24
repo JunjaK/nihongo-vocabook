@@ -102,12 +102,13 @@ export default function MasteredPage() {
   });
 
   const handleUnmaster = async (wordId: string) => {
-    await repo.words.setMastered(wordId, false);
+    // Optimistic: remove from list immediately
     setWords((prev) => prev.filter((w) => w.id !== wordId));
     setTotalCount((prev) => prev - 1);
     invalidateListCache('words');
     invalidateListCache('wordbooks');
     requestDueCountRefresh();
+    await repo.words.setMastered(wordId, false);
   };
 
   const handleDeleteRequest = (wordId: string) => {
@@ -116,13 +117,14 @@ export default function MasteredPage() {
 
   const handleDeleteConfirm = async () => {
     if (!deleteTarget) return;
-    await repo.words.delete(deleteTarget);
+    // Optimistic: remove from list immediately
     setWords((prev) => prev.filter((w) => w.id !== deleteTarget));
     setTotalCount((prev) => prev - 1);
     invalidateListCache('words');
     invalidateListCache('wordbooks');
     setDeleteTarget(null);
     toast.success(t.words.wordDeleted);
+    await repo.words.delete(deleteTarget);
   };
 
   return (

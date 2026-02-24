@@ -109,9 +109,10 @@ export default function WordsPage() {
   });
 
   const handleMaster = async (wordId: string) => {
-    await markWordMastered(repo, wordId);
+    // Optimistic: remove from list immediately
     setWords((prev) => prev.filter((w) => w.id !== wordId));
     setTotalCount((prev) => prev - 1);
+    await markWordMastered(repo, wordId);
   };
 
   return (

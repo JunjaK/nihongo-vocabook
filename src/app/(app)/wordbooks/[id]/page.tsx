@@ -56,8 +56,8 @@ export default function WordbookDetailPage({
   const [showInfo, setShowInfo] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-  const isOwned = wordbook && user && wordbook.userId === user.id;
-  const isSubscribed = wordbook && user && wordbook.userId !== user.id;
+  const isOwned = useMemo(() => wordbook && user && wordbook.userId === user.id, [wordbook, user]);
+  const isSubscribed = useMemo(() => wordbook && user && wordbook.userId !== user.id, [wordbook, user]);
 
   const parentRef = useRef<HTMLDivElement>(null);
 
@@ -136,14 +136,16 @@ export default function WordbookDetailPage({
   };
 
   const handleMasterWord = async (wordId: string) => {
-    await markWordMastered(repo, wordId);
+    // Optimistic: remove from list immediately
     setWords((prev) => prev.filter((w) => w.id !== wordId));
+    await markWordMastered(repo, wordId);
   };
 
   const handleRemoveWord = async (wordId: string) => {
-    await repo.wordbooks.removeWord(id, wordId);
+    // Optimistic: remove from list immediately
     setWords((prev) => prev.filter((w) => w.id !== wordId));
     toast.success(t.wordbooks.wordRemoved);
+    await repo.wordbooks.removeWord(id, wordId);
   };
 
   const sortOptions = getWordSortOptions(t);
