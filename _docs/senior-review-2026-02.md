@@ -96,8 +96,9 @@ Comprehensive review from a 10+ year senior Next.js developer perspective across
 - **Fix**: Wrapped with `useMemo` keyed on `[wordbook, user]`
 - **Files**: `wordbooks/[id]/page.tsx`
 
-### M4: Wordbook Detail Not Using `pageWrapper` Style
-- Skipped — functional; refactoring conditional return paths would be high churn for low value
+### M4: Wordbook Detail Not Using `pageWrapper` Style ✅
+- **Fix**: Wrapped all four conditional return paths (not-found, editing, info, word-list) with `<div className={pageWrapper}>`
+- **Files**: `wordbooks/[id]/page.tsx`
 
 ### M5: `handleSearch` / `handleSearchClear` Recreated Every Render ✅
 - Fixed implicitly — `useSearch` hook provides stable references
@@ -113,31 +114,35 @@ Comprehensive review from a 10+ year senior Next.js developer perspective across
 - **Fix**: Added `aria-label` to ComboboxClear ("Clear"), ComboboxTrigger ("Toggle"), ChipRemove ("Remove")
 - **Files**: `components/ui/combobox.tsx`
 
-### M9: Hard-coded `PAGE_SIZE` Not Configurable
-- Skipped — works fine as constant; no user-facing need to configure
+### M9: Hard-coded `PAGE_SIZE` Not Configurable ✅
+- **Fix**: Extracted to shared `PAGE_SIZE` constant in `lib/constants.ts`; removed local declarations from 3 pages
+- **Files**: `constants.ts`, `words/page.tsx`, `mastered/page.tsx`, `wordbooks/[id]/page.tsx`
 
 ### M10: No Loading State for `loadMore` ✅
 - Fixed implicitly by H1 (mastered page shows loading indicator)
 
 ---
 
-## Low (L) — Not Yet Addressed
+## Low (L) — All Resolved
 
-### L1: `SortOrder` Type Duplicated Across Pages
-- Mastered page defines its own `SortOrder` type vs `WordSortOrder` from types
-- Fixed implicitly by H1 rewrite (now uses `WordSortOrder`)
+### L1: `SortOrder` Type Duplicated Across Pages ✅
+- Fixed implicitly by H1 rewrite (mastered page now uses `WordSortOrder`)
+- `wordbooks/page.tsx` has `type SortOrder = 'newest' | 'name'` — separate wordbook-level sort, intentionally different
 
-### L2: `listContainer` Style vs Virtual Scroll Inconsistency
-- Some pages use `listContainer` (stagger animation), others use virtual scroll
+### L2: `listContainer` Style vs Virtual Scroll Inconsistency ✅
+- Intentional: word lists (hundreds/thousands) use virtual scroll; wordbook lists (small) use stagger animation
+- No change needed — documented as deliberate design decision
 
-### L3: `SwipeableWordCard` Accepts Both `onSwipeAction` and `contextMenuActions`
-- API could be simplified
+### L3: `SwipeableWordCard` Accepts Both `onSwipeAction` and `contextMenuActions` ✅
+- **Fix**: Removed `onSwipeAction` and `swipeLabel` props; swipe action now derived from first `contextMenuActions` entry
+- **Files**: `swipeable-word-card.tsx`, `words/page.tsx`, `mastered/page.tsx`, `wordbooks/[id]/page.tsx`
 
-### L4: `getWordSortOptions` vs Inline Sort Options
-- Some pages use shared constant, others define inline
+### L4: `getWordSortOptions` vs Inline Sort Options ✅
+- **Fix**: Mastered page now uses shared `getWordSortOptions(t)` instead of inline array
+- **Files**: `mastered/page.tsx`
 
-### L5: No Skeleton for Search Results
-- Minor UX gap during search loading
+### L5: No Skeleton for Search Results ✅
+- Already handled: `useLoader` triggers on `appliedQuery` change, which sets `loading=true` and shows skeletons during server fetch
 
 ---
 

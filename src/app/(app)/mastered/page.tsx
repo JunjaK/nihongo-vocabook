@@ -16,6 +16,7 @@ import { useLoader } from '@/hooks/use-loader';
 import { useSearch } from '@/hooks/use-search';
 import { invalidateListCache } from '@/lib/list-cache';
 import { requestDueCountRefresh } from '@/lib/quiz/due-count-sync';
+import { PAGE_SIZE, getWordSortOptions } from '@/lib/constants';
 import {
   skeletonWordList,
   emptyState,
@@ -23,8 +24,6 @@ import {
 } from '@/lib/styles';
 import type { Word } from '@/types/word';
 import type { WordSortOrder } from '@/lib/repository/types';
-
-const PAGE_SIZE = 100;
 
 export default function MasteredPage() {
   const repo = useRepository();
@@ -145,11 +144,7 @@ export default function MasteredPage() {
         showMeaning={showMeaning}
         onToggleMeaning={() => setShowMeaning((v) => !v)}
         sortValue={sortOrder}
-        sortOptions={[
-          { value: 'priority', label: t.priority.sortByPriority },
-          { value: 'newest', label: t.priority.sortByNewest },
-          { value: 'alphabetical', label: t.priority.sortByAlphabetical },
-        ]}
+        sortOptions={getWordSortOptions(t)}
         onSortChange={(v) => setSortOrder(v as WordSortOrder)}
       />
 
@@ -184,8 +179,6 @@ export default function MasteredPage() {
                     word={word}
                     showReading={showReading}
                     showMeaning={showMeaning}
-                    onSwipeAction={handleUnmaster}
-                    swipeLabel={t.masteredPage.unmaster}
                     swipeColor="orange"
                     contextMenuActions={[
                       {

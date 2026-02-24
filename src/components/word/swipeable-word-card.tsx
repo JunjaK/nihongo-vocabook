@@ -22,9 +22,8 @@ interface SwipeableWordCardProps {
   word: Word;
   showReading: boolean;
   showMeaning: boolean;
-  onSwipeAction: (wordId: string) => void;
-  swipeLabel: string;
   swipeColor: 'green' | 'orange';
+  /** First action is used as the swipe action. */
   contextMenuActions: WordCardAction[];
 }
 
@@ -35,14 +34,14 @@ export function SwipeableWordCard({
   word,
   showReading,
   showMeaning,
-  onSwipeAction,
-  swipeLabel,
   swipeColor,
   contextMenuActions,
 }: SwipeableWordCardProps) {
   const [offsetX, setOffsetX] = useState(0);
   const [dismissed, setDismissed] = useState(false);
   const touchRef = useRef({ startX: 0, startY: 0, swiping: false, locked: false });
+
+  const swipeAction = contextMenuActions[0];
 
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
     const touch = e.touches[0];
@@ -80,12 +79,12 @@ export function SwipeableWordCard({
     if (offsetX < -SWIPE_THRESHOLD) {
       // Dismiss animation
       setDismissed(true);
-      setTimeout(() => onSwipeAction(word.id), 200);
+      setTimeout(() => swipeAction.onAction(word.id), 200);
     } else {
       // Spring back
       setOffsetX(0);
     }
-  }, [offsetX, onSwipeAction, word.id]);
+  }, [offsetX, swipeAction, word.id]);
 
   if (dismissed) {
     return (
@@ -110,7 +109,7 @@ export function SwipeableWordCard({
               )}
             >
               <div className="flex items-center gap-2 text-sm font-medium">
-                <span>{swipeLabel}</span>
+                <span>{swipeAction.label}</span>
                 <SwipeIcon className="size-5" />
               </div>
             </div>

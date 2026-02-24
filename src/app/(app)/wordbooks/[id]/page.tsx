@@ -20,9 +20,10 @@ import { useTranslation } from '@/lib/i18n';
 import { useLoader } from '@/hooks/use-loader';
 import { useSearch } from '@/hooks/use-search';
 import { markWordMastered } from '@/lib/actions/mark-mastered';
-import { getWordSortOptions } from '@/lib/constants';
+import { PAGE_SIZE, getWordSortOptions } from '@/lib/constants';
 import { invalidateListCache } from '@/lib/list-cache';
 import {
+  pageWrapper,
   bottomBar,
   bottomSep,
   emptyState,
@@ -31,8 +32,6 @@ import {
 import type { Word } from '@/types/word';
 import type { WordSortOrder } from '@/lib/repository/types';
 import type { Wordbook } from '@/types/wordbook';
-
-const PAGE_SIZE = 100;
 
 export default function WordbookDetailPage({
   params,
@@ -188,18 +187,18 @@ export default function WordbookDetailPage({
 
   if (!loading && !wordbook) {
     return (
-      <>
+      <div className={pageWrapper}>
         <Header title={t.wordbooks.title} showBack />
         <div className="py-8 text-center text-muted-foreground">
           {t.words.wordNotFound}
         </div>
-      </>
+      </div>
     );
   }
 
   if (!loading && wordbook && editing) {
     return (
-      <>
+      <div className={pageWrapper}>
         <Header
           title={t.wordbooks.editWordbook}
           showBack
@@ -239,13 +238,13 @@ export default function WordbookDetailPage({
           submitLabel={t.common.update}
           showShareToggle={!!user}
         />
-      </>
+      </div>
     );
   }
 
   if (!loading && wordbook && showInfo) {
     return (
-      <>
+      <div className={pageWrapper}>
         <Header
           title={t.wordbooks.wordbookInfo}
           showBack
@@ -307,7 +306,7 @@ export default function WordbookDetailPage({
             </Button>
           </div>
         </div>
-      </>
+      </div>
     );
   }
 
@@ -318,8 +317,6 @@ export default function WordbookDetailPage({
           word={word}
           showReading={showReading}
           showMeaning={showMeaning}
-          onSwipeAction={handleMasterWord}
-          swipeLabel={t.wordDetail.markMastered}
           swipeColor="green"
           contextMenuActions={[
             {
@@ -341,8 +338,6 @@ export default function WordbookDetailPage({
           word={word}
           showReading={showReading}
           showMeaning={showMeaning}
-          onSwipeAction={handleMasterWord}
-          swipeLabel={t.wordDetail.markMastered}
           swipeColor="green"
           contextMenuActions={[
             {
@@ -363,7 +358,7 @@ export default function WordbookDetailPage({
   };
 
   return (
-    <>
+    <div className={pageWrapper}>
       <Header
         title={wordbook?.name ?? ''}
         desc={!loading && totalCount > 0 ? t.wordbooks.wordCount(totalCount) : undefined}
@@ -509,6 +504,6 @@ export default function WordbookDetailPage({
         onConfirm={handleDelete}
         onCancel={() => setShowDeleteConfirm(false)}
       />
-    </>
+    </div>
   );
 }

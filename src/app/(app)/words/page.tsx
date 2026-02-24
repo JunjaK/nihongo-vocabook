@@ -17,7 +17,7 @@ import { useTranslation } from '@/lib/i18n';
 import { useLoader } from '@/hooks/use-loader';
 import { useSearch } from '@/hooks/use-search';
 import { markWordMastered } from '@/lib/actions/mark-mastered';
-import { getWordSortOptions } from '@/lib/constants';
+import { PAGE_SIZE, getWordSortOptions } from '@/lib/constants';
 import {
   pageWrapper,
   bottomBar,
@@ -28,8 +28,6 @@ import {
 } from '@/lib/styles';
 import type { Word } from '@/types/word';
 import type { WordSortOrder } from '@/lib/repository/types';
-
-const PAGE_SIZE = 100;
 
 export default function WordsPage() {
   const router = useRouter();
@@ -182,8 +180,6 @@ export default function WordsPage() {
                     word={word}
                     showReading={showReading}
                     showMeaning={showMeaning}
-                    onSwipeAction={handleMaster}
-                    swipeLabel={t.wordDetail.markMastered}
                     swipeColor="green"
                     contextMenuActions={[
                       {
