@@ -1,6 +1,6 @@
 'use client';
 
-import { use, useState, useCallback, useRef, useEffect } from 'react';
+import { use, useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { BookOpenCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -9,6 +9,8 @@ import { PracticeFlashcard } from '@/components/quiz/practice-flashcard';
 import { useRepository } from '@/lib/repository/provider';
 import { useAuthStore } from '@/stores/auth-store';
 import { useTranslation } from '@/lib/i18n';
+import { useLoader } from '@/hooks/use-loader';
+import { markWordMastered } from '@/lib/actions/mark-mastered';
 import { invalidateListCache } from '@/lib/list-cache';
 import { selectPracticeWords } from '@/lib/quiz/word-scoring';
 import { requestDueCountRefresh } from '@/lib/quiz/due-count-sync';
@@ -25,37 +27,32 @@ export default function PracticePage({
   const authLoading = useAuthStore((s) => s.loading);
   const { t } = useTranslation();
 
+  const [wordbookName, setWordbookName] = useState('');
   const [practiceWords, setPracticeWords] = useState<Word[]>([]);
   const [practiceIndex, setPracticeIndex] = useState(0);
   const [practiceStats, setPracticeStats] = useState({ total: 0, masteredCount: 0 });
   const [practiceComplete, setPracticeComplete] = useState(false);
-  const [loading, setLoading] = useState(true);
 
-  const loadStart = useRef(0);
+  // Refs to avoid stale closures in setTimeout
+  const practiceWordsRef = useRef(practiceWords);
+  const practiceIndexRef = useRef(practiceIndex);
+  useEffect(() => { practiceWordsRef.current = practiceWords; }, [practiceWords]);
+  useEffect(() => { practiceIndexRef.current = practiceIndex; }, [practiceIndex]);
 
-  const loadPractice = useCallback(async () => {
-    if (authLoading) return;
-
-    setLoading(true);
-    loadStart.current = Date.now();
-
-    const settings = await repo.study.getQuizSettings();
-    const allWords = await repo.wordbooks.getWords(wordbookId);
+  const [loading, reload] = useLoader(async () => {
+    const [settings, wb, allWords] = await Promise.all([
+      repo.study.getQuizSettings(),
+      repo.wordbooks.getById(wordbookId),
+      repo.wordbooks.getWords(wordbookId),
+    ]);
+    if (wb) setWordbookName(wb.name);
     const nonMastered = allWords.filter((w) => !w.mastered);
     const selected = selectPracticeWords(nonMastered, settings.newPerDay, settings.jlptFilter);
     setPracticeWords(selected);
     setPracticeIndex(0);
     setPracticeStats({ total: selected.length, masteredCount: 0 });
     setPracticeComplete(false);
-
-    const remaining = 300 - (Date.now() - loadStart.current);
-    if (remaining > 0) await new Promise((r) => setTimeout(r, remaining));
-    setLoading(false);
-  }, [repo, wordbookId, authLoading]);
-
-  useEffect(() => {
-    loadPractice();
-  }, [loadPractice]);
+  }, [repo, wordbookId], { skip: authLoading });
 
   useEffect(() => {
     return () => {
@@ -71,7 +68,7 @@ export default function PracticePage({
         prev.map((w) => (w.id === wId ? { ...w, priority } : w)),
       );
       setTimeout(() => {
-        if (practiceIndex + 1 < practiceWords.length) {
+        if (practiceIndexRef.current + 1 < practiceWordsRef.current.length) {
           setPracticeIndex((i) => i + 1);
         } else {
           setPracticeComplete(true);
@@ -83,11 +80,7 @@ export default function PracticePage({
   };
 
   const handleMaster = async (wId: string) => {
-    await repo.words.setMastered(wId, true);
-    invalidateListCache('words');
-    invalidateListCache('mastered');
-    invalidateListCache('wordbooks');
-    requestDueCountRefresh();
+    await markWordMastered(repo, wId);
     setPracticeStats((prev) => ({ ...prev, masteredCount: prev.masteredCount + 1 }));
     const remaining = practiceWords.filter((w) => w.id !== wId);
     setPracticeWords(remaining);
@@ -100,7 +93,7 @@ export default function PracticePage({
 
   const handlePracticeAgain = async () => {
     setPracticeComplete(false);
-    await loadPractice();
+    await reload();
   };
 
   const handleBackToWordbook = () => {
@@ -145,7 +138,7 @@ export default function PracticePage({
   return (
     <>
       <Header
-        title={t.quiz.wordbookQuiz}
+        title={wordbookName || t.quiz.wordbookQuiz}
         showBack
         actions={
           <div className="flex items-center gap-1.5">

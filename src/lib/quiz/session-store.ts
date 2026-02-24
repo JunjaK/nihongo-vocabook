@@ -3,7 +3,7 @@ export type QuizMode = 'general' | 'quickstart';
 export type QuizSessionSnapshot = {
   version: 1;
   mode: QuizMode;
-  kstDate: string; // YYYY-MM-DD in KST — invalid if date rolled
+  date: string; // YYYY-MM-DD in browser-local timezone — invalid if date rolled
   updatedAt: number;
   wordIds: string[]; // full ordered word ID list
   currentIndex: number;
@@ -19,8 +19,13 @@ function sessionKey(mode: QuizMode): string {
   return `quiz:session:${mode}`;
 }
 
-export function getKstDateString(): string {
-  return new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Seoul' });
+/** YYYY-MM-DD in browser-local timezone, matching date-utils.getLocalDateString(). */
+export function getLocalDateString(): string {
+  const d = new Date();
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 }
 
 export function readSession(mode: QuizMode): QuizSessionSnapshot | null {
@@ -31,7 +36,9 @@ export function readSession(mode: QuizMode): QuizSessionSnapshot | null {
     const parsed = JSON.parse(raw) as QuizSessionSnapshot;
     if (!parsed || parsed.version !== 1) return null;
     if (!Array.isArray(parsed.wordIds) || parsed.wordIds.length === 0) return null;
-    if (parsed.kstDate !== getKstDateString()) {
+    // Accept both new `date` and legacy `kstDate` field
+    const storedDate = parsed.date ?? (parsed as Record<string, unknown>)['kstDate'];
+    if (storedDate !== getLocalDateString()) {
       window.localStorage.removeItem(sessionKey(mode));
       return null;
     }
@@ -66,6 +73,7 @@ export function clearAllSessions(): void {
 
 export function cleanupLegacyKeys(): void {
   if (typeof window === 'undefined') return;
+  if (window.localStorage.getItem('quiz:legacy-cleanup-done')) return;
   try {
     const keysToRemove: string[] = [];
     for (let i = 0; i < window.localStorage.length; i++) {
@@ -77,6 +85,7 @@ export function cleanupLegacyKeys(): void {
     for (const key of keysToRemove) {
       window.localStorage.removeItem(key);
     }
+    window.localStorage.setItem('quiz:legacy-cleanup-done', '1');
   } catch {
     // Ignore
   }

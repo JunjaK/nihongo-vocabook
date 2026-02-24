@@ -113,7 +113,7 @@ const ko: Translations = {
     now: '지금',
     tomorrow: '내일',
     days: (n: number) => `${n}일 후`,
-    practiceWord: '이 단어 연습하기',
+
     markMastered: '암기 완료',
     unmarkMastered: '암기 완료 해제',
     addToWordbook: '단어장에 추가',

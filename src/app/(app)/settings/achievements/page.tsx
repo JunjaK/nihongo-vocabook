@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState } from 'react';
 import { Trophy, Star, Flame, BookCheck } from 'lucide-react';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { Header } from '@/components/layout/header';
 import { useRepository } from '@/lib/repository/provider';
 import { useTranslation } from '@/lib/i18n';
+import { useLoader } from '@/hooks/use-loader';
 import type { AchievementType, Achievement } from '@/types/quiz';
 
 const ACHIEVEMENT_DEFS: {
@@ -26,25 +27,11 @@ export default function AchievementsPage() {
   const repo = useRepository();
   const { t } = useTranslation();
   const [achievements, setAchievements] = useState<Achievement[]>([]);
-  const [loading, setLoading] = useState(true);
-  const loadStart = useRef(0);
 
-  const loadData = useCallback(async () => {
-    setLoading(true);
-    loadStart.current = Date.now();
-    try {
-      const data = await repo.study.getAchievements();
-      setAchievements(data);
-    } finally {
-      const remaining = 300 - (Date.now() - loadStart.current);
-      if (remaining > 0) await new Promise((r) => setTimeout(r, remaining));
-      setLoading(false);
-    }
+  const [loading] = useLoader(async () => {
+    const data = await repo.study.getAchievements();
+    setAchievements(data);
   }, [repo]);
-
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
 
   const unlockedTypes = new Set(achievements.map((a) => a.type));
   const unlockedMap = new Map(achievements.map((a) => [a.type, a]));

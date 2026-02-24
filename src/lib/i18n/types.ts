@@ -109,7 +109,7 @@ export interface Translations {
     now: string;
     tomorrow: string;
     days: (n: number) => string;
-    practiceWord: string;
+
     markMastered: string;
     unmarkMastered: string;
     addToWordbook: string;

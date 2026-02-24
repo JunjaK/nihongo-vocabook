@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useState, useEffect, useCallback, useRef } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { BookOpenCheck, Flame } from 'lucide-react';
@@ -11,7 +11,8 @@ import { SessionReport } from '@/components/quiz/session-report';
 import { useRepository } from '@/lib/repository/provider';
 import { useAuthStore } from '@/stores/auth-store';
 import { useTranslation } from '@/lib/i18n';
-import { invalidateListCache } from '@/lib/list-cache';
+import { useLoader } from '@/hooks/use-loader';
+import { markWordMastered } from '@/lib/actions/mark-mastered';
 import { isNewCard } from '@/lib/spaced-repetition';
 import { checkAndUnlockAchievements } from '@/lib/quiz/achievements';
 import { requestDueCountRefresh } from '@/lib/quiz/due-count-sync';
@@ -20,10 +21,56 @@ import {
   writeSession,
   clearSession,
   cleanupLegacyKeys,
-  getKstDateString,
+  getLocalDateString,
   type QuizMode,
 } from '@/lib/quiz/session-store';
+import type { DataRepository } from '@/lib/repository/types';
 import type { WordWithProgress } from '@/types/word';
+
+/**
+ * Try restoring a saved quiz session from localStorage.
+ * Returns null if no session found or all words have been mastered.
+ */
+async function tryRestoreSession(
+  mode: QuizMode,
+  repo: DataRepository,
+): Promise<{
+  words: WordWithProgress[];
+  index: number;
+  completed: number;
+  stats: { totalReviewed: number; newCards: number; againCount: number };
+} | null> {
+  const saved = readSession(mode);
+  if (!saved) return null;
+
+  const words = (
+    await Promise.all(saved.wordIds.map((id) => repo.words.getById(id)))
+  ).filter((w): w is NonNullable<typeof w> => w !== null && !w.mastered);
+
+  if (words.length === 0) {
+    clearSession(mode);
+    return null;
+  }
+
+  const withProgress = await Promise.all(
+    words.map(async (w) => ({
+      ...w,
+      progress: await repo.study.getProgress(w.id),
+    })),
+  );
+
+  const currentWordId = saved.wordIds[saved.currentIndex];
+  const restoredIndex = currentWordId
+    ? withProgress.findIndex((w) => w.id === currentWordId)
+    : -1;
+
+  return {
+    words: withProgress,
+    index: restoredIndex >= 0 ? restoredIndex : Math.min(saved.currentIndex, withProgress.length - 1),
+    completed: saved.completed,
+    stats: saved.sessionStats,
+  };
+}
 
 export default function QuizPage() {
   return (
@@ -44,11 +91,9 @@ function QuizContent() {
 
   const [dueWords, setDueWords] = useState<WordWithProgress[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [loading, setLoading] = useState(true);
   const [completed, setCompleted] = useState(0);
   const [streak, setStreak] = useState<number | null>(null);
   const [showReport, setShowReport] = useState(false);
-  const loadStart = useRef(0);
 
   const [sessionStats, setSessionStats] = useState({
     totalReviewed: 0,
@@ -56,80 +101,19 @@ function QuizContent() {
     againCount: 0,
   });
 
-  const loadDueWords = useCallback(async () => {
-    if (authLoading) return;
-
-    setLoading(true);
-    loadStart.current = Date.now();
+  const [loading, reload] = useLoader(async () => {
     cleanupLegacyKeys();
 
-    if (quickStart) {
-      // Try restore first
-      const saved = readSession('quickstart');
-      if (saved) {
-        const words = (
-          await Promise.all(saved.wordIds.map((id) => repo.words.getById(id)))
-        ).filter((w): w is NonNullable<typeof w> => w !== null && !w.mastered);
-
-        if (words.length > 0) {
-          const withProgress = await Promise.all(
-            words.map(async (w) => ({
-              ...w,
-              progress: await repo.study.getProgress(w.id),
-            })),
-          );
-          setDueWords(withProgress);
-          const currentWordId = saved.wordIds[saved.currentIndex];
-          const restoredIndex = currentWordId
-            ? withProgress.findIndex((w) => w.id === currentWordId)
-            : -1;
-          setCurrentIndex(restoredIndex >= 0 ? restoredIndex : Math.min(saved.currentIndex, withProgress.length - 1));
-          setCompleted(saved.completed);
-          setSessionStats(saved.sessionStats);
-        } else {
-          clearSession('quickstart');
-          await loadFreshQuickStart();
-        }
-      } else {
-        await loadFreshQuickStart();
-      }
-    } else {
-      // General mode — try restore first
-      const saved = readSession('general');
-      if (saved) {
-        const words = (
-          await Promise.all(saved.wordIds.map((id) => repo.words.getById(id)))
-        ).filter((w): w is NonNullable<typeof w> => w !== null && !w.mastered);
-
-        if (words.length > 0) {
-          const withProgress = await Promise.all(
-            words.map(async (w) => ({
-              ...w,
-              progress: await repo.study.getProgress(w.id),
-            })),
-          );
-          setDueWords(withProgress);
-          const currentWordId = saved.wordIds[saved.currentIndex];
-          const restoredIndex = currentWordId
-            ? withProgress.findIndex((w) => w.id === currentWordId)
-            : -1;
-          setCurrentIndex(restoredIndex >= 0 ? restoredIndex : Math.min(saved.currentIndex, withProgress.length - 1));
-          setCompleted(saved.completed);
-          setSessionStats(saved.sessionStats);
-        } else {
-          clearSession('general');
-          await loadFreshGeneral();
-        }
-      } else {
-        await loadFreshGeneral();
-      }
+    const restored = await tryRestoreSession(quizMode, repo);
+    if (restored) {
+      setDueWords(restored.words);
+      setCurrentIndex(restored.index);
+      setCompleted(restored.completed);
+      setSessionStats(restored.stats);
+      return;
     }
 
-    const remaining = 300 - (Date.now() - loadStart.current);
-    if (remaining > 0) await new Promise((r) => setTimeout(r, remaining));
-    setLoading(false);
-
-    async function loadFreshQuickStart() {
+    if (quickStart) {
       const settings = await repo.study.getQuizSettings();
       const all = await repo.words.getNonMastered();
       const take = Math.min(Math.max(settings.newPerDay, 0), all.length);
@@ -149,20 +133,14 @@ function QuizContent() {
       setCurrentIndex(0);
       setCompleted(0);
       setSessionStats({ totalReviewed: 0, newCards: 0, againCount: 0 });
-    }
-
-    async function loadFreshGeneral() {
+    } else {
       const words = await repo.study.getDueWords(20);
       setDueWords(words);
       setCurrentIndex(0);
       setCompleted(0);
       setSessionStats({ totalReviewed: 0, newCards: 0, againCount: 0 });
     }
-  }, [repo, authLoading, quickStart]);
-
-  useEffect(() => {
-    loadDueWords();
-  }, [loadDueWords]);
+  }, [repo, quickStart], { skip: authLoading });
 
   useEffect(() => {
     if (authLoading) return;
@@ -199,7 +177,7 @@ function QuizContent() {
     writeSession({
       version: 1,
       mode: quizMode,
-      kstDate: getKstDateString(),
+      date: getLocalDateString(),
       updatedAt: Date.now(),
       wordIds: dueWords.map((w) => w.id),
       currentIndex,
@@ -235,7 +213,7 @@ function QuizContent() {
         const newStreak = await repo.study.getStreakDays();
         setStreak(newStreak);
       } else {
-        await loadDueWords();
+        await reload();
       }
     }
   };
@@ -261,23 +239,27 @@ function QuizContent() {
 
   const handleMaster = async () => {
     const currentWord = dueWords[currentIndex];
-    await repo.words.setMastered(currentWord.id, true);
-    invalidateListCache('words');
-    invalidateListCache('mastered');
-    invalidateListCache('wordbooks');
-    requestDueCountRefresh();
-    setDueWords((prev) => prev.filter((_, i) => i !== currentIndex));
+    await markWordMastered(repo, currentWord.id);
+    setDueWords((prev) => {
+      const next = prev.filter((_, i) => i !== currentIndex);
+      if (next.length === 0 || currentIndex >= next.length) {
+        setCurrentIndex(0);
+      }
+      return next;
+    });
     setCompleted((c) => c + 1);
-    if (currentIndex >= dueWords.length - 1) {
-      setCurrentIndex(0);
-    }
   };
 
   const handleContinueStudying = async () => {
+    clearSession(quizMode);
+    if (quickStart) {
+      // Switch to general SRS quiz instead of re-rolling another random batch
+      router.push('/quiz');
+      return;
+    }
     setShowReport(false);
     setSessionStats({ totalReviewed: 0, newCards: 0, againCount: 0 });
-    clearSession(quizMode);
-    await loadDueWords();
+    await reload();
   };
 
   const handleBackToHome = () => {

@@ -113,7 +113,7 @@ const en: Translations = {
     now: 'Now',
     tomorrow: 'Tomorrow',
     days: (n: number) => `${n} day${n !== 1 ? 's' : ''}`,
-    practiceWord: 'Practice this word',
+
     markMastered: 'Master',
     unmarkMastered: 'Unmark Mastered',
     addToWordbook: 'Add to Wordbook',

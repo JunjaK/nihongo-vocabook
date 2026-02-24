@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState } from 'react';
 import { toast } from 'sonner';
 import { Info } from 'lucide-react';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
@@ -8,7 +8,8 @@ import { Header } from '@/components/layout/header';
 import { Button } from '@/components/ui/button';
 import { useRepository } from '@/lib/repository/provider';
 import { useTranslation } from '@/lib/i18n';
-import { bottomBar, bottomSep, settingsScroll, settingsSection, settingsHeading } from '@/lib/styles';
+import { useLoader } from '@/hooks/use-loader';
+import { bottomBar, bottomSep } from '@/lib/styles';
 import type { QuizSettings } from '@/types/quiz';
 import { DEFAULT_QUIZ_SETTINGS } from '@/types/quiz';
 
@@ -19,26 +20,12 @@ export default function QuizSettingsPage() {
   const repo = useRepository();
   const { t } = useTranslation();
   const [settings, setSettings] = useState<QuizSettings>(DEFAULT_QUIZ_SETTINGS);
-  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const loadStart = useRef(0);
 
-  const loadData = useCallback(async () => {
-    setLoading(true);
-    loadStart.current = Date.now();
-    try {
-      const data = await repo.study.getQuizSettings();
-      setSettings(data);
-    } finally {
-      const remaining = 300 - (Date.now() - loadStart.current);
-      if (remaining > 0) await new Promise((r) => setTimeout(r, remaining));
-      setLoading(false);
-    }
+  const [loading] = useLoader(async () => {
+    const data = await repo.study.getQuizSettings();
+    setSettings(data);
   }, [repo]);
-
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
 
   const handleSave = async () => {
     setSaving(true);

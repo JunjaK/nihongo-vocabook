@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo, useRef, use } from 'react';
+import { useState, useCallback, useMemo, useRef, use } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
@@ -17,6 +17,10 @@ import { WordbookForm } from '@/components/wordbook/wordbook-form';
 import { useRepository } from '@/lib/repository/provider';
 import { useAuthStore } from '@/stores/auth-store';
 import { useTranslation } from '@/lib/i18n';
+import { useLoader } from '@/hooks/use-loader';
+import { useSearch } from '@/hooks/use-search';
+import { markWordMastered } from '@/lib/actions/mark-mastered';
+import { getWordSortOptions } from '@/lib/constants';
 import { invalidateListCache } from '@/lib/list-cache';
 import {
   bottomBar,
@@ -44,13 +48,10 @@ export default function WordbookDetailPage({
   const [wordbook, setWordbook] = useState<Wordbook | null>(null);
   const [words, setWords] = useState<Word[]>([]);
   const [totalCount, setTotalCount] = useState(0);
-  const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [editing, setEditing] = useState(false);
   const [showReading, setShowReading] = useState(false);
   const [showMeaning, setShowMeaning] = useState(false);
-  const [searchInput, setSearchInput] = useState('');
-  const [appliedQuery, setAppliedQuery] = useState('');
   const [sortOrder, setSortOrder] = useState<WordSortOrder>('newest');
   const [showInfo, setShowInfo] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -58,53 +59,41 @@ export default function WordbookDetailPage({
   const isOwned = wordbook && user && wordbook.userId === user.id;
   const isSubscribed = wordbook && user && wordbook.userId !== user.id;
 
-  const loadStart = useRef(0);
   const parentRef = useRef<HTMLDivElement>(null);
+
+  const { searchInput, appliedQuery, setSearchInput, handleSearch, handleSearchClear } = useSearch();
+
   const hasMore = !appliedQuery && sortOrder !== 'priority' && words.length < totalCount;
 
-  const loadData = useCallback(async () => {
-    if (authLoading) return;
-
-    setLoading(true);
-    loadStart.current = Date.now();
-    try {
-      const shouldLoadAll = appliedQuery || sortOrder === 'priority';
-      const [wb, loadedWords] = await Promise.all([
-        repo.wordbooks.getById(id),
-        shouldLoadAll
-          ? repo.wordbooks.getWords(id)
-          : repo.wordbooks.getWordsPaginated(id, {
-            limit: PAGE_SIZE,
-            offset: 0,
-            sort: sortOrder,
-          }).then((result) => {
-            setTotalCount(result.totalCount);
-            return result.words;
-          }),
-      ]);
-      setWordbook(wb);
-      if (sortOrder === 'priority') {
-        const sorted = [...loadedWords].sort((a, b) => {
-          if (a.priority !== b.priority) return a.priority - b.priority;
-          return b.createdAt.getTime() - a.createdAt.getTime();
-        });
-        setWords(sorted);
-      } else {
-        setWords(loadedWords);
-      }
-      if (shouldLoadAll) {
-        setTotalCount(loadedWords.length);
-      }
-    } finally {
-      const remaining = 300 - (Date.now() - loadStart.current);
-      if (remaining > 0) await new Promise((r) => setTimeout(r, remaining));
-      setLoading(false);
+  const [loading] = useLoader(async () => {
+    const shouldLoadAll = appliedQuery || sortOrder === 'priority';
+    const [wb, loadedWords] = await Promise.all([
+      repo.wordbooks.getById(id),
+      shouldLoadAll
+        ? repo.wordbooks.getWords(id)
+        : repo.wordbooks.getWordsPaginated(id, {
+          limit: PAGE_SIZE,
+          offset: 0,
+          sort: sortOrder,
+        }).then((result) => {
+          setTotalCount(result.totalCount);
+          return result.words;
+        }),
+    ]);
+    setWordbook(wb);
+    if (sortOrder === 'priority') {
+      const sorted = [...loadedWords].sort((a, b) => {
+        if (a.priority !== b.priority) return a.priority - b.priority;
+        return b.createdAt.getTime() - a.createdAt.getTime();
+      });
+      setWords(sorted);
+    } else {
+      setWords(loadedWords);
     }
-  }, [repo, id, authLoading, appliedQuery, sortOrder]);
-
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
+    if (shouldLoadAll) {
+      setTotalCount(loadedWords.length);
+    }
+  }, [repo, id, appliedQuery, sortOrder], { skip: authLoading });
 
   const loadMore = useCallback(async () => {
     if (loadingMore || !hasMore) return;
@@ -147,10 +136,7 @@ export default function WordbookDetailPage({
   };
 
   const handleMasterWord = async (wordId: string) => {
-    await repo.words.setMastered(wordId, true);
-    invalidateListCache('words');
-    invalidateListCache('mastered');
-    invalidateListCache('wordbooks');
+    await markWordMastered(repo, wordId);
     setWords((prev) => prev.filter((w) => w.id !== wordId));
   };
 
@@ -160,20 +146,7 @@ export default function WordbookDetailPage({
     toast.success(t.wordbooks.wordRemoved);
   };
 
-  const handleSearch = () => {
-    setAppliedQuery(searchInput.trim());
-  };
-
-  const handleSearchClear = () => {
-    setSearchInput('');
-    setAppliedQuery('');
-  };
-
-  const sortOptions = [
-    { value: 'priority', label: t.priority.sortByPriority },
-    { value: 'newest', label: t.priority.sortByNewest },
-    { value: 'alphabetical', label: t.priority.sortByAlphabetical },
-  ];
+  const sortOptions = getWordSortOptions(t);
 
   const sortedWords = useMemo(() => {
     if (!appliedQuery) return words;

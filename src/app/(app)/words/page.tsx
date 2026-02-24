@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { BookOpen, FileImage } from 'lucide-react';
@@ -13,7 +13,10 @@ import { AddToWordbookDialog } from '@/components/wordbook/add-to-wordbook-dialo
 import { useRepository } from '@/lib/repository/provider';
 import { useAuthStore } from '@/stores/auth-store';
 import { useTranslation } from '@/lib/i18n';
-import { invalidateListCache } from '@/lib/list-cache';
+import { useLoader } from '@/hooks/use-loader';
+import { useSearch } from '@/hooks/use-search';
+import { markWordMastered } from '@/lib/actions/mark-mastered';
+import { getWordSortOptions } from '@/lib/constants';
 import {
   pageWrapper,
   bottomBar,
@@ -33,51 +36,33 @@ export default function WordsPage() {
   const { t } = useTranslation();
   const [words, setWords] = useState<Word[]>([]);
   const [totalCount, setTotalCount] = useState(0);
-  const [searchInput, setSearchInput] = useState('');
-  const [appliedQuery, setAppliedQuery] = useState('');
-  const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [showReading, setShowReading] = useState(false);
   const [showMeaning, setShowMeaning] = useState(false);
   const [wordbookDialogWordId, setWordbookDialogWordId] = useState<string | null>(null);
   const [sortOrder, setSortOrder] = useState<WordSortOrder>('priority');
-  const loadStart = useRef(0);
-  const initialLoaded = useRef(false);
   const parentRef = useRef<HTMLDivElement>(null);
+
+  const { searchInput, appliedQuery, setSearchInput, handleSearch, handleSearchClear } = useSearch();
 
   const hasMore = words.length < totalCount;
 
-  const loadWords = useCallback(async () => {
-    if (authLoading) return;
-
-    setLoading(true);
-    loadStart.current = Date.now();
-    try {
-      if (appliedQuery) {
-        const data = await repo.words.search(appliedQuery);
-        const filtered = data.filter((w) => !w.mastered);
-        setWords(filtered);
-        setTotalCount(filtered.length);
-      } else {
-        const result = await repo.words.getNonMasteredPaginated({
-          sort: sortOrder,
-          limit: PAGE_SIZE,
-          offset: 0,
-        });
-        setWords(result.words);
-        setTotalCount(result.totalCount);
-      }
-    } finally {
-      const remaining = 300 - (Date.now() - loadStart.current);
-      if (remaining > 0) await new Promise((r) => setTimeout(r, remaining));
-      initialLoaded.current = true;
-      setLoading(false);
+  const [loading] = useLoader(async () => {
+    if (appliedQuery) {
+      const data = await repo.words.search(appliedQuery);
+      const filtered = data.filter((w) => !w.mastered);
+      setWords(filtered);
+      setTotalCount(filtered.length);
+    } else {
+      const result = await repo.words.getNonMasteredPaginated({
+        sort: sortOrder,
+        limit: PAGE_SIZE,
+        offset: 0,
+      });
+      setWords(result.words);
+      setTotalCount(result.totalCount);
     }
-  }, [repo, appliedQuery, sortOrder, authLoading]);
-
-  useEffect(() => {
-    loadWords();
-  }, [loadWords]);
+  }, [repo, appliedQuery, sortOrder], { skip: authLoading });
 
   const loadMore = useCallback(async () => {
     if (loadingMore || !hasMore || appliedQuery) return;
@@ -104,24 +89,11 @@ export default function WordsPage() {
     }
   }, [hasMore, loadingMore, appliedQuery, loadMore]);
 
-  const handleSearch = () => {
-    setAppliedQuery(searchInput.trim());
-  };
-
-  const handleSearchClear = () => {
-    setSearchInput('');
-    setAppliedQuery('');
-  };
-
   const handleSortChange = (v: string) => {
     setSortOrder(v as WordSortOrder);
   };
 
-  const sortOptions = [
-    { value: 'priority', label: t.priority.sortByPriority },
-    { value: 'newest', label: t.priority.sortByNewest },
-    { value: 'alphabetical', label: t.priority.sortByAlphabetical },
-  ];
+  const sortOptions = getWordSortOptions(t);
 
   const virtualizer = useVirtualizer({
     count: words.length,
@@ -131,10 +103,9 @@ export default function WordsPage() {
   });
 
   const handleMaster = async (wordId: string) => {
-    await repo.words.setMastered(wordId, true);
+    await markWordMastered(repo, wordId);
     setWords((prev) => prev.filter((w) => w.id !== wordId));
     setTotalCount((prev) => prev - 1);
-    invalidateListCache('mastered');
   };
 
   return (
@@ -168,7 +139,7 @@ export default function WordsPage() {
         onSortChange={handleSortChange}
       />
 
-      {(loading || !initialLoaded.current) ? (
+      {loading ? (
         <div className={skeletonWordList}>
           {Array.from({ length: 20 }).map((_, i) => (
             <Skeleton key={i} className="h-[60px] w-full rounded-lg" />

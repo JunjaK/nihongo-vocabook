@@ -81,6 +81,7 @@ export default function WordDetailPage({
     const updated = await repo.words.setMastered(id, !word.mastered);
     invalidateListCache('words');
     invalidateListCache('mastered');
+    invalidateListCache('wordbooks');
     setWord(updated);
   };
 

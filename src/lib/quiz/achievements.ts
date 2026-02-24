@@ -1,5 +1,6 @@
 import type { DataRepository } from '@/lib/repository/types';
 import type { AchievementType } from '@/types/quiz';
+import { getLocalDateString } from '@/lib/quiz/date-utils';
 
 /**
  * Check conditions and unlock any newly earned achievements.
@@ -17,9 +18,7 @@ export async function checkAndUnlockAchievements(
     {
       type: 'first_quiz',
       condition: async () => {
-        const stats = await repo.study.getDailyStats(
-          new Date().toISOString().slice(0, 10),
-        );
+        const stats = await repo.study.getDailyStats(getLocalDateString());
         return (stats?.reviewCount ?? 0) > 0;
       },
     },

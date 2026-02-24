@@ -1,7 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
@@ -12,6 +11,8 @@ import { SwipeableWordCard } from '@/components/word/swipeable-word-card';
 import { useRepository } from '@/lib/repository/provider';
 import { useAuthStore } from '@/stores/auth-store';
 import { useTranslation } from '@/lib/i18n';
+import { useLoader } from '@/hooks/use-loader';
+import { useSearch } from '@/hooks/use-search';
 import { getListCache, setListCache, invalidateListCache } from '@/lib/list-cache';
 import {
   skeletonWordList,
@@ -35,73 +36,41 @@ function sortWords(words: Word[], order: SortOrder): Word[] {
 }
 
 export default function MasteredPage() {
-  const router = useRouter();
   const repo = useRepository();
   const authLoading = useAuthStore((s) => s.loading);
   const { t } = useTranslation();
   const [words, setWords] = useState<Word[]>([]);
-  const [searchInput, setSearchInput] = useState('');
-  const [appliedQuery, setAppliedQuery] = useState('');
-  const [loading, setLoading] = useState(true);
   const [showReading, setShowReading] = useState(false);
   const [showMeaning, setShowMeaning] = useState(false);
   const [sortOrder, setSortOrder] = useState<SortOrder>('newest');
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
-  const loadStart = useRef(0);
-  const initialLoaded = useRef(false);
 
-  const loadWords = useCallback(async () => {
-    if (authLoading) return;
+  const { searchInput, appliedQuery, setSearchInput, handleSearch, handleSearchClear } = useSearch();
 
-    // Try cache first (only for non-search loads)
+  const [loading] = useLoader(async () => {
     if (!appliedQuery) {
       const cached = getListCache<Word[]>('mastered');
       if (cached) {
         setWords(cached.data);
-        initialLoaded.current = true;
-        setLoading(false);
-        return;
+        return true; // skip delay — data from cache
       }
     }
-
-    setLoading(true);
-    loadStart.current = Date.now();
-    try {
-      const data = await repo.words.getMastered();
-      if (appliedQuery) {
-        const lower = appliedQuery.toLowerCase();
-        setWords(
-          data.filter(
-            (w) =>
-              w.term.toLowerCase().includes(lower) ||
-              w.reading.toLowerCase().includes(lower) ||
-              w.meaning.toLowerCase().includes(lower),
-          ),
-        );
-      } else {
-        setWords(data);
-        setListCache('mastered', data);
-      }
-    } finally {
-      const remaining = 300 - (Date.now() - loadStart.current);
-      if (remaining > 0) await new Promise((r) => setTimeout(r, remaining));
-      initialLoaded.current = true;
-      setLoading(false);
+    const data = await repo.words.getMastered();
+    if (appliedQuery) {
+      const lower = appliedQuery.toLowerCase();
+      setWords(
+        data.filter(
+          (w) =>
+            w.term.toLowerCase().includes(lower) ||
+            w.reading.toLowerCase().includes(lower) ||
+            w.meaning.toLowerCase().includes(lower),
+        ),
+      );
+    } else {
+      setWords(data);
+      setListCache('mastered', data);
     }
-  }, [repo, appliedQuery, authLoading]);
-
-  useEffect(() => {
-    loadWords();
-  }, [loadWords]);
-
-  const handleSearch = () => {
-    setAppliedQuery(searchInput.trim());
-  };
-
-  const handleSearchClear = () => {
-    setSearchInput('');
-    setAppliedQuery('');
-  };
+  }, [repo, appliedQuery], { skip: authLoading });
 
   const handleUnmaster = async (wordId: string) => {
     await repo.words.setMastered(wordId, false);
@@ -148,7 +117,7 @@ export default function MasteredPage() {
         onSortChange={(v) => setSortOrder(v as SortOrder)}
       />
 
-      {(loading || !initialLoaded.current) ? (
+      {loading ? (
         <div className={skeletonWordList}>
           {Array.from({ length: 20 }).map((_, i) => (
             <Skeleton key={i} className="h-[60px] w-full rounded-lg" />

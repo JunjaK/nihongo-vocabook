@@ -1,17 +1,20 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
-import { ArrowUpDown, Check, FolderOpen, LogIn, Search, X } from 'lucide-react';
+import { FolderOpen, LogIn, Search, X } from 'lucide-react';
 import { Header } from '@/components/layout/header';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { SortDropdown } from '@/components/ui/sort-dropdown';
 import { ImportWordbookDialog } from '@/components/wordbook/import-wordbook-dialog';
 import { useRepository } from '@/lib/repository/provider';
 import { useAuthStore } from '@/stores/auth-store';
 import { useTranslation } from '@/lib/i18n';
+import { useLoader } from '@/hooks/use-loader';
+import { useSearch } from '@/hooks/use-search';
 import {
   bottomBar,
   bottomSep,
@@ -40,42 +43,20 @@ export default function BrowseSharedPage() {
   const { t } = useTranslation();
 
   const [items, setItems] = useState<SharedWordbookListItem[]>([]);
-  const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<SharedWordbookListItem | null>(null);
   const [sortBy, setSortBy] = useState<SharedSort>('imports');
-  const [searchInput, setSearchInput] = useState('');
-  const [appliedQuery, setAppliedQuery] = useState('');
 
-  const loadStart = useRef(0);
-  const initialLoaded = useRef(false);
+  const { searchInput, appliedQuery, setSearchInput, handleSearch, handleSearchClear } = useSearch();
 
-  const load = useCallback(async () => {
-    if (!user) {
-      setLoading(false);
-      return;
-    }
-    setLoading(true);
-    loadStart.current = Date.now();
-    try {
-      const data = await repo.wordbooks.browseShared();
-      setItems(data);
-    } finally {
-      const remaining = 300 - (Date.now() - loadStart.current);
-      if (remaining > 0) await new Promise((r) => setTimeout(r, remaining));
-      initialLoaded.current = true;
-      setLoading(false);
-    }
-  }, [repo, user]);
-
-  useEffect(() => {
-    load();
-  }, [load]);
-
-  const handleSearch = () => setAppliedQuery(searchInput.trim());
-  const handleSearchClear = () => { setSearchInput(''); setAppliedQuery(''); };
   const handleSearchKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') handleSearch();
   };
+
+  const [loading, reload] = useLoader(async () => {
+    if (!user) return true; // no user → skip delay, just set loading false
+    const data = await repo.wordbooks.browseShared();
+    setItems(data);
+  }, [repo, user], { skip: authLoading });
 
   // Guest user: show sign-up CTA (wait for auth to resolve first)
   if (!authLoading && !user) {
@@ -103,8 +84,6 @@ export default function BrowseSharedPage() {
       </>
     );
   }
-
-  const showSkeleton = loading || !initialLoaded.current;
 
   const systemItems = items.filter((i) => i.isSystem);
   const filteredUserItems = items.filter((i) => {
@@ -172,7 +151,7 @@ export default function BrowseSharedPage() {
           </div>
           <div className={inlineSep} />
 
-          {showSkeleton ? (
+          {loading ? (
             <div className="animate-page flex-1 space-y-2 overflow-y-auto px-4 pt-2">
               {Array.from({ length: 20 }).map((_, i) => (
                 <Skeleton key={i} className="h-[88px] w-full rounded-lg" />
@@ -206,7 +185,7 @@ export default function BrowseSharedPage() {
         </TabsContent>
 
         <TabsContent value="system" className="flex-1 overflow-y-auto">
-          {showSkeleton ? (
+          {loading ? (
             <div className="animate-page flex-1 space-y-2 overflow-y-auto px-4 pt-2">
               {Array.from({ length: 20 }).map((_, i) => (
                 <Skeleton key={i} className="h-[88px] w-full rounded-lg" />
@@ -242,64 +221,10 @@ export default function BrowseSharedPage() {
         onClose={() => setSelected(null)}
         onDone={() => {
           setSelected(null);
-          load();
+          reload();
         }}
       />
     </>
-  );
-}
-
-function SortDropdown({
-  value,
-  options,
-  onChange,
-}: {
-  value: string;
-  options: { value: string; label: string }[];
-  onChange: (value: string) => void;
-}) {
-  const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!open) return;
-    const handleClick = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClick);
-    return () => document.removeEventListener('mousedown', handleClick);
-  }, [open]);
-
-  return (
-    <div className="relative" ref={ref}>
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={() => setOpen((v) => !v)}
-        aria-label="Sort"
-      >
-        <ArrowUpDown className="size-4" />
-      </Button>
-      {open && (
-        <div className="absolute right-0 top-full z-50 mt-1 min-w-36 rounded-md border bg-popover py-1 shadow-md">
-          {options.map((opt) => (
-            <button
-              key={opt.value}
-              onClick={() => {
-                onChange(opt.value);
-                setOpen(false);
-              }}
-              className="flex w-full items-center gap-2 px-3 py-1.5 text-sm transition-colors hover:bg-accent"
-            >
-              <Check className={`size-4 ${value === opt.value ? 'opacity-100' : 'opacity-0'}`} />
-              {opt.label}
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
   );
 }
 
