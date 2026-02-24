@@ -123,11 +123,11 @@ export async function GET(request: NextRequest) {
 
   const supabase = await createClient();
 
-  // 1. Try local DB first
+  // 1. Try local DB first (search both term and reading)
   const { data: rows } = await supabase
     .from('dictionary_entries')
     .select('term, reading, meanings, meanings_ko, parts_of_speech, jlpt_level')
-    .eq('term', query)
+    .or(`term.eq.${query},reading.eq.${query}`)
     .limit(10);
 
   if (rows && rows.length > 0) {
@@ -185,7 +185,7 @@ export async function GET(request: NextRequest) {
       // Fire-and-forget upsert (strip source for type safety, add back)
       supabase
         .from('dictionary_entries')
-        .upsert(entries, { onConflict: 'term,reading', ignoreDuplicates: true })
+        .upsert(entries, { onConflict: 'term,reading' })
         .then(({ error }) => {
           if (error) console.error('Dictionary cache error:', error.message);
         });

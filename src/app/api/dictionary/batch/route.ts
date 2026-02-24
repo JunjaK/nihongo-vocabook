@@ -42,7 +42,7 @@ function mapRowToJisho(row: DictionaryRow): JishoResult {
 const MAX_TERMS = 200;
 
 export async function POST(request: NextRequest) {
-  let body: { terms?: string[]; locale?: string };
+  let body: { terms?: string[] };
   try {
     body = await request.json();
   } catch {
@@ -71,10 +71,11 @@ export async function POST(request: NextRequest) {
   const uniqueTerms = [...new Set(terms)];
   const supabase = await createClient();
 
+  const termList = uniqueTerms.join(',');
   const { data: rows, error } = await supabase
     .from('dictionary_entries')
     .select('term, reading, meanings, meanings_ko, parts_of_speech, jlpt_level')
-    .in('term', uniqueTerms);
+    .or(`term.in.(${termList}),reading.in.(${termList})`);
 
   if (error) {
     return NextResponse.json(
@@ -83,13 +84,20 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  // Build a lookup set for quick matching
+  const termSet = new Set(uniqueTerms);
+
   const found: Record<string, JishoResult[]> = {};
   for (const row of rows ?? []) {
     const mapped = mapRowToJisho(row);
-    if (!found[row.term]) {
-      found[row.term] = [];
+    // Key by the queried term — could match via term or reading
+    const keys: string[] = [];
+    if (termSet.has(row.term)) keys.push(row.term);
+    if (termSet.has(row.reading)) keys.push(row.reading);
+    for (const key of keys) {
+      if (!found[key]) found[key] = [];
+      found[key].push(mapped);
     }
-    found[row.term].push(mapped);
   }
 
   const missing = uniqueTerms.filter((term) => !found[term]);

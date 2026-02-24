@@ -123,7 +123,7 @@ export function WordSearch({ onSelect }: WordSearchProps) {
                 <div className="min-w-0 flex-1">
                   <div className="font-bold">
                     {jp?.word ?? jp?.reading}
-                    {jp?.word && (
+                    {jp?.word && jp.word !== jp.reading && (
                       <span className="ml-2 text-sm font-normal text-muted-foreground">
                         {jp.reading}
                       </span>

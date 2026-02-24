@@ -59,6 +59,9 @@ const migrations = [
   '011_non_mastered_view.sql',
   '012_dictionary_meanings_ko.sql',
   '013_consent_columns.sql',
+  '014_quiz_improvements.sql',
+  '015_batch_rpcs.sql',
+  '016_dictionary_reading_index.sql',
 ];
 
 async function run() {
