@@ -16,6 +16,8 @@ const en: Translations = {
     previous: 'Previous',
     next: 'Next',
     complete: 'Complete',
+    error: 'Something went wrong',
+    tryAgain: 'Try Again',
   },
   nav: {
     words: 'Words',

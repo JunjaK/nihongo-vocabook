@@ -116,6 +116,27 @@ export default function QuizSettingsPage() {
             </div>
           </section>
 
+          {/* Card direction */}
+          <section className="space-y-2">
+            <h2 className="text-sm font-semibold">{t.settings.cardDirection}</h2>
+            <div className="flex flex-wrap gap-2">
+              {([
+                { value: 'term_first' as const, label: t.settings.termFirst },
+                { value: 'meaning_first' as const, label: t.settings.meaningFirst },
+                { value: 'random' as const, label: t.settings.randomDirection },
+              ]).map(({ value, label }) => (
+                <Button
+                  key={value}
+                  variant={settings.cardDirection === value ? 'secondary' : 'outline'}
+                  size="sm"
+                  onClick={() => setSettings((s) => ({ ...s, cardDirection: value }))}
+                >
+                  {label}
+                </Button>
+              ))}
+            </div>
+          </section>
+
           {/* Priority filter */}
           <section className="space-y-2">
             <h2 className="text-sm font-semibold">{t.settings.priorityFilter}</h2>

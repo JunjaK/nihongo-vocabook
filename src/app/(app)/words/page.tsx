@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useRef } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { BookOpen, FileImage } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -31,6 +32,7 @@ import type { WordSortOrder } from '@/lib/repository/types';
 const PAGE_SIZE = 100;
 
 export default function WordsPage() {
+  const router = useRouter();
   const repo = useRepository();
   const authLoading = useAuthStore((s) => s.loading);
   const { t } = useTranslation();
@@ -42,17 +44,18 @@ export default function WordsPage() {
   const [wordbookDialogWordId, setWordbookDialogWordId] = useState<string | null>(null);
   const [sortOrder, setSortOrder] = useState<WordSortOrder>('priority');
   const parentRef = useRef<HTMLDivElement>(null);
+  const loadGenRef = useRef(0); // generation counter to cancel stale loadMore
 
   const { searchInput, appliedQuery, setSearchInput, handleSearch, handleSearchClear } = useSearch();
 
   const hasMore = words.length < totalCount;
 
   const [loading] = useLoader(async () => {
+    loadGenRef.current += 1; // invalidate in-flight loadMore
     if (appliedQuery) {
       const data = await repo.words.search(appliedQuery);
-      const filtered = data.filter((w) => !w.mastered);
-      setWords(filtered);
-      setTotalCount(filtered.length);
+      setWords(data);
+      setTotalCount(data.length);
     } else {
       const result = await repo.words.getNonMasteredPaginated({
         sort: sortOrder,
@@ -66,6 +69,7 @@ export default function WordsPage() {
 
   const loadMore = useCallback(async () => {
     if (loadingMore || !hasMore || appliedQuery) return;
+    const gen = loadGenRef.current;
     setLoadingMore(true);
     try {
       const result = await repo.words.getNonMasteredPaginated({
@@ -73,6 +77,8 @@ export default function WordsPage() {
         limit: PAGE_SIZE,
         offset: words.length,
       });
+      // Discard result if sort/query changed while this was in-flight
+      if (gen !== loadGenRef.current) return;
       setWords((prev) => [...prev, ...result.words]);
       setTotalCount(result.totalCount);
     } finally {
@@ -204,21 +210,31 @@ export default function WordsPage() {
       <div className={bottomBar}>
         <div className={bottomSep} />
         <div className="flex gap-2">
-          <Link href="/quiz?quickStart=1" className="flex-1">
+          {loading || totalCount === 0 ? (
+            <Button variant="outline" className="flex-1" disabled data-testid="words-start-quiz-button">
+              {t.words.startQuiz}
+            </Button>
+          ) : (
             <Button
               variant="outline"
-              className="w-full"
-              disabled={loading || totalCount === 0}
+              className="flex-1"
+              onClick={() => window.location.assign('/quiz?quickStart=1')}
               data-testid="words-start-quiz-button"
             >
               {t.words.startQuiz}
             </Button>
-          </Link>
-          <Link href="/words/create" className="flex-1">
-            <Button className="w-full" disabled={loading} data-testid="words-add-button">
+          )}
+          {loading ? (
+            <Button className="flex-1" disabled data-testid="words-add-button">
               {t.words.addWord}
             </Button>
-          </Link>
+          ) : (
+            <Link href="/words/create" className="flex-1">
+              <Button className="w-full" data-testid="words-add-button">
+                {t.words.addWord}
+              </Button>
+            </Link>
+          )}
         </div>
       </div>
 

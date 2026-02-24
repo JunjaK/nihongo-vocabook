@@ -307,15 +307,32 @@ class SupabaseWordRepository implements WordRepository {
 
   async search(query: string): Promise<Word[]> {
     const userId = await this.getUserId();
+    // Use v_words_active to exclude mastered words server-side
     const { data, error } = await this.supabase
-      .from('words')
-      .select('*, user_word_state(*)')
+      .from('v_words_active')
+      .select('*')
       .or(`term.ilike.%${query}%,reading.ilike.%${query}%,meaning.ilike.%${query}%`)
       .order('created_at', { ascending: false });
     if (error) throw error;
     return (data ?? []).map((row: Record<string, unknown>) => {
-      const state = extractState(row);
-      return dbWordToWord(row as unknown as DbWord, state, userId);
+      const dbRow = row as unknown as DbWord & { priority: number; mastered: boolean; mastered_at: string | null; is_leech: boolean; leech_at: string | null };
+      return {
+        id: dbRow.id,
+        term: dbRow.term,
+        reading: dbRow.reading,
+        meaning: dbRow.meaning,
+        notes: dbRow.notes,
+        tags: dbRow.tags,
+        jlptLevel: dbRow.jlpt_level,
+        priority: dbRow.priority ?? 2,
+        mastered: dbRow.mastered ?? false,
+        masteredAt: dbRow.mastered_at ? new Date(dbRow.mastered_at) : null,
+        isLeech: dbRow.is_leech ?? false,
+        leechAt: dbRow.leech_at ? new Date(dbRow.leech_at) : null,
+        isOwned: dbRow.user_id === userId,
+        createdAt: new Date(dbRow.created_at),
+        updatedAt: new Date(dbRow.updated_at),
+      } satisfies Word;
     });
   }
 
@@ -985,8 +1002,7 @@ class SupabaseWordbookRepository implements WordbookRepository {
   }
 
   async getAll(): Promise<WordbookWithCount[]> {
-    const { data: userData } = await this.supabase.auth.getUser();
-    const userId = userData.user!.id;
+    const userId = await this.getUserId();
 
     const { data, error } = await this.supabase
       .from('wordbooks')
@@ -995,30 +1011,25 @@ class SupabaseWordbookRepository implements WordbookRepository {
       .order('created_at', { ascending: false });
     if (error) throw error;
 
-    const results: WordbookWithCount[] = [];
-    for (const row of data ?? []) {
-      const wb = row as unknown as DbWordbook & {
-        wordbook_items: [{ count: number }];
-      };
-      const wordCount = wb.wordbook_items[0]?.count ?? 0;
+    const rows = (data ?? []) as unknown as Array<DbWordbook & { wordbook_items: [{ count: number }] }>;
+    const wbIds = rows.filter((wb) => (wb.wordbook_items[0]?.count ?? 0) > 0).map((wb) => wb.id);
 
-      // Count mastered words via RPC (works for both owned + subscribed)
-      let masteredCount = 0;
-      if (wordCount > 0) {
-        const { data: rpcData, error: rpcErr } = await this.supabase
-          .rpc('get_wordbook_mastered_count', { wb_id: wb.id });
-        if (!rpcErr) masteredCount = (rpcData as number) ?? 0;
+    // Single batch RPC instead of N sequential calls
+    const masteredMap = new Map<string, number>();
+    if (wbIds.length > 0) {
+      const { data: rpcData } = await this.supabase
+        .rpc('get_wordbook_mastered_counts', { wb_ids: wbIds });
+      for (const row of (rpcData ?? []) as Array<{ wordbook_id: string; mastered_count: number }>) {
+        masteredMap.set(row.wordbook_id, row.mastered_count);
       }
-
-      results.push({
-        ...dbWordbookToWordbook(wb),
-        wordCount,
-        importCount: wb.import_count ?? 0,
-        masteredCount,
-      });
     }
 
-    return results;
+    return rows.map((wb) => ({
+      ...dbWordbookToWordbook(wb),
+      wordCount: wb.wordbook_items[0]?.count ?? 0,
+      importCount: wb.import_count ?? 0,
+      masteredCount: masteredMap.get(wb.id) ?? 0,
+    }));
   }
 
   async getById(id: string): Promise<Wordbook | null> {
@@ -1244,8 +1255,7 @@ class SupabaseWordbookRepository implements WordbookRepository {
   }
 
   async getSubscribed(): Promise<WordbookWithCount[]> {
-    const { data: userData } = await this.supabase.auth.getUser();
-    const userId = userData.user!.id;
+    const userId = await this.getUserId();
 
     const { data, error } = await this.supabase
       .from('wordbook_subscriptions')
@@ -1253,35 +1263,31 @@ class SupabaseWordbookRepository implements WordbookRepository {
       .eq('subscriber_id', userId);
     if (error) throw error;
 
-    const results: WordbookWithCount[] = [];
-    for (const row of data ?? []) {
-      const wb = (row as Record<string, unknown>).wordbooks as unknown as DbWordbook & {
-        wordbook_items: [{ count: number }];
-      };
-      const wordCount = wb.wordbook_items[0]?.count ?? 0;
+    const rows = (data ?? []).map((row) =>
+      (row as Record<string, unknown>).wordbooks as unknown as DbWordbook & { wordbook_items: [{ count: number }] },
+    );
+    const wbIds = rows.filter((wb) => (wb.wordbook_items[0]?.count ?? 0) > 0).map((wb) => wb.id);
 
-      // Count mastered words via RPC
-      let masteredCount = 0;
-      if (wordCount > 0) {
-        const { data: rpcData, error: rpcErr } = await this.supabase
-          .rpc('get_wordbook_mastered_count', { wb_id: wb.id });
-        if (!rpcErr) masteredCount = (rpcData as number) ?? 0;
+    // Single batch RPC instead of N sequential calls
+    const masteredMap = new Map<string, number>();
+    if (wbIds.length > 0) {
+      const { data: rpcData } = await this.supabase
+        .rpc('get_wordbook_mastered_counts', { wb_ids: wbIds });
+      for (const row of (rpcData ?? []) as Array<{ wordbook_id: string; mastered_count: number }>) {
+        masteredMap.set(row.wordbook_id, row.mastered_count);
       }
-
-      results.push({
-        ...dbWordbookToWordbook(wb),
-        wordCount,
-        importCount: wb.import_count ?? 0,
-        masteredCount,
-      });
     }
 
-    return results;
+    return rows.map((wb) => ({
+      ...dbWordbookToWordbook(wb),
+      wordCount: wb.wordbook_items[0]?.count ?? 0,
+      importCount: wb.import_count ?? 0,
+      masteredCount: masteredMap.get(wb.id) ?? 0,
+    }));
   }
 
   async browseShared(): Promise<SharedWordbookListItem[]> {
-    const { data: userData } = await this.supabase.auth.getUser();
-    const userId = userData.user!.id;
+    const userId = await this.getUserId();
 
     const { data, error } = await this.supabase
       .from('wordbooks')
@@ -1293,31 +1299,31 @@ class SupabaseWordbookRepository implements WordbookRepository {
       .order('created_at', { ascending: false });
     if (error) throw error;
 
-    const results: SharedWordbookListItem[] = [];
-    for (const row of data ?? []) {
-      const wb = row as unknown as DbWordbook & {
-        wordbook_items: [{ count: number }];
-        wordbook_subscriptions: Array<{ subscriber_id: string }>;
-      };
+    type BrowseRow = DbWordbook & {
+      wordbook_items: [{ count: number }];
+      wordbook_subscriptions: Array<{ subscriber_id: string }>;
+    };
+    const rows = (data ?? []) as unknown as BrowseRow[];
 
+    // Single batch RPC for all owner emails instead of N sequential calls
+    const uniqueOwnerIds = [...new Set(rows.map((wb) => wb.user_id))];
+    const emailMap = new Map<string, string>();
+    if (uniqueOwnerIds.length > 0) {
       const { data: emailData } = await this.supabase
-        .rpc('get_user_email', { uid: wb.user_id });
-
-      const isSubscribed = wb.wordbook_subscriptions.some(
-        (s) => s.subscriber_id === userId,
-      );
-
-      results.push({
-        ...dbWordbookToWordbook(wb),
-        wordCount: wb.wordbook_items[0]?.count ?? 0,
-        importCount: wb.import_count ?? 0,
-        masteredCount: 0,
-        ownerEmail: (emailData as string) ?? '',
-        isSubscribed,
-      });
+        .rpc('get_user_emails', { uids: uniqueOwnerIds });
+      for (const row of (emailData ?? []) as Array<{ uid: string; email: string }>) {
+        emailMap.set(row.uid, row.email);
+      }
     }
 
-    return results;
+    return rows.map((wb) => ({
+      ...dbWordbookToWordbook(wb),
+      wordCount: wb.wordbook_items[0]?.count ?? 0,
+      importCount: wb.import_count ?? 0,
+      masteredCount: 0,
+      ownerEmail: emailMap.get(wb.user_id) ?? '',
+      isSubscribed: wb.wordbook_subscriptions.some((s) => s.subscriber_id === userId),
+    }));
   }
 
   async subscribe(wordbookId: string): Promise<void> {
@@ -1337,16 +1343,7 @@ class SupabaseWordbookRepository implements WordbookRepository {
   }
 
   private async incrementImportCount(wordbookId: string): Promise<void> {
-    const { data } = await this.supabase
-      .from('wordbooks')
-      .select('import_count')
-      .eq('id', wordbookId)
-      .single();
-    const current = (data as { import_count: number } | null)?.import_count ?? 0;
-    await this.supabase
-      .from('wordbooks')
-      .update({ import_count: current + 1 })
-      .eq('id', wordbookId);
+    await this.supabase.rpc('increment_import_count', { wb_id: wordbookId });
   }
 
   async unsubscribe(wordbookId: string): Promise<void> {

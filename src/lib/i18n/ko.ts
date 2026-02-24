@@ -16,6 +16,8 @@ const ko: Translations = {
     previous: '이전',
     next: '다음',
     complete: '완료',
+    error: '오류가 발생했습니다',
+    tryAgain: '다시 시도',
   },
   nav: {
     words: '단어',

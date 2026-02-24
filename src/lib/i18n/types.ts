@@ -14,6 +14,8 @@ export interface Translations {
     previous: string;
     next: string;
     complete: string;
+    error: string;
+    tryAgain: string;
   };
   nav: {
     words: string;

@@ -174,6 +174,7 @@ export default function PracticePage({
           onMaster={handleMaster}
           progress={{ current: practiceIndex + 1, total: practiceWords.length }}
           isLoading={loading}
+          cardDirection={cardDirection}
         />
       )}
     </>

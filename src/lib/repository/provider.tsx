@@ -3,6 +3,7 @@
 import { createContext, useContext, useMemo, type ReactNode } from 'react';
 import { useAuthStore } from '@/stores/auth-store';
 import { createClient } from '@/lib/supabase/client';
+import { invalidateListCache } from '@/lib/list-cache';
 import { SupabaseRepository } from './supabase-repo';
 import { IndexedDBRepository } from './indexeddb-repo';
 import type { DataRepository } from './types';
@@ -14,6 +15,8 @@ export function RepositoryProvider({ children }: { children: ReactNode }) {
   const userId = user?.id ?? null;
 
   const repo = useMemo<DataRepository>(() => {
+    // Clear all cached list data when user changes (login/logout)
+    invalidateListCache();
     if (userId) {
       const supabase = createClient();
       return new SupabaseRepository(supabase);
