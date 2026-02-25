@@ -40,6 +40,7 @@ export default function ScanPage() {
 
   // Scan store state
   const status = useScanStore((s) => s.status);
+  const capturedImages = useScanStore((s) => s.capturedImages);
   const enrichedWords = useScanStore((s) => s.enrichedWords);
   const enrichProgress = useScanStore((s) => s.enrichProgress);
   const addedCount = useScanStore((s) => s.addedCount);
@@ -148,9 +149,8 @@ export default function ScanPage() {
   };
 
   // Derive the visual step from store status
-  const step = status === 'idle' || status === 'extracting' || status === 'enriching'
-    ? 'capture'
-    : status;
+  const isInProgress = isExtracting || isEnriching;
+  const step = status === 'idle' ? 'capture' : status;
   const isPreviewStep = step === 'preview';
   const needsLeaveConfirm = isPreviewStep || (step as string) === 'confirm';
 
@@ -176,13 +176,12 @@ export default function ScanPage() {
         onBack={handleHeaderBack}
         allowBackWhenLocked={isPreviewStep}
         actions={
-          step === 'capture' && !guardLoading && !needsApiKey && !isEnriching ? (
+          step === 'capture' && !guardLoading && !needsApiKey ? (
             <Button
               variant="ghost"
               size="icon-sm"
               aria-label={t.scan.takePhoto}
               onClick={() => imageCaptureRef.current?.openCamera()}
-              disabled={isExtracting}
             >
               <Camera className="size-5" />
             </Button>
@@ -203,15 +202,29 @@ export default function ScanPage() {
             <Button variant="outline">{t.settings.goToSettings}</Button>
           </Link>
         </div>
-      ) : isEnriching ? (
+      ) : isInProgress ? (
         <div className="flex min-h-0 flex-1 flex-col">
-          {/* Centered content */}
+          {/* Image thumbnails */}
+          {capturedImages.length > 0 && (
+            <div className="flex gap-2 overflow-x-auto px-4 pt-4">
+              {capturedImages.map((src, i) => (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  key={i}
+                  src={src}
+                  alt={`Captured ${i + 1}`}
+                  className="h-20 w-20 shrink-0 rounded-lg border object-cover"
+                />
+              ))}
+            </div>
+          )}
+          {/* Centered status */}
           <div className="flex flex-1 flex-col items-center justify-center gap-4 px-6">
             <LoadingSpinner className="size-8" />
             <div className="text-sm text-muted-foreground">
-              {t.scan.enrichingWords}
+              {isEnriching ? t.scan.enrichingWords : t.scan.extracting}
             </div>
-            {enrichProgress.total > 1 && (
+            {isEnriching && enrichProgress.total > 1 && (
               <div className="w-full max-w-xs space-y-2">
                 <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
                   <div
@@ -249,9 +262,6 @@ export default function ScanPage() {
         <ImageCapture
           ref={imageCaptureRef}
           onExtract={handleExtract}
-          extracting={isExtracting}
-          onCancelExtract={handleCancelExtract}
-          onBackgroundExtract={handleBackgroundExtract}
         />
       ) : step === 'preview' ? (
         <WordPreview

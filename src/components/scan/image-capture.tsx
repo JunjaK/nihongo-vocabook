@@ -10,9 +10,6 @@ import { normalizeImage } from '@/lib/image/normalize';
 
 interface ImageCaptureProps {
   onExtract: (imageDataUrls: string[]) => void;
-  extracting: boolean;
-  onCancelExtract?: () => void;
-  onBackgroundExtract?: () => void;
 }
 
 export interface ImageCaptureHandle {
@@ -29,7 +26,7 @@ function fileKey(file: File): string {
 }
 
 export const ImageCapture = forwardRef<ImageCaptureHandle, ImageCaptureProps>(
-  function ImageCapture({ onExtract, extracting, onCancelExtract, onBackgroundExtract }, ref) {
+  function ImageCapture({ onExtract }, ref) {
     const { t } = useTranslation();
     const cameraRef = useRef<HTMLInputElement>(null);
     const galleryRef = useRef<HTMLInputElement>(null);
@@ -113,7 +110,6 @@ export const ImageCapture = forwardRef<ImageCaptureHandle, ImageCaptureProps>(
             <button
               type="button"
               onClick={() => galleryRef.current?.click()}
-              disabled={extracting}
               className="flex flex-1 flex-col items-center justify-center gap-2 rounded-lg border border-dashed text-muted-foreground transition-colors hover:border-primary/50 hover:text-primary"
               data-testid="scan-choose-gallery"
             >
@@ -132,22 +128,20 @@ export const ImageCapture = forwardRef<ImageCaptureHandle, ImageCaptureProps>(
                     alt={`Selected ${i + 1}`}
                     className="h-40 w-full object-cover"
                   />
-                  {!extracting && (
-                    <button
-                      type="button"
-                      onClick={() => removeImage(i)}
-                      className="absolute right-1.5 top-1.5 rounded-full bg-black/60 p-1 text-white transition-colors hover:bg-black/80"
-                      data-testid={`scan-remove-image-${i}`}
-                    >
-                      <X className="size-3.5" />
-                    </button>
-                  )}
+                  <button
+                    type="button"
+                    onClick={() => removeImage(i)}
+                    className="absolute right-1.5 top-1.5 rounded-full bg-black/60 p-1 text-white transition-colors hover:bg-black/80"
+                    data-testid={`scan-remove-image-${i}`}
+                  >
+                    <X className="size-3.5" />
+                  </button>
                 </div>
               ))}
               <button
                 type="button"
                 onClick={() => galleryRef.current?.click()}
-                disabled={extracting || converting}
+                disabled={converting}
                 className="flex h-40 flex-col items-center justify-center gap-1.5 rounded-lg border border-dashed text-muted-foreground transition-colors hover:border-primary/50 hover:text-primary disabled:opacity-50"
               >
                 <ImagePlus className="size-6" />
@@ -162,20 +156,19 @@ export const ImageCapture = forwardRef<ImageCaptureHandle, ImageCaptureProps>(
           <Button
             className="w-full"
             onClick={handleExtract}
-            disabled={images.length === 0 || extracting || converting}
+            disabled={images.length === 0 || converting}
             data-testid="scan-extract-button"
           >
             {t.scan.extract}
           </Button>
         </div>
 
-        {(extracting || converting) && (
+        {converting && (
           <div className="absolute inset-0 z-10 flex flex-col bg-background/60 backdrop-blur-[1px]">
-            {/* Centered content */}
             <div className="flex flex-1 flex-col items-center justify-center gap-4 text-sm">
               <LoadingSpinner className="size-8" />
-              <span>{converting ? t.scan.convertingImage : t.scan.extracting}</span>
-              {converting && convertProgress.total > 1 && (
+              <span>{t.scan.convertingImage}</span>
+              {convertProgress.total > 1 && (
                 <div className="w-full max-w-xs space-y-1.5 px-6">
                   <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
                     <div
@@ -196,26 +189,11 @@ export const ImageCapture = forwardRef<ImageCaptureHandle, ImageCaptureProps>(
                 </div>
               )}
             </div>
-            {/* Bottom actions */}
             <div className="bg-background px-4 pb-6 pt-2">
               <div className="mb-3 h-px bg-border" />
-              <div className="flex gap-2">
-                {converting && (
-                  <Button className="flex-1" variant="outline" onClick={handleCancelConvert}>
-                    {t.common.cancel}
-                  </Button>
-                )}
-                {extracting && onCancelExtract && (
-                  <Button className="flex-1" variant="outline" onClick={onCancelExtract}>
-                    {t.common.cancel}
-                  </Button>
-                )}
-                {extracting && onBackgroundExtract && (
-                  <Button className="flex-1" onClick={onBackgroundExtract}>
-                    {t.scan.continueInBackground}
-                  </Button>
-                )}
-              </div>
+              <Button className="w-full" variant="outline" onClick={handleCancelConvert}>
+                {t.common.cancel}
+              </Button>
             </div>
           </div>
         )}

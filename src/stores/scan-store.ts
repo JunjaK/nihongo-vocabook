@@ -43,6 +43,7 @@ export type ScanStatus = 'idle' | 'extracting' | 'enriching' | 'preview' | 'done
 
 interface ScanState {
   status: ScanStatus;
+  capturedImages: string[];
   enrichedWords: ExtractedWord[];
   enrichProgress: { current: number; total: number };
   addedCount: number;
@@ -326,6 +327,7 @@ function isAbortError(err: unknown): boolean {
 
 export const useScanStore = create<ScanState>((set, get) => ({
   status: 'idle',
+  capturedImages: [],
   enrichedWords: [],
   enrichProgress: { current: 0, total: 0 },
   addedCount: 0,
@@ -338,6 +340,7 @@ export const useScanStore = create<ScanState>((set, get) => ({
     const id = get().cancelId + 1;
     set({
       status: 'extracting',
+      capturedImages: imageDataUrls,
       enrichedWords: [],
       enrichProgress: { current: 0, total: 0 },
       addedCount: 0,
@@ -483,6 +486,7 @@ export const useScanStore = create<ScanState>((set, get) => ({
     get().activeController?.abort();
     return set({
       status: 'idle',
+      capturedImages: [],
       enrichedWords: [],
       enrichProgress: { current: 0, total: 0 },
       addedCount: 0,
