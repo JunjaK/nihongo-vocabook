@@ -1,3 +1,5 @@
+import { normalizeExtractedTerm, shouldRejectExtractedTerm } from './term-filter';
+
 export interface ExtractedWord {
   term: string;
   reading: string;
@@ -5,7 +7,7 @@ export interface ExtractedWord {
   jlptLevel: number | null;
 }
 
-const LLM_FETCH_TIMEOUT_MS = 30_000;
+const LLM_FETCH_TIMEOUT_MS = 60_000;
 
 function createAbortError(): Error {
   return new DOMException('Aborted', 'AbortError');
@@ -60,5 +62,13 @@ export async function extractWithLlm(
   }
 
   const data: { words: ExtractedWord[] } = await res.json();
-  return data.words;
+  const seen = new Set<string>();
+  return data.words
+    .map((word) => ({ ...word, term: normalizeExtractedTerm(word.term) }))
+    .filter((word) => !shouldRejectExtractedTerm(word.term))
+    .filter((word) => {
+      if (seen.has(word.term)) return false;
+      seen.add(word.term);
+      return true;
+    });
 }

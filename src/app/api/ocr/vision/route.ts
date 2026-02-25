@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { decrypt } from '@/lib/crypto/aes';
 import type { LlmProvider } from '@/lib/ocr/settings';
+import { normalizeExtractedTerm, shouldRejectExtractedTerm } from '@/lib/ocr/term-filter';
 
 interface RequestBody {
   imageBase64: string;
@@ -15,12 +16,28 @@ interface ExtractedWord {
   jlptLevel: number | null;
 }
 
-const PROVIDER_TIMEOUT_MS = 30_000;
+const PROVIDER_TIMEOUT_MS = 60_000;
 
 function buildSystemPrompt(locale: string): string {
   const meaningLang = locale === 'ko' ? 'Korean' : 'English';
   const example = locale === 'ko' ? '먹다' : 'to eat';
-  return `Extract Japanese words/phrases from this image (max 50, prioritize words containing kanji). For each word, provide the dictionary form (term), reading in hiragana, meaning in ${meaningLang}, and estimated JLPT level (1-5, where 5=N5 easiest, 1=N1 hardest, or null if unknown). Return ONLY a JSON array of objects: [{"term": "食べる", "reading": "たべる", "meaning": "${example}", "jlptLevel": 4}]. No explanation.`;
+  return [
+    'You are a Japanese vocabulary extractor. Extract Japanese words/phrases that are VISIBLE in this image.',
+    '',
+    'RULES:',
+    '1. Extract ONLY text written in Japanese (kanji, hiragana, katakana). If the image contains Korean, Chinese, or English, IGNORE it — do NOT translate or convert non-Japanese text into Japanese.',
+    '2. The image may contain vertical text (top-to-bottom columns, read right-to-left). Read vertical columns carefully and combine characters into complete words.',
+    '3. Prefer compound words over isolated single kanji. E.g., extract 純米吟醸 as one term, not 純, 米, 吟, 醸 separately. Extract single kanji only when it genuinely stands alone.',
+    '4. Be thorough — extract ALL readable Japanese words including menu items, labels, descriptions, katakana loanwords, and proper nouns.',
+    '5. Convert inflected forms to dictionary form (e.g. 食べました → 食べる).',
+    '6. Skip unreadable or heavily obscured text.',
+    '',
+    `For each word: dictionary form (term), reading in hiragana, meaning in ${meaningLang}, JLPT level (1-5, 5=N5 easiest, 1=N1 hardest, or null).`,
+    '',
+    'EXCLUDE: bare prefixes/suffixes (お, ご, 的, 性, 化), bare inflection endings (ます, ない, する, た), noise (ーー, repeated chars), affix marks (無-, -的).',
+    '',
+    `Max 50 words. Return ONLY a JSON array: [{"term": "食べる", "reading": "たべる", "meaning": "${example}", "jlptLevel": 4}]. No explanation.`,
+  ].join('\n');
 }
 
 export async function POST(req: NextRequest) {
@@ -145,8 +162,8 @@ async function callOpenAI(
           ],
         },
       ],
-      reasoning_effort: 'low',
-      max_completion_tokens: 2048,
+      reasoning_effort: 'medium',
+      max_completion_tokens: 8192,
     }),
   }, signal);
 
@@ -177,7 +194,7 @@ async function callAnthropic(
     },
     body: JSON.stringify({
       model: 'claude-sonnet-4-6',
-      max_tokens: 2048,
+      max_tokens: 8192,
       messages: [
         {
           role: 'user',
@@ -226,7 +243,7 @@ async function callGemini(
         },
       ],
       generationConfig: {
-        thinkingConfig: { thinkingLevel: 'low' },
+        thinkingConfig: { thinkingLevel: 'medium' },
       },
     }),
   }, signal);
@@ -257,19 +274,28 @@ function parseJsonArray(content: string): ExtractedWord[] {
   if (!jsonMatch) return [];
 
   const parsed = JSON.parse(jsonMatch[0]) as Record<string, unknown>[];
+  const seen = new Set<string>();
+
   return parsed
     .filter(
       (w) => typeof w.term === 'string' && typeof w.reading === 'string' && typeof w.meaning === 'string',
     )
     .map((w) => {
+      const term = normalizeExtractedTerm(w.term as string);
       const level = typeof w.jlptLevel === 'number' && w.jlptLevel >= 1 && w.jlptLevel <= 5
         ? w.jlptLevel
         : null;
       return {
-        term: w.term as string,
+        term,
         reading: w.reading as string,
         meaning: w.meaning as string,
         jlptLevel: level,
       };
+    })
+    .filter((word) => !shouldRejectExtractedTerm(word.term))
+    .filter((word) => {
+      if (seen.has(word.term)) return false;
+      seen.add(word.term);
+      return true;
     });
 }

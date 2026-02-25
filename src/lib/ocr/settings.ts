@@ -1,4 +1,4 @@
-export type OcrMode = 'ocr' | 'llm';
+export type OcrMode = 'ocr' | 'llm' | 'hybrid';
 export type LlmProvider = 'openai' | 'anthropic' | 'gemini';
 
 export interface OcrServerSettings {
@@ -13,7 +13,8 @@ const MODE_STORAGE_KEY = 'nihongo-vocabook-ocr-mode';
 export function getLocalOcrMode(): OcrMode {
   if (typeof window === 'undefined') return 'ocr';
   const stored = localStorage.getItem(MODE_STORAGE_KEY);
-  return stored === 'llm' ? 'llm' : 'ocr';
+  if (stored === 'llm' || stored === 'hybrid') return stored;
+  return 'ocr';
 }
 
 /** Save OCR mode to localStorage */

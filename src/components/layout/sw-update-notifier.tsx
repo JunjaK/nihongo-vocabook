@@ -7,9 +7,27 @@ import { useTranslation } from '@/lib/i18n';
 export function SwUpdateNotifier() {
   const { t } = useTranslation();
   const hasShownRef = useRef(false);
+  const isProduction = process.env.NODE_ENV === 'production';
 
   useEffect(() => {
     if (!('serviceWorker' in navigator)) return;
+
+    if (!isProduction) {
+      void (async () => {
+        try {
+          const registrations = await navigator.serviceWorker.getRegistrations();
+          await Promise.all(registrations.map((registration) => registration.unregister()));
+
+          if ('caches' in window) {
+            const cacheKeys = await caches.keys();
+            await Promise.all(cacheKeys.map((cacheKey) => caches.delete(cacheKey)));
+          }
+        } catch {
+          // noop
+        }
+      })();
+      return;
+    }
 
     function showUpdateToast(waiting: ServiceWorker) {
       if (hasShownRef.current) return;
@@ -56,10 +74,8 @@ export function SwUpdateNotifier() {
       window.location.reload();
     });
 
-    return () => {
-      registration?.unregister();
-    };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    return;
+  }, [isProduction]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return null;
 }

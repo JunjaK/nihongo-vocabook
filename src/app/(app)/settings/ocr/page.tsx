@@ -86,6 +86,7 @@ export default function OcrSettingsPage() {
             {([
               { value: 'ocr' as const, label: t.settings.ocrFree },
               { value: 'llm' as const, label: t.settings.llmVision },
+              { value: 'hybrid' as const, label: t.settings.llmHybrid },
             ]).map((opt) => (
               <Button
                 key={opt.value}
@@ -100,7 +101,7 @@ export default function OcrSettingsPage() {
           </div>
         </section>
 
-        {mode === 'llm' && user && !loading && (
+        {(mode === 'llm' || mode === 'hybrid') && user && !loading && (
           <>
             <Separator />
 

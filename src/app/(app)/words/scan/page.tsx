@@ -55,7 +55,7 @@ export default function ScanPage() {
   // Guard: LLM mode needs API key configured on server
   const mode = getLocalOcrMode();
   const [needsApiKey, setNeedsApiKey] = useState(false);
-  const [guardLoading, setGuardLoading] = useState(mode === 'llm');
+  const [guardLoading, setGuardLoading] = useState(mode === 'llm' || mode === 'hybrid');
   const [leaveConfirmOpen, setLeaveConfirmOpen] = useState(false);
 
   const isExtracting = status === 'extracting';
@@ -63,7 +63,7 @@ export default function ScanPage() {
   useBottomNavLock(isExtracting || isEnriching);
 
   useEffect(() => {
-    if (mode !== 'llm' || !user) {
+    if ((mode !== 'llm' && mode !== 'hybrid') || !user) {
       setGuardLoading(false);
       return;
     }

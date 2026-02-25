@@ -223,6 +223,7 @@ export interface Translations {
     ocrMode: string;
     ocrFree: string;
     llmVision: string;
+    llmHybrid: string;
     llmProvider: string;
     apiKey: string;
     apiKeyPlaceholder: string;
