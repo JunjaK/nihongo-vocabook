@@ -602,9 +602,9 @@ class IndexedDBStudyRepository implements StudyRepository {
         againCount: existing.againCount + (isAgain ? 1 : 0),
         reviewAgainCount: (existing.reviewAgainCount ?? 0) + (!isNew && isAgain ? 1 : 0),
         newAgainCount: (existing.newAgainCount ?? 0) + (isNew && isAgain ? 1 : 0),
-        hardCount: (existing.hardCount ?? 0) + (quality === 1 ? 1 : 0),
-        goodCount: (existing.goodCount ?? 0) + (quality === 2 ? 1 : 0),
-        easyCount: (existing.easyCount ?? 0) + (quality === 3 ? 1 : 0),
+        hardCount: (existing.hardCount ?? 0) + (quality === 3 ? 1 : 0),
+        goodCount: (existing.goodCount ?? 0) + (quality === 4 ? 1 : 0),
+        easyCount: (existing.easyCount ?? 0) + (quality === 5 ? 1 : 0),
       });
     } else {
       await db.dailyStats.add({
@@ -614,9 +614,9 @@ class IndexedDBStudyRepository implements StudyRepository {
         againCount: isAgain ? 1 : 0,
         reviewAgainCount: !isNew && isAgain ? 1 : 0,
         newAgainCount: isNew && isAgain ? 1 : 0,
-        hardCount: quality === 1 ? 1 : 0,
-        goodCount: quality === 2 ? 1 : 0,
-        easyCount: quality === 3 ? 1 : 0,
+        hardCount: quality === 3 ? 1 : 0,
+        goodCount: quality === 4 ? 1 : 0,
+        easyCount: quality === 5 ? 1 : 0,
         masteredInSessionCount: 0,
         practiceCount: 0,
         practiceKnownCount: 0,

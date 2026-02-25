@@ -11,6 +11,7 @@ import { useAuthStore } from '@/stores/auth-store';
 import { useTranslation } from '@/lib/i18n';
 import { useLoader } from '@/hooks/use-loader';
 import { useWakeLock } from '@/hooks/use-wake-lock';
+import { bottomBar, bottomSep } from '@/lib/styles';
 import { markWordMastered } from '@/lib/actions/mark-mastered';
 import { invalidateListCache } from '@/lib/list-cache';
 import { selectPracticeWords } from '@/lib/quiz/word-scoring';
@@ -124,29 +125,34 @@ export default function PracticePage({
     return (
       <>
         <Header title={t.quiz.practiceComplete} showBack />
-        <div className="flex flex-1 flex-col items-center justify-center text-center">
-          <BookOpenCheck className="animate-scale-in size-10 text-primary" />
-          <div className="animate-slide-up mt-4 text-lg font-semibold" style={{ animationDelay: '100ms' }}>
-            {t.quiz.practiceComplete}
-          </div>
-          <div className="animate-slide-up mt-2 text-muted-foreground" style={{ animationDelay: '200ms' }}>
-            {t.quiz.practicedCount(practiceStats.total)}
-          </div>
-          <div className="animate-slide-up mt-1 text-muted-foreground" style={{ animationDelay: '250ms' }}>
-            {t.quiz.knownCount(practiceStats.knownCount)}
-          </div>
-          {practiceStats.masteredCount > 0 && (
-            <div className="animate-slide-up mt-1 text-muted-foreground" style={{ animationDelay: '300ms' }}>
-              {t.quiz.masteredInSession(practiceStats.masteredCount)}
+        <div className="flex min-h-0 flex-1 flex-col">
+          <div className="flex flex-1 flex-col items-center justify-center text-center">
+            <BookOpenCheck className="animate-scale-in size-10 text-primary" />
+            <div className="animate-slide-up mt-4 text-lg font-semibold" style={{ animationDelay: '100ms' }}>
+              {t.quiz.practiceComplete}
             </div>
-          )}
-          <div className="animate-slide-up mt-6 flex gap-3" style={{ animationDelay: '400ms' }}>
-            <Button variant="outline" onClick={handlePracticeAgain}>
-              {t.quiz.practiceAgain}
-            </Button>
-            <Button onClick={handleBackToWordbook}>
-              {t.quiz.backToWordbook}
-            </Button>
+            <div className="animate-slide-up mt-2 text-muted-foreground" style={{ animationDelay: '200ms' }}>
+              {t.quiz.practicedCount(practiceStats.total)}
+            </div>
+            <div className="animate-slide-up mt-1 text-muted-foreground" style={{ animationDelay: '250ms' }}>
+              {t.quiz.knownCount(practiceStats.knownCount)}
+            </div>
+            {practiceStats.masteredCount > 0 && (
+              <div className="animate-slide-up mt-1 text-muted-foreground" style={{ animationDelay: '300ms' }}>
+                {t.quiz.masteredInSession(practiceStats.masteredCount)}
+              </div>
+            )}
+          </div>
+          <div className={bottomBar} style={{ animationDelay: '400ms' }}>
+            <div className={bottomSep} />
+            <div className="flex gap-2">
+              <Button className="flex-1" variant="outline" onClick={handlePracticeAgain}>
+                {t.quiz.practiceAgain}
+              </Button>
+              <Button className="flex-1" onClick={handleBackToWordbook}>
+                {t.quiz.backToWordbook}
+              </Button>
+            </div>
           </div>
         </div>
       </>

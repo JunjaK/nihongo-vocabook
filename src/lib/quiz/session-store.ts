@@ -11,6 +11,7 @@ export type QuizSessionSnapshot = {
   wordIds: string[]; // full ordered word ID list
   currentIndex: number;
   completed: number;
+  totalSessionSize: number; // original word count at session start (stable denominator)
   sessionStats: {
     totalReviewed: number;
     newCards: number;
@@ -55,6 +56,10 @@ export function readSession(mode: QuizMode): QuizSessionSnapshot | null {
       parsed.sessionStats.goodCount = 0;
       parsed.sessionStats.easyCount = 0;
       parsed.sessionStats.masteredCount = 0;
+    }
+    // Backfill totalSessionSize for sessions saved before this field existed
+    if (!parsed.totalSessionSize) {
+      parsed.totalSessionSize = parsed.wordIds.length + (parsed.sessionStats.masteredCount ?? 0);
     }
     parsed.version = 2;
     return parsed;

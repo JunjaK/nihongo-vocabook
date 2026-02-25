@@ -920,9 +920,9 @@ class SupabaseStudyRepository implements StudyRepository {
           again_count: existing.againCount + (isAgain ? 1 : 0),
           review_again_count: existing.reviewAgainCount + (!isNew && isAgain ? 1 : 0),
           new_again_count: existing.newAgainCount + (isNew && isAgain ? 1 : 0),
-          hard_count: existing.hardCount + (quality === 1 ? 1 : 0),
-          good_count: existing.goodCount + (quality === 2 ? 1 : 0),
-          easy_count: existing.easyCount + (quality === 3 ? 1 : 0),
+          hard_count: existing.hardCount + (quality === 3 ? 1 : 0),
+          good_count: existing.goodCount + (quality === 4 ? 1 : 0),
+          easy_count: existing.easyCount + (quality === 5 ? 1 : 0),
         })
         .eq('id', existing.id);
       if (error) throw error;
@@ -937,9 +937,9 @@ class SupabaseStudyRepository implements StudyRepository {
           again_count: isAgain ? 1 : 0,
           review_again_count: !isNew && isAgain ? 1 : 0,
           new_again_count: isNew && isAgain ? 1 : 0,
-          hard_count: quality === 1 ? 1 : 0,
-          good_count: quality === 2 ? 1 : 0,
-          easy_count: quality === 3 ? 1 : 0,
+          hard_count: quality === 3 ? 1 : 0,
+          good_count: quality === 4 ? 1 : 0,
+          easy_count: quality === 5 ? 1 : 0,
         });
       if (error) throw error;
     }

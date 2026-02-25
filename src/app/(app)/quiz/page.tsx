@@ -70,6 +70,7 @@ async function tryRestoreSession(
   words: WordWithProgress[];
   index: number;
   completed: number;
+  totalSessionSize: number;
   stats: SessionStats;
 } | null> {
   const saved = readSession(mode);
@@ -98,6 +99,7 @@ async function tryRestoreSession(
     words: withProgress,
     index: restoredIndex >= 0 ? restoredIndex : Math.min(saved.currentIndex, withProgress.length - 1),
     completed: saved.completed,
+    totalSessionSize: saved.totalSessionSize,
     stats: saved.sessionStats,
   };
 }
@@ -125,6 +127,7 @@ function QuizContent() {
   const [dueWords, setDueWords] = useState<WordWithProgress[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [completed, setCompleted] = useState(0);
+  const [totalSessionSize, setTotalSessionSize] = useState(0);
   const [streak, setStreak] = useState<number | null>(null);
   const [showReport, setShowReport] = useState(false);
 
@@ -139,6 +142,7 @@ function QuizContent() {
       setDueWords(restored.words);
       setCurrentIndex(restored.index);
       setCompleted(restored.completed);
+      setTotalSessionSize(restored.totalSessionSize);
       setSessionStats(restored.stats);
       return;
     }
@@ -167,12 +171,15 @@ function QuizContent() {
       setDueWords(withProgress);
       setCurrentIndex(0);
       setCompleted(0);
+      setTotalSessionSize(withProgress.length);
       setSessionStats({ ...EMPTY_STATS });
     } else {
       const words = await repo.study.getDueWords(settings.sessionSize);
-      setDueWords(shuffleArray([...words]));
+      const shuffled = shuffleArray([...words]);
+      setDueWords(shuffled);
       setCurrentIndex(0);
       setCompleted(0);
+      setTotalSessionSize(shuffled.length);
       setSessionStats({ ...EMPTY_STATS });
     }
   }, [repo, quickStart], { skip: authLoading || !user });
@@ -217,42 +224,43 @@ function QuizContent() {
       wordIds: dueWords.map((w) => w.id),
       currentIndex,
       completed,
+      totalSessionSize,
       sessionStats,
     });
-  }, [loading, showReport, dueWords, currentIndex, completed, sessionStats, quizMode]);
+  }, [loading, showReport, dueWords, currentIndex, completed, totalSessionSize, sessionStats, quizMode]);
 
   // --- SRS handlers ---
+
+  const endSession = async () => {
+    setShowReport(true);
+    try {
+      const weightedAccuracy = computeWeightedAccuracy({
+        ...sessionStats,
+        masteredInSessionCount: sessionStats.masteredCount,
+      });
+      const newAchievements = await checkAndUnlockAchievements(repo, {
+        weightedAccuracy,
+        totalReviewed: sessionStats.totalReviewed,
+      });
+      for (const type of newAchievements) {
+        const def = ACHIEVEMENT_DEFS.find((d) => d.type === type);
+        const label = def
+          ? (t.achievements as unknown as Record<string, string>)[def.labelKey] ?? type
+          : type;
+        toast.success(label);
+      }
+    } catch {
+      // Achievement check is non-critical
+    }
+    const newStreak = await repo.study.getStreakDays();
+    setStreak(newStreak);
+  };
 
   const advanceToNext = async () => {
     if (currentIndex + 1 < dueWords.length) {
       setCurrentIndex((i) => i + 1);
     } else {
-      if (sessionStats.totalReviewed > 0 || completed > 0) {
-        setShowReport(true);
-        try {
-          const weightedAccuracy = computeWeightedAccuracy({
-            ...sessionStats,
-            masteredInSessionCount: sessionStats.masteredCount,
-          });
-          const newAchievements = await checkAndUnlockAchievements(repo, {
-            weightedAccuracy,
-            totalReviewed: sessionStats.totalReviewed,
-          });
-          for (const type of newAchievements) {
-            const def = ACHIEVEMENT_DEFS.find((d) => d.type === type);
-            const label = def
-              ? (t.achievements as unknown as Record<string, string>)[def.labelKey] ?? type
-              : type;
-            toast.success(label);
-          }
-        } catch {
-          // Achievement check is non-critical
-        }
-        const newStreak = await repo.study.getStreakDays();
-        setStreak(newStreak);
-      } else {
-        await reload();
-      }
+      await endSession();
     }
   };
 
@@ -270,9 +278,9 @@ function QuizContent() {
         againCount: prev.againCount + (isAgain ? 1 : 0),
         reviewAgainCount: prev.reviewAgainCount + (!wasNew && isAgain ? 1 : 0),
         newAgainCount: prev.newAgainCount + (wasNew && isAgain ? 1 : 0),
-        hardCount: prev.hardCount + (quality === 1 ? 1 : 0),
-        goodCount: prev.goodCount + (quality === 2 ? 1 : 0),
-        easyCount: prev.easyCount + (quality === 3 ? 1 : 0),
+        hardCount: prev.hardCount + (quality === 3 ? 1 : 0),
+        goodCount: prev.goodCount + (quality === 4 ? 1 : 0),
+        easyCount: prev.easyCount + (quality === 5 ? 1 : 0),
       }));
       requestDueCountRefresh();
       setCompleted((c) => c + 1);
@@ -295,19 +303,14 @@ function QuizContent() {
     const remaining = dueWords.filter((_, i) => i !== currentIndex);
     setCompleted((c) => c + 1);
 
-    if (remaining.length === 0) {
+    if (remaining.length === 0 || currentIndex >= remaining.length) {
       setDueWords(remaining);
-      if (sessionStats.totalReviewed > 0 || completed > 0) {
-        setShowReport(true);
-        const newStreak = await repo.study.getStreakDays();
-        setStreak(newStreak);
-      }
+      await endSession();
       return;
     }
 
-    const nextIndex = currentIndex >= remaining.length ? 0 : currentIndex;
     setDueWords(remaining);
-    setCurrentIndex(nextIndex);
+    setCurrentIndex(currentIndex);
   };
 
   const handleContinueStudying = async () => {
@@ -357,12 +360,12 @@ function QuizContent() {
   }
 
   const currentSrsWord = dueWords[currentIndex];
-  const progressCount = !loading && dueWords.length > 0
-    ? `${currentIndex + 1}/${dueWords.length}`
+  const progressCount = !loading && totalSessionSize > 0 && dueWords.length > 0
+    ? `${completed + 1}/${totalSessionSize}`
     : undefined;
   const headerStatsLoading = loading || streak === null;
 
-  if (showReport && sessionStats.totalReviewed > 0) {
+  if (showReport) {
     return (
       <>
         <Header title={t.quiz.sessionComplete} />
@@ -427,7 +430,7 @@ function QuizContent() {
           word={currentSrsWord}
           onRate={handleRate}
           onMaster={handleMaster}
-          progress={{ current: currentIndex + 1, total: dueWords.length }}
+          progress={{ current: completed + 1, total: totalSessionSize }}
           isLoading={loading}
           cardDirection={cardDirection}
         />
