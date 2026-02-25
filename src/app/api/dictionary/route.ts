@@ -266,8 +266,7 @@ export async function GET(request: NextRequest) {
                 reading: row.reading,
                 meanings: row.meanings,
               };
-            })),
-          );
+            }));
           applyKoreanDefinitionsToResults(results, translated);
         } catch (err) {
           // Non-blocking — translation failure falls back to English-only
