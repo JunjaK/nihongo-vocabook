@@ -399,6 +399,10 @@ const ko: Translations = {
     wordMastered: '암기 완료로 표시되었습니다!',
     wordUnmastered: '암기 완료가 해제되었습니다.',
   },
+  pwa: {
+    updateAvailable: '새로운 버전이 있습니다.',
+    updateAction: '업데이트',
+  },
   achievements: {
     title: '업적',
     firstQuiz: '첫 퀴즈',

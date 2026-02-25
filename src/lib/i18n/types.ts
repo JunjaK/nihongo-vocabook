@@ -391,6 +391,10 @@ export interface Translations {
     wordMastered: string;
     wordUnmastered: string;
   };
+  pwa: {
+    updateAvailable: string;
+    updateAction: string;
+  };
   achievements: {
     title: string;
     firstQuiz: string;

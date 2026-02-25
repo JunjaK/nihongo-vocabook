@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { Loader2 } from 'lucide-react';
 import { bind, unbind, toKana } from 'wanakana';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -16,9 +17,10 @@ interface WordSearchProps {
     koreanMeaning?: string;
     jlptLevel: number | null;
   }) => void;
+  onLoadingChange?: (loading: boolean) => void;
 }
 
-export function WordSearch({ onSelect }: WordSearchProps) {
+export function WordSearch({ onSelect, onLoadingChange }: WordSearchProps) {
   const { t, locale } = useTranslation();
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<DictionaryEntry[]>([]);
@@ -39,6 +41,7 @@ export function WordSearch({ onSelect }: WordSearchProps) {
 
     setQuery(rawValue);
     setLoading(true);
+    onLoadingChange?.(true);
     try {
       const kanaQuery = toKana(trimmed);
       const data = await searchDictionary(kanaQuery || trimmed, locale);
@@ -47,8 +50,9 @@ export function WordSearch({ onSelect }: WordSearchProps) {
       setResults([]);
     } finally {
       setLoading(false);
+      onLoadingChange?.(false);
     }
-  }, [locale]);
+  }, [locale, onLoadingChange]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
@@ -104,7 +108,12 @@ export function WordSearch({ onSelect }: WordSearchProps) {
           disabled={loading || !query.trim()}
           data-testid="word-search-button"
         >
-          {loading ? '...' : t.common.search}
+          {loading ? (
+            <span className="inline-flex items-center gap-2">
+              <Loader2 className="size-4 animate-spin" />
+              {t.common.search}
+            </span>
+          ) : t.common.search}
         </Button>
       </div>
 

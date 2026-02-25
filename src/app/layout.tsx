@@ -6,6 +6,7 @@ import { AuthProvider } from '@/components/layout/auth-provider';
 import { RepositoryProvider } from '@/lib/repository/provider';
 import { I18nProvider } from '@/lib/i18n';
 import { MobileShell } from '@/components/layout/mobile-shell';
+import { SwUpdateNotifier } from '@/components/layout/sw-update-notifier';
 import './globals.css';
 
 const geistSans = Geist({
@@ -81,6 +82,7 @@ export default function RootLayout({
                 </MobileShell>
               </RepositoryProvider>
             </AuthProvider>
+            <SwUpdateNotifier />
           </I18nProvider>
           <Toaster />
         </ThemeProvider>

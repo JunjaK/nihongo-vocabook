@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, use } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 import { Pencil, Trash2, X, LinkIcon, AlertTriangle, ChevronLeft, ChevronRight, Eye, EyeOff } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -34,6 +34,7 @@ export default function WordDetailPage({
 }) {
   const { id } = use(params);
   const router = useRouter();
+  const searchParams = useSearchParams();
   const repo = useRepository();
   const authLoading = useAuthStore((s) => s.loading);
   const { t, locale } = useTranslation();
@@ -45,7 +46,9 @@ export default function WordDetailPage({
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [prevWordId, setPrevWordId] = useState<string | null>(null);
   const [nextWordId, setNextWordId] = useState<string | null>(null);
-  const [showWordInfo, setShowWordInfo] = useState(true);
+  const [showWordInfo, setShowWordInfo] = useState(
+    () => searchParams.get('showInfo') !== '0',
+  );
 
   useEffect(() => {
     if (authLoading) return;
@@ -127,7 +130,7 @@ export default function WordDetailPage({
 
   const handleMoveWord = (targetId: string | null) => {
     if (!targetId) return;
-    router.push(`/words/${targetId}`);
+    router.push(`/words/${targetId}?showInfo=${showWordInfo ? '1' : '0'}`);
   };
 
   const formatNextReview = (nextReview: Date) => {

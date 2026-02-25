@@ -399,6 +399,10 @@ const en: Translations = {
     wordMastered: 'Marked as mastered!',
     wordUnmastered: 'Unmarked as mastered.',
   },
+  pwa: {
+    updateAvailable: 'A new version is available.',
+    updateAction: 'Update',
+  },
   achievements: {
     title: 'Achievements',
     firstQuiz: 'First Quiz',

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { X } from 'lucide-react';
+import { Loader2, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
@@ -23,6 +23,7 @@ const JLPT_OPTIONS = ['N5', 'N4', 'N3', 'N2', 'N1'];
 interface WordFormFooterProps {
   canSubmit: boolean;
   submitting: boolean;
+  dictionarySearching: boolean;
 }
 
 interface WordFormProps {
@@ -56,6 +57,7 @@ export function WordForm({
   );
   const [englishRef, setEnglishRef] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [dictionarySearching, setDictionarySearching] = useState(false);
 
   const handleDictionarySelect = (entry: {
     term: string;
@@ -128,7 +130,10 @@ export function WordForm({
         {(showDictionarySearch ?? !initialValues) && (
           <div className="space-y-2">
             <Label>{t.wordForm.dictionarySearch}</Label>
-            <WordSearch onSelect={handleDictionarySelect} />
+            <WordSearch
+              onSelect={handleDictionarySelect}
+              onLoadingChange={setDictionarySearching}
+            />
           </div>
         )}
 
@@ -255,17 +260,26 @@ export function WordForm({
 
       {/* Footer — fixed outside scroll */}
       {renderFooter ? (
-        renderFooter({ canSubmit: !!canSubmit, submitting })
+        renderFooter({
+          canSubmit: !!canSubmit,
+          submitting,
+          dictionarySearching,
+        })
       ) : (
         <div className={bottomBar}>
           <div className={bottomSep} />
           <Button
             type="submit"
             className="w-full"
-            disabled={submitting || !canSubmit}
+            disabled={submitting || dictionarySearching || !canSubmit}
             data-testid="word-form-submit"
           >
-            {submitting ? t.common.saving : label}
+            {submitting || dictionarySearching ? (
+              <span className="inline-flex items-center gap-2">
+                <Loader2 className="size-4 animate-spin" />
+                {submitting ? t.common.saving : label}
+              </span>
+            ) : label}
           </Button>
         </div>
       )}
