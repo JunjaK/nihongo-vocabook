@@ -31,6 +31,7 @@ interface WordFormProps {
   submitLabel?: string;
   renderFooter?: (props: WordFormFooterProps) => React.ReactNode;
   showDictionarySearch?: boolean;
+  helperNotice?: React.ReactNode;
 }
 
 export function WordForm({
@@ -39,6 +40,7 @@ export function WordForm({
   submitLabel,
   renderFooter,
   showDictionarySearch,
+  helperNotice,
 }: WordFormProps) {
   const { t } = useTranslation();
   const meaningRef = useRef<HTMLInputElement>(null);
@@ -244,6 +246,12 @@ export function WordForm({
           />
         </div>
       </div>
+
+      {helperNotice && (
+        <div className="px-4 pb-2 text-xs text-muted-foreground">
+          {helperNotice}
+        </div>
+      )}
 
       {/* Footer — fixed outside scroll */}
       {renderFooter ? (

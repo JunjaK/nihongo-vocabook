@@ -115,6 +115,8 @@ const ko: Translations = {
     tags: '태그 (쉼표 구분)',
     notes: '메모',
     english: '영어',
+    loginRequiredTranslatedMeaning:
+      '로그인 하시면 Jisho API에서 번역된 한국어 뜻을 가져올 수 있습니다.',
   },
   wordDetail: {
     title: '단어 상세',

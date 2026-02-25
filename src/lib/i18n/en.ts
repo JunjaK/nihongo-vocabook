@@ -115,6 +115,8 @@ const en: Translations = {
     tags: 'Tags (comma-separated)',
     notes: 'Notes',
     english: 'English',
+    loginRequiredTranslatedMeaning:
+      'Sign in to get Korean meanings translated from Jisho API results.',
   },
   wordDetail: {
     title: 'Word Detail',

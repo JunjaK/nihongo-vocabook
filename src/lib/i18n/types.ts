@@ -111,6 +111,7 @@ export interface Translations {
     tags: string;
     notes: string;
     english: string;
+    loginRequiredTranslatedMeaning: string;
   };
   wordDetail: {
     title: string;

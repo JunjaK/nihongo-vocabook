@@ -3,7 +3,7 @@
 import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { Pencil, Trash2, X, LinkIcon, AlertTriangle } from 'lucide-react';
+import { Pencil, Trash2, X, LinkIcon, AlertTriangle, ChevronLeft, ChevronRight, Eye, EyeOff } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Header } from '@/components/layout/header';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
@@ -16,9 +16,16 @@ import { AddToWordbookDialog } from '@/components/wordbook/add-to-wordbook-dialo
 import { useRepository } from '@/lib/repository/provider';
 import { useAuthStore } from '@/stores/auth-store';
 import { useTranslation } from '@/lib/i18n';
-import { invalidateListCache } from '@/lib/list-cache';
+import { getListCache, invalidateListCache } from '@/lib/list-cache';
 import { bottomBar, bottomSep } from '@/lib/styles';
+import type { WordSortOrder } from '@/lib/repository/types';
 import type { Word, StudyProgress } from '@/types/word';
+
+interface WordsCacheData {
+  words: Word[];
+  totalCount: number;
+  sortOrder: WordSortOrder;
+}
 
 export default function WordDetailPage({
   params,
@@ -36,13 +43,41 @@ export default function WordDetailPage({
   const [editing, setEditing] = useState(false);
   const [wordbookDialogOpen, setWordbookDialogOpen] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [prevWordId, setPrevWordId] = useState<string | null>(null);
+  const [nextWordId, setNextWordId] = useState<string | null>(null);
+  const [showWordInfo, setShowWordInfo] = useState(true);
 
   useEffect(() => {
     if (authLoading) return;
+    const wordsCache = getListCache<WordsCacheData>('words');
+    const cachedWords = wordsCache?.data.words ?? [];
+    const hasCurrentInCache = cachedWords.some((item) => item.id === id);
+
+    const orderedWordsPromise = hasCurrentInCache
+      ? Promise.resolve(cachedWords)
+      : repo.words.getNonMastered().then((allWords) => {
+        const sortOrder = wordsCache?.data.sortOrder ?? 'priority';
+        if (sortOrder === 'newest') {
+          return [...allWords].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+        }
+        if (sortOrder === 'alphabetical') {
+          return [...allWords].sort((a, b) => a.term.localeCompare(b.term, 'ja'));
+        }
+        return allWords;
+      });
+
     Promise.all([
       repo.words.getById(id),
       repo.study.getProgress(id),
-    ]).then(([w, p]) => {
+      orderedWordsPromise,
+    ]).then(([w, p, orderedWords]) => {
+      const currentIndex = orderedWords.findIndex((item) => item.id === id);
+      setPrevWordId(currentIndex > 0 ? orderedWords[currentIndex - 1]?.id ?? null : null);
+      setNextWordId(
+        currentIndex >= 0 && currentIndex < orderedWords.length - 1
+          ? orderedWords[currentIndex + 1]?.id ?? null
+          : null,
+      );
       setWord(w);
       setProgress(p);
       setLoading(false);
@@ -88,6 +123,11 @@ export default function WordDetailPage({
   const handleSetPriority = async (priority: number) => {
     await repo.words.update(id, { priority });
     setWord((prev) => prev ? { ...prev, priority } : prev);
+  };
+
+  const handleMoveWord = (targetId: string | null) => {
+    if (!targetId) return;
+    router.push(`/words/${targetId}`);
   };
 
   const formatNextReview = (nextReview: Date) => {
@@ -258,7 +298,9 @@ export default function WordDetailPage({
                 </Badge>
               )}
             </div>
-            <div className="text-lg text-muted-foreground">{word.reading}</div>
+            <div className="text-lg text-muted-foreground">
+              {showWordInfo ? word.reading : '•••'}
+            </div>
           </div>
 
           <Separator />
@@ -268,8 +310,20 @@ export default function WordDetailPage({
             <div className="text-xs font-medium uppercase text-muted-foreground">
               {t.wordDetail.meaning}
             </div>
-            <div className="mt-1 text-2xl font-semibold text-primary">
-              {word.meaning}
+            <div className="mt-1 flex items-start justify-between gap-2">
+              <div className="text-2xl font-semibold text-primary">
+                {showWordInfo ? word.meaning : '•••'}
+              </div>
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                className="shrink-0"
+                onClick={() => setShowWordInfo((prev) => !prev)}
+                data-testid="word-toggle-info-button"
+                aria-label={`${t.words.showReading} / ${t.words.showMeaning}`}
+              >
+                {showWordInfo ? <Eye className="size-5" /> : <EyeOff className="size-5" />}
+              </Button>
             </div>
           </div>
 
@@ -372,11 +426,35 @@ export default function WordDetailPage({
         </div>
       </div>
 
+      <Button
+        variant="outline"
+        size="icon"
+        className="fixed top-1/2 left-1 z-20 -translate-y-1/2 rounded-r-xl rounded-l-none border-l-0 shadow-md md:left-[calc(50%-14rem+0.25rem)]"
+        onClick={() => handleMoveWord(prevWordId)}
+        disabled={!prevWordId}
+        data-testid="word-prev-button"
+        aria-label={t.common.previous}
+      >
+        <ChevronLeft className="size-5" />
+      </Button>
+
+      <Button
+        variant="outline"
+        size="icon"
+        className="fixed top-1/2 right-1 z-20 -translate-y-1/2 rounded-l-xl rounded-r-none border-r-0 shadow-md md:right-[calc(50%-14rem+0.25rem)]"
+        onClick={() => handleMoveWord(nextWordId)}
+        disabled={!nextWordId}
+        data-testid="word-next-button"
+        aria-label={t.common.next}
+      >
+        <ChevronRight className="size-5" />
+      </Button>
+
       {/* Action Buttons — fixed outside scroll */}
       <div className={bottomBar}>
         <div className={bottomSep} />
         <div className="flex gap-2">
-        {!word.mastered && (
+          {!word.mastered && (
             <Button
               variant="outline"
               className="flex-1"
@@ -386,7 +464,7 @@ export default function WordDetailPage({
               {t.wordDetail.addToWordbook}
             </Button>
           )}
-          
+
           <Button
             className="flex-1"
             onClick={handleToggleMastered}
@@ -394,8 +472,6 @@ export default function WordDetailPage({
           >
             {word.mastered ? t.wordDetail.unmarkMastered : t.wordDetail.markMastered}
           </Button>
-
-          
         </div>
       </div>
 

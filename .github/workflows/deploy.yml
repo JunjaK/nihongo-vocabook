@@ -80,6 +80,7 @@ jobs:
             -p 3500:3000 \
             -e NEXT_PRIVATE_SUPABASE_SERVICE_ROLE_KEY=${{ secrets.NEXT_PRIVATE_SUPABASE_SERVICE_ROLE_KEY }} \
             -e NEXT_PRIVATE_ENCRYPTION_KEY=${{ secrets.NEXT_PRIVATE_ENCRYPTION_KEY }} \
+            -e NEXT_PRIVATE_OPENAI_API_KEY=${{ secrets.NEXT_PRIVATE_OPENAI_API_KEY }} \
             nihongo-vocabook
 
       - name: Delete build artifact
