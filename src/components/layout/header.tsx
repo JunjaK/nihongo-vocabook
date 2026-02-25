@@ -3,6 +3,7 @@
 import type { ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
+import { useNavigationLockStore } from '@/stores/navigation-lock-store';
 
 interface HeaderProps {
   title: string;
@@ -10,10 +11,19 @@ interface HeaderProps {
   actions?: ReactNode;
   showBack?: boolean;
   onBack?: () => void;
+  allowBackWhenLocked?: boolean;
 }
 
-export function Header({ title, desc, actions, showBack, onBack }: HeaderProps) {
+export function Header({
+  title,
+  desc,
+  actions,
+  showBack,
+  onBack,
+  allowBackWhenLocked = false,
+}: HeaderProps) {
   const router = useRouter();
+  const navLocked = useNavigationLockStore((s) => s.lockCount > 0);
 
   return (
     <header className="sticky top-0 z-10 flex h-14 items-center justify-between border-b bg-background px-4">
@@ -23,6 +33,7 @@ export function Header({ title, desc, actions, showBack, onBack }: HeaderProps) 
             variant="ghost"
             size="icon-sm"
             onClick={onBack ?? (() => router.back())}
+            disabled={navLocked && !allowBackWhenLocked}
             aria-label="Go back"
             className="-ml-2"
           >

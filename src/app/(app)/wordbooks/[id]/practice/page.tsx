@@ -2,7 +2,7 @@
 
 import { use, useState, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { BookOpenCheck } from 'lucide-react';
+import { BookOpenCheck } from '@/components/ui/icons';
 import { Button } from '@/components/ui/button';
 import { Header } from '@/components/layout/header';
 import { PracticeFlashcard } from '@/components/quiz/practice-flashcard';
@@ -10,6 +10,7 @@ import { useRepository } from '@/lib/repository/provider';
 import { useAuthStore } from '@/stores/auth-store';
 import { useTranslation } from '@/lib/i18n';
 import { useLoader } from '@/hooks/use-loader';
+import { useWakeLock } from '@/hooks/use-wake-lock';
 import { markWordMastered } from '@/lib/actions/mark-mastered';
 import { invalidateListCache } from '@/lib/list-cache';
 import { selectPracticeWords } from '@/lib/quiz/word-scoring';
@@ -28,6 +29,8 @@ export default function PracticePage({
   const repo = useRepository();
   const authLoading = useAuthStore((s) => s.loading);
   const { t } = useTranslation();
+
+  useWakeLock(!authLoading);
 
   const [wordbookName, setWordbookName] = useState('');
   const [practiceWords, setPracticeWords] = useState<Word[]>([]);

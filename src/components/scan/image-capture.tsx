@@ -1,14 +1,18 @@
 'use client';
 
 import { useRef, useState, useImperativeHandle, forwardRef } from 'react';
-import { ImagePlus, X } from 'lucide-react';
+import { ImagePlus, X } from '@/components/ui/icons';
 import { Button } from '@/components/ui/button';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { useTranslation } from '@/lib/i18n';
 import { bottomBar, bottomSep } from '@/lib/styles';
+import { normalizeImage } from '@/lib/image/normalize';
 
 interface ImageCaptureProps {
   onExtract: (imageDataUrls: string[]) => void;
   extracting: boolean;
+  onCancelExtract?: () => void;
+  onBackgroundExtract?: () => void;
 }
 
 export interface ImageCaptureHandle {
@@ -25,34 +29,55 @@ function fileKey(file: File): string {
 }
 
 export const ImageCapture = forwardRef<ImageCaptureHandle, ImageCaptureProps>(
-  function ImageCapture({ onExtract, extracting }, ref) {
+  function ImageCapture({ onExtract, extracting, onCancelExtract, onBackgroundExtract }, ref) {
     const { t } = useTranslation();
     const cameraRef = useRef<HTMLInputElement>(null);
     const galleryRef = useRef<HTMLInputElement>(null);
     const [images, setImages] = useState<ImageEntry[]>([]);
+    const [converting, setConverting] = useState(false);
+    const [convertProgress, setConvertProgress] = useState({ current: 0, total: 0 });
+    const convertCancelRef = useRef(false);
 
     useImperativeHandle(ref, () => ({
       openCamera: () => cameraRef.current?.click(),
     }));
 
-    const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
       const files = e.target.files;
       if (!files || files.length === 0) return;
 
-      Array.from(files).forEach((file) => {
-        const key = fileKey(file);
-
-        const reader = new FileReader();
-        reader.onload = () => {
-          setImages((prev) => {
-            if (prev.some((img) => img.key === key)) return prev;
-            return [...prev, { key, dataUrl: reader.result as string }];
-          });
-        };
-        reader.readAsDataURL(file);
-      });
-
+      const fileList = Array.from(files);
       e.target.value = '';
+
+      convertCancelRef.current = false;
+      setConverting(true);
+      setConvertProgress({ current: 0, total: fileList.length });
+
+      try {
+        const results: ImageEntry[] = [];
+        for (let i = 0; i < fileList.length; i++) {
+          if (convertCancelRef.current) return;
+          const file = fileList[i];
+          const key = fileKey(file);
+          const dataUrl = await normalizeImage(file);
+          results.push({ key, dataUrl });
+          setConvertProgress({ current: i + 1, total: fileList.length });
+        }
+
+        if (!convertCancelRef.current) {
+          setImages((prev) => {
+            const existing = new Set(prev.map((img) => img.key));
+            const newEntries = results.filter((r) => !existing.has(r.key));
+            return newEntries.length > 0 ? [...prev, ...newEntries] : prev;
+          });
+        }
+      } finally {
+        setConverting(false);
+      }
+    };
+
+    const handleCancelConvert = () => {
+      convertCancelRef.current = true;
     };
 
     const removeImage = (index: number) => {
@@ -64,7 +89,7 @@ export const ImageCapture = forwardRef<ImageCaptureHandle, ImageCaptureProps>(
     };
 
     return (
-      <div className="animate-page flex min-h-0 flex-1 flex-col">
+      <div className="animate-page relative flex min-h-0 flex-1 flex-col">
         <input
           ref={cameraRef}
           type="file"
@@ -84,7 +109,7 @@ export const ImageCapture = forwardRef<ImageCaptureHandle, ImageCaptureProps>(
 
         {/* Scrollable image area — fills remaining space */}
         <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-4 py-4">
-          {images.length === 0 ? (
+          {images.length === 0 && !converting ? (
             <button
               type="button"
               onClick={() => galleryRef.current?.click()}
@@ -95,6 +120,8 @@ export const ImageCapture = forwardRef<ImageCaptureHandle, ImageCaptureProps>(
               <ImagePlus className="size-10" />
               <span className="text-sm">{t.scan.chooseFromGallery}</span>
             </button>
+          ) : images.length === 0 ? (
+            <div className="flex-1" />
           ) : (
             <div className="grid grid-cols-2 gap-2">
               {images.map((img, i) => (
@@ -120,7 +147,7 @@ export const ImageCapture = forwardRef<ImageCaptureHandle, ImageCaptureProps>(
               <button
                 type="button"
                 onClick={() => galleryRef.current?.click()}
-                disabled={extracting}
+                disabled={extracting || converting}
                 className="flex h-40 flex-col items-center justify-center gap-1.5 rounded-lg border border-dashed text-muted-foreground transition-colors hover:border-primary/50 hover:text-primary disabled:opacity-50"
               >
                 <ImagePlus className="size-6" />
@@ -135,12 +162,63 @@ export const ImageCapture = forwardRef<ImageCaptureHandle, ImageCaptureProps>(
           <Button
             className="w-full"
             onClick={handleExtract}
-            disabled={images.length === 0 || extracting}
+            disabled={images.length === 0 || extracting || converting}
             data-testid="scan-extract-button"
           >
-            {extracting ? t.scan.extracting : t.scan.extract}
+            {t.scan.extract}
           </Button>
         </div>
+
+        {(extracting || converting) && (
+          <div className="absolute inset-0 z-10 flex flex-col bg-background/60 backdrop-blur-[1px]">
+            {/* Centered content */}
+            <div className="flex flex-1 flex-col items-center justify-center gap-4 text-sm">
+              <LoadingSpinner className="size-8" />
+              <span>{converting ? t.scan.convertingImage : t.scan.extracting}</span>
+              {converting && convertProgress.total > 1 && (
+                <div className="w-full max-w-xs space-y-1.5 px-6">
+                  <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+                    <div
+                      className="h-full rounded-full bg-primary transition-all duration-300 ease-out"
+                      style={{
+                        width: `${(convertProgress.current / convertProgress.total) * 100}%`,
+                      }}
+                    />
+                  </div>
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="tabular-nums text-muted-foreground">
+                      {convertProgress.current} / {convertProgress.total}
+                    </span>
+                    <span className="tabular-nums font-medium">
+                      {Math.round((convertProgress.current / convertProgress.total) * 100)}%
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
+            {/* Bottom actions */}
+            <div className="bg-background px-4 pb-6 pt-2">
+              <div className="mb-3 h-px bg-border" />
+              <div className="flex gap-2">
+                {converting && (
+                  <Button className="flex-1" variant="outline" onClick={handleCancelConvert}>
+                    {t.common.cancel}
+                  </Button>
+                )}
+                {extracting && onCancelExtract && (
+                  <Button className="flex-1" variant="outline" onClick={onCancelExtract}>
+                    {t.common.cancel}
+                  </Button>
+                )}
+                {extracting && onBackgroundExtract && (
+                  <Button className="flex-1" onClick={onBackgroundExtract}>
+                    {t.scan.continueInBackground}
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   },

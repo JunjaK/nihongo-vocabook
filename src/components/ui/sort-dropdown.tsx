@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { ArrowUpDown, Check } from 'lucide-react';
+import { ArrowUpDown, Check } from '@/components/ui/icons';
 import { Button } from '@/components/ui/button';
 
 export function SortDropdown({

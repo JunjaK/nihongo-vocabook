@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { BookOpen, Brain, Camera, Share2 } from 'lucide-react';
+import { BookOpen, Brain, Camera, Share2 } from '@/components/ui/icons';
 import { Button } from '@/components/ui/button';
 import { useTranslation } from '@/lib/i18n';
 import { bottomSep } from '@/lib/styles';

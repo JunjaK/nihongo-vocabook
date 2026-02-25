@@ -4,7 +4,7 @@ import { Suspense, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { BookOpenCheck, Flame, LogIn } from 'lucide-react';
+import { BookOpenCheck, Flame, LogIn } from '@/components/ui/icons';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Header } from '@/components/layout/header';

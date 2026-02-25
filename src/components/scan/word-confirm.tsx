@@ -103,7 +103,7 @@ export function WordConfirm({
 
         {/* Dictionary results */}
         {loading ? (
-          <div className="py-4 text-center text-muted-foreground">
+          <div className="flex items-center justify-center py-8 text-muted-foreground">
             {t.scan.searchingDictionary}
           </div>
         ) : !selected && results.length > 0 ? (

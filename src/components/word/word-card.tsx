@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { cn } from '@/lib/utils';
 import type { Word } from '@/types/word';
 
 interface WordCardProps {
@@ -41,12 +42,26 @@ export function WordCard({ word, showReading, showMeaning, onClick }: WordCardPr
           )}
           <span className="text-xl font-bold">{word.term}</span>
         </div>
-        {readingVisible && (
+        <div
+          className={cn(
+            'overflow-hidden transition-[max-height,opacity,transform] duration-300 ease-out',
+            readingVisible
+              ? 'max-h-8 translate-y-0 opacity-100'
+              : 'max-h-0 -translate-y-0.5 opacity-0',
+          )}
+        >
           <div className="text-sm text-muted-foreground">{word.reading}</div>
-        )}
-        {meaningVisible && (
-          <div className="mt-1 text-base text-primary">{word.meaning}</div>
-        )}
+        </div>
+        <div
+          className={cn(
+            'overflow-hidden transition-[max-height,opacity,margin,transform] duration-300 ease-out',
+            meaningVisible
+              ? 'mt-1 max-h-12 translate-y-0 opacity-100'
+              : 'mt-0 max-h-0 -translate-y-0.5 opacity-0',
+          )}
+        >
+          <div className="text-base text-primary">{word.meaning}</div>
+        </div>
       </Wrapper>
       {(!showReading || !showMeaning) && (
         <button

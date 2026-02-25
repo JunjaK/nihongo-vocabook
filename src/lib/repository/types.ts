@@ -40,6 +40,7 @@ export interface WordRepository {
   getById(id: string): Promise<Word | null>;
   getByIds(ids: string[]): Promise<Word[]>;
   search(query: string): Promise<Word[]>;
+  getExistingTerms(terms: string[]): Promise<Set<string>>;
   create(word: CreateWordInput): Promise<Word>;
   update(id: string, word: UpdateWordInput): Promise<Word>;
   setPriority(id: string, priority: number): Promise<void>;
@@ -88,7 +89,7 @@ export interface WordbookRepository {
   browseShared(): Promise<SharedWordbookListItem[]>;
   subscribe(wordbookId: string): Promise<void>;
   unsubscribe(wordbookId: string): Promise<void>;
-  copySharedWordbook(wordbookId: string): Promise<Wordbook>;
+  copySharedWordbook(wordbookId: string, overrides?: { name: string; description: string | null }): Promise<Wordbook>;
 }
 
 export interface DataRepository {

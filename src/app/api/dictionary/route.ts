@@ -239,7 +239,7 @@ export async function GET(request: NextRequest) {
     .limit(SEARCH_RESULT_LIMIT);
 
   if (rows && rows.length > 0) {
-    // Backfill missing Korean meanings for authenticated users regardless of locale.
+    // Backfill missing Korean meanings (auth only — requires LLM call).
     if (isAuthenticated) {
       await translateAndUpdateRows(supabase, rows);
     }
@@ -254,7 +254,7 @@ export async function GET(request: NextRequest) {
   try {
     const results = (await fetchJishoWithRetry(query)).slice(0, SEARCH_RESULT_LIMIT);
 
-    // 3. ko 로케일은 응답 전에 번역을 완료해 목록에 즉시 반영
+    // 3. Translate before responding so Korean meanings are available immediately
     if (results.length > 0) {
       if (isAuthenticated) {
         try {
@@ -279,15 +279,13 @@ export async function GET(request: NextRequest) {
 
       const entries = results.map(mapJishoResultToRow);
 
-      // 4. Fire-and-forget 사전 캐시 저장 (로그인 사용자만)
-      if (isAuthenticated) {
-        supabase
-          .from('dictionary_entries')
-          .upsert(entries, { onConflict: 'term,reading' })
-          .then(({ error }) => {
-            if (error) logger.error('Dictionary cache error', error.message);
-          });
-      }
+      // 4. Fire-and-forget dictionary cache (regardless of auth)
+      supabase
+        .from('dictionary_entries')
+        .upsert(entries, { onConflict: 'term,reading' })
+        .then(({ error }) => {
+          if (error) logger.error('Dictionary cache error', error.message);
+        });
 
       return NextResponse.json({
         data: locale === 'ko' ? results : hideKoreanDefinitions(results),

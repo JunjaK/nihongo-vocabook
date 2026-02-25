@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { Info } from 'lucide-react';
+import { Info } from '@/components/ui/icons';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { Header } from '@/components/layout/header';
 import { Button } from '@/components/ui/button';

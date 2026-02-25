@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { FolderOpen, LogIn, Search, X } from 'lucide-react';
+import { FolderOpen, LogIn, Search, X } from '@/components/ui/icons';
 import { Header } from '@/components/layout/header';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';

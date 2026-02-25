@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect, use } from 'react';
+import { useState, useEffect, use, useRef, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
-import { Pencil, Trash2, X, LinkIcon, AlertTriangle, ChevronLeft, ChevronRight, Eye, EyeOff } from 'lucide-react';
+import { Pencil, Trash2, X, LinkIcon, AlertTriangle, ChevronLeft, ChevronRight, Eye, EyeOff } from '@/components/ui/icons';
 import { cn } from '@/lib/utils';
 import { Header } from '@/components/layout/header';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
@@ -17,7 +17,7 @@ import { useRepository } from '@/lib/repository/provider';
 import { useAuthStore } from '@/stores/auth-store';
 import { useTranslation } from '@/lib/i18n';
 import { getListCache, invalidateListCache } from '@/lib/list-cache';
-import { bottomBar, bottomSep } from '@/lib/styles';
+import { scrollArea, bottomBar, bottomSep, emptyState } from '@/lib/styles';
 import type { WordSortOrder } from '@/lib/repository/types';
 import type { Word, StudyProgress } from '@/types/word';
 
@@ -44,11 +44,22 @@ export default function WordDetailPage({
   const [editing, setEditing] = useState(false);
   const [wordbookDialogOpen, setWordbookDialogOpen] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [editDirty, setEditDirty] = useState(false);
+  const [showLeaveEditConfirm, setShowLeaveEditConfirm] = useState(false);
+  const pendingEditLeaveRef = useRef<(() => void) | null>(null);
   const [prevWordId, setPrevWordId] = useState<string | null>(null);
   const [nextWordId, setNextWordId] = useState<string | null>(null);
   const [showWordInfo, setShowWordInfo] = useState(
     () => searchParams.get('showInfo') !== '0',
   );
+  const requestLeaveEdit = useCallback((action: () => void) => {
+    if (!editDirty) {
+      action();
+      return;
+    }
+    pendingEditLeaveRef.current = action;
+    setShowLeaveEditConfirm(true);
+  }, [editDirty]);
 
   useEffect(() => {
     if (authLoading) return;
@@ -87,12 +98,63 @@ export default function WordDetailPage({
     });
   }, [repo, id, authLoading]);
 
+  useEffect(() => {
+    if (!editing || !editDirty) return undefined;
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = '';
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [editing, editDirty]);
+
+  useEffect(() => {
+    if (!editing || !editDirty) return undefined;
+    const handleDocumentClick = (e: MouseEvent) => {
+      if (e.defaultPrevented || e.button !== 0) return;
+      if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+
+      const target = (e.target as Element | null)?.closest('a[href]') as HTMLAnchorElement | null;
+      if (!target) return;
+
+      const href = target.getAttribute('href');
+      if (!href || href.startsWith('#') || href.startsWith('javascript:')) return;
+      if (target.target && target.target !== '_self') return;
+
+      e.preventDefault();
+      requestLeaveEdit(() => {
+        if (/^https?:\/\//.test(href)) {
+          window.location.assign(href);
+        } else {
+          router.push(href);
+        }
+      });
+    };
+
+    document.addEventListener('click', handleDocumentClick, true);
+    return () => document.removeEventListener('click', handleDocumentClick, true);
+  }, [editing, editDirty, requestLeaveEdit, router]);
+
+  const handleConfirmLeaveEdit = () => {
+    setShowLeaveEditConfirm(false);
+    const next = pendingEditLeaveRef.current;
+    pendingEditLeaveRef.current = null;
+    setEditDirty(false);
+    next?.();
+  };
+
+  const handleCancelLeaveEdit = () => {
+    setShowLeaveEditConfirm(false);
+    pendingEditLeaveRef.current = null;
+  };
+
   const handleUpdate = async (data: Parameters<typeof repo.words.update>[1]) => {
     try {
       await repo.words.update(id, data);
       invalidateListCache('words');
       invalidateListCache('mastered');
       toast.success(t.words.wordUpdated);
+      setEditDirty(false);
       setEditing(false);
       const updated = await repo.words.getById(id);
       setWord(updated);
@@ -146,7 +208,7 @@ export default function WordDetailPage({
     return (
       <>
         <Header title={t.wordDetail.title} showBack />
-        <div className="min-h-0 flex-1 overflow-y-auto p-4">
+        <div className={cn(scrollArea, 'min-h-0 p-4')}>
           <div className="animate-page space-y-5">
             {/* Term + Reading skeleton */}
             <div>
@@ -214,7 +276,7 @@ export default function WordDetailPage({
     return (
       <>
         <Header title={t.wordDetail.title} showBack />
-        <div className="py-8 text-center text-muted-foreground">
+        <div className={emptyState}>
           {t.words.wordNotFound}
         </div>
       </>
@@ -227,11 +289,12 @@ export default function WordDetailPage({
         <Header
           title={t.words.editWord}
           showBack
+          onBack={() => requestLeaveEdit(() => setEditing(false))}
           actions={
             <Button
               variant="ghost"
               size="icon-sm"
-              onClick={() => setEditing(false)}
+              onClick={() => requestLeaveEdit(() => setEditing(false))}
               aria-label={t.common.cancel}
             >
               <X className="size-5" />
@@ -242,6 +305,16 @@ export default function WordDetailPage({
           initialValues={word}
           onSubmit={handleUpdate}
           submitLabel={t.common.update}
+          onDirtyChange={setEditDirty}
+        />
+        <ConfirmDialog
+          open={showLeaveEditConfirm}
+          icon={<AlertTriangle className="text-destructive" />}
+          title={t.common.unsavedChangesTitle}
+          description={t.common.unsavedChangesDescription}
+          confirmLabel={t.common.leave}
+          onConfirm={handleConfirmLeaveEdit}
+          onCancel={handleCancelLeaveEdit}
         />
       </>
     );
@@ -267,7 +340,10 @@ export default function WordDetailPage({
             <Button
               variant="ghost"
               size="icon-sm"
-              onClick={() => setEditing(true)}
+              onClick={() => {
+                setEditDirty(false);
+                setEditing(true);
+              }}
               data-testid="word-edit-button"
               aria-label={t.common.edit}
             >
@@ -301,7 +377,14 @@ export default function WordDetailPage({
                 </Badge>
               )}
             </div>
-            <div className="text-lg text-muted-foreground">
+            <div
+              className={cn(
+                'text-lg text-muted-foreground transition-[opacity,filter,transform] duration-300 ease-out',
+                showWordInfo
+                  ? 'translate-y-0 scale-100 opacity-100 blur-0'
+                  : '-translate-y-0.5 scale-[0.99] opacity-70 blur-[1px]',
+              )}
+            >
               {showWordInfo ? word.reading : '•••'}
             </div>
           </div>
@@ -314,7 +397,14 @@ export default function WordDetailPage({
               {t.wordDetail.meaning}
             </div>
             <div className="mt-1 flex items-start justify-between gap-2">
-              <div className="text-2xl font-semibold text-primary">
+              <div
+                className={cn(
+                  'text-2xl font-semibold text-primary transition-[opacity,filter,transform] duration-300 ease-out',
+                  showWordInfo
+                    ? 'translate-y-0 scale-100 opacity-100 blur-0'
+                    : '-translate-y-0.5 scale-[0.99] opacity-70 blur-[1px]',
+                )}
+              >
                 {showWordInfo ? word.meaning : '•••'}
               </div>
               <Button
@@ -325,7 +415,11 @@ export default function WordDetailPage({
                 data-testid="word-toggle-info-button"
                 aria-label={`${t.words.showReading} / ${t.words.showMeaning}`}
               >
-                {showWordInfo ? <Eye className="size-5" /> : <EyeOff className="size-5" />}
+                {showWordInfo ? (
+                  <Eye className="size-5 transition-transform duration-300 ease-out" />
+                ) : (
+                  <EyeOff className="size-5 transition-transform duration-300 ease-out" />
+                )}
               </Button>
             </div>
           </div>

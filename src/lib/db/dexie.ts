@@ -74,6 +74,10 @@ export interface LocalDailyStats {
   againCount: number;
   reviewAgainCount: number;
   newAgainCount: number;
+  hardCount: number;
+  goodCount: number;
+  easyCount: number;
+  masteredInSessionCount: number;
   practiceCount: number;
   practiceKnownCount: number;
 }
@@ -224,6 +228,30 @@ class VocaBookDB extends Dexie {
             stats.newAgainCount = 0;
             stats.practiceCount = 0;
             stats.practiceKnownCount = 0;
+          }
+        });
+      });
+
+    this.version(6)
+      .stores({
+        words: '++id, term, reading, meaning, *tags, jlptLevel, createdAt',
+        userWordState: '++id, wordId, mastered',
+        studyProgress: '++id, wordId, nextReview',
+        wordbooks: '++id, name, createdAt',
+        wordbookItems: '++id, wordbookId, wordId, [wordbookId+wordId]',
+        quizSettings: '++id',
+        dailyStats: '++id, date',
+        achievements: '++id, type',
+        wordExamples: '++id, wordId',
+      })
+      .upgrade(async (tx) => {
+        // Add per-rating count fields to dailyStats
+        await tx.table('dailyStats').toCollection().modify((stats) => {
+          if (stats.hardCount === undefined) {
+            stats.hardCount = 0;
+            stats.goodCount = 0;
+            stats.easyCount = 0;
+            stats.masteredInSessionCount = 0;
           }
         });
       });

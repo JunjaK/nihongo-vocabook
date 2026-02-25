@@ -379,6 +379,16 @@ class SupabaseWordRepository implements WordRepository {
     });
   }
 
+  async getExistingTerms(terms: string[]): Promise<Set<string>> {
+    if (terms.length === 0) return new Set();
+    const { data, error } = await this.supabase
+      .from('words')
+      .select('term')
+      .in('term', terms);
+    if (error) throw error;
+    return new Set((data ?? []).map((row: { term: string }) => row.term));
+  }
+
   async create(input: CreateWordInput): Promise<Word> {
     const userId = await this.getUserId();
 
@@ -1210,7 +1220,10 @@ class SupabaseWordbookRepository implements WordbookRepository {
       .eq('id', id)
       .select()
       .single();
-    if (error) throw error;
+    if (error) {
+      if (error.code === '23505') throw new Error('DUPLICATE_WORDBOOK');
+      throw error;
+    }
     return dbWordbookToWordbook(data as DbWordbook);
   }
 
@@ -1555,7 +1568,7 @@ class SupabaseWordbookRepository implements WordbookRepository {
     if (error) throw error;
   }
 
-  async copySharedWordbook(wordbookId: string): Promise<Wordbook> {
+  async copySharedWordbook(wordbookId: string, overrides?: { name: string; description: string | null }): Promise<Wordbook> {
     const { data: userData } = await this.supabase.auth.getUser();
     const userId = userData.user!.id;
 
@@ -1565,8 +1578,8 @@ class SupabaseWordbookRepository implements WordbookRepository {
     const sourceWords = await this.getWords(wordbookId);
 
     const newWb = await this.create({
-      name: source.name,
-      description: source.description,
+      name: overrides?.name ?? source.name,
+      description: overrides?.description ?? source.description,
     });
 
     const { data: existingWords } = await this.supabase

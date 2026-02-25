@@ -10,7 +10,7 @@ import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ChevronRight, ArrowRightLeft, ExternalLink, Trophy, SlidersHorizontal } from 'lucide-react';
+import { ChevronRight, ArrowRightLeft, ExternalLink, Trophy, SlidersHorizontal, BarChart3 } from '@/components/ui/icons';
 import { useAuthStore } from '@/stores/auth-store';
 import { useRepository } from '@/lib/repository/provider';
 import { createClient } from '@/lib/supabase/client';
@@ -19,6 +19,7 @@ import {
   migrateToSupabase,
 } from '@/lib/migration/migrate-to-supabase';
 import { useTranslation, type Locale } from '@/lib/i18n';
+import { useBottomNavLock } from '@/hooks/use-bottom-nav-lock';
 import { invalidateListCache } from '@/lib/list-cache';
 import { getLocalOcrMode } from '@/lib/ocr/settings';
 import { fetchProfile } from '@/lib/profile/fetch';
@@ -38,11 +39,13 @@ export default function SettingsPage() {
   const { theme, setTheme } = useTheme();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [migrating, setMigrating] = useState(false);
+  const [importing, setImporting] = useState(false);
   const [migrateCount, setMigrateCount] = useState(0);
   const [showMigrateConfirm, setShowMigrateConfirm] = useState(false);
   const [ocrModeLabel, setOcrModeLabel] = useState('');
   const [profileNickname, setProfileNickname] = useState<string | null>(null);
   const [profileLoading, setProfileLoading] = useState(true);
+  useBottomNavLock(migrating || importing);
 
   useEffect(() => {
     const mode = getLocalOcrMode();
@@ -61,38 +64,12 @@ export default function SettingsPage() {
       .finally(() => setProfileLoading(false));
   }, [user]);
 
-  const handleExportJSON = async () => {
-    const data = await repo.exportAll();
-    const blob = new Blob([JSON.stringify(data, null, 2)], {
-      type: 'application/json',
-    });
-    downloadBlob(blob, 'nivoca-export.json');
-    toast.success(t.settings.exportSuccess);
-  };
-
-  const handleExportCSV = async () => {
-    const data = await repo.exportAll();
-    const header = 'term,reading,meaning,tags,jlptLevel,notes';
-    const rows = data.words.map((w) =>
-      [
-        csvEscape(w.term),
-        csvEscape(w.reading),
-        csvEscape(w.meaning),
-        csvEscape(w.tags.join(';')),
-        w.jlptLevel ?? '',
-        csvEscape(w.notes ?? ''),
-      ].join(','),
-    );
-    const csv = [header, ...rows].join('\n');
-    const blob = new Blob([csv], { type: 'text/csv' });
-    downloadBlob(blob, 'nivoca-export.csv');
-    toast.success(t.settings.exportSuccess);
-  };
-
   const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    setImporting(true);
+    let imported = false;
     try {
       const text = await file.text();
 
@@ -103,6 +80,7 @@ export default function SettingsPage() {
           return;
         }
         await repo.importAll(data);
+        imported = true;
         toast.success(t.settings.importSuccess(data.words.length));
       } else if (file.name.endsWith('.csv')) {
         const lines = text.trim().split('\n');
@@ -121,16 +99,20 @@ export default function SettingsPage() {
         for (const word of words) {
           await repo.words.create(word);
         }
+        imported = true;
         toast.success(t.settings.importSuccess(words.length));
       } else {
         toast.error(t.settings.unsupportedFormat);
       }
     } catch {
       toast.error(t.settings.importError);
+    } finally {
+      if (imported) {
+        invalidateListCache();
+      }
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      setImporting(false);
     }
-
-    invalidateListCache();
-    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   const handleMigrateRequest = async () => {
@@ -282,28 +264,47 @@ export default function SettingsPage() {
         {/* Quiz & Achievements */}
         <section className={settingsSection}>
           <h2 className={settingsHeading}>{t.nav.quiz}</h2>
-          <Link
-            href="/settings/quiz"
-            className={settingsNavLink}
-            data-testid="settings-quiz-link"
-          >
-            <div className="flex items-center gap-3">
-              <SlidersHorizontal className="size-4 text-muted-foreground" />
-              <span className="text-sm">{t.settings.quizSettings}</span>
+          {user ? (
+            <>
+              <Link
+                href="/settings/quiz"
+                className={settingsNavLink}
+                data-testid="settings-quiz-link"
+              >
+                <div className="flex items-center gap-3">
+                  <SlidersHorizontal className="size-4 text-muted-foreground" />
+                  <span className="text-sm">{t.settings.quizSettings}</span>
+                </div>
+                <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
+              </Link>
+              <Link
+                href="/settings/quiz-stats"
+                className={settingsNavLink}
+                data-testid="settings-quiz-stats-link"
+              >
+                <div className="flex items-center gap-3">
+                  <BarChart3 className="size-4 text-muted-foreground" />
+                  <span className="text-sm">{t.settings.quizStats}</span>
+                </div>
+                <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
+              </Link>
+              <Link
+                href="/settings/achievements"
+                className={settingsNavLink}
+                data-testid="settings-achievements-link"
+              >
+                <div className="flex items-center gap-3">
+                  <Trophy className="size-4 text-muted-foreground" />
+                  <span className="text-sm">{t.settings.achievements}</span>
+                </div>
+                <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
+              </Link>
+            </>
+          ) : (
+            <div className="text-sm text-muted-foreground">
+              {t.settings.loginRequiredQuiz}
             </div>
-            <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
-          </Link>
-          <Link
-            href="/settings/achievements"
-            className={settingsNavLink}
-            data-testid="settings-achievements-link"
-          >
-            <div className="flex items-center gap-3">
-              <Trophy className="size-4 text-muted-foreground" />
-              <span className="text-sm">{t.settings.achievements}</span>
-            </div>
-            <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
-          </Link>
+          )}
         </section>
 
         <Separator />
@@ -332,55 +333,30 @@ export default function SettingsPage() {
         <Separator />
 
         {/* Data Migration */}
-        {user && (
-          <>
-            <section className={settingsSection}>
-              <h2 className={settingsHeading}>
-                {t.settings.migration}
-              </h2>
-              <div className="text-sm text-muted-foreground">
-                {t.settings.migrationDesc}
-              </div>
+        <section className={settingsSection}>
+          <h2 className={settingsHeading}>{t.settings.migration}</h2>
+          {user && (
+            <div className="text-sm text-muted-foreground">
+              {t.settings.migrationDesc}
+            </div>
+          )}
+          <div className="flex flex-wrap gap-2">
+            {user && (
               <Button
                 variant="outline"
                 size="sm"
                 onClick={handleMigrateRequest}
-                disabled={migrating}
+                disabled={migrating || importing}
                 data-testid="settings-migrate-button"
               >
                 {migrating ? t.settings.migrating : t.settings.migrateLocalData}
               </Button>
-            </section>
-            <Separator />
-          </>
-        )}
-
-        {/* Import/Export */}
-        <section className={settingsSection}>
-          <h2 className={settingsHeading}>
-            {t.settings.importExport}
-          </h2>
-          <div className="flex flex-wrap gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleExportJSON}
-              data-testid="settings-export-json"
-            >
-              {t.settings.exportJSON}
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleExportCSV}
-              data-testid="settings-export-csv"
-            >
-              {t.settings.exportCSV}
-            </Button>
+            )}
             <Button
               variant="outline"
               size="sm"
               onClick={() => fileInputRef.current?.click()}
+              disabled={importing || migrating}
               data-testid="settings-import-button"
             >
               {t.settings.import}
@@ -492,13 +468,4 @@ function parseCSVLine(line: string): string[] {
   }
   result.push(current);
   return result;
-}
-
-function downloadBlob(blob: Blob, filename: string) {
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = filename;
-  a.click();
-  URL.revokeObjectURL(url);
 }

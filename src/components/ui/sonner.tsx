@@ -1,21 +1,39 @@
 "use client"
 
+import { useEffect } from "react"
 import {
   CircleCheckIcon,
   InfoIcon,
   Loader2Icon,
   OctagonXIcon,
   TriangleAlertIcon,
-} from "lucide-react"
+} from "@/components/ui/icons"
 import { useTheme } from "next-themes"
-import { Toaster as Sonner, type ToasterProps } from "sonner"
+import { toast, Toaster as Sonner, type ToasterProps } from "sonner"
 
 const Toaster = ({ ...props }: ToasterProps) => {
   const { theme = "system" } = useTheme()
 
+  useEffect(() => {
+    const handleToastClick = (event: MouseEvent) => {
+      const target = event.target as HTMLElement | null
+      if (!target) return
+      if (target.closest("[data-sonner-toast]")) {
+        toast.dismiss()
+      }
+    }
+
+    document.addEventListener("click", handleToastClick)
+    return () => {
+      document.removeEventListener("click", handleToastClick)
+    }
+  }, [])
+
   return (
     <Sonner
       theme={theme as ToasterProps["theme"]}
+      position="top-center"
+      offset={16}
       className="toaster group"
       icons={{
         success: <CircleCheckIcon className="size-4" />,

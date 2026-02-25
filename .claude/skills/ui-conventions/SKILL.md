@@ -23,17 +23,20 @@ Header actions MUST be icon-only buttons (`variant="ghost" size="icon-sm"` + `ar
 
 ## Button UI/UX
 
+- **All buttons MUST have a visible background or border** — text-only buttons (no bg, no border) are forbidden. Users cannot recognize plain text as interactive.
+- Allowed variants: `default` (bg), `outline` (border), `secondary` (bg), `destructive` (bg), `ghost` (only for icon buttons where the icon shape provides affordance)
+- **Never use `link` or text-only style for action buttons**
 - Right-aligned, rightmost = primary
 - Order (L→R): secondary > info > warning > primary
 - Destructive actions: visually separated
 
 | Context | Style |
 |---------|-------|
-| Page header | Text-only |
-| Tab/section | Text or icon+text |
-| Toolbar | Icon-only + tooltip |
-| List row | Ghost/outline |
-| Modal footer | Cancel > Confirm |
+| Page header | Icon-only ghost (`variant="ghost" size="icon-sm"`) |
+| Tab/section | Outline or icon+text |
+| Toolbar | Icon-only ghost + tooltip |
+| List row | Ghost (icon) / outline |
+| Modal footer | Cancel (outline) > Confirm (default) |
 | Bottom bar (multi) | `flex gap-2` with `flex-1` each — **always horizontal, never vertical** |
 | Bottom bar (single) | `w-full` |
 

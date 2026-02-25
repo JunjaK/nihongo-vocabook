@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils';
 import { useTranslation } from '@/lib/i18n';
 import { useRepository } from '@/lib/repository/provider';
 import { useAuthStore } from '@/stores/auth-store';
+import { useNavigationLockStore } from '@/stores/navigation-lock-store';
 import { getDueCountRefreshEventName } from '@/lib/quiz/due-count-sync';
 
 export function BottomNav() {
@@ -14,9 +15,19 @@ export function BottomNav() {
   const { t } = useTranslation();
   const repo = useRepository();
   const authLoading = useAuthStore((s) => s.loading);
+  const navLocked = useNavigationLockStore((s) => s.lockCount > 0);
   const [dueCount, setDueCount] = useState(0);
   const fetchCount = useCallback(() => {
-    repo.study.getDueCount().then(setDueCount).catch(() => {});
+    repo.study.getDueCount().then((count) => {
+      setDueCount(count);
+      if ('setAppBadge' in navigator) {
+        if (count > 0) {
+          navigator.setAppBadge(count).catch(() => {});
+        } else {
+          navigator.clearAppBadge?.().catch(() => {});
+        }
+      }
+    }).catch(() => {});
   }, [repo]);
 
   useEffect(() => {
@@ -55,8 +66,14 @@ export function BottomNav() {
   ] as const;
 
   return (
-    <nav className="sticky bottom-0 z-10 border-t bg-background">
-      <div className="flex h-14">
+    <nav
+      className={cn(
+        'sticky bottom-0 z-10 border-t bg-background transition-opacity',
+        navLocked && 'pointer-events-none opacity-70',
+      )}
+      aria-busy={navLocked}
+    >
+      <div className="flex h-16">
         {navItems.map(({ href, label, icon: Icon }) => {
           const isActive = pathname.startsWith(href);
           const showBadge = href === '/quiz' && dueCount > 0;
@@ -65,21 +82,28 @@ export function BottomNav() {
               key={href}
               href={href}
               className={cn(
-                'flex flex-1 flex-col items-center justify-center gap-0.5 text-xs transition-colors',
+                'flex flex-1 items-center justify-center text-xs transition-colors',
                 isActive
-                  ? 'text-primary'
+                  ? 'text-primary font-medium'
                   : 'text-muted-foreground hover:text-foreground',
               )}
             >
-              <div className="relative">
-                <Icon className="h-5 w-5" />
-                {showBadge && (
-                  <span className="absolute -top-1 -right-1.5 flex size-4 items-center justify-center rounded-full bg-primary text-[10px] font-medium text-primary-foreground">
-                    {dueCount > 99 ? '99' : dueCount}
-                  </span>
+              <div
+                className={cn(
+                  'flex h-12.5 w-16 flex-col items-center justify-center gap-0.5 rounded-md transition-colors',
+                  isActive && 'bg-primary/15',
                 )}
+              >
+                <div className="relative">
+                  <Icon className="h-5 w-5" />
+                  {showBadge && (
+                    <span className="absolute -top-1 -right-1.5 flex size-4 items-center justify-center rounded-full bg-primary text-[10px] font-medium text-primary-foreground">
+                      {dueCount > 99 ? '99' : dueCount}
+                    </span>
+                  )}
+                </div>
+                <span>{label}</span>
               </div>
-              <span>{label}</span>
             </Link>
           );
         })}

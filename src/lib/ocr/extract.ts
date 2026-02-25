@@ -10,15 +10,15 @@ export async function extractWordsFromImage(
   mode: OcrMode,
   onProgress?: (progress: number) => void,
   locale?: string,
+  signal?: AbortSignal,
 ): Promise<ExtractionResult> {
   if (mode === 'llm') {
     const { extractWithLlm } = await import('./llm-vision');
-    const words = await extractWithLlm(imageDataUrl, locale);
+    const words = await extractWithLlm(imageDataUrl, locale, signal);
     return { mode: 'llm', words };
   }
 
-  const { extractWithTesseract, splitJapaneseText } = await import('./tesseract');
-  const rawText = await extractWithTesseract(imageDataUrl, onProgress);
-  const words = splitJapaneseText(rawText);
+  const { extractWithTesseract } = await import('./tesseract');
+  const words = await extractWithTesseract(imageDataUrl, onProgress, signal);
   return { mode: 'ocr', words };
 }

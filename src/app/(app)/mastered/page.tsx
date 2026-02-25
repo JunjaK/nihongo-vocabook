@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
-import { Flag, Trash2 } from 'lucide-react';
+import { Flag, Trash2 } from '@/components/ui/icons';
 import { Header } from '@/components/layout/header';
 import { ListToolbar } from '@/components/layout/list-toolbar';
 import { SwipeableWordCard } from '@/components/word/swipeable-word-card';

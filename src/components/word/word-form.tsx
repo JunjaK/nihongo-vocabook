@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useRef } from 'react';
-import { Loader2, X } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { Loader2, X } from '@/components/ui/icons';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
@@ -33,6 +33,22 @@ interface WordFormProps {
   renderFooter?: (props: WordFormFooterProps) => React.ReactNode;
   showDictionarySearch?: boolean;
   helperNotice?: React.ReactNode;
+  onDirtyChange?: (dirty: boolean) => void;
+}
+
+interface WordFormSnapshot {
+  term: string;
+  reading: string;
+  meaning: string;
+  notes: string;
+  tags: string[];
+  tagInput: string;
+  jlptLevel: string;
+}
+
+function isSameStringArray(a: string[], b: string[]): boolean {
+  if (a.length !== b.length) return false;
+  return a.every((v, i) => v === b[i]);
 }
 
 export function WordForm({
@@ -42,6 +58,7 @@ export function WordForm({
   renderFooter,
   showDictionarySearch,
   helperNotice,
+  onDirtyChange,
 }: WordFormProps) {
   const { t } = useTranslation();
   const meaningRef = useRef<HTMLInputElement>(null);
@@ -58,6 +75,38 @@ export function WordForm({
   const [englishRef, setEnglishRef] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [dictionarySearching, setDictionarySearching] = useState(false);
+  const initialSnapshotRef = useRef<WordFormSnapshot>({
+    term: initialValues?.term ?? '',
+    reading: initialValues?.reading ?? '',
+    meaning: initialValues?.meaning ?? '',
+    notes: initialValues?.notes ?? '',
+    tags: [...(initialValues?.tags ?? [])],
+    tagInput: '',
+    jlptLevel: initialValues?.jlptLevel?.toString() ?? '',
+  });
+
+  const currentSnapshot: WordFormSnapshot = {
+    term,
+    reading,
+    meaning,
+    notes,
+    tags,
+    tagInput,
+    jlptLevel,
+  };
+  const initial = initialSnapshotRef.current;
+  const isDirty =
+    currentSnapshot.term !== initial.term ||
+    currentSnapshot.reading !== initial.reading ||
+    currentSnapshot.meaning !== initial.meaning ||
+    currentSnapshot.notes !== initial.notes ||
+    currentSnapshot.tagInput !== initial.tagInput ||
+    currentSnapshot.jlptLevel !== initial.jlptLevel ||
+    !isSameStringArray(currentSnapshot.tags, initial.tags);
+
+  useEffect(() => {
+    onDirtyChange?.(isDirty);
+  }, [isDirty, onDirtyChange]);
 
   const handleDictionarySelect = (entry: {
     term: string;

@@ -23,7 +23,7 @@ Japanese vocabulary study PWA — Learn, Review, and Share words with spaced rep
 | State | Zustand (auth), React local state |
 | Database | Supabase (authenticated), IndexedDB via Dexie (guest) |
 | OCR | Tesseract.js, LLM Vision (OpenAI / Google) |
-| Icons | Lucide React |
+| Icons | Tabler Icons (`@tabler/icons-react`) via `src/components/ui/icons.tsx` |
 | Testing | Vitest, Playwright |
 | Deployment | GitHub Actions → Docker (standalone) |
 

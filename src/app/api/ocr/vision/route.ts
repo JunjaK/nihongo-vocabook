@@ -15,10 +15,12 @@ interface ExtractedWord {
   jlptLevel: number | null;
 }
 
+const PROVIDER_TIMEOUT_MS = 30_000;
+
 function buildSystemPrompt(locale: string): string {
   const meaningLang = locale === 'ko' ? 'Korean' : 'English';
   const example = locale === 'ko' ? '먹다' : 'to eat';
-  return `Extract all Japanese words/phrases from this image. For each word, provide the dictionary form (term), reading in hiragana, meaning in ${meaningLang}, and estimated JLPT level (1-5, where 5=N5 easiest, 1=N1 hardest, or null if unknown). Return ONLY a JSON array of objects: [{"term": "食べる", "reading": "たべる", "meaning": "${example}", "jlptLevel": 4}]. No explanation.`;
+  return `Extract Japanese words/phrases from this image (max 50, prioritize words containing kanji). For each word, provide the dictionary form (term), reading in hiragana, meaning in ${meaningLang}, and estimated JLPT level (1-5, where 5=N5 easiest, 1=N1 hardest, or null if unknown). Return ONLY a JSON array of objects: [{"term": "食べる", "reading": "たべる", "meaning": "${example}", "jlptLevel": 4}]. No explanation.`;
 }
 
 export async function POST(req: NextRequest) {
@@ -53,11 +55,53 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const words = await callProvider(provider, apiKey, imageBase64, locale);
-    return NextResponse.json({ words });
+    const words = await callProvider(provider, apiKey, imageBase64, locale, req.signal);
+    return NextResponse.json({ words: words.slice(0, 50) });
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error';
     return NextResponse.json({ error: message }, { status: 500 });
+  }
+}
+
+function createAbortError(): Error {
+  return new DOMException('Aborted', 'AbortError');
+}
+
+function withTimeoutSignal(signal?: AbortSignal, timeoutMs = PROVIDER_TIMEOUT_MS): {
+  signal: AbortSignal;
+  cleanup: () => void;
+} {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(createAbortError()), timeoutMs);
+  const onAbort = () => controller.abort(signal?.reason ?? createAbortError());
+
+  if (signal) {
+    if (signal.aborted) {
+      controller.abort(signal.reason ?? createAbortError());
+    } else {
+      signal.addEventListener('abort', onAbort, { once: true });
+    }
+  }
+
+  return {
+    signal: controller.signal,
+    cleanup: () => {
+      clearTimeout(timeoutId);
+      if (signal) signal.removeEventListener('abort', onAbort);
+    },
+  };
+}
+
+async function fetchWithTimeout(
+  input: string,
+  init: RequestInit,
+  signal?: AbortSignal,
+): Promise<Response> {
+  const { signal: requestSignal, cleanup } = withTimeoutSignal(signal);
+  try {
+    return await fetch(input, { ...init, signal: requestSignal });
+  } finally {
+    cleanup();
   }
 }
 
@@ -66,19 +110,25 @@ async function callProvider(
   apiKey: string,
   imageBase64: string,
   locale: string,
+  signal?: AbortSignal,
 ): Promise<ExtractedWord[]> {
   switch (provider) {
     case 'openai':
-      return callOpenAI(apiKey, imageBase64, locale);
+      return callOpenAI(apiKey, imageBase64, locale, signal);
     case 'anthropic':
-      return callAnthropic(apiKey, imageBase64, locale);
+      return callAnthropic(apiKey, imageBase64, locale, signal);
     case 'gemini':
-      return callGemini(apiKey, imageBase64, locale);
+      return callGemini(apiKey, imageBase64, locale, signal);
   }
 }
 
-async function callOpenAI(apiKey: string, imageBase64: string, locale: string): Promise<ExtractedWord[]> {
-  const res = await fetch('https://api.openai.com/v1/chat/completions', {
+async function callOpenAI(
+  apiKey: string,
+  imageBase64: string,
+  locale: string,
+  signal?: AbortSignal,
+): Promise<ExtractedWord[]> {
+  const res = await fetchWithTimeout('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${apiKey}`,
@@ -98,7 +148,7 @@ async function callOpenAI(apiKey: string, imageBase64: string, locale: string): 
       reasoning_effort: 'low',
       max_completion_tokens: 2048,
     }),
-  });
+  }, signal);
 
   if (!res.ok) {
     const err = await res.text();
@@ -110,10 +160,15 @@ async function callOpenAI(apiKey: string, imageBase64: string, locale: string): 
   return parseJsonArray(content);
 }
 
-async function callAnthropic(apiKey: string, imageBase64: string, locale: string): Promise<ExtractedWord[]> {
+async function callAnthropic(
+  apiKey: string,
+  imageBase64: string,
+  locale: string,
+  signal?: AbortSignal,
+): Promise<ExtractedWord[]> {
   const { mediaType, base64Data } = parseDataUrl(imageBase64);
 
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
+  const res = await fetchWithTimeout('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {
       'x-api-key': apiKey,
@@ -136,7 +191,7 @@ async function callAnthropic(apiKey: string, imageBase64: string, locale: string
         },
       ],
     }),
-  });
+  }, signal);
 
   if (!res.ok) {
     const err = await res.text();
@@ -149,11 +204,16 @@ async function callAnthropic(apiKey: string, imageBase64: string, locale: string
   return parseJsonArray(content);
 }
 
-async function callGemini(apiKey: string, imageBase64: string, locale: string): Promise<ExtractedWord[]> {
+async function callGemini(
+  apiKey: string,
+  imageBase64: string,
+  locale: string,
+  signal?: AbortSignal,
+): Promise<ExtractedWord[]> {
   const { mediaType, base64Data } = parseDataUrl(imageBase64);
 
   const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
-  const res = await fetch(url, {
+  const res = await fetchWithTimeout(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -169,7 +229,7 @@ async function callGemini(apiKey: string, imageBase64: string, locale: string): 
         thinkingConfig: { thinkingLevel: 'low' },
       },
     }),
-  });
+  }, signal);
 
   if (!res.ok) {
     const err = await res.text();

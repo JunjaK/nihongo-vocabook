@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useCallback, useMemo, useRef, use } from 'react';
+import { useState, useCallback, useMemo, useRef, use, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { BookOpen, Info, Link2Off, Pencil, Trash2, X } from 'lucide-react';
+import { AlertTriangle, BookOpen, Info, Link2Off, Pencil, Trash2, X } from '@/components/ui/icons';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Header } from '@/components/layout/header';
@@ -26,6 +26,7 @@ import {
   pageWrapper,
   bottomBar,
   bottomSep,
+  skeletonWordList,
   emptyState,
   emptyIcon,
 } from '@/lib/styles';
@@ -49,6 +50,8 @@ export default function WordbookDetailPage({
   const [totalCount, setTotalCount] = useState(0);
   const [loadingMore, setLoadingMore] = useState(false);
   const [editing, setEditing] = useState(false);
+  const [editDirty, setEditDirty] = useState(false);
+  const [showLeaveEditConfirm, setShowLeaveEditConfirm] = useState(false);
   const [showReading, setShowReading] = useState(false);
   const [showMeaning, setShowMeaning] = useState(false);
   const [sortOrder, setSortOrder] = useState<WordSortOrder>('newest');
@@ -59,6 +62,15 @@ export default function WordbookDetailPage({
   const isSubscribed = useMemo(() => wordbook && user && wordbook.userId !== user.id, [wordbook, user]);
 
   const parentRef = useRef<HTMLDivElement>(null);
+  const pendingEditLeaveRef = useRef<(() => void) | null>(null);
+  const requestLeaveEdit = useCallback((action: () => void) => {
+    if (!editDirty) {
+      action();
+      return;
+    }
+    pendingEditLeaveRef.current = action;
+    setShowLeaveEditConfirm(true);
+  }, [editDirty]);
 
   const { searchInput, appliedQuery, setSearchInput, handleSearch, handleSearchClear } = useSearch();
 
@@ -94,6 +106,56 @@ export default function WordbookDetailPage({
     }
   }, [repo, id, appliedQuery, sortOrder], { skip: authLoading });
 
+  useEffect(() => {
+    if (!editing || !editDirty) return undefined;
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = '';
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [editing, editDirty]);
+
+  useEffect(() => {
+    if (!editing || !editDirty) return undefined;
+    const handleDocumentClick = (e: MouseEvent) => {
+      if (e.defaultPrevented || e.button !== 0) return;
+      if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+
+      const target = (e.target as Element | null)?.closest('a[href]') as HTMLAnchorElement | null;
+      if (!target) return;
+
+      const href = target.getAttribute('href');
+      if (!href || href.startsWith('#') || href.startsWith('javascript:')) return;
+      if (target.target && target.target !== '_self') return;
+
+      e.preventDefault();
+      requestLeaveEdit(() => {
+        if (/^https?:\/\//.test(href)) {
+          window.location.assign(href);
+        } else {
+          router.push(href);
+        }
+      });
+    };
+
+    document.addEventListener('click', handleDocumentClick, true);
+    return () => document.removeEventListener('click', handleDocumentClick, true);
+  }, [editing, editDirty, requestLeaveEdit, router]);
+
+  const handleConfirmLeaveEdit = () => {
+    setShowLeaveEditConfirm(false);
+    const next = pendingEditLeaveRef.current;
+    pendingEditLeaveRef.current = null;
+    setEditDirty(false);
+    next?.();
+  };
+
+  const handleCancelLeaveEdit = () => {
+    setShowLeaveEditConfirm(false);
+    pendingEditLeaveRef.current = null;
+  };
+
   const loadMore = useCallback(async () => {
     if (loadingMore || !hasMore) return;
     setLoadingMore(true);
@@ -111,12 +173,21 @@ export default function WordbookDetailPage({
   }, [repo, id, words.length, sortOrder, loadingMore, hasMore]);
 
   const handleUpdate = async (values: { name: string; description: string | null; isShared?: boolean; tags?: string[] }) => {
-    await repo.wordbooks.update(id, values);
-    invalidateListCache('wordbooks');
-    toast.success(t.wordbooks.wordbookUpdated);
-    setEditing(false);
-    const updated = await repo.wordbooks.getById(id);
-    setWordbook(updated);
+    try {
+      await repo.wordbooks.update(id, values);
+      invalidateListCache('wordbooks');
+      toast.success(t.wordbooks.wordbookUpdated);
+      setEditDirty(false);
+      setEditing(false);
+      const updated = await repo.wordbooks.getById(id);
+      setWordbook(updated);
+    } catch (err) {
+      if (err instanceof Error && err.message === 'DUPLICATE_WORDBOOK') {
+        toast.error(t.wordbooks.duplicateWordbook);
+      } else {
+        throw err;
+      }
+    }
   };
 
   const handleDelete = async () => {
@@ -189,7 +260,7 @@ export default function WordbookDetailPage({
     return (
       <div className={pageWrapper}>
         <Header title={t.wordbooks.title} showBack />
-        <div className="py-8 text-center text-muted-foreground">
+        <div className={emptyState}>
           {t.words.wordNotFound}
         </div>
       </div>
@@ -202,6 +273,7 @@ export default function WordbookDetailPage({
         <Header
           title={t.wordbooks.editWordbook}
           showBack
+          onBack={() => requestLeaveEdit(() => setEditing(false))}
           actions={
             <>
               <Button
@@ -217,7 +289,7 @@ export default function WordbookDetailPage({
               <Button
                 variant="ghost"
                 size="icon-sm"
-                onClick={() => setEditing(false)}
+                onClick={() => requestLeaveEdit(() => setEditing(false))}
                 data-testid="wordbook-cancel-edit-button"
                 aria-label={t.common.cancel}
               >
@@ -237,6 +309,16 @@ export default function WordbookDetailPage({
           onSubmit={handleUpdate}
           submitLabel={t.common.update}
           showShareToggle={!!user}
+          onDirtyChange={setEditDirty}
+        />
+        <ConfirmDialog
+          open={showLeaveEditConfirm}
+          icon={<AlertTriangle className="text-destructive" />}
+          title={t.common.unsavedChangesTitle}
+          description={t.common.unsavedChangesDescription}
+          confirmLabel={t.common.leave}
+          onConfirm={handleConfirmLeaveEdit}
+          onCancel={handleCancelLeaveEdit}
         />
       </div>
     );
@@ -259,7 +341,7 @@ export default function WordbookDetailPage({
             </Button>
           }
         />
-        <div className="flex min-h-0 flex-1 flex-col">
+        <div className={pageWrapper}>
           <div className="flex-1 space-y-4 overflow-y-auto p-4">
             <div className="rounded-lg bg-muted px-3 py-2 text-sm text-muted-foreground">
               {t.wordbooks.readOnly}
@@ -378,7 +460,10 @@ export default function WordbookDetailPage({
             <Button
               variant="ghost"
               size="icon-sm"
-              onClick={() => setEditing(true)}
+              onClick={() => {
+                setEditDirty(false);
+                setEditing(true);
+              }}
               data-testid="wordbook-edit-button"
               aria-label={t.common.edit}
             >
@@ -404,7 +489,7 @@ export default function WordbookDetailPage({
       />
 
       {loading ? (
-        <div className="animate-page flex-1 space-y-2 overflow-y-auto px-4 pt-2">
+        <div className={skeletonWordList}>
           {Array.from({ length: 20 }).map((_, i) => (
             <Skeleton key={i} className="h-[60px] w-full rounded-lg" />
           ))}
@@ -417,7 +502,7 @@ export default function WordbookDetailPage({
       ) : (
         <div ref={parentRef} className="min-h-0 flex-1 overflow-y-auto" onScroll={handleScroll}>
           {filteredWords.length === 0 ? (
-            <div className="py-8 text-center text-muted-foreground">
+            <div className="flex min-h-full items-center justify-center text-center text-muted-foreground">
               {t.words.noWords}
             </div>
           ) : (

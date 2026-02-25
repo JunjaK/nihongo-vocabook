@@ -1,6 +1,6 @@
 'use client';
 
-import { ExternalLink } from 'lucide-react';
+import { ExternalLink } from '@/components/ui/icons';
 import { Header } from '@/components/layout/header';
 import { useTranslation } from '@/lib/i18n';
 
@@ -14,7 +14,7 @@ const OPEN_SOURCE_LIBS = [
   { name: 'TanStack Virtual', url: 'https://github.com/TanStack/virtual', license: 'MIT', description: 'Headless virtual scrolling' },
   { name: 'Dexie.js', url: 'https://github.com/dexie/Dexie.js', license: 'Apache-2.0', description: 'IndexedDB wrapper' },
   { name: 'Tesseract.js', url: 'https://github.com/naptha/tesseract.js', license: 'Apache-2.0', description: 'OCR engine for the browser' },
-  { name: 'Lucide', url: 'https://github.com/lucide-icons/lucide', license: 'ISC', description: 'Icon library' },
+  { name: 'Tabler Icons', url: 'https://github.com/tabler/tabler-icons', license: 'MIT', description: 'Icon library' },
   { name: 'shadcn/ui', url: 'https://github.com/shadcn-ui/ui', license: 'MIT', description: 'Beautifully designed components' },
   { name: 'Sonner', url: 'https://github.com/emilkowalski/sonner', license: 'MIT', description: 'Toast notification library' },
   { name: 'WanaKana', url: 'https://github.com/WaniKani/WanaKana', license: 'MIT', description: 'Japanese input helper' },

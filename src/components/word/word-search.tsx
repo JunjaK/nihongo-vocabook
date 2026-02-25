@@ -1,12 +1,13 @@
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Loader2 } from 'lucide-react';
+import { Loader2 } from '@/components/ui/icons';
 import { bind, unbind, toKana } from 'wanakana';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { searchDictionary } from '@/lib/dictionary/jisho';
 import { useTranslation } from '@/lib/i18n';
+import { useBottomNavLock } from '@/hooks/use-bottom-nav-lock';
 import type { DictionaryEntry } from '@/types/word';
 
 interface WordSearchProps {
@@ -26,6 +27,7 @@ export function WordSearch({ onSelect, onLoadingChange }: WordSearchProps) {
   const [results, setResults] = useState<DictionaryEntry[]>([]);
   const [loading, setLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  useBottomNavLock(loading);
 
   useEffect(() => {
     const el = inputRef.current;

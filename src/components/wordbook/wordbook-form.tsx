@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useRef } from 'react';
-import { X } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { X } from '@/components/ui/icons';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -22,9 +22,30 @@ interface WordbookFormProps {
   submitLabel: string;
   showShareToggle?: boolean;
   createdAt?: Date;
+  onDirtyChange?: (dirty: boolean) => void;
 }
 
-export function WordbookForm({ initialValues, onSubmit, submitLabel, showShareToggle, createdAt }: WordbookFormProps) {
+interface WordbookFormSnapshot {
+  name: string;
+  description: string;
+  isShared: boolean;
+  tags: string[];
+  tagInput: string;
+}
+
+function isSameStringArray(a: string[], b: string[]): boolean {
+  if (a.length !== b.length) return false;
+  return a.every((v, i) => v === b[i]);
+}
+
+export function WordbookForm({
+  initialValues,
+  onSubmit,
+  submitLabel,
+  showShareToggle,
+  createdAt,
+  onDirtyChange,
+}: WordbookFormProps) {
   const { t, locale } = useTranslation();
   const [name, setName] = useState(initialValues?.name ?? '');
   const [description, setDescription] = useState(initialValues?.description ?? '');
@@ -33,6 +54,32 @@ export function WordbookForm({ initialValues, onSubmit, submitLabel, showShareTo
   const [tagInput, setTagInput] = useState('');
   const [saving, setSaving] = useState(false);
   const tagInputRef = useRef<HTMLInputElement>(null);
+  const initialSnapshotRef = useRef<WordbookFormSnapshot>({
+    name: initialValues?.name ?? '',
+    description: initialValues?.description ?? '',
+    isShared: initialValues?.isShared ?? false,
+    tags: [...(initialValues?.tags ?? [])],
+    tagInput: '',
+  });
+
+  const currentSnapshot: WordbookFormSnapshot = {
+    name,
+    description,
+    isShared,
+    tags,
+    tagInput,
+  };
+  const initial = initialSnapshotRef.current;
+  const isDirty =
+    currentSnapshot.name !== initial.name ||
+    currentSnapshot.description !== initial.description ||
+    currentSnapshot.tagInput !== initial.tagInput ||
+    (showShareToggle ? currentSnapshot.isShared !== initial.isShared : false) ||
+    !isSameStringArray(currentSnapshot.tags, initial.tags);
+
+  useEffect(() => {
+    onDirtyChange?.(isDirty);
+  }, [isDirty, onDirtyChange]);
 
   const addTag = (value: string) => {
     const trimmed = value.trim();

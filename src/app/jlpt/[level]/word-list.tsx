@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
-import { Lock } from 'lucide-react';
+import { Lock } from '@/components/ui/icons';
 import { Button } from '@/components/ui/button';
 import { WordCard } from '@/components/word/word-card';
 import { pageWrapper, bottomBar, bottomSep } from '@/lib/styles';

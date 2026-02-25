@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Crown } from 'lucide-react';
+import { Crown } from '@/components/ui/icons';
 import { useTranslation } from '@/lib/i18n';
 import { BaseFlashcard } from './base-flashcard';
 import type { WordWithProgress } from '@/types/word';

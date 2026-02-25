@@ -23,10 +23,18 @@ export function ConsentGate({ children }: { children: ReactNode }) {
   const user = useAuthStore((s) => s.user);
   const authLoading = useAuthStore((s) => s.loading);
 
-  const [consented, setConsented] = useState<boolean | null>(null);
+  const isProd = process.env.NODE_ENV === 'production';
+
+  const [consented, setConsented] = useState<boolean | null>(isProd ? null : true);
   const [declined, setDeclined] = useState(false);
 
   const checkConsent = useCallback(async () => {
+    // Skip consent in non-production environments
+    if (!isProd) {
+      setConsented(true);
+      return;
+    }
+
     // Guest: check localStorage
     if (!user) {
       setConsented(getLocalConsent());

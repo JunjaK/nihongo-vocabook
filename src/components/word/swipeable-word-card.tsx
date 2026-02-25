@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useState, useCallback } from 'react';
-import { Check, Undo2 } from 'lucide-react';
+import { Check, Undo2 } from '@/components/ui/icons';
 import {
   ContextMenu,
   ContextMenuTrigger,

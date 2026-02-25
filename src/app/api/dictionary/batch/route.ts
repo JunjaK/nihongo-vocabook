@@ -1,5 +1,9 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { translateToKorean } from '@/lib/dictionary/translate';
+import { createLogger } from '@/lib/logger';
+
+const logger = createLogger('api/dictionary/batch');
 
 interface DictionaryRow {
   term: string;
@@ -70,6 +74,10 @@ export async function POST(request: NextRequest) {
 
   const uniqueTerms = [...new Set(terms)];
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const isAuthenticated = Boolean(user);
 
   const termList = uniqueTerms.join(',');
   const { data: rows, error } = await supabase
@@ -82,6 +90,47 @@ export async function POST(request: NextRequest) {
       { error: `Database error: ${error.message}` },
       { status: 500 },
     );
+  }
+
+  // Backfill missing Korean meanings for authenticated users
+  if (isAuthenticated && rows && rows.length > 0) {
+    const toTranslate = rows.filter(
+      (r) => !r.meanings_ko || r.meanings_ko.length === 0,
+    );
+    if (toTranslate.length > 0) {
+      try {
+        const translated = await translateToKorean(
+          toTranslate.map((r) => ({
+            term: r.term,
+            reading: r.reading,
+            meanings: r.meanings,
+          })),
+        );
+        for (let i = 0; i < toTranslate.length; i++) {
+          const ko = translated[i];
+          if (ko && ko.length > 0) {
+            toTranslate[i].meanings_ko = ko;
+            // Fire-and-forget DB update
+            supabase
+              .from('dictionary_entries')
+              .update({ meanings_ko: ko })
+              .eq('term', toTranslate[i].term)
+              .eq('reading', toTranslate[i].reading)
+              .then(({ error: updateErr }) => {
+                if (updateErr) {
+                  logger.error('Failed to update meanings_ko', updateErr.message);
+                }
+              });
+          }
+        }
+      } catch (err) {
+        // Non-blocking — translation failure falls back to English-only
+        logger.warn(
+          'Korean translation failed in batch',
+          err instanceof Error ? err.message : err,
+        );
+      }
+    }
   }
 
   // Build a lookup set for quick matching

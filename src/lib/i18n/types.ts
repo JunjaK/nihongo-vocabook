@@ -16,6 +16,9 @@ export interface Translations {
     complete: string;
     error: string;
     tryAgain: string;
+    unsavedChangesTitle: string;
+    unsavedChangesDescription: string;
+    leave: string;
   };
   nav: {
     words: string;
@@ -138,6 +141,8 @@ export interface Translations {
   quiz: {
     title: string;
     practice: string;
+    loginRequired: string;
+    loginRequiredDescription: string;
     allCaughtUp: string;
     noWordsDue: string;
     noWordsDueHint: string;
@@ -215,6 +220,7 @@ export interface Translations {
     unsupportedVersion: string;
     ocrTitle: string;
     loginRequiredOcr: string;
+    loginRequiredQuiz: string;
     ocrMode: string;
     ocrFree: string;
     llmVision: string;
@@ -230,6 +236,7 @@ export interface Translations {
     sourceCode: string;
     openSource: string;
     quizSettings: string;
+    quizStats: string;
     newPerDay: string;
     maxReviewsPerDay: string;
     jlptFilter: string;
@@ -343,12 +350,22 @@ export interface Translations {
     fromImage: string;
     fromImageDescription: string;
     filterByLevel: string;
+    noWordsForLevel: string;
+    noSelectableWords: string;
+    convertingImage: string;
     enrichingWords: string;
     notFound: string;
     extractedCount: (n: number) => string;
     editAndAdd: string;
     editWordProgress: (current: number, total: number) => string;
     apiKeyRequired: string;
+    extractionReady: string;
+    continueInBackground: string;
+    alreadyAdded: string;
+    alreadyRegistered: (n: number) => string;
+    leaveConfirmTitle: string;
+    leaveConfirmDescription: string;
+    leaveConfirmAction: string;
   };
   profile: {
     title: string;
@@ -395,16 +412,84 @@ export interface Translations {
     updateAvailable: string;
     updateAction: string;
   };
+  stats: {
+    title: string;
+    totalReviewed: string;
+    currentStreak: string;
+    totalMastered: string;
+    avgAccuracy: string;
+    dailyActivity: string;
+    accuracyTrend: string;
+    cardDistribution: string;
+    ratingDistribution: string;
+    last30Days: string;
+    noData: string;
+    newCards: string;
+    reviewCards: string;
+    stateNew: string;
+    stateLearning: string;
+    stateReview: string;
+    stateRelearning: string;
+    stateMastered: string;
+    cards: string;
+    days: string;
+  };
   achievements: {
     title: string;
-    firstQuiz: string;
-    words100: string;
-    words500: string;
-    words1000: string;
-    streak7: string;
-    streak30: string;
     unlocked: string;
     noAchievements: string;
     locked: string;
+    // Category labels
+    categorySpecial: string;
+    categoryMilestone: string;
+    categoryStreak: string;
+    categoryVolume: string;
+    categoryAccuracy: string;
+    // Achievement labels
+    firstQuiz: string;
+    firstQuizDesc: string;
+    words50: string;
+    words50Desc: string;
+    words100: string;
+    words100Desc: string;
+    words250: string;
+    words250Desc: string;
+    words500: string;
+    words500Desc: string;
+    words1000: string;
+    words1000Desc: string;
+    words2000: string;
+    words2000Desc: string;
+    words5000: string;
+    words5000Desc: string;
+    streak3: string;
+    streak3Desc: string;
+    streak7: string;
+    streak7Desc: string;
+    streak14: string;
+    streak14Desc: string;
+    streak30: string;
+    streak30Desc: string;
+    streak60: string;
+    streak60Desc: string;
+    streak100: string;
+    streak100Desc: string;
+    streak365: string;
+    streak365Desc: string;
+    reviews500: string;
+    reviews500Desc: string;
+    reviews1000: string;
+    reviews1000Desc: string;
+    reviews5000: string;
+    reviews5000Desc: string;
+    perfectSession: string;
+    perfectSessionDesc: string;
+    accuracyWeek80: string;
+    accuracyWeek80Desc: string;
+    daily50: string;
+    daily50Desc: string;
+    daily100: string;
+    daily100Desc: string;
+    progress: (current: number, target: number) => string;
   };
 }

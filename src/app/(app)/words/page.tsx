@@ -4,7 +4,7 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { BookOpen, FileImage } from 'lucide-react';
+import { BookOpen, FileImage, Loader2, PhotoScan } from '@/components/ui/icons';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Header } from '@/components/layout/header';
 import { ListToolbar } from '@/components/layout/list-toolbar';
@@ -13,6 +13,7 @@ import { SwipeableWordCard } from '@/components/word/swipeable-word-card';
 import { AddToWordbookDialog } from '@/components/wordbook/add-to-wordbook-dialog';
 import { useRepository } from '@/lib/repository/provider';
 import { useAuthStore } from '@/stores/auth-store';
+import { useScanStore } from '@/stores/scan-store';
 import { useTranslation } from '@/lib/i18n';
 import { useLoader } from '@/hooks/use-loader';
 import { useSearch } from '@/hooks/use-search';
@@ -39,7 +40,9 @@ interface WordsCacheData {
 export default function WordsPage() {
   const router = useRouter();
   const repo = useRepository();
+  const user = useAuthStore((s) => s.user);
   const authLoading = useAuthStore((s) => s.loading);
+  const scanStatus = useScanStore((s) => s.status);
   const { t } = useTranslation();
   const [words, setWords] = useState<Word[]>([]);
   const [totalCount, setTotalCount] = useState(0);
@@ -73,7 +76,7 @@ export default function WordsPage() {
         setListCache('words', { words: w, totalCount: tc, sortOrder: so }, scrollOffsetRef.current);
       }
     };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   const [loading] = useLoader(async () => {
     loadGenRef.current += 1; // invalidate in-flight loadMore
@@ -170,9 +173,18 @@ export default function WordsPage() {
         desc={!loading && totalCount > 0 ? t.words.totalWordCount(totalCount) : undefined}
         actions={
           <div className="flex items-center gap-2">
+            {(scanStatus === 'extracting' || scanStatus === 'enriching') && (
+              <Link href="/words/scan" className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <Loader2 className="size-3.5 animate-spin" />
+                <span>{scanStatus === 'extracting' ? t.scan.extracting : t.scan.enrichingWords}</span>
+              </Link>
+            )}
             <Link href="/words/scan">
-              <Button variant="ghost" size="icon-sm" data-testid="words-scan-button" aria-label="Scan">
-                <FileImage className="size-5" />
+              <Button variant="ghost" size="icon-sm" data-testid="words-scan-button" aria-label="Scan" className="relative">
+                <PhotoScan className="size-5" />
+                {scanStatus === 'preview' && (
+                  <span className="absolute -top-0.5 -right-0.5 size-2.5 rounded-full bg-primary" />
+                )}
               </Button>
             </Link>
           </div>
@@ -265,7 +277,13 @@ export default function WordsPage() {
             <Button
               variant="outline"
               className="flex-1"
-              onClick={() => window.location.assign('/quiz?quickStart=1')}
+              onClick={() => {
+                if (!user) {
+                  window.alert(t.quiz.loginRequired);
+                  return;
+                }
+                router.push('/quiz?quickStart=1');
+              }}
               data-testid="words-start-quiz-button"
             >
               {t.words.startQuiz}

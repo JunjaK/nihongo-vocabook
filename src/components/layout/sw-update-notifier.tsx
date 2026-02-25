@@ -27,6 +27,8 @@ export function SwUpdateNotifier() {
 
     let registration: ServiceWorkerRegistration | undefined;
 
+    navigator.storage?.persist?.().catch(() => {});
+
     navigator.serviceWorker.register('/sw.js').then((reg) => {
       registration = reg;
 

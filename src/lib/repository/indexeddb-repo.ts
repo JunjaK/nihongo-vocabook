@@ -244,7 +244,17 @@ class IndexedDBWordRepository implements WordRepository {
     return result;
   }
 
+  async getExistingTerms(terms: string[]): Promise<Set<string>> {
+    if (terms.length === 0) return new Set();
+    const existing = await db.words.where('term').anyOf(terms).toArray();
+    return new Set(existing.map((w) => w.term));
+  }
+
   async create(input: CreateWordInput): Promise<Word> {
+    // Check for duplicate term
+    const existing = await db.words.where('term').equals(input.term).first();
+    if (existing) throw new Error('DUPLICATE_WORD');
+
     const now = new Date();
     const localWord: LocalWord = {
       term: input.term,
@@ -276,6 +286,13 @@ class IndexedDBWordRepository implements WordRepository {
 
   async update(id: string, input: UpdateWordInput): Promise<Word> {
     const numId = Number(id);
+    // Check for duplicate term (if term is being changed)
+    if (input.term !== undefined) {
+      const existing = await db.words.where('term').equals(input.term).first();
+      if (existing && (existing as LocalWord & { id: number }).id !== numId) {
+        throw new Error('DUPLICATE_WORD');
+      }
+    }
     const wordUpdate: Partial<LocalWord> = { updatedAt: new Date() };
     if (input.term !== undefined) wordUpdate.term = input.term;
     if (input.reading !== undefined) wordUpdate.reading = input.reading;
@@ -796,6 +813,10 @@ class IndexedDBWordbookRepository implements WordbookRepository {
   }
 
   async create(input: CreateWordbookInput): Promise<Wordbook> {
+    // Check for duplicate name
+    const existing = await db.wordbooks.where('name').equals(input.name).first();
+    if (existing) throw new Error('DUPLICATE_WORDBOOK');
+
     const now = new Date();
     const local: LocalWordbook = {
       name: input.name,
@@ -809,6 +830,13 @@ class IndexedDBWordbookRepository implements WordbookRepository {
 
   async update(id: string, input: UpdateWordbookInput): Promise<Wordbook> {
     const numId = Number(id);
+    // Check for duplicate name (excluding self)
+    if (input.name !== undefined) {
+      const existing = await db.wordbooks.where('name').equals(input.name).first();
+      if (existing && (existing as LocalWordbook & { id: number }).id !== numId) {
+        throw new Error('DUPLICATE_WORDBOOK');
+      }
+    }
     const updateData: Partial<LocalWordbook> = { updatedAt: new Date() };
     if (input.name !== undefined) updateData.name = input.name;
     if (input.description !== undefined) updateData.description = input.description;
@@ -944,7 +972,7 @@ class IndexedDBWordbookRepository implements WordbookRepository {
     throw new Error('Sign in required to unsubscribe from shared wordbooks');
   }
 
-  async copySharedWordbook(): Promise<Wordbook> {
+  async copySharedWordbook(_wordbookId: string, _overrides?: { name: string; description: string | null }): Promise<Wordbook> {
     throw new Error('Sign in required to copy shared wordbooks');
   }
 }

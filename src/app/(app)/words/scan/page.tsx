@@ -1,54 +1,66 @@
 'use client';
 
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { Camera } from 'lucide-react';
+import { Camera } from '@/components/ui/icons';
 import { Header } from '@/components/layout/header';
 import { ImageCapture, type ImageCaptureHandle } from '@/components/scan/image-capture';
 import { WordPreview } from '@/components/scan/word-preview';
 import { ScanComplete } from '@/components/scan/scan-complete';
 import { Button } from '@/components/ui/button';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { useRepository } from '@/lib/repository/provider';
 import { useTranslation } from '@/lib/i18n';
 import { invalidateListCache } from '@/lib/list-cache';
 import { useAuthStore } from '@/stores/auth-store';
+import { useScanStore } from '@/stores/scan-store';
+import { useBottomNavLock } from '@/hooks/use-bottom-nav-lock';
 import { getLocalOcrMode, fetchOcrSettings } from '@/lib/ocr/settings';
-import { extractWordsFromImage } from '@/lib/ocr/extract';
 import { fetchProfile } from '@/lib/profile/fetch';
-import { searchDictionary, searchDictionaryBatch } from '@/lib/dictionary/jisho';
 import type { ExtractedWord } from '@/lib/ocr/llm-vision';
-import type { DictionaryEntry } from '@/types/word';
 import Link from 'next/link';
-
-type Step = 'capture' | 'preview' | 'done';
 
 export default function ScanPage() {
   const router = useRouter();
   const repo = useRepository();
   const { t, locale } = useTranslation();
   const user = useAuthStore((s) => s.user);
-  const [step, setStep] = useState<Step>('capture');
-  const [extracting, setExtracting] = useState(false);
-  const [addedCount, setAddedCount] = useState(0);
   const imageCaptureRef = useRef<ImageCaptureHandle>(null);
 
-  // Enriched words for preview (used by both OCR and LLM modes)
-  const [enrichedWords, setEnrichedWords] = useState<ExtractedWord[]>([]);
-
-  // OCR enrichment state
-  const [enriching, setEnriching] = useState(false);
-  const [enrichProgress, setEnrichProgress] = useState({ current: 0, total: 0 });
-  const enrichCancelledRef = useRef(false);
+  // Scan store state
+  const status = useScanStore((s) => s.status);
+  const enrichedWords = useScanStore((s) => s.enrichedWords);
+  const enrichProgress = useScanStore((s) => s.enrichProgress);
+  const addedCount = useScanStore((s) => s.addedCount);
+  const startExtraction = useScanStore((s) => s.startExtraction);
+  const setDone = useScanStore((s) => s.setDone);
+  const reset = useScanStore((s) => s.reset);
 
   // User JLPT level for filtering
   const [userJlptLevel, setUserJlptLevel] = useState<number | null>(null);
+  // Terms already in user's word list
+  const [existingTerms, setExistingTerms] = useState<Set<string>>(new Set());
 
   // Guard: LLM mode needs API key configured on server
   const mode = getLocalOcrMode();
   const [needsApiKey, setNeedsApiKey] = useState(false);
   const [guardLoading, setGuardLoading] = useState(mode === 'llm');
+  const [leaveConfirmOpen, setLeaveConfirmOpen] = useState(false);
+
+  const isExtracting = status === 'extracting';
+  const isEnriching = status === 'enriching';
+  useBottomNavLock(isExtracting || isEnriching);
 
   useEffect(() => {
     if (mode !== 'llm' || !user) {
@@ -73,111 +85,25 @@ export default function ScanPage() {
       .catch(() => {});
   }, [user]);
 
-  const getMeaning = (entries: DictionaryEntry[]): string => {
-    if (entries.length === 0) return '';
-    const sense = entries[0].senses[0];
-    if (locale === 'ko' && sense?.koreanDefinitions && sense.koreanDefinitions.length > 0) {
-      return sense.koreanDefinitions.slice(0, 3).join(', ');
-    }
-    return sense?.englishDefinitions.slice(0, 3).join(', ') ?? '';
-  };
+  // Check existing terms when preview starts
+  useEffect(() => {
+    if (status !== 'preview' || enrichedWords.length === 0) return;
+    repo.words
+      .getExistingTerms(enrichedWords.map((w) => w.term))
+      .then(setExistingTerms)
+      .catch(() => setExistingTerms(new Set()));
+  }, [status, enrichedWords, repo]);
 
-  const toExtractedWord = (raw: string, entries: DictionaryEntry[]): ExtractedWord => {
-    if (entries.length === 0) {
-      return { term: raw, reading: '', meaning: '', jlptLevel: null };
-    }
-    const entry = entries[0];
-    const jp = entry.japanese[0];
-    const jlptMatch = entry.jlptLevels[0]?.match(/\d/);
-    return {
-      term: jp?.word ?? jp?.reading ?? raw,
-      reading: jp?.reading ?? '',
-      meaning: getMeaning(entries),
-      jlptLevel: jlptMatch ? Number(jlptMatch[0]) : null,
-    };
-  };
-
-  const enrichOcrWords = useCallback(async (rawWords: string[]) => {
-    setEnriching(true);
-    setEnrichProgress({ current: 0, total: rawWords.length });
-    enrichCancelledRef.current = false;
-
-    // 1. Batch lookup from DB
-    const batchResult = await searchDictionaryBatch(rawWords, locale);
-    if (enrichCancelledRef.current) return;
-
-    // Build a map of raw word → ExtractedWord for found entries
-    const resultMap = new Map<string, ExtractedWord>();
-    for (const [term, entries] of batchResult.found) {
-      resultMap.set(term, toExtractedWord(term, entries));
-    }
-
-    const batchFoundCount = batchResult.found.size;
-    setEnrichProgress({ current: batchFoundCount, total: rawWords.length });
-
-    // 2. Sequential Jisho lookups for misses only
-    for (let i = 0; i < batchResult.missing.length; i++) {
-      if (enrichCancelledRef.current) return;
-
-      const raw = batchResult.missing[i];
-      if (i > 0) await new Promise((r) => setTimeout(r, 200));
-
-      try {
-        const entries = await searchDictionary(raw, locale);
-        resultMap.set(raw, toExtractedWord(raw, entries));
-      } catch {
-        resultMap.set(raw, { term: raw, reading: '', meaning: '', jlptLevel: null });
-      }
-      setEnrichProgress({ current: batchFoundCount + i + 1, total: rawWords.length });
-    }
-
-    if (!enrichCancelledRef.current) {
-      // Preserve original order
-      const results = rawWords.map((raw) => resultMap.get(raw) ?? { term: raw, reading: '', meaning: '', jlptLevel: null });
-      setEnrichedWords(results);
-      setEnriching(false);
-      setStep('preview');
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [locale]);
-
-  const handleExtract = useCallback(async (imageDataUrls: string[]) => {
-    const currentMode = getLocalOcrMode();
-    setExtracting(true);
+  const handleExtract = async (imageDataUrls: string[]) => {
     try {
-      const allOcrWords: string[] = [];
-      const allLlmWords: ExtractedWord[] = [];
-
-      for (const imageDataUrl of imageDataUrls) {
-        const result = await extractWordsFromImage(imageDataUrl, currentMode, undefined, locale);
-        if (result.mode === 'ocr') {
-          allOcrWords.push(...result.words);
-        } else {
-          allLlmWords.push(...result.words);
-        }
-      }
-
-      if (allOcrWords.length > 0) {
-        setExtracting(false);
-        await enrichOcrWords(allOcrWords);
-      } else {
-        // Deduplicate LLM words by term
-        const seen = new Set<string>();
-        const unique = allLlmWords.filter((w) => {
-          if (seen.has(w.term)) return false;
-          seen.add(w.term);
-          return true;
-        });
-        setEnrichedWords(unique);
-        setExtracting(false);
-        setStep('preview');
-      }
+      await startExtraction(imageDataUrls, locale, {
+        resolveExistingTerms: (terms) => repo.words.getExistingTerms(terms),
+      });
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Extraction failed';
       toast.error(message === 'API_KEY_REQUIRED' ? t.scan.apiKeyRequired : message);
-      setExtracting(false);
     }
-  }, [enrichOcrWords, locale]);
+  };
 
   const handleBulkAdd = async (words: ExtractedWord[]) => {
     let count = 0;
@@ -199,9 +125,8 @@ export default function ScanPage() {
         }
       }
     }
-    setAddedCount(count);
     if (count > 0) invalidateListCache('words');
-    setStep('done');
+    setDone(count);
     toast.success(t.scan.wordsAdded(count));
   };
 
@@ -211,12 +136,36 @@ export default function ScanPage() {
   };
 
   const handleReset = () => {
-    enrichCancelledRef.current = true;
-    setStep('capture');
-    setEnrichedWords([]);
-    setEnriching(false);
-    setEnrichProgress({ current: 0, total: 0 });
-    setAddedCount(0);
+    reset();
+  };
+
+  const handleCancelExtract = () => {
+    reset();
+  };
+
+  const handleBackgroundExtract = () => {
+    router.push('/words');
+  };
+
+  // Derive the visual step from store status
+  const step = status === 'idle' || status === 'extracting' || status === 'enriching'
+    ? 'capture'
+    : status;
+  const isPreviewStep = step === 'preview';
+  const needsLeaveConfirm = isPreviewStep || (step as string) === 'confirm';
+
+  const handleHeaderBack = () => {
+    if (needsLeaveConfirm) {
+      setLeaveConfirmOpen(true);
+      return;
+    }
+    router.back();
+  };
+
+  const handleConfirmLeave = () => {
+    setLeaveConfirmOpen(false);
+    reset();
+    router.push('/words');
   };
 
   return (
@@ -224,14 +173,16 @@ export default function ScanPage() {
       <Header
         title={t.scan.title}
         showBack
+        onBack={handleHeaderBack}
+        allowBackWhenLocked={isPreviewStep}
         actions={
-          step === 'capture' && !guardLoading && !needsApiKey && !enriching ? (
+          step === 'capture' && !guardLoading && !needsApiKey && !isEnriching ? (
             <Button
               variant="ghost"
               size="icon-sm"
               aria-label={t.scan.takePhoto}
               onClick={() => imageCaptureRef.current?.openCamera()}
-              disabled={extracting}
+              disabled={isExtracting}
             >
               <Camera className="size-5" />
             </Button>
@@ -252,22 +203,61 @@ export default function ScanPage() {
             <Button variant="outline">{t.settings.goToSettings}</Button>
           </Link>
         </div>
-      ) : enriching ? (
-        <div className="flex flex-1 flex-col items-center justify-center gap-3 text-muted-foreground">
-          <LoadingSpinner className="size-8" />
-          <div className="text-sm">
-            {t.scan.enrichingWords}
+      ) : isEnriching ? (
+        <div className="flex min-h-0 flex-1 flex-col">
+          {/* Centered content */}
+          <div className="flex flex-1 flex-col items-center justify-center gap-4 px-6">
+            <LoadingSpinner className="size-8" />
+            <div className="text-sm text-muted-foreground">
+              {t.scan.enrichingWords}
+            </div>
+            {enrichProgress.total > 1 && (
+              <div className="w-full max-w-xs space-y-2">
+                <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+                  <div
+                    className="h-full rounded-full bg-primary transition-all duration-300 ease-out"
+                    style={{
+                      width: `${(enrichProgress.current / enrichProgress.total) * 100}%`,
+                    }}
+                  />
+                </div>
+                <div className="flex items-center justify-between text-xs">
+                  <span className="tabular-nums text-muted-foreground">
+                    {enrichProgress.current} / {enrichProgress.total}
+                  </span>
+                  <span className="tabular-nums font-medium text-foreground">
+                    {Math.round((enrichProgress.current / enrichProgress.total) * 100)}%
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
-          <div className="text-lg font-medium text-foreground">
-            {enrichProgress.current} / {enrichProgress.total}
+          {/* Bottom actions */}
+          <div className="sticky bottom-0 bg-background px-4 pb-6 pt-2">
+            <div className="mb-3 h-px bg-border" />
+            <div className="flex gap-2">
+              <Button className="flex-1" variant="outline" onClick={handleCancelExtract}>
+                {t.common.cancel}
+              </Button>
+              <Button className="flex-1" onClick={handleBackgroundExtract}>
+                {t.scan.continueInBackground}
+              </Button>
+            </div>
           </div>
         </div>
       ) : step === 'capture' ? (
-        <ImageCapture ref={imageCaptureRef} onExtract={handleExtract} extracting={extracting} />
+        <ImageCapture
+          ref={imageCaptureRef}
+          onExtract={handleExtract}
+          extracting={isExtracting}
+          onCancelExtract={handleCancelExtract}
+          onBackgroundExtract={handleBackgroundExtract}
+        />
       ) : step === 'preview' ? (
         <WordPreview
           words={enrichedWords}
           userJlptLevel={userJlptLevel}
+          existingTerms={existingTerms}
           onConfirm={handleBulkAdd}
           onEditAndAdd={handleEditAndAdd}
           onRetry={handleReset}
@@ -275,6 +265,21 @@ export default function ScanPage() {
       ) : step === 'done' ? (
         <ScanComplete addedCount={addedCount} onAddMore={handleReset} />
       ) : null}
+
+      <AlertDialog open={leaveConfirmOpen} onOpenChange={setLeaveConfirmOpen}>
+        <AlertDialogContent size="sm">
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t.scan.leaveConfirmTitle}</AlertDialogTitle>
+            <AlertDialogDescription>{t.scan.leaveConfirmDescription}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t.common.cancel}</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmLeave}>
+              {t.scan.leaveConfirmAction}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }

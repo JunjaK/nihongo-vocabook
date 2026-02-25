@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight } from '@/components/ui/icons';
 import { useTranslation } from '@/lib/i18n';
 import type { WordbookWithCount } from '@/types/wordbook';
 
