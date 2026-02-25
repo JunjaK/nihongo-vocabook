@@ -51,7 +51,6 @@ export interface Translations {
     hasAccount: string;
     continueAsGuest: string;
     rememberEmail: string;
-    goToSignup: string;
     goToLogin: string;
     minPassword: string;
     passwordRule: string;
@@ -285,7 +284,6 @@ export interface Translations {
     cannotAddMastered: string;
     selectWordbook: string;
     shareToggle: string;
-    browseShared: string;
     systemWordbooks: string;
     subscribe: string;
     copyToMine: string;
@@ -363,9 +361,6 @@ export interface Translations {
     continueInBackground: string;
     alreadyAdded: string;
     alreadyRegistered: (n: number) => string;
-    leaveConfirmTitle: string;
-    leaveConfirmDescription: string;
-    leaveConfirmAction: string;
   };
   profile: {
     title: string;
@@ -385,7 +380,6 @@ export interface Translations {
     confirmNewPassword: string;
     passwordChanged: string;
     saved: string;
-    editProfile: string;
     email: string;
     deleteAccount: string;
     deleteAccountWarning: string;

@@ -139,7 +139,7 @@ export default function LoginPage() {
             </Button>
             <Link href="/signup">
               <Button type="button" variant="outline" className="w-full" data-testid="login-goto-signup">
-                {t.auth.goToSignup}
+                {t.auth.signUp}
               </Button>
             </Link>
           </div>

@@ -269,13 +269,13 @@ export default function ScanPage() {
       <AlertDialog open={leaveConfirmOpen} onOpenChange={setLeaveConfirmOpen}>
         <AlertDialogContent size="sm">
           <AlertDialogHeader>
-            <AlertDialogTitle>{t.scan.leaveConfirmTitle}</AlertDialogTitle>
-            <AlertDialogDescription>{t.scan.leaveConfirmDescription}</AlertDialogDescription>
+            <AlertDialogTitle>{t.common.unsavedChangesTitle}</AlertDialogTitle>
+            <AlertDialogDescription>{t.common.unsavedChangesDescription}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>{t.common.cancel}</AlertDialogCancel>
             <AlertDialogAction onClick={handleConfirmLeave}>
-              {t.scan.leaveConfirmAction}
+              {t.common.leave}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

@@ -526,7 +526,7 @@ export default function WordDetailPage({
       <Button
         variant="outline"
         size="icon"
-        className="fixed top-1/2 left-1 z-20 -translate-y-1/2 rounded-r-xl rounded-l-none border-l-0 shadow-md md:left-[calc(50%-14rem+0.25rem)]"
+        className="fixed top-[60%] left-1 z-20 -translate-y-1/2 rounded-r-xl rounded-l-none border-l-0 shadow-md md:left-[calc(50%-14rem+0.25rem)]"
         onClick={() => handleMoveWord(prevWordId)}
         disabled={!prevWordId}
         data-testid="word-prev-button"
@@ -538,7 +538,7 @@ export default function WordDetailPage({
       <Button
         variant="outline"
         size="icon"
-        className="fixed top-1/2 right-1 z-20 -translate-y-1/2 rounded-l-xl rounded-r-none border-r-0 shadow-md md:right-[calc(50%-14rem+0.25rem)]"
+        className="fixed top-[60%] right-1 z-20 -translate-y-1/2 rounded-l-xl rounded-r-none border-r-0 shadow-md md:right-[calc(50%-14rem+0.25rem)]"
         onClick={() => handleMoveWord(nextWordId)}
         disabled={!nextWordId}
         data-testid="word-next-button"
