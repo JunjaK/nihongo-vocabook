@@ -51,6 +51,105 @@ import { pageWrapper, scrollArea, bottomBar, bottomSep } from '@/lib/styles';
 - The parent container must use `pageWrapper` (`flex min-h-0 flex-1 flex-col`)
 - Applies to: forms, wizard steps, detail pages with action buttons, confirmation dialogs
 
+### Bottom Button Layout: Horizontal, Never Vertical
+
+When there are multiple buttons in the bottom bar, they MUST be **horizontal** (`flex gap-2`), never vertical (`flex-col`).
+
+```tsx
+// ✅ Correct — horizontal layout, secondary left, primary right
+<div className={bottomBar}>
+  <div className={bottomSep} />
+  <div className="flex gap-2">
+    <Button variant="outline" className="flex-1">Secondary</Button>
+    <Button className="flex-1">Primary</Button>
+  </div>
+</div>
+
+// ❌ Wrong — vertical stacking
+<div className="flex flex-col gap-2">
+  <Button className="w-full">Primary</Button>
+  <Button variant="outline" className="w-full">Secondary</Button>
+</div>
+```
+
+**Button order (L→R):** secondary (outline) → primary. Rightmost = primary action.
+**Sizing:** Each button gets `flex-1` (not `w-full`).
+**Single button:** Use `className="w-full"` (no flex container needed).
+
+---
+
+## State Screen Patterns (Empty / Error / Not Found)
+
+All full-page state screens (empty, not-found, error, completion) MUST be vertically + horizontally centered using the `emptyState` constant.
+
+### Full-page state (replaces scroll area)
+
+```tsx
+// ✅ Correct — uses emptyState constant for centering
+import { emptyState, emptyIcon } from '@/lib/styles';
+
+<div className={emptyState}>
+  <BookOpen className={emptyIcon} />
+  {t.words.noWords}
+</div>
+
+// ❌ Wrong — py-8 text-center is NOT vertically centered
+<div className="py-8 text-center text-muted-foreground">
+  {t.words.wordNotFound}
+</div>
+```
+
+### "No results" inside a scroll container
+
+When the empty state is rendered **inside** an existing scroll area (e.g., search returns 0 results but the parent scroll container must persist), use `min-h-full` centering:
+
+```tsx
+<div ref={parentRef} className="min-h-0 flex-1 overflow-y-auto">
+  {filteredWords.length === 0 ? (
+    // ✅ Centered within scroll area
+    <div className="flex min-h-full items-center justify-center text-center text-muted-foreground">
+      {t.words.noWords}
+    </div>
+  ) : (
+    // ... virtual list ...
+  )}
+</div>
+```
+
+### Completion screen (e.g., scan complete)
+
+Completion screens use `scrollArea` + internal centering:
+
+```tsx
+<div className={scrollArea}>
+  <div className="animate-page flex flex-1 flex-col items-center justify-center gap-6">
+    <CheckIcon className="size-16 text-green-500" />
+    <div className="text-center">...</div>
+  </div>
+</div>
+```
+
+---
+
+## Style Constant Enforcement
+
+**NEVER write raw Tailwind strings when a style constant exists.** Common violations:
+
+| Raw Tailwind (wrong) | Style Constant (correct) |
+|-----------------------|--------------------------|
+| `"flex min-h-0 flex-1 flex-col"` | `pageWrapper` |
+| `"flex-1 overflow-y-auto"` | `scrollArea` |
+| `"shrink-0 bg-background px-4 pb-3"` | `bottomBar` |
+| `"mb-3 h-px bg-border"` | `bottomSep` |
+| `"animate-page flex-1 space-y-2 overflow-y-auto px-4 pt-2"` | `skeletonWordList` |
+| `"animate-page flex-1 space-y-2 overflow-y-auto p-4"` | `skeletonCardList` |
+| `"py-8 text-center text-muted-foreground"` (for state screens) | `emptyState` |
+
+**Use `cn()` when adding modifiers:**
+```tsx
+<div className={cn(scrollArea, 'min-h-0 p-4')}>
+```
+
 ---
 
 ## Page Component Order

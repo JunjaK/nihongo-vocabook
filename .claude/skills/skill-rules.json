@@ -1,0 +1,135 @@
+{
+  "version": "1.0",
+  "description": "Skill activation triggers for Nihongo VocaBook",
+  "skills": {
+    "page-patterns": {
+      "type": "domain",
+      "enforcement": "suggest",
+      "priority": "high",
+      "description": "Page development patterns, list layouts, loading states, search bars, bottom buttons, style constants",
+      "promptTriggers": {
+        "keywords": [
+          "page", "list", "layout", "loading", "search",
+          "bottom button", "scroll", "skeleton", "empty state",
+          "style constant", "pageWrapper", "scrollArea", "bottomBar"
+        ],
+        "intentPatterns": [
+          "(create|add|build|modify|edit|update).*?(page|list|layout|form)",
+          "(how to|best practice).*?(page|loading|search|scroll)",
+          "(style|class|pattern).*?(page|list|bottom|toolbar)"
+        ]
+      },
+      "fileTriggers": {
+        "pathPatterns": [
+          "src/app/(app)/**/*.tsx",
+          "src/lib/styles.ts"
+        ],
+        "pathExclusions": ["**/*.test.ts", "**/*.spec.ts"]
+      }
+    },
+    "ui-conventions": {
+      "type": "domain",
+      "enforcement": "suggest",
+      "priority": "high",
+      "description": "Header actions, buttons, icons, animations, i18n, toast notifications",
+      "promptTriggers": {
+        "keywords": [
+          "header", "button", "icon", "animation", "toast",
+          "i18n", "translation", "badge", "dialog", "modal",
+          "card", "stagger", "animate", "sonner"
+        ],
+        "intentPatterns": [
+          "(create|add|build|modify|edit|update).*?(header|button|icon|animation|dialog|modal)",
+          "(how to|best practice).*?(icon|button|toast|animation|i18n)",
+          "(style|design).*?(header|button|card|badge)"
+        ]
+      },
+      "fileTriggers": {
+        "pathPatterns": [
+          "src/components/ui/**/*.tsx",
+          "src/components/layout/**/*.tsx"
+        ]
+      }
+    },
+    "data-layer": {
+      "type": "domain",
+      "enforcement": "suggest",
+      "priority": "high",
+      "description": "Repository pattern, Supabase/IndexedDB, database migrations",
+      "promptTriggers": {
+        "keywords": [
+          "repository", "supabase", "indexeddb", "dexie",
+          "migration", "database", "db", "table",
+          "useRepository", "DataRepository"
+        ],
+        "intentPatterns": [
+          "(create|add|modify|update).*?(repository|migration|table|database)",
+          "(how to|setup).*?(supabase|indexeddb|dexie|migration)",
+          "(query|fetch|save|delete).*?(data|record|word|wordbook)"
+        ]
+      },
+      "fileTriggers": {
+        "pathPatterns": [
+          "src/lib/repository/**/*.ts",
+          "src/lib/db/**/*.ts",
+          "src/lib/supabase/**/*.ts",
+          "supabase/migrations/**/*.sql"
+        ]
+      }
+    },
+    "quiz-maintainer": {
+      "type": "domain",
+      "enforcement": "suggest",
+      "priority": "high",
+      "description": "Quiz UI, practice mode, SRS (FSRS), flashcards, badge counts, session behavior",
+      "promptTriggers": {
+        "keywords": [
+          "quiz", "practice", "flashcard", "SRS", "FSRS",
+          "spaced repetition", "badge", "mastered", "priority",
+          "session", "review", "due count"
+        ],
+        "intentPatterns": [
+          "(create|modify|fix|update).*?(quiz|practice|flashcard|session)",
+          "(how to|best practice).*?(quiz|SRS|practice|review)",
+          "(badge|count|due).*?(quiz|review|mastered)"
+        ]
+      },
+      "fileTriggers": {
+        "pathPatterns": [
+          "src/app/(app)/quiz/**/*.tsx",
+          "src/components/quiz/**/*.tsx",
+          "src/lib/quiz/**/*.ts",
+          "src/lib/spaced-repetition.ts"
+        ]
+      }
+    },
+    "testing": {
+      "type": "domain",
+      "enforcement": "suggest",
+      "priority": "high",
+      "description": "Unit tests (Vitest), E2E tests (Playwright), mocking, test IDs",
+      "promptTriggers": {
+        "keywords": [
+          "test", "testing", "vitest", "playwright",
+          "E2E", "e2e", "unit test", "mock",
+          "spec", "fixture", "testid"
+        ],
+        "intentPatterns": [
+          "(write|create|add|run|fix).*?test",
+          "(how to|setup).*?(test|mock|playwright|vitest)",
+          "(E2E|e2e|end.to.end).*?(test|setup|write)"
+        ]
+      },
+      "fileTriggers": {
+        "pathPatterns": [
+          "e2e/**/*.ts",
+          "**/*.test.ts",
+          "**/*.test.tsx",
+          "**/*.spec.ts",
+          "playwright.config.ts",
+          "vitest.config.ts"
+        ]
+      }
+    }
+  }
+}

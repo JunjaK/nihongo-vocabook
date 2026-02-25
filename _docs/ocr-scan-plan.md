@@ -193,7 +193,7 @@ For each selected word, one at a time:
 
 **New file: `src/components/scan/scan-complete.tsx`**
 
-- Success icon (lucide `CheckCircle`)
+- Success icon (`CheckCircle` from `@/components/ui/icons`, Tabler-backed)
 - Summary: "N words added"
 - "Add more" button → reset wizard to capture step
 - "Go to word list" button → navigate to `/words`

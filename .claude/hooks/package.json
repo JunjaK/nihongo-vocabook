@@ -1,0 +1,8 @@
+{
+  "name": "claude-hooks",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "tsx": "^4.19.0"
+  }
+}

@@ -34,12 +34,48 @@ Header actions MUST be icon-only buttons (`variant="ghost" size="icon-sm"` + `ar
 | Toolbar | Icon-only + tooltip |
 | List row | Ghost/outline |
 | Modal footer | Cancel > Confirm |
+| Bottom bar (multi) | `flex gap-2` with `flex-1` each — **always horizontal, never vertical** |
+| Bottom bar (single) | `w-full` |
+
+---
+
+## Checkbox / Toggle Row Pattern
+
+Selectable list rows (e.g., word preview) MUST use `<div>` with ARIA attributes. Never use bare `<label>` without an associated `<input>`.
+
+```tsx
+<div
+  role="checkbox"
+  aria-checked={isChecked}
+  tabIndex={0}
+  className={`flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-colors ${
+    isChecked ? 'border-primary/20 bg-primary/[0.03]' : 'border-transparent opacity-60'
+  }`}
+  onClick={() => toggle(i)}
+  onKeyDown={(e) => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); toggle(i); } }}
+>
+  {/* Checkbox indicator — rounded-lg (~8px) */}
+  <div className={`flex size-5 shrink-0 items-center justify-center rounded-lg border transition-colors ${
+    isChecked ? 'border-primary bg-primary text-primary-foreground' : 'border-muted-foreground/30'
+  }`}>
+    {isChecked && <Check className="size-3.5" strokeWidth={3} />}
+  </div>
+  {/* Content */}
+  <div className="min-w-0 flex-1">...</div>
+</div>
+```
+
+**Rules:**
+- Whole row is clickable (not just the checkbox indicator)
+- Keyboard accessible: Space and Enter toggle
+- Checkbox border radius: `rounded-lg` (~8px)
+- Use `role="checkbox"` + `aria-checked` for screen readers
 
 ---
 
 ## Icons
 
-Use **Lucide React** (`lucide-react`) for all icons.
+Use project icon exports from `@/components/ui/icons` (Tabler-based compatibility layer) for all icons.
 
 ---
 
@@ -58,7 +94,7 @@ Use **Lucide React** (`lucide-react`) for all icons.
 ))}
 ```
 
-**Available animation classes:** `animate-fade-in`, `animate-slide-up`, `animate-stagger`, `animate-page`
+**Available animation classes:** `animate-fade-in`, `animate-slide-up`, `animate-slide-down-fade`, `animate-stagger`, `animate-page`, `animate-scale-in`
 
 ---
 
