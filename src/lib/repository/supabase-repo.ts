@@ -808,7 +808,7 @@ class SupabaseStudyRepository implements StudyRepository {
 
     // Track daily stats
     const today = getLocalDateString();
-    await this.incrementDailyStats(today, wasNew, quality === 0);
+    await this.incrementDailyStats(today, wasNew, quality);
 
     // Upgrade priority to high when rated "Again" — now in user_word_state
     if (quality === 0) {
@@ -885,16 +885,21 @@ class SupabaseStudyRepository implements StudyRepository {
         againCount: data.again_count,
         reviewAgainCount: data.review_again_count ?? 0,
         newAgainCount: data.new_again_count ?? 0,
+        hardCount: data.hard_count ?? 0,
+        goodCount: data.good_count ?? 0,
+        easyCount: data.easy_count ?? 0,
+        masteredInSessionCount: data.mastered_in_session_count ?? 0,
         practiceCount: data.practice_count ?? 0,
         practiceKnownCount: data.practice_known_count ?? 0,
       };
     });
   }
 
-  async incrementDailyStats(date: string, isNew: boolean, isAgain: boolean): Promise<void> {
+  async incrementDailyStats(date: string, isNew: boolean, quality: number): Promise<void> {
     const { data: userData } = await this.supabase.auth.getUser();
     const userId = userData.user!.id;
 
+    const isAgain = quality === 0;
     const existing = await this.getDailyStats(date);
     if (existing) {
       const { error } = await this.supabase
@@ -905,6 +910,9 @@ class SupabaseStudyRepository implements StudyRepository {
           again_count: existing.againCount + (isAgain ? 1 : 0),
           review_again_count: existing.reviewAgainCount + (!isNew && isAgain ? 1 : 0),
           new_again_count: existing.newAgainCount + (isNew && isAgain ? 1 : 0),
+          hard_count: existing.hardCount + (quality === 1 ? 1 : 0),
+          good_count: existing.goodCount + (quality === 2 ? 1 : 0),
+          easy_count: existing.easyCount + (quality === 3 ? 1 : 0),
         })
         .eq('id', existing.id);
       if (error) throw error;
@@ -919,6 +927,35 @@ class SupabaseStudyRepository implements StudyRepository {
           again_count: isAgain ? 1 : 0,
           review_again_count: !isNew && isAgain ? 1 : 0,
           new_again_count: isNew && isAgain ? 1 : 0,
+          hard_count: quality === 1 ? 1 : 0,
+          good_count: quality === 2 ? 1 : 0,
+          easy_count: quality === 3 ? 1 : 0,
+        });
+      if (error) throw error;
+    }
+    this._cache.delete(`daily_stats:${date}`);
+  }
+
+  async incrementMasteredStats(date: string): Promise<void> {
+    const { data: userData } = await this.supabase.auth.getUser();
+    const userId = userData.user!.id;
+
+    const existing = await this.getDailyStats(date);
+    if (existing) {
+      const { error } = await this.supabase
+        .from('daily_stats')
+        .update({
+          mastered_in_session_count: existing.masteredInSessionCount + 1,
+        })
+        .eq('id', existing.id);
+      if (error) throw error;
+    } else {
+      const { error } = await this.supabase
+        .from('daily_stats')
+        .insert({
+          user_id: userId,
+          stat_date: date,
+          mastered_in_session_count: 1,
         });
       if (error) throw error;
     }
@@ -999,6 +1036,56 @@ class SupabaseStudyRepository implements StudyRepository {
     }
 
     return streak;
+  }
+
+  async getDailyStatsRange(startDate: string, endDate: string): Promise<DailyStats[]> {
+    const { data, error } = await this.supabase
+      .from('daily_stats')
+      .select('*')
+      .gte('stat_date', startDate)
+      .lte('stat_date', endDate)
+      .order('stat_date', { ascending: true });
+    if (error) throw error;
+    return (data ?? []).map((d: Record<string, unknown>) => ({
+      id: d.id as string,
+      date: d.stat_date as string,
+      newCount: (d.new_count as number) ?? 0,
+      reviewCount: (d.review_count as number) ?? 0,
+      againCount: (d.again_count as number) ?? 0,
+      reviewAgainCount: (d.review_again_count as number) ?? 0,
+      newAgainCount: (d.new_again_count as number) ?? 0,
+      hardCount: (d.hard_count as number) ?? 0,
+      goodCount: (d.good_count as number) ?? 0,
+      easyCount: (d.easy_count as number) ?? 0,
+      masteredInSessionCount: (d.mastered_in_session_count as number) ?? 0,
+      practiceCount: (d.practice_count as number) ?? 0,
+      practiceKnownCount: (d.practice_known_count as number) ?? 0,
+    }));
+  }
+
+  async getCardStateDistribution(): Promise<{ state: number; count: number }[]> {
+    const { data, error } = await this.supabase
+      .from('study_progress')
+      .select('card_state');
+    if (error) throw error;
+    const counts = new Map<number, number>();
+    for (const row of data ?? []) {
+      const state = (row as { card_state: number }).card_state ?? 0;
+      counts.set(state, (counts.get(state) ?? 0) + 1);
+    }
+    return Array.from(counts.entries()).map(([state, count]) => ({ state, count }));
+  }
+
+  async getTotalReviewedAllTime(): Promise<number> {
+    const { data, error } = await this.supabase
+      .from('daily_stats')
+      .select('review_count');
+    if (error) throw error;
+    let total = 0;
+    for (const row of data ?? []) {
+      total += (row as { review_count: number }).review_count ?? 0;
+    }
+    return total;
   }
 
   async getAchievements(): Promise<Achievement[]> {

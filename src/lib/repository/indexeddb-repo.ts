@@ -516,7 +516,7 @@ class IndexedDBStudyRepository implements StudyRepository {
 
     // Track daily stats
     const today = getLocalDateString();
-    await this.incrementDailyStats(today, wasNew, quality === 0);
+    await this.incrementDailyStats(today, wasNew, quality);
 
     // Upgrade priority to high when rated "Again" — now in userWordState
     if (quality === 0) {
@@ -566,12 +566,17 @@ class IndexedDBStudyRepository implements StudyRepository {
       againCount: stat.againCount,
       reviewAgainCount: stat.reviewAgainCount ?? 0,
       newAgainCount: stat.newAgainCount ?? 0,
+      hardCount: stat.hardCount ?? 0,
+      goodCount: stat.goodCount ?? 0,
+      easyCount: stat.easyCount ?? 0,
+      masteredInSessionCount: stat.masteredInSessionCount ?? 0,
       practiceCount: stat.practiceCount ?? 0,
       practiceKnownCount: stat.practiceKnownCount ?? 0,
     };
   }
 
-  async incrementDailyStats(date: string, isNew: boolean, isAgain: boolean): Promise<void> {
+  async incrementDailyStats(date: string, isNew: boolean, quality: number): Promise<void> {
+    const isAgain = quality === 0;
     const existing = await db.dailyStats.where('date').equals(date).first();
     if (existing) {
       await db.dailyStats.update(existing.id!, {
@@ -580,6 +585,9 @@ class IndexedDBStudyRepository implements StudyRepository {
         againCount: existing.againCount + (isAgain ? 1 : 0),
         reviewAgainCount: (existing.reviewAgainCount ?? 0) + (!isNew && isAgain ? 1 : 0),
         newAgainCount: (existing.newAgainCount ?? 0) + (isNew && isAgain ? 1 : 0),
+        hardCount: (existing.hardCount ?? 0) + (quality === 1 ? 1 : 0),
+        goodCount: (existing.goodCount ?? 0) + (quality === 2 ? 1 : 0),
+        easyCount: (existing.easyCount ?? 0) + (quality === 3 ? 1 : 0),
       });
     } else {
       await db.dailyStats.add({
@@ -589,6 +597,34 @@ class IndexedDBStudyRepository implements StudyRepository {
         againCount: isAgain ? 1 : 0,
         reviewAgainCount: !isNew && isAgain ? 1 : 0,
         newAgainCount: isNew && isAgain ? 1 : 0,
+        hardCount: quality === 1 ? 1 : 0,
+        goodCount: quality === 2 ? 1 : 0,
+        easyCount: quality === 3 ? 1 : 0,
+        masteredInSessionCount: 0,
+        practiceCount: 0,
+        practiceKnownCount: 0,
+      });
+    }
+  }
+
+  async incrementMasteredStats(date: string): Promise<void> {
+    const existing = await db.dailyStats.where('date').equals(date).first();
+    if (existing) {
+      await db.dailyStats.update(existing.id!, {
+        masteredInSessionCount: (existing.masteredInSessionCount ?? 0) + 1,
+      });
+    } else {
+      await db.dailyStats.add({
+        date,
+        newCount: 0,
+        reviewCount: 0,
+        againCount: 0,
+        reviewAgainCount: 0,
+        newAgainCount: 0,
+        hardCount: 0,
+        goodCount: 0,
+        easyCount: 0,
+        masteredInSessionCount: 1,
         practiceCount: 0,
         practiceKnownCount: 0,
       });
@@ -610,6 +646,10 @@ class IndexedDBStudyRepository implements StudyRepository {
         againCount: 0,
         reviewAgainCount: 0,
         newAgainCount: 0,
+        hardCount: 0,
+        goodCount: 0,
+        easyCount: 0,
+        masteredInSessionCount: 0,
         practiceCount: 1,
         practiceKnownCount: known ? 1 : 0,
       });
@@ -655,6 +695,48 @@ class IndexedDBStudyRepository implements StudyRepository {
     }
 
     return streak;
+  }
+
+  async getDailyStatsRange(startDate: string, endDate: string): Promise<DailyStats[]> {
+    const stats = await db.dailyStats
+      .where('date')
+      .between(startDate, endDate, true, true)
+      .toArray();
+    stats.sort((a, b) => a.date.localeCompare(b.date));
+    return stats.map((s) => ({
+      id: String(s.id!),
+      date: s.date,
+      newCount: s.newCount,
+      reviewCount: s.reviewCount,
+      againCount: s.againCount,
+      reviewAgainCount: s.reviewAgainCount ?? 0,
+      newAgainCount: s.newAgainCount ?? 0,
+      hardCount: s.hardCount ?? 0,
+      goodCount: s.goodCount ?? 0,
+      easyCount: s.easyCount ?? 0,
+      masteredInSessionCount: s.masteredInSessionCount ?? 0,
+      practiceCount: s.practiceCount ?? 0,
+      practiceKnownCount: s.practiceKnownCount ?? 0,
+    }));
+  }
+
+  async getCardStateDistribution(): Promise<{ state: number; count: number }[]> {
+    const allProgress = await db.studyProgress.toArray();
+    const counts = new Map<number, number>();
+    for (const p of allProgress) {
+      const state = p.cardState ?? 0;
+      counts.set(state, (counts.get(state) ?? 0) + 1);
+    }
+    return Array.from(counts.entries()).map(([state, count]) => ({ state, count }));
+  }
+
+  async getTotalReviewedAllTime(): Promise<number> {
+    const stats = await db.dailyStats.toArray();
+    let total = 0;
+    for (const s of stats) {
+      total += s.reviewCount;
+    }
+    return total;
   }
 
   async getAchievements(): Promise<Achievement[]> {

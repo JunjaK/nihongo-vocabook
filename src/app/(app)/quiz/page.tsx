@@ -1,10 +1,12 @@
 'use client';
 
 import { Suspense, useState, useEffect } from 'react';
+import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { BookOpenCheck, Flame } from 'lucide-react';
+import { BookOpenCheck, Flame, LogIn } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
 import { Header } from '@/components/layout/header';
 import { Flashcard } from '@/components/quiz/flashcard';
 import { SessionReport } from '@/components/quiz/session-report';
@@ -12,11 +14,15 @@ import { useRepository } from '@/lib/repository/provider';
 import { useAuthStore } from '@/stores/auth-store';
 import { useTranslation } from '@/lib/i18n';
 import { useLoader } from '@/hooks/use-loader';
+import { useWakeLock } from '@/hooks/use-wake-lock';
 import { markWordMastered } from '@/lib/actions/mark-mastered';
 import { isNewCard } from '@/lib/spaced-repetition';
 import { checkAndUnlockAchievements } from '@/lib/quiz/achievements';
+import { ACHIEVEMENT_DEFS } from '@/lib/quiz/achievement-defs';
 import { requestDueCountRefresh } from '@/lib/quiz/due-count-sync';
 import { shuffleArray } from '@/lib/quiz/word-scoring';
+import { computeWeightedAccuracy } from '@/types/quiz';
+import { bottomBar, bottomSep } from '@/lib/styles';
 import {
   readSession,
   writeSession,
@@ -29,6 +35,30 @@ import type { DataRepository } from '@/lib/repository/types';
 import type { WordWithProgress } from '@/types/word';
 import type { CardDirection } from '@/types/quiz';
 
+type SessionStats = {
+  totalReviewed: number;
+  newCards: number;
+  againCount: number;
+  reviewAgainCount: number;
+  newAgainCount: number;
+  hardCount: number;
+  goodCount: number;
+  easyCount: number;
+  masteredCount: number;
+};
+
+const EMPTY_STATS: SessionStats = {
+  totalReviewed: 0,
+  newCards: 0,
+  againCount: 0,
+  reviewAgainCount: 0,
+  newAgainCount: 0,
+  hardCount: 0,
+  goodCount: 0,
+  easyCount: 0,
+  masteredCount: 0,
+};
+
 /**
  * Try restoring a saved quiz session from localStorage.
  * Returns null if no session found or all words have been mastered.
@@ -40,7 +70,7 @@ async function tryRestoreSession(
   words: WordWithProgress[];
   index: number;
   completed: number;
-  stats: { totalReviewed: number; newCards: number; againCount: number; reviewAgainCount: number; newAgainCount: number };
+  stats: SessionStats;
 } | null> {
   const saved = readSession(mode);
   if (!saved) return null;
@@ -83,11 +113,14 @@ export default function QuizPage() {
 function QuizContent() {
   const router = useRouter();
   const repo = useRepository();
+  const user = useAuthStore((s) => s.user);
   const authLoading = useAuthStore((s) => s.loading);
   const { t } = useTranslation();
   const searchParams = useSearchParams();
   const quickStart = searchParams.get('quickStart') === '1';
   const quizMode: QuizMode = quickStart ? 'quickstart' : 'general';
+
+  useWakeLock(!authLoading && !!user);
 
   const [dueWords, setDueWords] = useState<WordWithProgress[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -96,13 +129,7 @@ function QuizContent() {
   const [showReport, setShowReport] = useState(false);
 
   const [cardDirection, setCardDirection] = useState<CardDirection>('term_first');
-  const [sessionStats, setSessionStats] = useState({
-    totalReviewed: 0,
-    newCards: 0,
-    againCount: 0,
-    reviewAgainCount: 0,
-    newAgainCount: 0,
-  });
+  const [sessionStats, setSessionStats] = useState<SessionStats>({ ...EMPTY_STATS });
 
   const [loading, reload] = useLoader(async () => {
     cleanupLegacyKeys();
@@ -140,15 +167,15 @@ function QuizContent() {
       setDueWords(withProgress);
       setCurrentIndex(0);
       setCompleted(0);
-      setSessionStats({ totalReviewed: 0, newCards: 0, againCount: 0, reviewAgainCount: 0, newAgainCount: 0 });
+      setSessionStats({ ...EMPTY_STATS });
     } else {
       const words = await repo.study.getDueWords(settings.sessionSize);
       setDueWords(shuffleArray([...words]));
       setCurrentIndex(0);
       setCompleted(0);
-      setSessionStats({ totalReviewed: 0, newCards: 0, againCount: 0, reviewAgainCount: 0, newAgainCount: 0 });
+      setSessionStats({ ...EMPTY_STATS });
     }
-  }, [repo, quickStart], { skip: authLoading });
+  }, [repo, quickStart], { skip: authLoading || !user });
 
   useEffect(() => {
     if (authLoading) return;
@@ -183,7 +210,7 @@ function QuizContent() {
       return;
     }
     writeSession({
-      version: 1,
+      version: 2,
       mode: quizMode,
       date: getLocalDateString(),
       updatedAt: Date.now(),
@@ -203,17 +230,20 @@ function QuizContent() {
       if (sessionStats.totalReviewed > 0 || completed > 0) {
         setShowReport(true);
         try {
-          const newAchievements = await checkAndUnlockAchievements(repo);
+          const weightedAccuracy = computeWeightedAccuracy({
+            ...sessionStats,
+            masteredInSessionCount: sessionStats.masteredCount,
+          });
+          const newAchievements = await checkAndUnlockAchievements(repo, {
+            weightedAccuracy,
+            totalReviewed: sessionStats.totalReviewed,
+          });
           for (const type of newAchievements) {
-            const achievementNames: Record<string, string> = {
-              first_quiz: t.achievements.firstQuiz,
-              words_100: t.achievements.words100,
-              words_500: t.achievements.words500,
-              words_1000: t.achievements.words1000,
-              streak_7: t.achievements.streak7,
-              streak_30: t.achievements.streak30,
-            };
-            toast.success(`${achievementNames[type] ?? type}`);
+            const def = ACHIEVEMENT_DEFS.find((d) => d.type === type);
+            const label = def
+              ? (t.achievements as unknown as Record<string, string>)[def.labelKey] ?? type
+              : type;
+            toast.success(label);
           }
         } catch {
           // Achievement check is non-critical
@@ -234,11 +264,15 @@ function QuizContent() {
 
       const isAgain = quality === 0;
       setSessionStats((prev) => ({
+        ...prev,
         totalReviewed: prev.totalReviewed + 1,
         newCards: prev.newCards + (wasNew ? 1 : 0),
         againCount: prev.againCount + (isAgain ? 1 : 0),
         reviewAgainCount: prev.reviewAgainCount + (!wasNew && isAgain ? 1 : 0),
         newAgainCount: prev.newAgainCount + (wasNew && isAgain ? 1 : 0),
+        hardCount: prev.hardCount + (quality === 1 ? 1 : 0),
+        goodCount: prev.goodCount + (quality === 2 ? 1 : 0),
+        easyCount: prev.easyCount + (quality === 3 ? 1 : 0),
       }));
       requestDueCountRefresh();
       setCompleted((c) => c + 1);
@@ -251,6 +285,13 @@ function QuizContent() {
   const handleMaster = async () => {
     const currentWord = dueWords[currentIndex];
     await markWordMastered(repo, currentWord.id);
+    setSessionStats((prev) => ({
+      ...prev,
+      masteredCount: prev.masteredCount + 1,
+    }));
+    const today = getLocalDateString();
+    await repo.study.incrementMasteredStats(today);
+
     const remaining = dueWords.filter((_, i) => i !== currentIndex);
     setCompleted((c) => c + 1);
 
@@ -277,7 +318,7 @@ function QuizContent() {
       return;
     }
     setShowReport(false);
-    setSessionStats({ totalReviewed: 0, newCards: 0, againCount: 0, reviewAgainCount: 0, newAgainCount: 0 });
+    setSessionStats({ ...EMPTY_STATS });
     await reload();
   };
 
@@ -286,6 +327,34 @@ function QuizContent() {
   };
 
   // --- Render ---
+
+  if (!authLoading && !user) {
+    return (
+      <>
+        <Header title={t.quiz.title} showBack />
+        <div className="flex flex-1 flex-col items-center justify-center px-6 text-center">
+          <LogIn className="animate-scale-in size-10 text-primary" />
+          <div className="animate-slide-up mt-4 text-lg font-semibold" style={{ animationDelay: '100ms' }}>
+            {t.quiz.loginRequired}
+          </div>
+          <div className="animate-slide-up mt-2 text-muted-foreground" style={{ animationDelay: '200ms' }}>
+            {t.quiz.loginRequiredDescription}
+          </div>
+        </div>
+        <div className={bottomBar}>
+          <div className={bottomSep} />
+          <div className="flex gap-2">
+            <Link href="/login" className="flex-1">
+              <Button className="w-full">{t.auth.signIn}</Button>
+            </Link>
+            <Link href="/signup" className="flex-1">
+              <Button variant="outline" className="w-full">{t.auth.signUp}</Button>
+            </Link>
+          </div>
+        </div>
+      </>
+    );
+  }
 
   const currentSrsWord = dueWords[currentIndex];
   const progressCount = !loading && dueWords.length > 0
@@ -298,11 +367,7 @@ function QuizContent() {
       <>
         <Header title={t.quiz.sessionComplete} />
         <SessionReport
-          totalReviewed={sessionStats.totalReviewed}
-          newCards={sessionStats.newCards}
-          againCount={sessionStats.againCount}
-          reviewAgainCount={sessionStats.reviewAgainCount}
-          newAgainCount={sessionStats.newAgainCount}
+          stats={sessionStats}
           streak={streak ?? 0}
           onContinue={handleContinueStudying}
           onHome={handleBackToHome}

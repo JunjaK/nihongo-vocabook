@@ -56,10 +56,14 @@ export interface StudyRepository {
   getQuizSettings(): Promise<QuizSettings>;
   updateQuizSettings(settings: Partial<QuizSettings>): Promise<void>;
   getDailyStats(date: string): Promise<DailyStats | null>;
-  incrementDailyStats(date: string, isNew: boolean, isAgain: boolean): Promise<void>;
+  incrementDailyStats(date: string, isNew: boolean, quality: number): Promise<void>;
+  incrementMasteredStats(date: string): Promise<void>;
   incrementPracticeStats(date: string, known: boolean): Promise<void>;
   checkAndMarkLeech(wordId: string): Promise<boolean>;
   getStreakDays(): Promise<number>;
+  getDailyStatsRange(startDate: string, endDate: string): Promise<DailyStats[]>;
+  getCardStateDistribution(): Promise<{ state: number; count: number }[]>;
+  getTotalReviewedAllTime(): Promise<number>;
   getAchievements(): Promise<Achievement[]>;
   unlockAchievement(type: string): Promise<Achievement | null>;
 }
