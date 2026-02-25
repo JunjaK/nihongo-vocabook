@@ -11,9 +11,12 @@ interface TranslateInput {
 export async function translateToKorean(
   entries: TranslateInput[],
 ): Promise<string[][]> {
-  const apiKey = process.env.NEXT_PRIVATE_OPENAI_API_KEY;
+  const apiKey =
+    process.env.NEXT_PRIVATE_OPENAI_API_KEY || process.env.OPENAI_API_KEY;
   if (!apiKey) {
-    throw new Error('NEXT_PRIVATE_OPENAI_API_KEY is not configured');
+    throw new Error(
+      'NEXT_PRIVATE_OPENAI_API_KEY or OPENAI_API_KEY is not configured',
+    );
   }
 
   const prompt = entries
