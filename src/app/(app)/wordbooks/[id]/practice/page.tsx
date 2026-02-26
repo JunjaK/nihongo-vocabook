@@ -1,7 +1,8 @@
 'use client';
 
-import { use, useState, useCallback, useEffect } from 'react';
+import { use, useState, useCallback, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 import { BookOpenCheck } from '@/components/ui/icons';
 import { Button } from '@/components/ui/button';
 import { Header } from '@/components/layout/header';
@@ -62,6 +63,8 @@ export default function PracticePage({
     };
   }, []);
 
+  const isProcessingRef = useRef(false);
+
   const advancePractice = useCallback(() => {
     setPracticeWords((words) => {
       setPracticeIndex((idx) => {
@@ -76,6 +79,8 @@ export default function PracticePage({
   }, []);
 
   const handleRecall = async (wId: string, known: boolean) => {
+    if (isProcessingRef.current) return;
+    isProcessingRef.current = true;
     try {
       if (!known) {
         await repo.words.setPriority(wId, 1);
@@ -92,18 +97,29 @@ export default function PracticePage({
       advancePractice();
     } catch (error) {
       console.error('Failed to record practice recall', error);
+    } finally {
+      isProcessingRef.current = false;
     }
   };
 
   const handleMaster = async (wId: string) => {
-    await markWordMastered(repo, wId);
-    setPracticeStats((prev) => ({ ...prev, masteredCount: prev.masteredCount + 1 }));
-    const remaining = practiceWords.filter((w) => w.id !== wId);
-    setPracticeWords(remaining);
-    if (remaining.length === 0) {
-      setPracticeComplete(true);
-    } else if (practiceIndex >= remaining.length) {
-      setPracticeIndex(0);
+    if (isProcessingRef.current) return;
+    isProcessingRef.current = true;
+    try {
+      await markWordMastered(repo, wId);
+      setPracticeStats((prev) => ({ ...prev, masteredCount: prev.masteredCount + 1 }));
+      const remaining = practiceWords.filter((w) => w.id !== wId);
+      setPracticeWords(remaining);
+      if (remaining.length === 0) {
+        setPracticeComplete(true);
+      } else if (practiceIndex >= remaining.length) {
+        setPracticeIndex(0);
+      }
+    } catch (error) {
+      console.error('Failed to mark word as mastered', error);
+      toast.error(t.common.error);
+    } finally {
+      isProcessingRef.current = false;
     }
   };
 

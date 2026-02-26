@@ -266,6 +266,10 @@ const ko: Translations = {
     termFirst: '단어 → 뜻',
     meaningFirst: '뜻 → 단어',
     randomDirection: '랜덤',
+    resetStudyData: '학습 데이터 초기화',
+    resetStudyDataDesc: '학습 진행도, 일별 통계, 업적을 모두 삭제합니다. 단어와 단어장은 유지됩니다.',
+    resetStudyDataConfirm: '이 작업은 되돌릴 수 없습니다. 정말 초기화하시겠습니까?',
+    resetStudyDataSuccess: '학습 데이터가 초기화되었습니다.',
   },
   wordbooks: {
     title: '단어장',

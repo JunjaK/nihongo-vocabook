@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useState, useEffect } from 'react';
+import { Suspense, useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { toast } from 'sonner';
@@ -231,6 +231,8 @@ function QuizContent() {
 
   // --- SRS handlers ---
 
+  const isProcessingRef = useRef(false);
+
   const endSession = async () => {
     setShowReport(true);
     try {
@@ -265,6 +267,8 @@ function QuizContent() {
   };
 
   const handleRate = async (quality: number) => {
+    if (isProcessingRef.current) return;
+    isProcessingRef.current = true;
     const currentWord = dueWords[currentIndex];
     const wasNew = isNewCard(currentWord.progress);
     try {
@@ -287,30 +291,40 @@ function QuizContent() {
       await advanceToNext();
     } catch (error) {
       console.error('Failed to record review', error);
+    } finally {
+      isProcessingRef.current = false;
     }
   };
 
   const handleMaster = async () => {
-    const currentWord = dueWords[currentIndex];
-    await markWordMastered(repo, currentWord.id);
-    setSessionStats((prev) => ({
-      ...prev,
-      masteredCount: prev.masteredCount + 1,
-    }));
-    const today = getLocalDateString();
-    await repo.study.incrementMasteredStats(today);
+    if (isProcessingRef.current) return;
+    isProcessingRef.current = true;
+    try {
+      const currentWord = dueWords[currentIndex];
+      await markWordMastered(repo, currentWord.id);
+      setSessionStats((prev) => ({
+        ...prev,
+        masteredCount: prev.masteredCount + 1,
+      }));
+      const today = getLocalDateString();
+      await repo.study.incrementMasteredStats(today);
 
-    const remaining = dueWords.filter((_, i) => i !== currentIndex);
-    setCompleted((c) => c + 1);
+      const remaining = dueWords.filter((_, i) => i !== currentIndex);
+      setCompleted((c) => c + 1);
 
-    if (remaining.length === 0 || currentIndex >= remaining.length) {
+      if (remaining.length === 0 || currentIndex >= remaining.length) {
+        setDueWords(remaining);
+        await endSession();
+        return;
+      }
+
       setDueWords(remaining);
-      await endSession();
-      return;
+    } catch (error) {
+      console.error('Failed to mark word as mastered', error);
+      toast.error(t.common.error);
+    } finally {
+      isProcessingRef.current = false;
     }
-
-    setDueWords(remaining);
-    setCurrentIndex(currentIndex);
   };
 
   const handleContinueStudying = async () => {

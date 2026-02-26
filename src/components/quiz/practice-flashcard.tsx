@@ -38,13 +38,14 @@ export function PracticeFlashcard({ word, onRecall, onMaster, progress, isLoadin
           </Button>
         </>
       )}
-      renderActions={({ word: w, onAdvance }) => (
+      renderActions={({ word: w, onAdvance, revealed }) => (
         <>
           <div className="flex gap-2" data-testid="practice-recall">
             <Button
               variant="outline"
               className="h-10 flex-1 rounded-lg border-rose-500/30 bg-rose-500/5 text-sm font-medium text-rose-300 hover:border-rose-400/40 hover:bg-rose-500/10"
               onClick={() => { onRecall(w.id, false); onAdvance(); }}
+              disabled={!revealed}
               data-testid="practice-recall-no"
             >
               {t.quiz.didntKnow}
@@ -53,6 +54,7 @@ export function PracticeFlashcard({ word, onRecall, onMaster, progress, isLoadin
               variant="outline"
               className="h-10 flex-1 rounded-lg border-emerald-500/30 bg-emerald-500/5 text-sm font-medium text-emerald-300 hover:border-emerald-400/40 hover:bg-emerald-500/10"
               onClick={() => { onRecall(w.id, true); onAdvance(); }}
+              disabled={!revealed}
               data-testid="practice-recall-yes"
             >
               {t.quiz.knewIt}
@@ -63,6 +65,7 @@ export function PracticeFlashcard({ word, onRecall, onMaster, progress, isLoadin
             size="sm"
             className="mt-2 w-full gap-1.5 text-xs"
             onClick={() => onMaster(w.id)}
+            disabled={!revealed}
             data-testid="practice-master"
           >
             <Crown className="size-3.5" />

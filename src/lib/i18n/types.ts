@@ -258,6 +258,10 @@ export interface Translations {
     termFirst: string;
     meaningFirst: string;
     randomDirection: string;
+    resetStudyData: string;
+    resetStudyDataDesc: string;
+    resetStudyDataConfirm: string;
+    resetStudyDataSuccess: string;
   };
   wordbooks: {
     title: string;

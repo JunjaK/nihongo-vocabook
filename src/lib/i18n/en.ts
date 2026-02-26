@@ -266,6 +266,10 @@ const en: Translations = {
     termFirst: 'Term → Meaning',
     meaningFirst: 'Meaning → Term',
     randomDirection: 'Random',
+    resetStudyData: 'Reset Study Data',
+    resetStudyDataDesc: 'Deletes all study progress, daily stats, and achievements. Words and wordbooks are kept.',
+    resetStudyDataConfirm: 'This cannot be undone. Are you sure?',
+    resetStudyDataSuccess: 'Study data has been reset.',
   },
   wordbooks: {
     title: 'Wordbooks',

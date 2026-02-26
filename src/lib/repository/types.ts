@@ -67,6 +67,7 @@ export interface StudyRepository {
   getTotalReviewedAllTime(): Promise<number>;
   getAchievements(): Promise<Achievement[]>;
   unlockAchievement(type: string): Promise<Achievement | null>;
+  resetStudyData(): Promise<void>;
 }
 
 export interface WordbookRepository {

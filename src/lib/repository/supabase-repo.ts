@@ -1130,6 +1130,17 @@ class SupabaseStudyRepository implements StudyRepository {
       unlockedAt: new Date(data.unlocked_at),
     };
   }
+
+  async resetStudyData(): Promise<void> {
+    const { data: userData } = await this.supabase.auth.getUser();
+    const userId = userData.user!.id;
+
+    await Promise.all([
+      this.supabase.from('study_progress').delete().eq('user_id', userId),
+      this.supabase.from('daily_stats').delete().eq('user_id', userId),
+      this.supabase.from('achievements').delete().eq('user_id', userId),
+    ]);
+  }
 }
 
 class SupabaseWordbookRepository implements WordbookRepository {

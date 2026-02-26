@@ -10,7 +10,7 @@ import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ChevronRight, ArrowRightLeft, ExternalLink, Trophy, SlidersHorizontal, BarChart3 } from '@/components/ui/icons';
+import { ChevronRight, ArrowRightLeft, ExternalLink, Trophy, SlidersHorizontal, BarChart3, Trash2, AlertTriangle } from '@/components/ui/icons';
 import { useAuthStore } from '@/stores/auth-store';
 import { useRepository } from '@/lib/repository/provider';
 import { createClient } from '@/lib/supabase/client';
@@ -22,6 +22,8 @@ import { useTranslation, type Locale } from '@/lib/i18n';
 import { useBottomNavLock } from '@/hooks/use-bottom-nav-lock';
 import { invalidateListCache } from '@/lib/list-cache';
 import { getLocalOcrMode } from '@/lib/ocr/settings';
+import { clearSession } from '@/lib/quiz/session-store';
+import { requestDueCountRefresh } from '@/lib/quiz/due-count-sync';
 import { fetchProfile } from '@/lib/profile/fetch';
 import {
   settingsScroll,
@@ -42,6 +44,8 @@ export default function SettingsPage() {
   const [importing, setImporting] = useState(false);
   const [migrateCount, setMigrateCount] = useState(0);
   const [showMigrateConfirm, setShowMigrateConfirm] = useState(false);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [resetting, setResetting] = useState(false);
   const [ocrModeLabel, setOcrModeLabel] = useState('');
   const [profileNickname, setProfileNickname] = useState<string | null>(null);
   const [profileLoading, setProfileLoading] = useState(true);
@@ -145,6 +149,22 @@ export default function SettingsPage() {
     const supabase = createClient();
     await supabase.auth.signOut();
     router.push('/');
+  };
+
+  const handleResetStudyData = async () => {
+    setShowResetConfirm(false);
+    setResetting(true);
+    try {
+      await repo.study.resetStudyData();
+      clearSession('general');
+      clearSession('quickstart');
+      requestDueCountRefresh();
+      toast.success(t.settings.resetStudyDataSuccess);
+    } catch {
+      toast.error(t.common.error);
+    } finally {
+      setResetting(false);
+    }
   };
 
   const languageOptions: { value: Locale; label: string }[] = [
@@ -299,6 +319,21 @@ export default function SettingsPage() {
                 </div>
                 <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
               </Link>
+              <div className="mt-1 space-y-1.5">
+                <div className="text-xs text-muted-foreground">
+                  {t.settings.resetStudyDataDesc}
+                </div>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => setShowResetConfirm(true)}
+                  disabled={resetting}
+                  data-testid="settings-reset-study-button"
+                >
+                  <Trash2 className="size-3.5" />
+                  {t.settings.resetStudyData}
+                </Button>
+              </div>
             </>
           ) : (
             <div className="text-sm text-muted-foreground">
@@ -427,6 +462,17 @@ export default function SettingsPage() {
         confirmLabel={t.settings.migrateLocalData}
         onConfirm={handleMigrateConfirm}
         onCancel={() => setShowMigrateConfirm(false)}
+      />
+
+      <ConfirmDialog
+        open={showResetConfirm}
+        icon={<AlertTriangle />}
+        title={t.settings.resetStudyData}
+        description={t.settings.resetStudyDataConfirm}
+        confirmLabel={t.settings.resetStudyData}
+        destructive
+        onConfirm={handleResetStudyData}
+        onCancel={() => setShowResetConfirm(false)}
       />
     </>
   );

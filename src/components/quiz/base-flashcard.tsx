@@ -12,7 +12,7 @@ interface BaseFlashcardProps {
   progress: { current: number; total: number };
   isLoading?: boolean;
   cardDirection?: CardDirection;
-  renderActions: (props: { word: Word; onAdvance: () => void }) => ReactNode;
+  renderActions: (props: { word: Word; onAdvance: () => void; revealed: boolean }) => ReactNode;
   renderLoadingActions: () => ReactNode;
   testId?: string;
 }
@@ -129,7 +129,7 @@ export function BaseFlashcard({
       {/* Actions */}
       <div className="shrink-0 px-4 pb-3 pt-3">
         <div className={bottomSep} />
-        {renderActions({ word, onAdvance: () => setRevealed(false) })}
+        {renderActions({ word, onAdvance: () => setRevealed(false), revealed })}
       </div>
     </div>
   );

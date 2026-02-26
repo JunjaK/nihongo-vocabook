@@ -777,6 +777,14 @@ class IndexedDBStudyRepository implements StudyRepository {
       unlockedAt: now,
     };
   }
+
+  async resetStudyData(): Promise<void> {
+    await Promise.all([
+      db.studyProgress.clear(),
+      db.dailyStats.clear(),
+      db.achievements.clear(),
+    ]);
+  }
 }
 
 class IndexedDBWordbookRepository implements WordbookRepository {
