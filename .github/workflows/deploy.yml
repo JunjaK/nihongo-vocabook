@@ -35,13 +35,13 @@ jobs:
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-        run: bun run build
+        run: cd apps/web && bun run build
 
       - name: Clean macOS metadata
-        run: find public -name 'Icon?' -delete 2>/dev/null || true
+        run: find apps/web/public -name 'Icon?' -delete 2>/dev/null || true
 
       - name: Package build
-        run: tar -cf build.tar .next/standalone .next/static public
+        run: tar -cf build.tar -C apps/web .next/standalone .next/static public
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
@@ -59,7 +59,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           sparse-checkout: |
-            Dockerfile
+            apps/web/Dockerfile
 
       - name: Download build artifact
         uses: actions/download-artifact@v4
@@ -70,7 +70,7 @@ jobs:
         run: tar -xf build.tar && rm build.tar
 
       - name: Build Docker image
-        run: DOCKER_BUILDKIT=1 docker build -t nihongo-vocabook .
+        run: DOCKER_BUILDKIT=1 docker build -t nihongo-vocabook -f apps/web/Dockerfile .
 
       - name: Deploy container
         run: |

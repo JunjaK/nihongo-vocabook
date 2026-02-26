@@ -4,6 +4,10 @@
   "workspaces": {
     "": {
       "name": "nihongo-vocabook",
+    },
+    "apps/web": {
+      "name": "web",
+      "version": "0.1.0",
       "dependencies": {
         "@base-ui/react": "^1.2.0",
         "@fontsource/noto-sans-kr": "^5.2.9",
@@ -1977,6 +1981,8 @@
     "wanakana": ["wanakana@5.3.1", "", {}, "sha512-OSDqupzTlzl2LGyqTdhcXcl6ezMiFhcUwLBP8YKaBIbMYW1wAwDvupw2T9G9oVaKT9RmaSpyTXjxddFPUcFFIw=="],
 
     "wasm-feature-detect": ["wasm-feature-detect@1.8.0", "", {}, "sha512-zksaLKM2fVlnB5jQQDqKXXwYHLQUVH9es+5TOOHwGOVJOCeRBCiPjwSg+3tN2AdTCzjgli4jijCH290kXb/zWQ=="],
+
+    "web": ["web@workspace:apps/web"],
 
     "web-streams-polyfill": ["web-streams-polyfill@3.3.3", "", {}, "sha512-d2JWLCivmZYTSIoge9MsgFCZrt571BikcWGYkjC1khllbTeDlGqZ2D8vD8E/lJa8WGWbb7Plm8/XJYV7IJHZZw=="],
 

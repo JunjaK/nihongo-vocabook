@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { CircleCheck } from 'lucide-react';
+import { CircleCheckIcon as CircleCheck } from '@/components/ui/icons';
 import { Button } from '@/components/ui/button';
 import { useTranslation } from '@/lib/i18n';
 import { bottomBar, bottomSep } from '@/lib/styles';

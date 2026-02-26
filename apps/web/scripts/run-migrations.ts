@@ -66,7 +66,7 @@ const migrations = [
 
 async function run() {
   for (const file of migrations) {
-    const path = join(__dirname, '..', 'supabase', 'migrations', file);
+    const path = join(__dirname, '..', '..', '..', 'supabase', 'migrations', file);
     const content = readFileSync(path, 'utf-8');
     console.log(`Running ${file}...`);
     try {

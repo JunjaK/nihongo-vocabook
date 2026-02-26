@@ -1,9 +1,6 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
 # dependencies
-/node_modules
 node_modules/
-/.pnp
+.pnp
 .pnp.*
 .yarn/*
 !.yarn/patches
@@ -11,15 +8,24 @@ node_modules/
 !.yarn/releases
 !.yarn/versions
 
-# testing
-/coverage
-
 # next.js
-/.next/
-/out/
+.next/
+out/
+
+# expo
+.expo/
+ios/
+android/
+*.jks
+*.keystore
 
 # production
-/build
+build/
+
+# testing
+coverage/
+playwright-report/
+test-results/
 
 # misc
 .DS_Store
@@ -32,7 +38,7 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
+# env files
 .env*
 
 # vercel
@@ -43,7 +49,9 @@ yarn-error.log*
 next-env.d.ts
 
 # serwist (generated service worker)
-public/sw.js
-public/sw.js.map
-public/serwist-worker-*
+**/public/sw.js
+**/public/sw.js.map
+**/public/serwist-worker-*
+
+# other
 .playwright-mcp

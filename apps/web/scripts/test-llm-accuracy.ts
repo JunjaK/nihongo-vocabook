@@ -47,7 +47,7 @@ type Provider = 'openai' | 'anthropic';
 // ---------------------------------------------------------------------------
 
 function loadEnv(): void {
-  const envPath = resolve(process.cwd(), '.env.local');
+  const envPath = resolve(__dirname, '..', '.env.local');
   if (!existsSync(envPath)) return;
   const content = readFileSync(envPath, 'utf-8');
   for (const line of content.split('\n')) {
@@ -305,7 +305,7 @@ async function callAnthropic(apiKey: string, imageBase64: string, locale: string
 // Test case definitions
 // ---------------------------------------------------------------------------
 
-const TEST_IMG_DIR = resolve(process.cwd(), '_docs/ocr/test-img');
+const TEST_IMG_DIR = resolve(__dirname, '../../../_docs/ocr/test-img');
 
 const TEST_CASES: TestCase[] = [
   {

@@ -467,7 +467,7 @@ function computeMetrics(matches: number, extracted: number, expected: number) {
 // ---------- Main ----------
 
 async function main() {
-  const testImgDir = resolve(__dirname, '../_docs/ocr/test-img');
+  const testImgDir = resolve(__dirname, '../../../_docs/ocr/test-img');
   const results: TestResult[] = [];
 
   console.log('=== OCR Accuracy Test ===\n');
