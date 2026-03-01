@@ -1,0 +1,28 @@
+{
+  "cli": {
+    "version": ">= 14.0.0"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_WEB_URL": "http://localhost:3000"
+      }
+    },
+    "preview": {
+      "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_WEB_URL": "https://nivoca.jun-devlog.win"
+      }
+    },
+    "production": {
+      "env": {
+        "EXPO_PUBLIC_WEB_URL": "https://nivoca.jun-devlog.win"
+      }
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}

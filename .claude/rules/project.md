@@ -44,10 +44,16 @@ Japanese vocabulary study PWA (Progressive Web App).
 
 ### Commands
 ```bash
-bun dev                     # Dev server
-bun run build               # Production build
-bun test                    # Unit tests (Vitest)
-bunx playwright test        # E2E tests
+# From repo root (workspace shortcuts)
+bun run dev                 # Dev server (web)
+bun run build               # Production build (web)
+bun run test                # Unit tests (web)
+bun run dev:mobile          # Expo dev server (mobile)
+
+# From apps/web/
+cd apps/web && bun run dev  # Dev server
+cd apps/web && bun test     # Unit tests (Vitest)
+cd apps/web && bunx playwright test  # E2E tests
 ```
 
 ## Provider Composition Order

@@ -1,0 +1,55 @@
+{
+  "expo": {
+    "name": "NiVoca",
+    "slug": "nivoca",
+    "version": "1.0.0",
+    "sdkVersion": "55.0.0",
+    "orientation": "portrait",
+    "newArchEnabled": true,
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#3eb8d4"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "win.jun-devlog.nivoca",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Used to scan Japanese text from images",
+        "NSPhotoLibraryUsageDescription": "Used to select images with Japanese text"
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#3eb8d4"
+      },
+      "package": "win.jundevlog.nivoca",
+      "permissions": ["CAMERA", "VIBRATE", "RECEIVE_BOOT_COMPLETED"]
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#3eb8d4"
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow NiVoca to access your camera to scan Japanese text."
+        }
+      ]
+    ],
+    "scheme": "nivoca",
+    "extra": {
+      "eas": {
+        "projectId": "YOUR_EAS_PROJECT_ID"
+      }
+    }
+  }
+}

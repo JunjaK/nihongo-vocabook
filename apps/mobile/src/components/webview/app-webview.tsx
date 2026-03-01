@@ -1,0 +1,129 @@
+import { useRef, useCallback, useEffect } from 'react';
+import { Platform, BackHandler } from 'react-native';
+import { WebView, type WebViewMessageEvent } from 'react-native-webview';
+import * as Notifications from 'expo-notifications';
+import * as Haptics from 'expo-haptics';
+import * as SecureStore from 'expo-secure-store';
+import type {
+  WebToNativeMessage,
+  NativeToWebMessage,
+} from '../../types/bridge';
+
+const WEB_URL =
+  process.env.EXPO_PUBLIC_WEB_URL ?? 'https://nivoca.jun-devlog.win';
+const BRIDGE_VERSION = 1;
+const AUTH_KEY = 'supabase_refresh_token';
+
+export function AppWebView() {
+  const webViewRef = useRef<WebView>(null);
+  const canGoBackRef = useRef(false);
+
+  // --- Android back button handling ---
+  useEffect(() => {
+    if (Platform.OS !== 'android') return;
+
+    const handler = BackHandler.addEventListener('hardwareBackPress', () => {
+      if (canGoBackRef.current) {
+        webViewRef.current?.goBack();
+        return true; // handled — stay in app
+      }
+      return false; // let system handle (exit app)
+    });
+
+    return () => handler.remove();
+  }, []);
+
+  // --- Send message TO web ---
+  const sendToWeb = useCallback((message: NativeToWebMessage) => {
+    const js = `window.dispatchEvent(new CustomEvent('nativeMessage', { detail: ${JSON.stringify(message)} })); true;`;
+    webViewRef.current?.injectJavaScript(js);
+  }, []);
+
+  // --- Handle message FROM web ---
+  const handleMessage = useCallback(
+    async (event: WebViewMessageEvent) => {
+      const message: WebToNativeMessage = JSON.parse(event.nativeEvent.data);
+
+      switch (message.type) {
+        case 'READY': {
+          // Send app info to web
+          sendToWeb({
+            type: 'APP_INFO',
+            version: '1.0.0',
+            platform: Platform.OS as 'ios' | 'android',
+            bridgeVersion: BRIDGE_VERSION,
+          });
+
+          // Restore auth session from SecureStore
+          const savedToken = await SecureStore.getItemAsync(AUTH_KEY);
+          if (savedToken) {
+            sendToWeb({ type: 'RESTORE_AUTH', refreshToken: savedToken });
+          }
+          break;
+        }
+
+        case 'AUTH_TOKEN':
+          // Web app sends refresh token after login — persist natively
+          await SecureStore.setItemAsync(AUTH_KEY, message.refreshToken);
+          break;
+
+        case 'REQUEST_PUSH_TOKEN': {
+          const { status } = await Notifications.requestPermissionsAsync();
+          if (status === 'granted') {
+            const token = await Notifications.getExpoPushTokenAsync();
+            sendToWeb({ type: 'PUSH_TOKEN', token: token.data });
+          } else {
+            sendToWeb({
+              type: 'PUSH_TOKEN_ERROR',
+              error: 'Permission denied',
+            });
+          }
+          break;
+        }
+
+        case 'HAPTIC_FEEDBACK': {
+          const style =
+            message.style === 'heavy'
+              ? Haptics.ImpactFeedbackStyle.Heavy
+              : message.style === 'medium'
+                ? Haptics.ImpactFeedbackStyle.Medium
+                : Haptics.ImpactFeedbackStyle.Light;
+          Haptics.impactAsync(style);
+          break;
+        }
+
+        // Future: CAMERA, SHARE, SET_BADGE_COUNT, OPEN_EXTERNAL_URL
+      }
+    },
+    [sendToWeb],
+  );
+
+  // --- Inject NiVocaBridge global before web content loads ---
+  const injectedJS = `
+    window.NiVocaBridge = {
+      postMessage: (msg) => window.ReactNativeWebView.postMessage(JSON.stringify(msg)),
+      isNative: true,
+      platform: '${Platform.OS}',
+      bridgeVersion: ${BRIDGE_VERSION},
+    };
+    true;
+  `;
+
+  return (
+    <WebView
+      ref={webViewRef}
+      source={{ uri: WEB_URL }}
+      onMessage={handleMessage}
+      onNavigationStateChange={(navState) => {
+        canGoBackRef.current = navState.canGoBack;
+      }}
+      injectedJavaScriptBeforeContentLoaded={injectedJS}
+      allowsBackForwardNavigationGestures
+      sharedCookiesEnabled
+      mediaPlaybackRequiresUserAction={false}
+      allowsInlineMediaPlayback
+      javaScriptEnabled
+      domStorageEnabled
+    />
+  );
+}

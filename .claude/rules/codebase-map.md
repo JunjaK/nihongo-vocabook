@@ -3,126 +3,151 @@
 Quick-reference file paths for the most frequently accessed areas.
 **Always check here first** before exploring the codebase.
 
-## Core Infrastructure
+## Monorepo Structure
+
+```
+nihongo-vocabook/
+├── apps/web/          # Next.js web app
+├── apps/mobile/       # Expo React Native app (WebView + native features)
+├── packages/          # Shared packages (future)
+├── supabase/          # Shared infra (migrations, seeds)
+└── _docs/             # Shared documentation
+```
+
+## Web App — Core Infrastructure
 
 | Purpose | Path |
 |---------|------|
-| App layout | `src/app/layout.tsx` |
-| Global CSS | `src/app/globals.css` |
-| Style constants | `src/lib/styles.ts` |
-| Auth store | `src/stores/auth-store.ts` |
-| Repository interface | `src/lib/repository/types.ts` |
-| Repository provider | `src/lib/repository/provider.tsx` |
-| Supabase repository | `src/lib/repository/supabase-repo.ts` |
-| IndexedDB repository | `src/lib/repository/indexeddb-repo.ts` |
-| Dexie schema | `src/lib/db/dexie.ts` |
-| Supabase client | `src/lib/supabase/client.ts` |
-| i18n types | `src/lib/i18n/types.ts` |
-| i18n translations (en) | `src/lib/i18n/en.ts` |
-| i18n translations (ko) | `src/lib/i18n/ko.ts` |
-| i18n provider | `src/lib/i18n/index.tsx` |
-| Spaced repetition (FSRS) | `src/lib/spaced-repetition.ts` |
-| OCR extraction | `src/lib/ocr/extract.ts` |
-| OCR Tesseract | `src/lib/ocr/tesseract.ts` |
-| Image processing | `src/lib/image/` |
-| AES crypto | `src/lib/crypto/` |
-| Scan store (Zustand) | `src/stores/scan-store.ts` |
-| Navigation lock store | `src/stores/navigation-lock-store.ts` |
-| PWA manifest | `src/app/manifest.ts` |
+| App layout | `apps/web/src/app/layout.tsx` |
+| Global CSS | `apps/web/src/app/globals.css` |
+| Style constants | `apps/web/src/lib/styles.ts` |
+| Auth store | `apps/web/src/stores/auth-store.ts` |
+| Repository interface | `apps/web/src/lib/repository/types.ts` |
+| Repository provider | `apps/web/src/lib/repository/provider.tsx` |
+| Supabase repository | `apps/web/src/lib/repository/supabase-repo.ts` |
+| IndexedDB repository | `apps/web/src/lib/repository/indexeddb-repo.ts` |
+| Dexie schema | `apps/web/src/lib/db/dexie.ts` |
+| Supabase client | `apps/web/src/lib/supabase/client.ts` |
+| i18n types | `apps/web/src/lib/i18n/types.ts` |
+| i18n translations (en) | `apps/web/src/lib/i18n/en.ts` |
+| i18n translations (ko) | `apps/web/src/lib/i18n/ko.ts` |
+| i18n provider | `apps/web/src/lib/i18n/index.tsx` |
+| Spaced repetition (FSRS) | `apps/web/src/lib/spaced-repetition.ts` |
+| OCR extraction | `apps/web/src/lib/ocr/extract.ts` |
+| OCR Tesseract | `apps/web/src/lib/ocr/tesseract.ts` |
+| Image processing | `apps/web/src/lib/image/` |
+| AES crypto | `apps/web/src/lib/crypto/` |
+| Scan store (Zustand) | `apps/web/src/stores/scan-store.ts` |
+| Navigation lock store | `apps/web/src/stores/navigation-lock-store.ts` |
+| PWA manifest | `apps/web/src/app/manifest.ts` |
+| Native bridge | `apps/web/src/lib/native-bridge.ts` |
 
-## Layout Components
+## Web App — Layout Components
 
 | Component | Path |
 |-----------|------|
-| MobileShell | `src/components/layout/mobile-shell.tsx` |
-| Header | `src/components/layout/header.tsx` |
-| BottomNav | `src/components/layout/bottom-nav.tsx` |
-| ListToolbar | `src/components/layout/list-toolbar.tsx` |
-| AuthProvider | `src/components/layout/consent-gate.tsx` |
-| SW Update Notifier | `src/components/layout/sw-update-notifier.tsx` |
+| MobileShell | `apps/web/src/components/layout/mobile-shell.tsx` |
+| Header | `apps/web/src/components/layout/header.tsx` |
+| BottomNav | `apps/web/src/components/layout/bottom-nav.tsx` |
+| ListToolbar | `apps/web/src/components/layout/list-toolbar.tsx` |
+| AuthProvider | `apps/web/src/components/layout/consent-gate.tsx` |
+| SW Update Notifier | `apps/web/src/components/layout/sw-update-notifier.tsx` |
 
-## Pages Overview
+## Web App — Pages Overview
 
 | Feature | Page Entry | Key Components |
 |---------|-----------|----------------|
-| Words list | `src/app/(app)/words/page.tsx` | SwipeableWordCard, WordSearch |
-| Word create | `src/app/(app)/words/create/page.tsx` | WordForm |
-| Word detail | `src/app/(app)/words/[id]/page.tsx` | — |
-| Word scan | `src/app/(app)/words/scan/page.tsx` | ImageCapture, WordPreview |
-| Wordbooks list | `src/app/(app)/wordbooks/page.tsx` | WordbookCard |
-| Wordbook detail | `src/app/(app)/wordbooks/[id]/page.tsx` | — |
-| Wordbook add words | `src/app/(app)/wordbooks/[id]/add-words/page.tsx` | WordSearch |
-| Wordbook practice | `src/app/(app)/wordbooks/[id]/practice/page.tsx` | PracticeFlashcard |
-| Browse wordbooks | `src/app/(app)/wordbooks/browse/page.tsx` | WordbookCard |
-| Quiz | `src/app/(app)/quiz/page.tsx` | Flashcard, SessionReport |
-| Mastered words | `src/app/(app)/mastered/page.tsx` | WordCard |
-| Settings | `src/app/(app)/settings/page.tsx` | — |
-| Quiz settings | `src/app/(app)/settings/quiz/page.tsx` | — |
-| Quiz stats | `src/app/(app)/settings/quiz-stats/page.tsx` | — |
-| Achievements | `src/app/(app)/settings/achievements/page.tsx` | — |
+| Words list | `apps/web/src/app/(app)/words/page.tsx` | SwipeableWordCard, WordSearch |
+| Word create | `apps/web/src/app/(app)/words/create/page.tsx` | WordForm |
+| Word detail | `apps/web/src/app/(app)/words/[id]/page.tsx` | — |
+| Word scan | `apps/web/src/app/(app)/words/scan/page.tsx` | ImageCapture, WordPreview |
+| Wordbooks list | `apps/web/src/app/(app)/wordbooks/page.tsx` | WordbookCard |
+| Wordbook detail | `apps/web/src/app/(app)/wordbooks/[id]/page.tsx` | — |
+| Wordbook add words | `apps/web/src/app/(app)/wordbooks/[id]/add-words/page.tsx` | WordSearch |
+| Wordbook practice | `apps/web/src/app/(app)/wordbooks/[id]/practice/page.tsx` | PracticeFlashcard |
+| Browse wordbooks | `apps/web/src/app/(app)/wordbooks/browse/page.tsx` | WordbookCard |
+| Quiz | `apps/web/src/app/(app)/quiz/page.tsx` | Flashcard, SessionReport |
+| Mastered words | `apps/web/src/app/(app)/mastered/page.tsx` | WordCard |
+| Settings | `apps/web/src/app/(app)/settings/page.tsx` | — |
+| Quiz settings | `apps/web/src/app/(app)/settings/quiz/page.tsx` | — |
+| Quiz stats | `apps/web/src/app/(app)/settings/quiz-stats/page.tsx` | — |
+| Achievements | `apps/web/src/app/(app)/settings/achievements/page.tsx` | — |
 
-## Domain Components
+## Web App — Domain Components
 
 | Component | Path |
 |-----------|------|
-| WordCard | `src/components/word/word-card.tsx` |
-| SwipeableWordCard | `src/components/word/swipeable-word-card.tsx` |
-| WordForm | `src/components/word/word-form.tsx` |
-| WordSearch | `src/components/word/word-search.tsx` |
-| WordbookCard | `src/components/wordbook/wordbook-card.tsx` |
-| WordbookForm | `src/components/wordbook/wordbook-form.tsx` |
-| ImportWordbookDialog | `src/components/wordbook/import-wordbook-dialog.tsx` |
-| Flashcard (SRS) | `src/components/quiz/flashcard.tsx` |
-| PracticeFlashcard | `src/components/quiz/practice-flashcard.tsx` |
-| SessionReport | `src/components/quiz/session-report.tsx` |
-| ImageCapture | `src/components/scan/image-capture.tsx` |
-| WordPreview | `src/components/scan/word-preview.tsx` |
-| WordConfirm | `src/components/scan/word-confirm.tsx` |
-| ScanComplete | `src/components/scan/scan-complete.tsx` |
+| WordCard | `apps/web/src/components/word/word-card.tsx` |
+| SwipeableWordCard | `apps/web/src/components/word/swipeable-word-card.tsx` |
+| WordForm | `apps/web/src/components/word/word-form.tsx` |
+| WordSearch | `apps/web/src/components/word/word-search.tsx` |
+| WordbookCard | `apps/web/src/components/wordbook/wordbook-card.tsx` |
+| WordbookForm | `apps/web/src/components/wordbook/wordbook-form.tsx` |
+| ImportWordbookDialog | `apps/web/src/components/wordbook/import-wordbook-dialog.tsx` |
+| Flashcard (SRS) | `apps/web/src/components/quiz/flashcard.tsx` |
+| PracticeFlashcard | `apps/web/src/components/quiz/practice-flashcard.tsx` |
+| SessionReport | `apps/web/src/components/quiz/session-report.tsx` |
+| ImageCapture | `apps/web/src/components/scan/image-capture.tsx` |
+| WordPreview | `apps/web/src/components/scan/word-preview.tsx` |
+| WordConfirm | `apps/web/src/components/scan/word-confirm.tsx` |
+| ScanComplete | `apps/web/src/components/scan/scan-complete.tsx` |
 
-## API Routes
+## Web App — API Routes
 
 | Route | Path |
 |-------|------|
-| Dictionary lookup | `src/app/api/dictionary/route.ts` |
-| OCR Vision | `src/app/api/ocr/vision/route.ts` |
+| Dictionary lookup | `apps/web/src/app/api/dictionary/route.ts` |
+| OCR Vision | `apps/web/src/app/api/ocr/vision/route.ts` |
 
 ## Types
 
 | Type | Path |
 |------|------|
-| Word, StudyProgress | `src/types/word.ts` |
-| Wordbook | `src/types/wordbook.ts` |
-| Quiz types | `src/types/quiz.ts` |
+| Word, StudyProgress | `apps/web/src/types/word.ts` |
+| Wordbook | `apps/web/src/types/wordbook.ts` |
+| Quiz types | `apps/web/src/types/quiz.ts` |
 
 ## Scan/OCR System
 
 | Purpose | Path |
 |---------|------|
-| Scan store (background extraction) | `src/stores/scan-store.ts` |
-| OCR extraction pipeline | `src/lib/ocr/extract.ts` |
-| Tesseract worker | `src/lib/ocr/tesseract.ts` |
-| LLM Vision OCR | `src/lib/ocr/llm-vision.ts` |
-| Image processing | `src/lib/image/` |
+| Scan store (background extraction) | `apps/web/src/stores/scan-store.ts` |
+| OCR extraction pipeline | `apps/web/src/lib/ocr/extract.ts` |
+| Tesseract worker | `apps/web/src/lib/ocr/tesseract.ts` |
+| LLM Vision OCR | `apps/web/src/lib/ocr/llm-vision.ts` |
+| Image processing | `apps/web/src/lib/image/` |
 
 ## Quiz/SRS System
 
 | Purpose | Path |
 |---------|------|
-| Quiz session store | `src/lib/quiz/session-store.ts` |
-| Achievement definitions | `src/lib/quiz/achievement-defs.ts` |
-| Achievement logic | `src/lib/quiz/achievements.ts` |
+| Quiz session store | `apps/web/src/lib/quiz/session-store.ts` |
+| Achievement definitions | `apps/web/src/lib/quiz/achievement-defs.ts` |
+| Achievement logic | `apps/web/src/lib/quiz/achievements.ts` |
+
+## Mobile App (Expo)
+
+| Purpose | Path |
+|---------|------|
+| App entry | `apps/mobile/index.ts` |
+| Root layout | `apps/mobile/src/app/_layout.tsx` |
+| WebView home | `apps/mobile/src/app/index.tsx` |
+| WebView component | `apps/mobile/src/components/webview/app-webview.tsx` |
+| Bridge types | `apps/mobile/src/types/bridge.ts` |
+| Expo config | `apps/mobile/app.json` |
+| EAS config | `apps/mobile/eas.json` |
+| Metro config | `apps/mobile/metro.config.js` |
 
 ## Database
 
 | Purpose | Path |
 |---------|------|
 | Supabase migrations | `supabase/migrations/` |
-| Dexie (IndexedDB) schema | `src/lib/db/dexie.ts` |
+| Dexie (IndexedDB) schema | `apps/web/src/lib/db/dexie.ts` |
 
 ## Tests
 
 | Type | Path |
 |------|------|
-| E2E tests | `e2e/` |
-| E2E fixtures | `e2e/fixtures/` |
+| E2E tests | `apps/web/e2e/` |
+| E2E fixtures | `apps/web/e2e/fixtures/` |

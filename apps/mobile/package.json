@@ -1,0 +1,33 @@
+{
+  "name": "mobile",
+  "version": "1.0.0",
+  "private": true,
+  "main": "index.ts",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
+    "prebuild": "expo prebuild",
+    "build:dev": "eas build --profile development",
+    "build:preview": "eas build --profile preview",
+    "build:prod": "eas build --profile production"
+  },
+  "dependencies": {
+    "expo": "~55.0.0",
+    "expo-router": "~5.0.0",
+    "expo-status-bar": "~2.2.0",
+    "expo-notifications": "~0.30.0",
+    "expo-camera": "~16.1.0",
+    "expo-haptics": "~14.0.0",
+    "expo-secure-store": "~14.0.0",
+    "react": "19.2.0",
+    "react-native": "~0.83.0",
+    "react-native-webview": "^13.12.0",
+    "react-native-safe-area-context": "~5.1.0",
+    "react-native-screens": "~4.5.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.0",
+    "typescript": "^5.9.0"
+  }
+}
