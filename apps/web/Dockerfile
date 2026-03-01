@@ -5,8 +5,8 @@ ENV NODE_ENV=production
 ENV TZ=Asia/Seoul
 
 COPY .next/standalone ./
-COPY .next/static ./.next/static
-COPY public ./public
+COPY .next/static ./apps/web/.next/static
+COPY public ./apps/web/public
 
 EXPOSE 3000
-CMD ["node", "server.js"]
+CMD ["node", "apps/web/server.js"]
