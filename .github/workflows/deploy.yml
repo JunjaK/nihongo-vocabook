@@ -22,13 +22,13 @@ jobs:
         with:
           path: |
             node_modules
+            apps/*/node_modules
             ~/.bun/install/cache
           key: gh-bun-${{ hashFiles('bun.lock') }}
           restore-keys: |
             gh-bun-
 
       - name: Install dependencies
-        if: steps.cache.outputs.cache-hit != 'true'
         run: bun install --frozen-lockfile
 
       - name: Build
