@@ -2,16 +2,16 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { toast } from 'sonner';
 import { Header } from '@/components/layout/header';
 import { WordForm } from '@/components/word/word-form';
+import { ScanComplete } from '@/components/scan/scan-complete';
 import { Button } from '@/components/ui/button';
 import { useRepository } from '@/lib/repository/provider';
 import { useTranslation } from '@/lib/i18n';
 import { invalidateListCache } from '@/lib/list-cache';
 import { bottomBar, bottomSep } from '@/lib/styles';
 import type { ExtractedWord } from '@/lib/ocr/llm-vision';
-import type { Word } from '@/types/word';
+import type { CreateWordInput } from '@/types/word';
 
 export default function CreateByImagePage() {
   const router = useRouter();
@@ -20,7 +20,10 @@ export default function CreateByImagePage() {
 
   const [words, setWords] = useState<ExtractedWord[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [addedCount, setAddedCount] = useState(0);
+  const [editedWords, setEditedWords] = useState<Map<number, CreateWordInput>>(new Map());
+  const [skippedIndices, setSkippedIndices] = useState<Set<number>>(new Set());
+  const [phase, setPhase] = useState<'editing' | 'complete'>('editing');
+  const [savedCount, setSavedCount] = useState(0);
   const formKey = useRef(0);
 
   useEffect(() => {
@@ -35,44 +38,109 @@ export default function CreateByImagePage() {
   const isLast = currentIndex >= words.length - 1;
   const currentWord = words[currentIndex];
 
-  const handleSubmit = useCallback(async (data: Parameters<typeof repo.words.create>[0]) => {
-    try {
-      await repo.words.create(data);
-      setAddedCount((c) => c + 1);
-    } catch (err) {
-      if (err instanceof Error && err.message === 'DUPLICATE_WORD') {
-        toast.error(t.words.duplicateWord);
-      } else {
-        throw err;
+  const batchSave = useCallback(async (
+    edited: Map<number, CreateWordInput>,
+    skipped: Set<number>,
+  ) => {
+    const wordsToSave = Array.from(edited.entries())
+      .filter(([index]) => !skipped.has(index))
+      .map(([, data]) => data);
+
+    let saved = 0;
+    for (const data of wordsToSave) {
+      try {
+        await repo.words.create(data);
+        saved++;
+      } catch (err) {
+        if (err instanceof Error && err.message === 'DUPLICATE_WORD') {
+          // Skip duplicates silently during batch save
+        } else {
+          throw err;
+        }
       }
     }
 
+    sessionStorage.removeItem('scan-edit-words');
+    invalidateListCache('words');
+    setSavedCount(saved);
+    setPhase('complete');
+  }, [repo]);
+
+  const handleSubmit = useCallback(async (data: CreateWordInput) => {
+    const nextEdited = new Map(editedWords);
+    nextEdited.set(currentIndex, data);
+    setEditedWords(nextEdited);
+
+    // Un-skip if user submits via Next
+    const nextSkipped = new Set(skippedIndices);
+    nextSkipped.delete(currentIndex);
+    setSkippedIndices(nextSkipped);
+
     if (isLast) {
-      sessionStorage.removeItem('scan-edit-words');
-      invalidateListCache('words');
-      toast.success(t.scan.wordsAdded(addedCount + 1));
-      router.push('/words');
+      await batchSave(nextEdited, nextSkipped);
     } else {
       setCurrentIndex((i) => i + 1);
       formKey.current += 1;
     }
-  }, [repo, isLast, addedCount, router, t]);
+  }, [editedWords, currentIndex, skippedIndices, isLast, batchSave]);
 
-  const handlePrevious = () => {
+  const handleSkip = useCallback(async () => {
+    const nextEdited = new Map(editedWords);
+    nextEdited.delete(currentIndex);
+    setEditedWords(nextEdited);
+
+    const nextSkipped = new Set(skippedIndices);
+    nextSkipped.add(currentIndex);
+    setSkippedIndices(nextSkipped);
+
+    if (isLast) {
+      await batchSave(nextEdited, nextSkipped);
+    } else {
+      setCurrentIndex((i) => i + 1);
+      formKey.current += 1;
+    }
+  }, [currentIndex, isLast, editedWords, skippedIndices, batchSave]);
+
+  const handlePrevious = useCallback(() => {
     if (currentIndex > 0) {
       setCurrentIndex((i) => i - 1);
       formKey.current += 1;
     }
+  }, [currentIndex]);
+
+  const handleAddMore = () => {
+    router.push('/words/scan');
   };
+
+  if (phase === 'complete') {
+    return (
+      <>
+        <Header title={t.scan.title} showBack />
+        <ScanComplete addedCount={savedCount} onAddMore={handleAddMore} />
+      </>
+    );
+  }
 
   if (!currentWord) return null;
 
-  const initialValues: Partial<Word> = {
-    term: currentWord.term,
-    reading: currentWord.reading,
-    meaning: currentWord.meaning,
-    jlptLevel: currentWord.jlptLevel,
-  };
+  const editedData = editedWords.get(currentIndex);
+  const initialValues = editedData
+    ? {
+        term: editedData.term,
+        reading: editedData.reading,
+        meaning: editedData.meaning,
+        notes: editedData.notes,
+        tags: editedData.tags,
+        jlptLevel: editedData.jlptLevel,
+      }
+    : {
+        term: currentWord.term,
+        reading: currentWord.reading,
+        meaning: currentWord.meaning,
+        jlptLevel: currentWord.jlptLevel,
+      };
+
+  const skippedCount = skippedIndices.size;
 
   return (
     <>
@@ -82,6 +150,9 @@ export default function CreateByImagePage() {
         actions={
           <span className="text-sm text-muted-foreground">
             {t.scan.editWordProgress(currentIndex + 1, words.length)}
+            {skippedCount > 0 && (
+              <span className="ml-1.5 text-xs">({t.scan.skippedCount(skippedCount)})</span>
+            )}
           </span>
         }
       />
@@ -103,6 +174,15 @@ export default function CreateByImagePage() {
                 data-testid="create-by-image-prev"
               >
                 {t.common.previous}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                className="flex-1"
+                onClick={handleSkip}
+                data-testid="create-by-image-skip"
+              >
+                {t.scan.skip}
               </Button>
               <Button
                 type="submit"

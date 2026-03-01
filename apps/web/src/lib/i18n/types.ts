@@ -372,6 +372,7 @@ export interface Translations {
     continueInBackground: string;
     alreadyAdded: string;
     alreadyRegistered: (n: number) => string;
+    skippedCount: (n: number) => string;
   };
   profile: {
     title: string;

@@ -380,6 +380,7 @@ const en: Translations = {
     alreadyRegistered: (n: number) => `${n} already registered`,
     editWordProgress: (current: number, total: number) => `${current} / ${total}`,
     apiKeyRequired: 'Please set your AI API key in Settings.',
+    skippedCount: (n: number) => `Skipped ${n}`,
   },
   profile: {
     title: 'Edit Profile',

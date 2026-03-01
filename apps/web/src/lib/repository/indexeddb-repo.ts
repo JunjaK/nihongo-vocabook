@@ -10,7 +10,7 @@ import {
 } from '@/lib/db/dexie';
 import { reviewCard, createInitialProgress, isNewCard } from '@/lib/spaced-repetition';
 import { getLocalDateString } from '@/lib/quiz/date-utils';
-import { selectDueWords } from '@/lib/quiz/word-scoring';
+import { selectDueWords, shuffleArray } from '@/lib/quiz/word-scoring';
 import type {
   Word,
   CreateWordInput,
@@ -474,6 +474,7 @@ class IndexedDBStudyRepository implements StudyRepository {
     }
 
     const remainingNew = Math.max(0, settings.newPerDay - (todayStats?.newCount ?? 0));
+    shuffleArray(newWords);
     const cappedNewWords = newWords.slice(0, remainingNew);
     const candidates = [...reviewWords, ...cappedNewWords];
 

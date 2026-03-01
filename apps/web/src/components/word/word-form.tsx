@@ -15,6 +15,7 @@ import {
   ComboboxList,
 } from '@/components/ui/combobox';
 import { WordSearch } from './word-search';
+import { RubyText } from '@/components/ui/ruby-text';
 import { useTranslation } from '@/lib/i18n';
 import type { CreateWordInput, Word } from '@/types/word';
 
@@ -209,6 +210,12 @@ export function WordForm({
             data-testid="word-form-reading"
           />
         </div>
+
+        {term && reading && (
+          <div className="rounded-md bg-muted/50 px-3 py-2 text-center text-xl">
+            <RubyText term={term} reading={reading} />
+          </div>
+        )}
 
         {englishRef && (
           <div className="rounded-md bg-muted p-3 text-sm">

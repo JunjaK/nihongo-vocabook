@@ -380,6 +380,7 @@ const ko: Translations = {
     alreadyRegistered: (n: number) => `${n}개 등록됨`,
     editWordProgress: (current: number, total: number) => `${current} / ${total}`,
     apiKeyRequired: '설정에서 AI API 키를 등록해주세요.',
+    skippedCount: (n: number) => `${n}개 건너뜀`,
   },
   profile: {
     title: '프로필 수정',

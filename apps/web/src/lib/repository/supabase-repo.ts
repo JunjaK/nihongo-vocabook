@@ -1,7 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { reviewCard, createInitialProgress, isNewCard } from '@/lib/spaced-repetition';
 import { getLocalDateString } from '@/lib/quiz/date-utils';
-import { selectDueWords } from '@/lib/quiz/word-scoring';
+import { selectDueWords, shuffleArray } from '@/lib/quiz/word-scoring';
 import type {
   Word,
   CreateWordInput,
@@ -711,13 +711,16 @@ class SupabaseStudyRepository implements StudyRepository {
     const { data: newWordsData, error: wordsError } = await newWordsQuery.limit(remainingNew * 3);
     if (wordsError) throw wordsError;
 
-    const newWords: WordWithProgress[] = (newWordsData ?? [])
+    const filteredNewRows = (newWordsData ?? [])
       .filter((row: Record<string, unknown>) => {
         const state = extractState(row);
         if (state?.mastered) return false;
         if (settings.priorityFilter !== null && (state?.priority ?? 2) !== settings.priorityFilter) return false;
         return true;
-      })
+      });
+    shuffleArray(filteredNewRows);
+
+    const newWords: WordWithProgress[] = filteredNewRows
       .slice(0, remainingNew)
       .map((row: Record<string, unknown>) => {
         const state = extractState(row);
