@@ -4,6 +4,7 @@ import { WebView, type WebViewMessageEvent } from 'react-native-webview';
 import * as Notifications from 'expo-notifications';
 import * as Haptics from 'expo-haptics';
 import * as SecureStore from 'expo-secure-store';
+import * as ImagePicker from 'expo-image-picker';
 import type {
   WebToNativeMessage,
   NativeToWebMessage,
@@ -92,7 +93,57 @@ export function AppWebView() {
           break;
         }
 
-        // Future: CAMERA, SHARE, SET_BADGE_COUNT, OPEN_EXTERNAL_URL
+        case 'REQUEST_CAMERA': {
+          const source = message.options?.source ?? 'camera';
+          const pickerOptions: ImagePicker.ImagePickerOptions = {
+            mediaTypes: ['images'],
+            quality: 0.85,
+            base64: true,
+            selectionLimit: source === 'gallery' ? 10 : 1,
+          };
+
+          const result =
+            source === 'camera'
+              ? await ImagePicker.launchCameraAsync(pickerOptions)
+              : await ImagePicker.launchImageLibraryAsync(pickerOptions);
+
+          if (result.canceled) {
+            sendToWeb({ type: 'CAMERA_CANCELLED' });
+          } else {
+            const images = result.assets
+              .filter((a) => a.base64)
+              .map((a) => `data:image/jpeg;base64,${a.base64}`);
+            sendToWeb({ type: 'CAMERA_RESULT', images });
+          }
+          break;
+        }
+
+        case 'SET_BADGE_COUNT':
+          await Notifications.setBadgeCountAsync(message.count);
+          break;
+
+        case 'SCHEDULE_NOTIFICATION':
+          // Cancel existing before scheduling new
+          await Notifications.cancelScheduledNotificationAsync('daily-quiz-reminder').catch(() => {});
+          await Notifications.scheduleNotificationAsync({
+            identifier: 'daily-quiz-reminder',
+            content: {
+              title: 'NiVoca',
+              body: 'Time to review your words! 📚',
+            },
+            trigger: {
+              type: Notifications.SchedulableTriggerInputTypes.DAILY,
+              hour: message.hour,
+              minute: message.minute,
+            },
+          });
+          break;
+
+        case 'CANCEL_NOTIFICATION':
+          await Notifications.cancelScheduledNotificationAsync('daily-quiz-reminder').catch(() => {});
+          break;
+
+        // Future: SHARE, OPEN_EXTERNAL_URL
       }
     },
     [sendToWeb],

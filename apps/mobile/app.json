@@ -17,7 +17,8 @@
       "bundleIdentifier": "win.jun-devlog.nivoca",
       "infoPlist": {
         "NSCameraUsageDescription": "Used to scan Japanese text from images",
-        "NSPhotoLibraryUsageDescription": "Used to select images with Japanese text"
+        "NSPhotoLibraryUsageDescription": "Used to select images with Japanese text",
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
@@ -27,9 +28,10 @@
       },
       "package": "win.jundevlog.nivoca",
       "permissions": [
-        "CAMERA",
-        "VIBRATE",
-        "RECEIVE_BOOT_COMPLETED"
+        "android.permission.CAMERA",
+        "android.permission.VIBRATE",
+        "android.permission.RECEIVE_BOOT_COMPLETED",
+        "android.permission.RECORD_AUDIO"
       ]
     },
     "plugins": [
@@ -47,13 +49,22 @@
           "cameraPermission": "Allow NiVoca to access your camera to scan Japanese text."
         }
       ],
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow NiVoca to select images with Japanese text.",
+          "cameraPermission": "Allow NiVoca to take photos of Japanese text."
+        }
+      ]
     ],
     "scheme": "nivoca",
     "extra": {
       "eas": {
-        "projectId": "YOUR_EAS_PROJECT_ID"
-      }
-    }
+        "projectId": "28699ba2-ed17-467c-beab-35a465c48813"
+      },
+      "router": {}
+    },
+    "owner": "junjakk"
   }
 }

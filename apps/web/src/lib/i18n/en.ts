@@ -270,6 +270,12 @@ const en: Translations = {
     resetStudyDataDesc: 'Deletes all study progress, daily stats, and achievements. Words and wordbooks are kept.',
     resetStudyDataConfirm: 'This cannot be undone. Are you sure?',
     resetStudyDataSuccess: 'Study data has been reset.',
+    notifications: 'Notifications',
+    notificationEnabled: 'Daily study reminder',
+    notificationEnabledDesc: 'Get reminded to review your words at a set time each day.',
+    notificationTime: 'Reminder time',
+    notificationHour: 'Hour',
+    notificationMinute: 'Minute',
   },
   wordbooks: {
     title: 'Wordbooks',

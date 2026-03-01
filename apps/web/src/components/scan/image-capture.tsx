@@ -1,12 +1,13 @@
 'use client';
 
-import { useRef, useState, useImperativeHandle, forwardRef } from 'react';
+import { useRef, useState, useEffect, useImperativeHandle, forwardRef } from 'react';
 import { ImagePlus, X } from '@/components/ui/icons';
 import { Button } from '@/components/ui/button';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { useTranslation } from '@/lib/i18n';
 import { bottomBar, bottomSep } from '@/lib/styles';
-import { normalizeImage } from '@/lib/image/normalize';
+import { normalizeImage, normalizeDataUrl } from '@/lib/image/normalize';
+import { isNativeApp, requestCamera, onNativeMessage } from '@/lib/native-bridge';
 
 interface ImageCaptureProps {
   onExtract: (imageDataUrls: string[]) => void;
@@ -35,9 +36,46 @@ export const ImageCapture = forwardRef<ImageCaptureHandle, ImageCaptureProps>(
     const [convertProgress, setConvertProgress] = useState({ current: 0, total: 0 });
     const convertCancelRef = useRef(false);
 
-    useImperativeHandle(ref, () => ({
-      openCamera: () => cameraRef.current?.click(),
-    }));
+    const openCamera = () => {
+      if (isNativeApp()) {
+        requestCamera('camera');
+      } else {
+        cameraRef.current?.click();
+      }
+    };
+
+    const openGallery = () => {
+      if (isNativeApp()) {
+        requestCamera('gallery');
+      } else {
+        galleryRef.current?.click();
+      }
+    };
+
+    useImperativeHandle(ref, () => ({ openCamera }));
+
+    // Listen for native camera results
+    useEffect(() => {
+      if (!isNativeApp()) return;
+
+      return onNativeMessage(async (msg) => {
+        if (msg.type !== 'CAMERA_RESULT') return;
+
+        setConverting(true);
+        setConvertProgress({ current: 0, total: msg.images.length });
+        try {
+          const results: ImageEntry[] = [];
+          for (let i = 0; i < msg.images.length; i++) {
+            const dataUrl = await normalizeDataUrl(msg.images[i]);
+            results.push({ key: `native-${Date.now()}-${i}`, dataUrl });
+            setConvertProgress({ current: i + 1, total: msg.images.length });
+          }
+          setImages((prev) => [...prev, ...results]);
+        } finally {
+          setConverting(false);
+        }
+      });
+    }, []);
 
     const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
       const files = e.target.files;
@@ -109,7 +147,7 @@ export const ImageCapture = forwardRef<ImageCaptureHandle, ImageCaptureProps>(
           {images.length === 0 && !converting ? (
             <button
               type="button"
-              onClick={() => galleryRef.current?.click()}
+              onClick={openGallery}
               className="flex flex-1 flex-col items-center justify-center gap-2 rounded-lg border border-dashed text-muted-foreground transition-colors hover:border-primary/50 hover:text-primary"
               data-testid="scan-choose-gallery"
             >
@@ -140,7 +178,7 @@ export const ImageCapture = forwardRef<ImageCaptureHandle, ImageCaptureProps>(
               ))}
               <button
                 type="button"
-                onClick={() => galleryRef.current?.click()}
+                onClick={openGallery}
                 disabled={converting}
                 className="flex h-40 flex-col items-center justify-center gap-1.5 rounded-lg border border-dashed text-muted-foreground transition-colors hover:border-primary/50 hover:text-primary disabled:opacity-50"
               >

@@ -262,6 +262,12 @@ export interface Translations {
     resetStudyDataDesc: string;
     resetStudyDataConfirm: string;
     resetStudyDataSuccess: string;
+    notifications: string;
+    notificationEnabled: string;
+    notificationEnabledDesc: string;
+    notificationTime: string;
+    notificationHour: string;
+    notificationMinute: string;
   };
   wordbooks: {
     title: string;

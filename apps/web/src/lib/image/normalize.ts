@@ -56,6 +56,19 @@ async function decodeHeic(file: File): Promise<ImageBitmap> {
 }
 
 /**
+ * Normalize a base64 data URL to a JPEG data URL with max 2048px dimension.
+ * Used for images received from native camera bridge.
+ */
+export function normalizeDataUrl(dataUrl: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(drawToJpeg(img));
+    img.onerror = () => reject(new Error('Failed to decode data URL'));
+    img.src = dataUrl;
+  });
+}
+
+/**
  * Normalize an image file to a JPEG data URL with max 2048px dimension.
  *
  * 1. Try native browser decoding (JPEG/PNG/WebP + HEIC on Safari)

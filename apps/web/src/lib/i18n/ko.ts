@@ -270,6 +270,12 @@ const ko: Translations = {
     resetStudyDataDesc: '학습 진행도, 일별 통계, 업적을 모두 삭제합니다. 단어와 단어장은 유지됩니다.',
     resetStudyDataConfirm: '이 작업은 되돌릴 수 없습니다. 정말 초기화하시겠습니까?',
     resetStudyDataSuccess: '학습 데이터가 초기화되었습니다.',
+    notifications: '알림',
+    notificationEnabled: '매일 학습 알림',
+    notificationEnabledDesc: '매일 정해진 시간에 복습할 단어가 있으면 알려드립니다.',
+    notificationTime: '알림 시간',
+    notificationHour: '시',
+    notificationMinute: '분',
   },
   wordbooks: {
     title: '단어장',

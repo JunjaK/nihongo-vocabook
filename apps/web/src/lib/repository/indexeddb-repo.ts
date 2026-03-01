@@ -557,6 +557,9 @@ class IndexedDBStudyRepository implements StudyRepository {
       cardDirection: (settings.cardDirection ?? 'term_first') as QuizSettings['cardDirection'],
       sessionSize: settings.sessionSize ?? 20,
       leechThreshold: settings.leechThreshold ?? 8,
+      notificationEnabled: settings.notificationEnabled ?? false,
+      notificationHour: settings.notificationHour ?? 9,
+      notificationMinute: settings.notificationMinute ?? 0,
     };
   }
 

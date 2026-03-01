@@ -9,6 +9,7 @@ import { useRepository } from '@/lib/repository/provider';
 import { useAuthStore } from '@/stores/auth-store';
 import { useNavigationLockStore } from '@/stores/navigation-lock-store';
 import { getDueCountRefreshEventName } from '@/lib/quiz/due-count-sync';
+import { setBadgeCount } from '@/lib/native-bridge';
 
 export function BottomNav() {
   const pathname = usePathname();
@@ -20,6 +21,7 @@ export function BottomNav() {
   const fetchCount = useCallback(() => {
     repo.study.getDueCount().then((count) => {
       setDueCount(count);
+      setBadgeCount(count);
       if ('setAppBadge' in navigator) {
         if (count > 0) {
           navigator.setAppBadge(count).catch(() => {});

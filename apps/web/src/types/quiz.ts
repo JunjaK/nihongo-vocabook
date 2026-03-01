@@ -8,6 +8,9 @@ export interface QuizSettings {
   cardDirection: CardDirection;
   sessionSize: number;
   leechThreshold: number;
+  notificationEnabled: boolean;
+  notificationHour: number;   // 0-23
+  notificationMinute: number; // 0-59
 }
 
 export interface DailyStats {
@@ -94,4 +97,7 @@ export const DEFAULT_QUIZ_SETTINGS: QuizSettings = {
   cardDirection: 'term_first',
   sessionSize: 20,
   leechThreshold: 8,
+  notificationEnabled: false,
+  notificationHour: 9,
+  notificationMinute: 0,
 };

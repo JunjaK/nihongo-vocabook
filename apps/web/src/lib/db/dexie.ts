@@ -64,6 +64,9 @@ export interface LocalQuizSettings {
   cardDirection: string;
   sessionSize: number;
   leechThreshold: number;
+  notificationEnabled: boolean;
+  notificationHour: number;
+  notificationMinute: number;
 }
 
 export interface LocalDailyStats {
@@ -252,6 +255,29 @@ class VocaBookDB extends Dexie {
             stats.goodCount = 0;
             stats.easyCount = 0;
             stats.masteredInSessionCount = 0;
+          }
+        });
+      });
+
+    this.version(7)
+      .stores({
+        words: '++id, term, reading, meaning, *tags, jlptLevel, createdAt',
+        userWordState: '++id, wordId, mastered',
+        studyProgress: '++id, wordId, nextReview',
+        wordbooks: '++id, name, createdAt',
+        wordbookItems: '++id, wordbookId, wordId, [wordbookId+wordId]',
+        quizSettings: '++id',
+        dailyStats: '++id, date',
+        achievements: '++id, type',
+        wordExamples: '++id, wordId',
+      })
+      .upgrade(async (tx) => {
+        // Add notification fields to quizSettings
+        await tx.table('quizSettings').toCollection().modify((settings) => {
+          if (settings.notificationEnabled === undefined) {
+            settings.notificationEnabled = false;
+            settings.notificationHour = 9;
+            settings.notificationMinute = 0;
           }
         });
       });

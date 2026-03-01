@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { toast } from 'sonner';
 import { Info } from '@/components/ui/icons';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
@@ -10,6 +10,7 @@ import { useRepository } from '@/lib/repository/provider';
 import { useTranslation } from '@/lib/i18n';
 import { useLoader } from '@/hooks/use-loader';
 import { bottomBar, bottomSep } from '@/lib/styles';
+import { isNativeApp, scheduleNotification, cancelNotification } from '@/lib/native-bridge';
 import type { QuizSettings } from '@/types/quiz';
 import { DEFAULT_QUIZ_SETTINGS } from '@/types/quiz';
 
@@ -17,22 +18,45 @@ const NEW_PER_DAY_OPTIONS = [5, 10, 15, 20, 30, 50];
 const MAX_REVIEWS_OPTIONS = [50, 100, 150, 200, 9999];
 const SESSION_SIZE_OPTIONS = [10, 15, 20, 30, 50];
 const LEECH_THRESHOLD_OPTIONS = [4, 6, 8, 10, 15];
+const NOTIFICATION_HOUR_OPTIONS = [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22];
+const NOTIFICATION_MINUTE_OPTIONS = [0, 15, 30, 45];
 
 export default function QuizSettingsPage() {
   const repo = useRepository();
   const { t } = useTranslation();
   const [settings, setSettings] = useState<QuizSettings>(DEFAULT_QUIZ_SETTINGS);
   const [saving, setSaving] = useState(false);
+  const initialSettingsRef = useRef<QuizSettings>(DEFAULT_QUIZ_SETTINGS);
 
   const [loading] = useLoader(async () => {
     const data = await repo.study.getQuizSettings();
     setSettings(data);
+    initialSettingsRef.current = data;
   }, [repo]);
 
   const handleSave = async () => {
     setSaving(true);
     try {
       await repo.study.updateQuizSettings(settings);
+
+      // Sync notification schedule with native app
+      if (isNativeApp()) {
+        const prev = initialSettingsRef.current;
+        const notifChanged =
+          settings.notificationEnabled !== prev.notificationEnabled ||
+          settings.notificationHour !== prev.notificationHour ||
+          settings.notificationMinute !== prev.notificationMinute;
+
+        if (notifChanged) {
+          if (settings.notificationEnabled) {
+            scheduleNotification(settings.notificationHour, settings.notificationMinute);
+          } else {
+            cancelNotification();
+          }
+        }
+      }
+
+      initialSettingsRef.current = settings;
       toast.success(t.profile.saved);
     } finally {
       setSaving(false);
@@ -200,6 +224,68 @@ export default function QuizSettingsPage() {
                 </Button>
               ))}
             </div>
+          </section>
+
+          {/* Notifications */}
+          <section className="space-y-2">
+            <h2 className="text-sm font-semibold">{t.settings.notifications}</h2>
+            <div
+              role="checkbox"
+              aria-checked={settings.notificationEnabled}
+              tabIndex={0}
+              className="flex cursor-pointer items-center justify-between rounded-lg border p-3"
+              onClick={() => setSettings((s) => ({ ...s, notificationEnabled: !s.notificationEnabled }))}
+              onKeyDown={(e) => {
+                if (e.key === ' ' || e.key === 'Enter') {
+                  e.preventDefault();
+                  setSettings((s) => ({ ...s, notificationEnabled: !s.notificationEnabled }));
+                }
+              }}
+            >
+              <div className="space-y-0.5">
+                <p className="text-sm font-medium">{t.settings.notificationEnabled}</p>
+                <p className="text-xs text-muted-foreground">{t.settings.notificationEnabledDesc}</p>
+              </div>
+              <div className={`relative h-5 w-9 rounded-full transition-colors ${settings.notificationEnabled ? 'bg-primary' : 'bg-muted'}`}>
+                <div className={`absolute top-0.5 size-4 rounded-full bg-white shadow transition-transform ${settings.notificationEnabled ? 'translate-x-4' : 'translate-x-0.5'}`} />
+              </div>
+            </div>
+            {settings.notificationEnabled && (
+              <div className="space-y-3 rounded-lg border p-3">
+                <p className="text-sm font-medium">{t.settings.notificationTime}</p>
+                <div className="space-y-2">
+                  <p className="text-xs text-muted-foreground">{t.settings.notificationHour}</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {NOTIFICATION_HOUR_OPTIONS.map((h) => (
+                      <Button
+                        key={h}
+                        variant={settings.notificationHour === h ? 'secondary' : 'outline'}
+                        size="sm"
+                        className="min-w-[2.5rem]"
+                        onClick={() => setSettings((s) => ({ ...s, notificationHour: h }))}
+                      >
+                        {h}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <p className="text-xs text-muted-foreground">{t.settings.notificationMinute}</p>
+                  <div className="flex flex-wrap gap-2">
+                    {NOTIFICATION_MINUTE_OPTIONS.map((m) => (
+                      <Button
+                        key={m}
+                        variant={settings.notificationMinute === m ? 'secondary' : 'outline'}
+                        size="sm"
+                        onClick={() => setSettings((s) => ({ ...s, notificationMinute: m }))}
+                      >
+                        {String(m).padStart(2, '0')}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
           </section>
 
           {/* Rating guide — informational block at bottom */}
