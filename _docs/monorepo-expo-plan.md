@@ -1,6 +1,6 @@
 # Monorepo Migration: bun workspaces + Expo Mobile App
 
-> Status: Planning
+> Status: Complete
 
 ## Context
 

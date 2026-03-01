@@ -5,7 +5,6 @@
     "version": "1.0.0",
     "sdkVersion": "55.0.0",
     "orientation": "portrait",
-    "newArchEnabled": true,
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
     "splash": {
@@ -27,7 +26,11 @@
         "backgroundColor": "#3eb8d4"
       },
       "package": "win.jundevlog.nivoca",
-      "permissions": ["CAMERA", "VIBRATE", "RECEIVE_BOOT_COMPLETED"]
+      "permissions": [
+        "CAMERA",
+        "VIBRATE",
+        "RECEIVE_BOOT_COMPLETED"
+      ]
     },
     "plugins": [
       "expo-router",
@@ -43,7 +46,8 @@
         {
           "cameraPermission": "Allow NiVoca to access your camera to scan Japanese text."
         }
-      ]
+      ],
+      "expo-secure-store"
     ],
     "scheme": "nivoca",
     "extra": {
