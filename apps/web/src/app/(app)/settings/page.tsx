@@ -8,8 +8,8 @@ import { toast } from 'sonner';
 import { Header } from '@/components/layout/header';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
+import { cn } from '@/lib/utils';
 import { ChevronRight, ArrowRightLeft, ExternalLink, Trophy, SlidersHorizontal, BarChart3, Trash2, AlertTriangle } from '@/components/ui/icons';
 import { useAuthStore } from '@/stores/auth-store';
 import { useRepository } from '@/lib/repository/provider';
@@ -30,6 +30,7 @@ import {
   settingsSection,
   settingsHeading,
   settingsNavLink,
+  settingsRow,
 } from '@/lib/styles';
 import type { ImportData } from '@/types/word';
 
@@ -235,27 +236,27 @@ export default function SettingsPage() {
           )}
         </section>
 
-        <Separator />
-
         {/* Language */}
         <section className={settingsSection}>
           <h2 className={settingsHeading}>{t.settings.language}</h2>
           <div className="flex gap-2">
             {languageOptions.map((opt) => (
-              <Button
+              <button
                 key={opt.value}
-                variant={locale === opt.value ? 'default' : 'outline'}
-                size="sm"
                 onClick={() => setLocale(opt.value)}
                 data-testid={`settings-lang-${opt.value}`}
+                className={cn(
+                  'h-9 rounded-lg px-4 text-[13px] transition-colors',
+                  locale === opt.value
+                    ? 'bg-primary font-semibold text-primary-foreground'
+                    : 'border border-border bg-background font-medium text-muted-foreground',
+                )}
               >
                 {opt.label}
-              </Button>
+              </button>
             ))}
           </div>
         </section>
-
-        <Separator />
 
         {/* Theme */}
         <section className={settingsSection}>
@@ -266,59 +267,63 @@ export default function SettingsPage() {
               { value: 'light', label: t.settings.themeLight },
               { value: 'dark', label: t.settings.themeDark },
             ] as const).map((opt) => (
-              <Button
+              <button
                 key={opt.value}
-                variant={theme === opt.value ? 'default' : 'outline'}
-                size="sm"
                 onClick={() => setTheme(opt.value)}
                 data-testid={`settings-theme-${opt.value}`}
+                className={cn(
+                  'h-9 rounded-lg px-4 text-[13px] transition-colors',
+                  theme === opt.value
+                    ? 'bg-primary font-semibold text-primary-foreground'
+                    : 'border border-border bg-background font-medium text-muted-foreground',
+                )}
               >
                 {opt.label}
-              </Button>
+              </button>
             ))}
           </div>
         </section>
-
-        <Separator />
 
         {/* Quiz & Achievements */}
         <section className={settingsSection}>
           <h2 className={settingsHeading}>{t.nav.quiz}</h2>
           {user ? (
             <>
-              <Link
-                href="/settings/quiz"
-                className={settingsNavLink}
-                data-testid="settings-quiz-link"
-              >
-                <div className="flex items-center gap-3">
-                  <SlidersHorizontal className="size-4 text-muted-foreground" />
-                  <span className="text-sm">{t.settings.quizSettings}</span>
-                </div>
-                <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
-              </Link>
-              <Link
-                href="/settings/quiz-stats"
-                className={settingsNavLink}
-                data-testid="settings-quiz-stats-link"
-              >
-                <div className="flex items-center gap-3">
-                  <BarChart3 className="size-4 text-muted-foreground" />
-                  <span className="text-sm">{t.settings.quizStats}</span>
-                </div>
-                <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
-              </Link>
-              <Link
-                href="/settings/achievements"
-                className={settingsNavLink}
-                data-testid="settings-achievements-link"
-              >
-                <div className="flex items-center gap-3">
-                  <Trophy className="size-4 text-muted-foreground" />
-                  <span className="text-sm">{t.settings.achievements}</span>
-                </div>
-                <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
-              </Link>
+              <div>
+                <Link
+                  href="/settings/quiz"
+                  className={settingsRow}
+                  data-testid="settings-quiz-link"
+                >
+                  <div className="flex items-center gap-3">
+                    <SlidersHorizontal className="size-[18px] text-muted-foreground" />
+                    <span className="text-[15px] font-medium">{t.settings.quizSettings}</span>
+                  </div>
+                  <ChevronRight className="size-4 shrink-0 text-text-tertiary" />
+                </Link>
+                <Link
+                  href="/settings/achievements"
+                  className={settingsRow}
+                  data-testid="settings-achievements-link"
+                >
+                  <div className="flex items-center gap-3">
+                    <Trophy className="size-[18px] text-muted-foreground" />
+                    <span className="text-[15px] font-medium">{t.settings.achievements}</span>
+                  </div>
+                  <ChevronRight className="size-4 shrink-0 text-text-tertiary" />
+                </Link>
+                <Link
+                  href="/settings/quiz-stats"
+                  className={settingsRow}
+                  data-testid="settings-quiz-stats-link"
+                >
+                  <div className="flex items-center gap-3">
+                    <BarChart3 className="size-[18px] text-muted-foreground" />
+                    <span className="text-[15px] font-medium">{t.settings.quizStats}</span>
+                  </div>
+                  <ChevronRight className="size-4 shrink-0 text-text-tertiary" />
+                </Link>
+              </div>
               <div className="mt-1 space-y-1.5">
                 <div className="text-xs text-muted-foreground">
                   {t.settings.resetStudyDataDesc}
@@ -342,8 +347,6 @@ export default function SettingsPage() {
           )}
         </section>
 
-        <Separator />
-
         {/* OCR / AI */}
         <section className={settingsSection}>
           <h2 className={settingsHeading}>
@@ -364,8 +367,6 @@ export default function SettingsPage() {
             </div>
           )}
         </section>
-
-        <Separator />
 
         {/* Data Migration */}
         <section className={settingsSection}>
@@ -405,8 +406,6 @@ export default function SettingsPage() {
             />
           </div>
         </section>
-
-        <Separator />
 
         {/* About */}
         <section className={settingsSection}>

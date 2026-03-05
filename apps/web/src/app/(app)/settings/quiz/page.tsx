@@ -91,8 +91,9 @@ export default function QuizSettingsPage() {
               {NEW_PER_DAY_OPTIONS.map((n) => (
                 <Button
                   key={n}
-                  variant={settings.newPerDay === n ? 'secondary' : 'outline'}
+                  variant={settings.newPerDay === n ? 'default' : 'secondary'}
                   size="sm"
+                  className="rounded-full text-[13px]"
                   onClick={() => setSettings((s) => ({ ...s, newPerDay: n }))}
                 >
                   {n}
@@ -108,8 +109,9 @@ export default function QuizSettingsPage() {
               {MAX_REVIEWS_OPTIONS.map((n) => (
                 <Button
                   key={n}
-                  variant={settings.maxReviewsPerDay === n ? 'secondary' : 'outline'}
+                  variant={settings.maxReviewsPerDay === n ? 'default' : 'secondary'}
                   size="sm"
+                  className="rounded-full text-[13px]"
                   onClick={() => setSettings((s) => ({ ...s, maxReviewsPerDay: n }))}
                 >
                   {n === 9999 ? '∞' : n}
@@ -123,8 +125,9 @@ export default function QuizSettingsPage() {
             <h2 className="text-[15px] font-semibold">{t.settings.jlptFilter}</h2>
             <div className="flex flex-wrap gap-2">
               <Button
-                variant={settings.jlptFilter === null ? 'secondary' : 'outline'}
+                variant={settings.jlptFilter === null ? 'default' : 'secondary'}
                 size="sm"
+                className="rounded-full text-[13px]"
                 onClick={() => setSettings((s) => ({ ...s, jlptFilter: null }))}
               >
                 {t.settings.allLevels}
@@ -132,8 +135,9 @@ export default function QuizSettingsPage() {
               {[5, 4, 3, 2, 1].map((n) => (
                 <Button
                   key={n}
-                  variant={settings.jlptFilter === n ? 'secondary' : 'outline'}
+                  variant={settings.jlptFilter === n ? 'default' : 'secondary'}
                   size="sm"
+                  className="rounded-full text-[13px]"
                   onClick={() => setSettings((s) => ({ ...s, jlptFilter: n }))}
                 >
                   N{n}
@@ -149,8 +153,9 @@ export default function QuizSettingsPage() {
               {SESSION_SIZE_OPTIONS.map((n) => (
                 <Button
                   key={n}
-                  variant={settings.sessionSize === n ? 'secondary' : 'outline'}
+                  variant={settings.sessionSize === n ? 'default' : 'secondary'}
                   size="sm"
+                  className="rounded-full text-[13px]"
                   onClick={() => setSettings((s) => ({ ...s, sessionSize: n }))}
                 >
                   {n}
@@ -167,8 +172,9 @@ export default function QuizSettingsPage() {
               {LEECH_THRESHOLD_OPTIONS.map((n) => (
                 <Button
                   key={n}
-                  variant={settings.leechThreshold === n ? 'secondary' : 'outline'}
+                  variant={settings.leechThreshold === n ? 'default' : 'secondary'}
                   size="sm"
+                  className="rounded-full text-[13px]"
                   onClick={() => setSettings((s) => ({ ...s, leechThreshold: n }))}
                 >
                   {n}
@@ -188,8 +194,9 @@ export default function QuizSettingsPage() {
               ]).map(({ value, label }) => (
                 <Button
                   key={value}
-                  variant={settings.cardDirection === value ? 'secondary' : 'outline'}
+                  variant={settings.cardDirection === value ? 'default' : 'secondary'}
                   size="sm"
+                  className="rounded-full text-[13px]"
                   onClick={() => setSettings((s) => ({ ...s, cardDirection: value }))}
                 >
                   {label}
@@ -203,8 +210,9 @@ export default function QuizSettingsPage() {
             <h2 className="text-[15px] font-semibold">{t.settings.priorityFilter}</h2>
             <div className="flex flex-wrap gap-2">
               <Button
-                variant={settings.priorityFilter === null ? 'secondary' : 'outline'}
+                variant={settings.priorityFilter === null ? 'default' : 'secondary'}
                 size="sm"
+                className="rounded-full text-[13px]"
                 onClick={() => setSettings((s) => ({ ...s, priorityFilter: null }))}
               >
                 {t.settings.allPriorities}
@@ -216,8 +224,9 @@ export default function QuizSettingsPage() {
               ].map(({ value, label }) => (
                 <Button
                   key={value}
-                  variant={settings.priorityFilter === value ? 'secondary' : 'outline'}
+                  variant={settings.priorityFilter === value ? 'default' : 'secondary'}
                   size="sm"
+                  className="rounded-full text-[13px]"
                   onClick={() => setSettings((s) => ({ ...s, priorityFilter: value }))}
                 >
                   {label}
@@ -259,9 +268,9 @@ export default function QuizSettingsPage() {
                     {NOTIFICATION_HOUR_OPTIONS.map((h) => (
                       <Button
                         key={h}
-                        variant={settings.notificationHour === h ? 'secondary' : 'outline'}
+                        variant={settings.notificationHour === h ? 'default' : 'secondary'}
                         size="sm"
-                        className="min-w-[2.5rem]"
+                        className="min-w-[2.5rem] rounded-full text-[13px]"
                         onClick={() => setSettings((s) => ({ ...s, notificationHour: h }))}
                       >
                         {h}
@@ -275,8 +284,9 @@ export default function QuizSettingsPage() {
                     {NOTIFICATION_MINUTE_OPTIONS.map((m) => (
                       <Button
                         key={m}
-                        variant={settings.notificationMinute === m ? 'secondary' : 'outline'}
+                        variant={settings.notificationMinute === m ? 'default' : 'secondary'}
                         size="sm"
+                        className="rounded-full text-[13px]"
                         onClick={() => setSettings((s) => ({ ...s, notificationMinute: m }))}
                       >
                         {String(m).padStart(2, '0')}

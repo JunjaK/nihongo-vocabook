@@ -440,8 +440,8 @@ export default function WordDetailPage({
               </div>
               <div className="mt-1 flex gap-1.5">
                 {[
-                  { value: 1, label: t.priority.high, color: 'bg-red-500' },
-                  { value: 2, label: t.priority.medium, color: 'bg-primary' },
+                  { value: 1, label: t.priority.high, color: 'bg-primary' },
+                  { value: 2, label: t.priority.medium, color: 'bg-accent-muted' },
                   { value: 3, label: t.priority.low, color: 'bg-border-strong' },
                 ].map((p) => (
                   <button

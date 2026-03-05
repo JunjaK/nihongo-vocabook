@@ -62,7 +62,7 @@ export const sectionLabel =
 
 // ─── Settings Page ───────────────────────────────────────
 /** Settings page scroll area with section spacing. */
-export const settingsScroll = 'animate-page flex-1 space-y-5 overflow-y-auto px-5 py-3';
+export const settingsScroll = 'animate-page flex-1 space-y-6 overflow-y-auto px-5 py-3';
 
 /** Settings section container. */
 export const settingsSection = 'space-y-3';
@@ -74,6 +74,10 @@ export const settingsHeading =
 /** Settings navigation link row (design: rounded-12, bg-secondary, p-16, gap-12). */
 export const settingsNavLink =
   'flex items-center justify-between rounded-xl bg-secondary p-4 active:bg-accent/50';
+
+/** Settings flat list row (design: h-52, px-4, border-b, icon+label+chevron). */
+export const settingsRow =
+  'flex h-[52px] items-center justify-between px-4 border-b border-bg-tertiary last:border-b-0';
 
 // ─── Namespace export ────────────────────────────────────
 export const styles = {
@@ -95,4 +99,5 @@ export const styles = {
   settingsSection,
   settingsHeading,
   settingsNavLink,
+  settingsRow,
 } as const;
