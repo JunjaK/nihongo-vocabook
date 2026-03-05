@@ -5563,7 +5563,6 @@
                       "name": "sub1",
                       "enabled": false,
                       "width": "fill_container",
-                      "height": "fit_content(0)",
                       "layout": "vertical",
                       "gap": 2,
                       "padding": [
@@ -5673,7 +5672,6 @@
                       "name": "sub2",
                       "enabled": false,
                       "width": "fill_container",
-                      "height": "fit_content(0)",
                       "layout": "vertical",
                       "gap": 2,
                       "padding": [
@@ -5783,7 +5781,6 @@
                       "name": "sub3",
                       "enabled": false,
                       "width": "fill_container",
-                      "height": "fit_content(0)",
                       "layout": "vertical",
                       "gap": 2,
                       "padding": [
@@ -5893,7 +5890,6 @@
                       "name": "sub4",
                       "enabled": false,
                       "width": "fill_container",
-                      "height": "fit_content(0)",
                       "layout": "vertical",
                       "gap": 2,
                       "padding": [
@@ -9554,7 +9550,7 @@
                   "type": "ref",
                   "ref": "48Qd9",
                   "width": "fill_container",
-                  "height": 52,
+                  "height": 48,
                   "cornerRadius": 14,
                   "name": "startBtn",
                   "fill": "#3D5A80",
@@ -9571,7 +9567,7 @@
                   "id": "ajR7l",
                   "name": "loginBtn",
                   "width": "fill_container",
-                  "height": 44,
+                  "height": 48,
                   "cornerRadius": 14,
                   "justifyContent": "center",
                   "alignItems": "center",
@@ -9972,7 +9968,6 @@
                       "name": "dsub1",
                       "enabled": false,
                       "width": "fill_container",
-                      "height": "fit_content(0)",
                       "layout": "vertical",
                       "gap": 2,
                       "padding": [
@@ -10082,7 +10077,6 @@
                       "name": "dsub2",
                       "enabled": false,
                       "width": "fill_container",
-                      "height": "fit_content(0)",
                       "layout": "vertical",
                       "gap": 2,
                       "padding": [
@@ -10192,7 +10186,6 @@
                       "name": "dsub3",
                       "enabled": false,
                       "width": "fill_container",
-                      "height": "fit_content(0)",
                       "layout": "vertical",
                       "gap": 2,
                       "padding": [
@@ -10302,7 +10295,6 @@
                       "name": "dsub4",
                       "enabled": false,
                       "width": "fill_container",
-                      "height": "fit_content(0)",
                       "layout": "vertical",
                       "gap": 2,
                       "padding": [
@@ -14023,7 +14015,7 @@
                   "type": "ref",
                   "ref": "48Qd9",
                   "width": "fill_container",
-                  "height": 52,
+                  "height": 48,
                   "cornerRadius": 14,
                   "name": "startBtn",
                   "fill": "#3D5A80",
@@ -14034,7 +14026,7 @@
                       "fontSize": 16,
                       "fontWeight": "600",
                       "x": 111.5,
-                      "y": 14.5
+                      "y": 12.5
                     }
                   }
                 },
@@ -14043,7 +14035,7 @@
                   "id": "By8n7",
                   "name": "loginBtn",
                   "width": "fill_container",
-                  "height": 44,
+                  "height": 48,
                   "cornerRadius": 14,
                   "justifyContent": "center",
                   "alignItems": "center",
