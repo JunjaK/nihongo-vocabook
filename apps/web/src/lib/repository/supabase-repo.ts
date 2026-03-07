@@ -649,15 +649,23 @@ class SupabaseStudyRepository implements StudyRepository {
       return !states?.[0]?.mastered;
     }).length;
 
-    // New words: no progress, not mastered
-    const { data: newData, error: e2 } = await this.supabase
+    // New words: no progress, not mastered (apply same filters as getDueWords)
+    let newCountQuery = this.supabase
       .from('words')
-      .select('id, study_progress(id), user_word_state(mastered)');
+      .select('id, study_progress(id), user_word_state(mastered, priority)')
+      .is('study_progress', null);
+
+    if (settings.jlptFilter !== null) {
+      newCountQuery = newCountQuery.eq('jlpt_level', settings.jlptFilter);
+    }
+
+    const { data: newData, error: e2 } = await newCountQuery;
     if (e2) throw e2;
     const totalNew = (newData ?? []).filter((row: Record<string, unknown>) => {
-      const sp = row.study_progress as Array<{ id: string }> | null;
-      const states = row.user_word_state as Array<{ mastered: boolean }> | null;
-      return (!sp || sp.length === 0) && !states?.[0]?.mastered;
+      const states = row.user_word_state as Array<{ mastered: boolean; priority: number }> | null;
+      if (states?.[0]?.mastered) return false;
+      if (settings.priorityFilter !== null && (states?.[0]?.priority ?? 2) !== settings.priorityFilter) return false;
+      return true;
     }).length;
 
     const remainingNew = Math.max(0, settings.newPerDay - (todayStats?.newCount ?? 0));

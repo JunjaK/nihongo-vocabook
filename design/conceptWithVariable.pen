@@ -5379,15 +5379,16 @@
                   "width": "fill_container",
                   "name": "wlSearchBar",
                   "fill": "$search-bg",
+                  "height": 36,
                   "descendants": {
                     "AP1Qc": {
                       "x": 12,
-                      "y": 13
+                      "y": 9
                     },
                     "BghXM": {
                       "fill": "$text-tertiary",
                       "x": 38,
-                      "y": 11
+                      "y": 7
                     }
                   }
                 },
@@ -8305,6 +8306,11 @@
                           "ref": "JpYu6",
                           "name": "sLangKo",
                           "fill": "#3D5A80",
+                          "stroke": {
+                            "align": "inside",
+                            "thickness": 1,
+                            "fill": "#000000ff"
+                          },
                           "descendants": {
                             "ZaEHK": {
                               "content": "한국어"
@@ -21110,6 +21116,8 @@
                               "type": "ref",
                               "ref": "BEgD1",
                               "name": "w3b",
+                              "x": 115,
+                              "y": 0,
                               "descendants": {
                                 "iymQa": {
                                   "content": "N4",

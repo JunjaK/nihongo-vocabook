@@ -421,6 +421,9 @@ class IndexedDBStudyRepository implements StudyRepository {
         .equals(w.id)
         .first();
       if (!progress) {
+        // Apply same filters as getDueWords
+        if (settings.jlptFilter !== null && w.jlptLevel !== settings.jlptFilter) continue;
+        if (settings.priorityFilter !== null && (state?.priority ?? 2) !== settings.priorityFilter) continue;
         totalNew++;
       } else if (progress.nextReview <= now) {
         reviewDue++;
