@@ -1,0 +1,5942 @@
+[
+  {
+    "word_id": "4a2b0c37-1e6f-41e0-b1bc-be46882552e9",
+    "sentence_ja": "鰆の塩焼きを食べた。",
+    "sentence_reading": "さわらのしおやきをたべた。",
+    "sentence_meaning": "삼치 소금구이를 먹었다."
+  },
+  {
+    "word_id": "4a2b0c37-1e6f-41e0-b1bc-be46882552e9",
+    "sentence_ja": "市場で新鮮な鰆を買った。",
+    "sentence_reading": "いちばでしんせんなさわらをかった。",
+    "sentence_meaning": "시장에서 신선한 삼치를 샀다."
+  },
+  {
+    "word_id": "bc45d23a-721a-4839-8590-91f6b17696b3",
+    "sentence_ja": "そのチームは全国大会を制覇した。",
+    "sentence_reading": "そのちーむはぜんこくたいかいをせいはした。",
+    "sentence_meaning": "그 팀은 전국 대회를 제패했다."
+  },
+  {
+    "word_id": "bc45d23a-721a-4839-8590-91f6b17696b3",
+    "sentence_ja": "彼女は市場を制覇しようとしている。",
+    "sentence_reading": "かのじょはしじょうをせいはしようとしている。",
+    "sentence_meaning": "그녀는 시장을 지배하려 하고 있다."
+  },
+  {
+    "word_id": "10d6b83f-9721-4f2b-9342-c5adb0faaacf",
+    "sentence_ja": "丁度いい時間に着きました。",
+    "sentence_reading": "ちょうどいいじかんについました。",
+    "sentence_meaning": "딱 좋은 시간에 도착했습니다."
+  },
+  {
+    "word_id": "10d6b83f-9721-4f2b-9342-c5adb0faaacf",
+    "sentence_ja": "財布に丁度千円しかない。",
+    "sentence_reading": "さいふにちょうどせんえんしかない。",
+    "sentence_meaning": "지갑에 딱 천 엔밖에 없다."
+  },
+  {
+    "word_id": "ba9f26fc-4d54-414e-bd8f-8257f9caad49",
+    "sentence_ja": "川の淵は深くて危険だ。",
+    "sentence_reading": "かわのふちはふかくてきけんだ。",
+    "sentence_meaning": "강의 깊은 곳은 깊어서 위험하다."
+  },
+  {
+    "word_id": "ba9f26fc-4d54-414e-bd8f-8257f9caad49",
+    "sentence_ja": "彼は絶望の淵に立っていた。",
+    "sentence_reading": "かれはぜつぼうのふちにたっていた。",
+    "sentence_meaning": "그는 절망의 심연에 서 있었다."
+  },
+  {
+    "word_id": "b79e1184-1d5d-4864-9c2d-494b123e7b85",
+    "sentence_ja": "お客様を奥座敷にご案内した。",
+    "sentence_reading": "おきゃくさまをおくざしきにごあんないした。",
+    "sentence_meaning": "손님을 안방으로 안내했다."
+  },
+  {
+    "word_id": "b79e1184-1d5d-4864-9c2d-494b123e7b85",
+    "sentence_ja": "奥座敷で静かにお茶を飲んだ。",
+    "sentence_reading": "おくざしきでしずかにおちゃをのんだ。",
+    "sentence_meaning": "내실에서 조용히 차를 마셨다."
+  },
+  {
+    "word_id": "16e5aa35-f221-421a-b1fb-bff3f671a31e",
+    "sentence_ja": "多くの人が参加してくれた。",
+    "sentence_reading": "おおくのひとがさんかしてくれた。",
+    "sentence_meaning": "많은 사람이 참가해 주었다."
+  },
+  {
+    "word_id": "16e5aa35-f221-421a-b1fb-bff3f671a31e",
+    "sentence_ja": "多才な人だと感じた。",
+    "sentence_reading": "たさいなひとだとかんじた。",
+    "sentence_meaning": "다재다능한 사람이라고 느꼈다."
+  },
+  {
+    "word_id": "fbffefd8-1ee2-40af-aefa-214eaf920632",
+    "sentence_ja": "刀の鍔が金色に光っている。",
+    "sentence_reading": "かたなのつばがきんいろにひかっている。",
+    "sentence_meaning": "칼의 코등이가 금색으로 빛나고 있다."
+  },
+  {
+    "word_id": "fbffefd8-1ee2-40af-aefa-214eaf920632",
+    "sentence_ja": "鍔が錆びて動かなくなった。",
+    "sentence_reading": "つばがさびてうごかなくなった。",
+    "sentence_meaning": "가드가 녹슬어 움직이지 않게 되었다."
+  },
+  {
+    "word_id": "1e55576c-ecd3-4f72-aa8e-cb2f458397ec",
+    "sentence_ja": "問題を一挙に解決した。",
+    "sentence_reading": "もんだいをいっきょにかいけつした。",
+    "sentence_meaning": "문제를 단번에 해결했다."
+  },
+  {
+    "word_id": "1e55576c-ecd3-4f72-aa8e-cb2f458397ec",
+    "sentence_ja": "一挙両得の方法を考えよう。",
+    "sentence_reading": "いっきょりょうとくのほうほうをかんがえよう。",
+    "sentence_meaning": "일거양득의 방법을 생각해 보자."
+  },
+  {
+    "word_id": "c13f75bb-dea2-4fe6-a75e-9ec68cdc246c",
+    "sentence_ja": "雄大な山の景色に感動した。",
+    "sentence_reading": "ゆうだいなやまのけしきにかんどうした。",
+    "sentence_meaning": "웅장한 산의 경치에 감동했다."
+  },
+  {
+    "word_id": "c13f75bb-dea2-4fe6-a75e-9ec68cdc246c",
+    "sentence_ja": "雄大な夢を持って生きている。",
+    "sentence_reading": "ゆうだいなゆめをもってきている。",
+    "sentence_meaning": "웅대한 꿈을 품고 살아가고 있다."
+  },
+  {
+    "word_id": "2532f7a0-320d-4659-b062-8ee26cef46d6",
+    "sentence_ja": "船はいつもの航路を進んだ。",
+    "sentence_reading": "ふねはいつものこうろをすすんだ。",
+    "sentence_meaning": "배는 늘 다니는 항로를 나아갔다."
+  },
+  {
+    "word_id": "2532f7a0-320d-4659-b062-8ee26cef46d6",
+    "sentence_ja": "嵐で航路が変更になった。",
+    "sentence_reading": "あらしでこうろがへんこうになった。",
+    "sentence_meaning": "폭풍으로 항로가 변경되었다."
+  },
+  {
+    "word_id": "e260d55b-4869-4615-a64f-af9f14593655",
+    "sentence_ja": "大なり小なり影響はあるよ。",
+    "sentence_reading": "だいなりしょうなりえいきょうはあるよ。",
+    "sentence_meaning": "다소 영향은 있어."
+  },
+  {
+    "word_id": "e260d55b-4869-4615-a64f-af9f14593655",
+    "sentence_ja": "誰でも大なり小なり悩みがある。",
+    "sentence_reading": "だれでもだいなりしょうなりなやみがある。",
+    "sentence_meaning": "누구든 크든 작든 고민이 있다."
+  },
+  {
+    "word_id": "2a1bee27-d848-4b04-8eaf-e9afae9c79f0",
+    "sentence_ja": "あの車は私には高嶺の花だ。",
+    "sentence_reading": "あのくるまはわたしにはたかねのはなだ。",
+    "sentence_meaning": "저 차는 나에게는 그림의 떡이다."
+  },
+  {
+    "word_id": "2a1bee27-d848-4b04-8eaf-e9afae9c79f0",
+    "sentence_ja": "彼女は高嶺の花だと思っていた。",
+    "sentence_reading": "かのじょはたかねのはなだとおもっていた。",
+    "sentence_meaning": "그녀는 닿을 수 없는 존재라고 생각했었다."
+  },
+  {
+    "word_id": "62cfd4e7-fc84-471d-b453-7d18fa9fa4ea",
+    "sentence_ja": "食事はよく咀嚼してから飲み込もう。",
+    "sentence_reading": "しょくじはよくそしゃくしてからのみこもう。",
+    "sentence_meaning": "식사는 잘 씹어서 삼키자."
+  },
+  {
+    "word_id": "62cfd4e7-fc84-471d-b453-7d18fa9fa4ea",
+    "sentence_ja": "詩の意味を静かに咀嚼した。",
+    "sentence_reading": "しのいみをしずかにそしゃくした。",
+    "sentence_meaning": "시의 의미를 조용히 음미했다."
+  },
+  {
+    "word_id": "9f9c7f3c-403c-4182-8185-44784bae3e45",
+    "sentence_ja": "そんな悠長なことは言っていられない。",
+    "sentence_reading": "そんなゆうちょうなことはいっていられない。",
+    "sentence_meaning": "그런 여유로운 소리는 할 수 없다."
+  },
+  {
+    "word_id": "9f9c7f3c-403c-4182-8185-44784bae3e45",
+    "sentence_ja": "彼は悠長に構えてばかりいる。",
+    "sentence_reading": "かれはゆうちょうにかまえてばかりいる。",
+    "sentence_meaning": "그는 느긋하게 있기만 한다."
+  },
+  {
+    "word_id": "648f7062-c0d4-487a-bdaa-603369a10cba",
+    "sentence_ja": "早春の花が一斉に咲き始めた。",
+    "sentence_reading": "そうしゅんのはながいっせいにさきはじめた。",
+    "sentence_meaning": "이른 봄의 꽃이 일제히 피기 시작했다."
+  },
+  {
+    "word_id": "648f7062-c0d4-487a-bdaa-603369a10cba",
+    "sentence_ja": "早春の花を見に公園へ行った。",
+    "sentence_reading": "そうしゅんのはなをみにこうえんへいった。",
+    "sentence_meaning": "이른 봄의 꽃을 보러 공원에 갔다."
+  },
+  {
+    "word_id": "4bed32b3-9e4e-4a77-8fd9-42213fab62b3",
+    "sentence_ja": "この漢字は何画ですか？",
+    "sentence_reading": "このかんじはなんかくですか？",
+    "sentence_meaning": "이 한자는 몇 획입니까?"
+  },
+  {
+    "word_id": "4bed32b3-9e4e-4a77-8fd9-42213fab62b3",
+    "sentence_ja": "一画一画丁寧に書いてください。",
+    "sentence_reading": "いちかくいちかくていねいにかいてください。",
+    "sentence_meaning": "한 획 한 획 정성껏 써 주세요."
+  },
+  {
+    "word_id": "4dcf9bfa-7fa9-4c5b-9ff1-e383f231eb6f",
+    "sentence_ja": "古い刀の鍔を博物館で見た。",
+    "sentence_reading": "ふるいかたなのつばをはくぶつかんでみた。",
+    "sentence_meaning": "오래된 칼의 코등이를 박물관에서 봤다."
+  },
+  {
+    "word_id": "4dcf9bfa-7fa9-4c5b-9ff1-e383f231eb6f",
+    "sentence_ja": "鍔迫り合いが続いている。",
+    "sentence_reading": "つばぜりあいがつづいている。",
+    "sentence_meaning": "막상막하의 접전이 계속되고 있다."
+  },
+  {
+    "word_id": "ee21205a-7a22-49f3-9b75-6df4ac91b4b7",
+    "sentence_ja": "彼の一挙一動に注目が集まる。",
+    "sentence_reading": "かれのいっきょいちどうにちゅうもくがあつまる。",
+    "sentence_meaning": "그의 일거수일투족에 주목이 쏠린다."
+  },
+  {
+    "word_id": "ee21205a-7a22-49f3-9b75-6df4ac91b4b7",
+    "sentence_ja": "借金を一挙に返済した。",
+    "sentence_reading": "しゃっきんをいっきょにへんさいした。",
+    "sentence_meaning": "빚을 한꺼번에 갚았다."
+  },
+  {
+    "word_id": "d9a768f1-bc21-4d8d-915d-2b3389a174c2",
+    "sentence_ja": "アルプスの雄大な景色を見た。",
+    "sentence_reading": "あるぷすのゆうだいなけしきをみた。",
+    "sentence_meaning": "알프스의 장엄한 경치를 보았다."
+  },
+  {
+    "word_id": "d9a768f1-bc21-4d8d-915d-2b3389a174c2",
+    "sentence_ja": "雄大な自然の中でキャンプした。",
+    "sentence_reading": "ゆうだいなしぜんのなかできゃんぷした。",
+    "sentence_meaning": "웅대한 자연 속에서 캠핑했다."
+  },
+  {
+    "word_id": "2f760c1d-e740-4e71-a130-2bc9c539e92a",
+    "sentence_ja": "この航路は安全で快適だ。",
+    "sentence_reading": "このこうろはあんぜんでかいてきだ。",
+    "sentence_meaning": "이 항로는 안전하고 쾌적하다."
+  },
+  {
+    "word_id": "2f760c1d-e740-4e71-a130-2bc9c539e92a",
+    "sentence_ja": "新しい航路を開拓した。",
+    "sentence_reading": "あたらしいこうろをかいたくした。",
+    "sentence_meaning": "새로운 항로를 개척했다."
+  },
+  {
+    "word_id": "a9494f65-dd94-4863-8b15-681e17187369",
+    "sentence_ja": "静岡県には富士山がある。",
+    "sentence_reading": "しずおかけんにはふじさんがある。",
+    "sentence_meaning": "시즈오카현에는 후지산이 있다."
+  },
+  {
+    "word_id": "a9494f65-dd94-4863-8b15-681e17187369",
+    "sentence_ja": "静岡県はお茶の産地として有名だ。",
+    "sentence_reading": "しずおかけんはおちゃのさんちとしてゆうめいだ。",
+    "sentence_meaning": "시즈오카현은 차 산지로 유명하다."
+  },
+  {
+    "word_id": "8469c1c0-f979-4890-96f9-99db688e2fac",
+    "sentence_ja": "富士山は日本一高い山だ。",
+    "sentence_reading": "ふじさんはにほんいちたかいやまだ。",
+    "sentence_meaning": "후지산은 일본에서 가장 높은 산이다."
+  },
+  {
+    "word_id": "8469c1c0-f979-4890-96f9-99db688e2fac",
+    "sentence_ja": "日本一の選手を目指して練習している。",
+    "sentence_reading": "にほんいちのせんしゅをめざしてれんしゅうしている。",
+    "sentence_meaning": "일본 최고의 선수를 목표로 연습하고 있다."
+  },
+  {
+    "word_id": "0833bfac-e7cb-4427-b5cc-42d68ea01104",
+    "sentence_ja": "大なり小なり責任はあると思う。",
+    "sentence_reading": "だいなりしょうなりせきにんはあるとおもう。",
+    "sentence_meaning": "어느 정도 책임은 있다고 생각한다."
+  },
+  {
+    "word_id": "0833bfac-e7cb-4427-b5cc-42d68ea01104",
+    "sentence_ja": "大なり小なり変化があった。",
+    "sentence_reading": "だいなりしょうなりへんかがあった。",
+    "sentence_meaning": "다소 변화가 있었다."
+  },
+  {
+    "word_id": "30eeb0a1-695b-4f2e-8183-fec17ada28ef",
+    "sentence_ja": "彼女は大会で入賞した。",
+    "sentence_reading": "かのじょはたいかいでにゅうしょうした。",
+    "sentence_meaning": "그녀는 대회에서 입상했다."
+  },
+  {
+    "word_id": "30eeb0a1-695b-4f2e-8183-fec17ada28ef",
+    "sentence_ja": "初めてのコンテストで入賞できた。",
+    "sentence_reading": "はじめてのこんてすとでにゅうしょうできた。",
+    "sentence_meaning": "처음 참가한 대회에서 입상할 수 있었다."
+  },
+  {
+    "word_id": "616ad08b-d647-4f16-857a-5f018b5b7afa",
+    "sentence_ja": "足の怪我で棄権することになった。",
+    "sentence_reading": "あしのけができけんすることになった。",
+    "sentence_meaning": "다리 부상으로 기권하게 되었다."
+  },
+  {
+    "word_id": "616ad08b-d647-4f16-857a-5f018b5b7afa",
+    "sentence_ja": "投票を棄権するのはもったいない。",
+    "sentence_reading": "とうひょうをきけんするのはもったいない。",
+    "sentence_meaning": "투표를 기권하는 것은 아깝다."
+  },
+  {
+    "word_id": "9f93036c-cbc7-434f-b9a2-df3fbe1f33b2",
+    "sentence_ja": "ひき肉でハンバーグを作った。",
+    "sentence_reading": "ひきにくでばんばーぐをつくった。",
+    "sentence_meaning": "다진 고기로 햄버그를 만들었다."
+  },
+  {
+    "word_id": "9f93036c-cbc7-434f-b9a2-df3fbe1f33b2",
+    "sentence_ja": "スーパーで豚のひき肉を買った。",
+    "sentence_reading": "すーぱーでぶたのひきにくをかった。",
+    "sentence_meaning": "슈퍼마켓에서 돼지 다진 고기를 샀다."
+  },
+  {
+    "word_id": "da56ca33-014d-4d95-81cf-a1819bfeb781",
+    "sentence_ja": "この柄はズボンと釣り合っている。",
+    "sentence_reading": "このがらはずぼんとつりあっている。",
+    "sentence_meaning": "이 패턴은 바지와 잘 어울린다."
+  },
+  {
+    "word_id": "da56ca33-014d-4d95-81cf-a1819bfeb781",
+    "sentence_ja": "収入と支出が釣り合っていない。",
+    "sentence_reading": "しゅうにゅうとししゅつがつりあっていない。",
+    "sentence_meaning": "수입과 지출이 균형이 맞지 않는다."
+  },
+  {
+    "word_id": "b621e061-7ba1-4689-af51-30076ec786eb",
+    "sentence_ja": "下駄の緒が切れてしまった。",
+    "sentence_reading": "げたのおがきれてしまった。",
+    "sentence_meaning": "나막신의 끈이 끊어져 버렸다."
+  },
+  {
+    "word_id": "b621e061-7ba1-4689-af51-30076ec786eb",
+    "sentence_ja": "緒を丁寧に結び直した。",
+    "sentence_reading": "おをていねいにむすびなおした。",
+    "sentence_meaning": "끈을 정성껏 다시 묶었다."
+  },
+  {
+    "word_id": "c9aa4772-a88c-431e-9789-1971e4889633",
+    "sentence_ja": "富士山の景が素晴らしかった。",
+    "sentence_reading": "ふじさんのけいがすばらしかった。",
+    "sentence_meaning": "후지산의 경치가 훌륭했다."
+  },
+  {
+    "word_id": "c9aa4772-a88c-431e-9789-1971e4889633",
+    "sentence_ja": "この窓から見える景が好きだ。",
+    "sentence_reading": "このまどからみえるけいがすきだ。",
+    "sentence_meaning": "이 창문에서 보이는 풍경이 좋다."
+  },
+  {
+    "word_id": "3158d8f7-3c8d-4f46-af2b-e4896857112f",
+    "sentence_ja": "新着メールを確認してください。",
+    "sentence_reading": "しんちゃくめーるをかくにんしてください。",
+    "sentence_meaning": "새로 도착한 메일을 확인해 주세요."
+  },
+  {
+    "word_id": "3158d8f7-3c8d-4f46-af2b-e4896857112f",
+    "sentence_ja": "サイトに新着情報が掲載された。",
+    "sentence_reading": "さいとにしんちゃくじょうほうがけいさいされた。",
+    "sentence_meaning": "사이트에 새 정보가 게재되었다."
+  },
+  {
+    "word_id": "12b053e4-64f0-412f-8a5d-c713860efb1d",
+    "sentence_ja": "帰り路に友達と話した。",
+    "sentence_reading": "かえりじにともだちとはなした。",
+    "sentence_meaning": "귀갓길에 친구와 이야기했다."
+  },
+  {
+    "word_id": "12b053e4-64f0-412f-8a5d-c713860efb1d",
+    "sentence_ja": "山路を歩いて頂上を目指した。",
+    "sentence_reading": "やまじをあるいてちょうじょうをめざした。",
+    "sentence_meaning": "산길을 걸어 정상을 목표로 했다."
+  },
+  {
+    "word_id": "5e05df4e-6dc1-4833-b204-861361ec2b2d",
+    "sentence_ja": "彼の成績は秀でている。",
+    "sentence_reading": "かれのせいせきはひいでている。",
+    "sentence_meaning": "그의 성적은 탁월하다."
+  },
+  {
+    "word_id": "5e05df4e-6dc1-4833-b204-861361ec2b2d",
+    "sentence_ja": "秀才として学校で知られていた。",
+    "sentence_reading": "しゅうさいとしてがっこうでしられていた。",
+    "sentence_meaning": "수재로서 학교에서 알려져 있었다."
+  },
+  {
+    "word_id": "f1bafa71-254b-4c8f-9592-82587ac20538",
+    "sentence_ja": "その時期に旅行を計画している。",
+    "sentence_reading": "そのごにりょこうをけいかくしている。",
+    "sentence_meaning": "그 시기에 여행을 계획하고 있다."
+  },
+  {
+    "word_id": "f1bafa71-254b-4c8f-9592-82587ac20538",
+    "sentence_ja": "学期末に試験がある。",
+    "sentence_reading": "がっきまつにしけんがある。",
+    "sentence_meaning": "학기말에 시험이 있다."
+  },
+  {
+    "word_id": "b5fccea2-7153-4d0c-93e7-26daecaa1210",
+    "sentence_ja": "冷蔵庫に菜がたくさんある。",
+    "sentence_reading": "れいぞうこになたくさんある。",
+    "sentence_meaning": "냉장고에 채소가 많이 있다."
+  },
+  {
+    "word_id": "b5fccea2-7153-4d0c-93e7-26daecaa1210",
+    "sentence_ja": "春菜を使った料理を作った。",
+    "sentence_reading": "はるなをつかったりょうりをつくった。",
+    "sentence_meaning": "봄나물을 사용한 요리를 만들었다."
+  },
+  {
+    "word_id": "356f6eca-3661-420a-bfb8-4f9ee57a6880",
+    "sentence_ja": "お城の見学ツアーに参加した。",
+    "sentence_reading": "おしろのけんがくつあーにさんかした。",
+    "sentence_meaning": "성 견학 투어에 참가했다."
+  },
+  {
+    "word_id": "356f6eca-3661-420a-bfb8-4f9ee57a6880",
+    "sentence_ja": "大阪城は歴史的な建物だ。",
+    "sentence_reading": "おおさかじょうはれきしてきなたてものだ。",
+    "sentence_meaning": "오사카성은 역사적인 건물이다."
+  },
+  {
+    "word_id": "f6f4ad86-2a80-4593-ab33-d522b7af4e37",
+    "sentence_ja": "美術展を見に行きたい。",
+    "sentence_reading": "びじゅつてんをみにいきたい。",
+    "sentence_meaning": "미술 전시회를 보러 가고 싶다."
+  },
+  {
+    "word_id": "f6f4ad86-2a80-4593-ab33-d522b7af4e37",
+    "sentence_ja": "写真展が来月開催される。",
+    "sentence_reading": "しゃしんてんがらいげつかいさいされる。",
+    "sentence_meaning": "사진 전시회가 다음 달 개최된다."
+  },
+  {
+    "word_id": "d61b8376-a04e-4f06-a89f-6517e5586013",
+    "sentence_ja": "第一回の会議に出席した。",
+    "sentence_reading": "だいいっかいのかいぎにしゅっせきした。",
+    "sentence_meaning": "제1회 회의에 출석했다."
+  },
+  {
+    "word_id": "d61b8376-a04e-4f06-a89f-6517e5586013",
+    "sentence_ja": "第三章を読んでから寝た。",
+    "sentence_reading": "だいさんしょうをよんでからねた。",
+    "sentence_meaning": "제3장을 읽고 나서 잤다."
+  },
+  {
+    "word_id": "ad7d4aab-4d9c-4e8a-afe9-53850e8f8e29",
+    "sentence_ja": "音楽界で有名な人になりたい。",
+    "sentence_reading": "おんがくかいでゆうめいなひとになりたい。",
+    "sentence_meaning": "음악계에서 유명한 사람이 되고 싶다."
+  },
+  {
+    "word_id": "ad7d4aab-4d9c-4e8a-afe9-53850e8f8e29",
+    "sentence_ja": "芸能界のニュースが気になる。",
+    "sentence_reading": "げいのうかいのにゅーすがきになる。",
+    "sentence_meaning": "연예계 뉴스가 신경 쓰인다."
+  },
+  {
+    "word_id": "9d9497bd-c22b-423f-99d1-b6da93be9778",
+    "sentence_ja": "展望台から絶景が見えた。",
+    "sentence_reading": "てんぼうだいからぜっけいがみえた。",
+    "sentence_meaning": "전망대에서 절경이 보였다."
+  },
+  {
+    "word_id": "9d9497bd-c22b-423f-99d1-b6da93be9778",
+    "sentence_ja": "この島の絶景を写真に撮った。",
+    "sentence_reading": "このしまのぜっけいをしゃしんにとった。",
+    "sentence_meaning": "이 섬의 절경을 사진으로 찍었다."
+  },
+  {
+    "word_id": "1625ca3d-62c5-4eef-a349-616f0c7a8283",
+    "sentence_ja": "ジョージアの通貨はラリです。",
+    "sentence_reading": "じょーじあのつうかはらりです。",
+    "sentence_meaning": "조지아의 통화는 라리입니다."
+  },
+  {
+    "word_id": "1625ca3d-62c5-4eef-a349-616f0c7a8283",
+    "sentence_ja": "ラリに両替してから旅行した。",
+    "sentence_reading": "らりにりょうがえしてからりょこうした。",
+    "sentence_meaning": "라리로 환전하고 나서 여행했다."
+  },
+  {
+    "word_id": "63584966-fb41-44e1-af87-6d114923aaed",
+    "sentence_ja": "ポットでお湯を沸かした。",
+    "sentence_reading": "ぽっとでおゆをわかした。",
+    "sentence_meaning": "주전자로 물을 끓였다."
+  },
+  {
+    "word_id": "63584966-fb41-44e1-af87-6d114923aaed",
+    "sentence_ja": "ポットのお湯でコーヒーを淹れた。",
+    "sentence_reading": "ぽっとのおゆでこーひーをいれた。",
+    "sentence_meaning": "주전자의 뜨거운 물로 커피를 내렸다."
+  },
+  {
+    "word_id": "146ad07a-8de0-487d-8310-73bffa4f3655",
+    "sentence_ja": "暖炉の煤が部屋に積もった。",
+    "sentence_reading": "だんろのすすがへやにつもった。",
+    "sentence_meaning": "벽난로의 그을음이 방에 쌓였다."
+  },
+  {
+    "word_id": "146ad07a-8de0-487d-8310-73bffa4f3655",
+    "sentence_ja": "煤で壁が黒くなっている。",
+    "sentence_reading": "すすでかべがくろくなっている。",
+    "sentence_meaning": "그을음으로 벽이 까맣게 되어 있다."
+  },
+  {
+    "word_id": "144a1f3f-71d9-4322-a6f6-3c8901b6f632",
+    "sentence_ja": "夜は静かで気持ちいい。",
+    "sentence_reading": "よるはしずかできもちいい。",
+    "sentence_meaning": "밤은 고요해서 기분이 좋다."
+  },
+  {
+    "word_id": "144a1f3f-71d9-4322-a6f6-3c8901b6f632",
+    "sentence_ja": "動と静のバランスが大切だ。",
+    "sentence_reading": "どうとせいのばらんすがたいせつだ。",
+    "sentence_meaning": "동과 정의 균형이 중요하다."
+  },
+  {
+    "word_id": "e7b4b759-6122-451e-a298-f18c10509d9c",
+    "sentence_ja": "今回は三回目の挑戦だ。",
+    "sentence_reading": "こんかいはさんかいめのちょうせんだ。",
+    "sentence_meaning": "이번은 세 번째 도전이다."
+  },
+  {
+    "word_id": "e7b4b759-6122-451e-a298-f18c10509d9c",
+    "sentence_ja": "毎回同じ失敗を繰り返している。",
+    "sentence_reading": "まいかいおなじしっぱいをくりかえしている。",
+    "sentence_meaning": "매번 같은 실수를 반복하고 있다."
+  },
+  {
+    "word_id": "53120327-8e22-4a33-b676-c7b24405f038",
+    "sentence_ja": "伊豆の温泉に行きたいな。",
+    "sentence_reading": "いずのおんせんにいきたいな。",
+    "sentence_meaning": "이즈의 온천에 가고 싶다."
+  },
+  {
+    "word_id": "53120327-8e22-4a33-b676-c7b24405f038",
+    "sentence_ja": "伊豆半島は観光地として人気だ。",
+    "sentence_reading": "いずはんとうはかんこうちとしてにんきだ。",
+    "sentence_meaning": "이즈 반도는 관광지로 인기가 있다."
+  },
+  {
+    "word_id": "424541b1-262c-4a85-855f-08da7d599fb0",
+    "sentence_ja": "駿河湾は魚介類が豊富だ。",
+    "sentence_reading": "するがわんはぎょかいるいがほうふだ。",
+    "sentence_meaning": "스루가만은 어패류가 풍부하다."
+  },
+  {
+    "word_id": "424541b1-262c-4a85-855f-08da7d599fb0",
+    "sentence_ja": "駿河は昔、重要な地方だった。",
+    "sentence_reading": "するがはむかし、じゅうようなちほうだった。",
+    "sentence_meaning": "스루가는 옛날에 중요한 지방이었다."
+  },
+  {
+    "word_id": "32eab4b5-3811-4ecd-b00f-850beca95e72",
+    "sentence_ja": "早春には梅の花が咲く。",
+    "sentence_reading": "そうしゅんにはうめのはながさく。",
+    "sentence_meaning": "이른 봄에는 매화가 핀다."
+  },
+  {
+    "word_id": "32eab4b5-3811-4ecd-b00f-850beca95e72",
+    "sentence_ja": "早春の冷たい風を感じた。",
+    "sentence_reading": "そうしゅんのつめたいかぜをかんじた。",
+    "sentence_meaning": "초봄의 차가운 바람을 느꼈다."
+  },
+  {
+    "word_id": "f934a7f0-2b8d-46e3-95c9-bc0817ecc399",
+    "sentence_ja": "イベントは来月開催される予定だ。",
+    "sentence_reading": "いべんとはらいげつかいさいされるよていだ。",
+    "sentence_meaning": "이벤트는 다음 달 개최될 예정이다."
+  },
+  {
+    "word_id": "f934a7f0-2b8d-46e3-95c9-bc0817ecc399",
+    "sentence_ja": "コンサートの開催が決まった。",
+    "sentence_reading": "こんさーとのかいさいがきまった。",
+    "sentence_meaning": "콘서트 개최가 결정되었다."
+  },
+  {
+    "word_id": "39e9f052-ca72-4b13-9e2b-913c8f81ef20",
+    "sentence_ja": "世界遺産に登録されている。",
+    "sentence_reading": "せかいいさんにとうろくされている。",
+    "sentence_meaning": "세계유산으로 등재되어 있다."
+  },
+  {
+    "word_id": "39e9f052-ca72-4b13-9e2b-913c8f81ef20",
+    "sentence_ja": "祖父から遺産を相続した。",
+    "sentence_reading": "そふからいさんをそうぞくした。",
+    "sentence_meaning": "할아버지로부터 유산을 상속받았다."
+  },
+  {
+    "word_id": "36055eeb-99c7-4bac-bcfb-beee02b93ecd",
+    "sentence_ja": "富士山に登ってみたい。",
+    "sentence_reading": "ふじさんにのぼってみたい。",
+    "sentence_meaning": "후지산에 올라가 보고 싶다."
+  },
+  {
+    "word_id": "36055eeb-99c7-4bac-bcfb-beee02b93ecd",
+    "sentence_ja": "富士の裾野は広く美しい。",
+    "sentence_reading": "ふじのすそのはひろくうつくしい。",
+    "sentence_meaning": "후지산의 산기슭은 넓고 아름답다."
+  },
+  {
+    "word_id": "c78fb550-de85-4faa-942b-9d20389d00f8",
+    "sentence_ja": "京都で御朱印を集めています。",
+    "sentence_reading": "きょうとでごしゅいんをあつめています。",
+    "sentence_meaning": "교토에서 고슈인을 모으고 있어요."
+  },
+  {
+    "word_id": "c78fb550-de85-4faa-942b-9d20389d00f8",
+    "sentence_ja": "この神社の御朱印は特別です。",
+    "sentence_reading": "このじんじゃのごしゅいんはとくべつです。",
+    "sentence_meaning": "이 신사의 고슈인은 특별해요."
+  },
+  {
+    "word_id": "5c8ad70e-839f-4145-9622-3a339b8d38c7",
+    "sentence_ja": "医学部で解剖の実習があった。",
+    "sentence_reading": "いがくぶでかいぼうのじっしゅうがあった。",
+    "sentence_meaning": "의대에서 해부 실습이 있었어."
+  },
+  {
+    "word_id": "5c8ad70e-839f-4145-9622-3a339b8d38c7",
+    "sentence_ja": "その問題を細かく解剖してみた。",
+    "sentence_reading": "そのもんだいをこまかくかいぼうしてみた。",
+    "sentence_meaning": "그 문제를 세밀하게 분석해봤어."
+  },
+  {
+    "word_id": "86d4b519-221f-4621-a955-941f856e2aba",
+    "sentence_ja": "コンという音がして驚いた。",
+    "sentence_reading": "コンというおとがしておどろいた。",
+    "sentence_meaning": "'쿵' 하는 소리가 나서 깜짝 놀랐어."
+  },
+  {
+    "word_id": "86d4b519-221f-4621-a955-941f856e2aba",
+    "sentence_ja": "ドアをコンとノックした。",
+    "sentence_reading": "ドアをコンとノックした。",
+    "sentence_meaning": "문을 '콘' 하고 노크했어."
+  },
+  {
+    "word_id": "88038e39-b0d8-4498-821c-06d93555024d",
+    "sentence_ja": "バスターミナルで友達を待った。",
+    "sentence_reading": "バスターミナルでともだちをまった。",
+    "sentence_meaning": "버스 터미널에서 친구를 기다렸어."
+  },
+  {
+    "word_id": "88038e39-b0d8-4498-821c-06d93555024d",
+    "sentence_ja": "このターミナルは電車も通っている。",
+    "sentence_reading": "このターミナルはでんしゃもとおっている。",
+    "sentence_meaning": "이 터미널은 전철도 지나가."
+  },
+  {
+    "word_id": "0bc4793d-c283-4648-b653-3a12693bb665",
+    "sentence_ja": "ボトルのセンを開けてください。",
+    "sentence_reading": "ボトルのセンをあけてください。",
+    "sentence_meaning": "병 마개를 열어 주세요."
+  },
+  {
+    "word_id": "0bc4793d-c283-4648-b653-3a12693bb665",
+    "sentence_ja": "排水口のセンが外れていた。",
+    "sentence_reading": "はいすいこうのセンがはずれていた。",
+    "sentence_meaning": "배수구 마개가 빠져 있었어."
+  },
+  {
+    "word_id": "cbf7c556-a8c2-4d25-855b-c66c70bbb880",
+    "sentence_ja": "大きな声で話さないでください。",
+    "sentence_reading": "おおきなこえではなさないでください。",
+    "sentence_meaning": "큰 소리로 말하지 마세요."
+  },
+  {
+    "word_id": "cbf7c556-a8c2-4d25-855b-c66c70bbb880",
+    "sentence_ja": "これは大した問題だと思う。",
+    "sentence_reading": "これはたいしたもんだいだとおもう。",
+    "sentence_meaning": "이건 중요한 문제라고 생각해."
+  },
+  {
+    "word_id": "de84ba6b-cb0c-4e10-878b-0e3c2e6650a7",
+    "sentence_ja": "神奈川県に住んでいます。",
+    "sentence_reading": "かながわけんにすんでいます。",
+    "sentence_meaning": "가나가와현에 살고 있어요."
+  },
+  {
+    "word_id": "de84ba6b-cb0c-4e10-878b-0e3c2e6650a7",
+    "sentence_ja": "この県では桜が有名です。",
+    "sentence_reading": "このけんではさくらがゆうめいです。",
+    "sentence_meaning": "이 현에서는 벚꽃이 유명해요."
+  },
+  {
+    "word_id": "e77e9a7b-a9ca-4600-a989-70a4e4b90edf",
+    "sentence_ja": "公園を巡って写真を撮った。",
+    "sentence_reading": "こうえんをめぐってしゃしんをとった。",
+    "sentence_meaning": "공원을 돌아다니며 사진을 찍었어."
+  },
+  {
+    "word_id": "e77e9a7b-a9ca-4600-a989-70a4e4b90edf",
+    "sentence_ja": "彼の発言を巡って議論が続いた。",
+    "sentence_reading": "かれのはつげんをめぐってぎろんがつづいた。",
+    "sentence_meaning": "그의 발언을 둘러싸고 논쟁이 이어졌어."
+  },
+  {
+    "word_id": "5f1baa1c-be65-4676-9e46-3f1f6dbe61e6",
+    "sentence_ja": "山頂からの眺めが最高だった。",
+    "sentence_reading": "さんちょうからのながめがさいこうだった。",
+    "sentence_meaning": "산 정상에서 바라본 경치가 최고였어."
+  },
+  {
+    "word_id": "5f1baa1c-be65-4676-9e46-3f1f6dbe61e6",
+    "sentence_ja": "この部屋は眺めがとてもいい。",
+    "sentence_reading": "このへやはながめがとてもいい。",
+    "sentence_meaning": "이 방은 전망이 정말 좋아."
+  },
+  {
+    "word_id": "2f38bf55-d435-4002-b380-2299c5154e7b",
+    "sentence_ja": "縄をあざなって丈夫にした。",
+    "sentence_reading": "なわをあざなってじょうぶにした。",
+    "sentence_meaning": "밧줄을 꼬아서 튼튼하게 만들었어."
+  },
+  {
+    "word_id": "2f38bf55-d435-4002-b380-2299c5154e7b",
+    "sentence_ja": "糸をあざなう技術を習った。",
+    "sentence_reading": "いとをあざなうぎじゅつをならった。",
+    "sentence_meaning": "실을 꼬는 기술을 배웠어."
+  },
+  {
+    "word_id": "ccc4a612-f359-42e8-ab75-6663d02999b8",
+    "sentence_ja": "紆余曲折を経てやっと完成した。",
+    "sentence_reading": "うよきょくせつをへてやっとかんせいした。",
+    "sentence_meaning": "우여곡절 끝에 드디어 완성됐어."
+  },
+  {
+    "word_id": "ccc4a612-f359-42e8-ab75-6663d02999b8",
+    "sentence_ja": "紆余曲折があったが諦めなかった。",
+    "sentence_reading": "うよきょくせつがあったがあきらめなかった。",
+    "sentence_meaning": "우여곡절이 있었지만 포기하지 않았어."
+  },
+  {
+    "word_id": "8346f285-ac5e-4f3e-bbe6-e0637124cd40",
+    "sentence_ja": "兵士が匍匐で前進した。",
+    "sentence_reading": "へいしがほふくでぜんしんした。",
+    "sentence_meaning": "병사가 포복으로 전진했어."
+  },
+  {
+    "word_id": "8346f285-ac5e-4f3e-bbe6-e0637124cd40",
+    "sentence_ja": "訓練で匍匐前進をさせられた。",
+    "sentence_reading": "くんれんでほふくぜんしんをさせられた。",
+    "sentence_meaning": "훈련에서 포복 전진을 하게 됐어."
+  },
+  {
+    "word_id": "92f1196e-c634-4128-8b8c-23fde412e1a3",
+    "sentence_ja": "終日本を読んで過ごした。",
+    "sentence_reading": "ひねもすほんをよんですごした。",
+    "sentence_meaning": "온종일 책을 읽으며 보냈어."
+  },
+  {
+    "word_id": "92f1196e-c634-4128-8b8c-23fde412e1a3",
+    "sentence_ja": "終日雨が降り続いていた。",
+    "sentence_reading": "ひねもすあめがふりつづいていた。",
+    "sentence_meaning": "온종일 비가 계속 내렸어."
+  },
+  {
+    "word_id": "983a7d90-c97c-418f-9681-28befaa41dce",
+    "sentence_ja": "掃除が億劫でつい後回しにした。",
+    "sentence_reading": "そうじがおっくうでついあとまわしにした。",
+    "sentence_meaning": "청소가 귀찮아서 그만 미뤄버렸어."
+  },
+  {
+    "word_id": "983a7d90-c97c-418f-9681-28befaa41dce",
+    "sentence_ja": "雨の日は外出が億劫だ。",
+    "sentence_reading": "あめのひはがいしゅつがおっくうだ。",
+    "sentence_meaning": "비 오는 날은 외출이 귀찮아."
+  },
+  {
+    "word_id": "db389762-2936-4541-990e-8ed02e48f127",
+    "sentence_ja": "ボランティアを募っています。",
+    "sentence_reading": "ボランティアをつのっています。",
+    "sentence_meaning": "자원봉사자를 모집하고 있어요."
+  },
+  {
+    "word_id": "db389762-2936-4541-990e-8ed02e48f127",
+    "sentence_ja": "不満が募って限界になった。",
+    "sentence_reading": "ふまんがつのってげんかいになった。",
+    "sentence_meaning": "불만이 쌓여서 한계에 달했어."
+  },
+  {
+    "word_id": "bfe2b65e-6779-407b-b9d8-595f92bc69d2",
+    "sentence_ja": "営業から企画に鞍替えした。",
+    "sentence_reading": "えいぎょうからきかくにくらがえした。",
+    "sentence_meaning": "영업에서 기획으로 전직했어."
+  },
+  {
+    "word_id": "bfe2b65e-6779-407b-b9d8-595f92bc69d2",
+    "sentence_ja": "彼はIT業界に鞍替えするらしい。",
+    "sentence_reading": "かれはITぎょうかいにくらがえするらしい。",
+    "sentence_meaning": "그는 IT 업계로 전직할 것 같아."
+  },
+  {
+    "word_id": "c7093b4d-d741-467b-b7e6-844d650fd125",
+    "sentence_ja": "災害に備えて食料を備蓄した。",
+    "sentence_reading": "さいがいにそなえてしょくりょうをびちくした。",
+    "sentence_meaning": "재해에 대비해 식량을 비축했어."
+  },
+  {
+    "word_id": "c7093b4d-d741-467b-b7e6-844d650fd125",
+    "sentence_ja": "備蓄の水が切れてしまった。",
+    "sentence_reading": "びちくのみずがきれてしまった。",
+    "sentence_meaning": "비축해둔 물이 떨어져버렸어."
+  },
+  {
+    "word_id": "e33d5817-4e32-46e9-9fec-72cf74e1fa66",
+    "sentence_ja": "村人たちは山の神を崇めた。",
+    "sentence_reading": "むらびとたちはやまのかみをあがめた。",
+    "sentence_meaning": "마을 사람들은 산의 신을 숭배했어."
+  },
+  {
+    "word_id": "e33d5817-4e32-46e9-9fec-72cf74e1fa66",
+    "sentence_ja": "彼女は才能ある人物として崇められている。",
+    "sentence_reading": "かのじょはさいのうあるじんぶつとしてあがめられている。",
+    "sentence_meaning": "그녀는 재능 있는 인물로서 숭배받고 있어."
+  },
+  {
+    "word_id": "4b0a0b0e-b552-414d-8b8d-78a1c860c529",
+    "sentence_ja": "武士は矢筒を背負っていた。",
+    "sentence_reading": "ぶしはやづつをせおっていた。",
+    "sentence_meaning": "무사는 화살통을 등에 지고 있었어."
+  },
+  {
+    "word_id": "4b0a0b0e-b552-414d-8b8d-78a1c860c529",
+    "sentence_ja": "矢筒から矢を取り出して構えた。",
+    "sentence_reading": "やづつからやをとりだしてかまえた。",
+    "sentence_meaning": "화살통에서 화살을 꺼내 겨눴어."
+  },
+  {
+    "word_id": "90e606b6-3fad-4f1e-946e-791fce9f57b9",
+    "sentence_ja": "帽子を目深にかぶって歩いた。",
+    "sentence_reading": "ぼうしをまぶかにかぶってあるいた。",
+    "sentence_meaning": "모자를 깊이 눌러쓰고 걸었어."
+  },
+  {
+    "word_id": "90e606b6-3fad-4f1e-946e-791fce9f57b9",
+    "sentence_ja": "彼はフードを目深にかぶった。",
+    "sentence_reading": "かれはフードをまぶかにかぶった。",
+    "sentence_meaning": "그는 후드를 깊이 눌러썼어."
+  },
+  {
+    "word_id": "ee15a20a-232d-487b-a9b8-fb685714ad8f",
+    "sentence_ja": "このカメラは取り回しが難しい。",
+    "sentence_reading": "このカメラはとりまわしがむずかしい。",
+    "sentence_meaning": "이 카메라는 다루기가 어려워."
+  },
+  {
+    "word_id": "ee15a20a-232d-487b-a9b8-fb685714ad8f",
+    "sentence_ja": "軽くて取り回しのいい車が欲しい。",
+    "sentence_reading": "かるくてとりまわしのいいくるまがほしい。",
+    "sentence_meaning": "가볍고 다루기 편한 차가 갖고 싶어."
+  },
+  {
+    "word_id": "a6c2feeb-e97b-402e-8c71-98da2c445222",
+    "sentence_ja": "彼女の白いうなじが美しかった。",
+    "sentence_reading": "かのじょのしろいうなじがうつくしかった。",
+    "sentence_meaning": "그녀의 흰 목덜미가 아름다웠어."
+  },
+  {
+    "word_id": "a6c2feeb-e97b-402e-8c71-98da2c445222",
+    "sentence_ja": "うなじに冷たい風が当たった。",
+    "sentence_reading": "うなじにつめたいかぜがあたった。",
+    "sentence_meaning": "목덜미에 차가운 바람이 닿았어."
+  },
+  {
+    "word_id": "99d32abe-5f02-4359-9949-f3a3d5e969f4",
+    "sentence_ja": "邪魔な荷物を退かしてくれた。",
+    "sentence_reading": "じゃまなにもつをどかしてくれた。",
+    "sentence_meaning": "방해가 되는 짐을 치워줬어."
+  },
+  {
+    "word_id": "99d32abe-5f02-4359-9949-f3a3d5e969f4",
+    "sentence_ja": "車を退かしてもらえますか？",
+    "sentence_reading": "くるまをどかしてもらえますか？",
+    "sentence_meaning": "차를 좀 치워줄 수 있어요?"
+  },
+  {
+    "word_id": "93bb097f-ba4c-4e16-9a9a-272ec6311e9a",
+    "sentence_ja": "彼女の活躍に焼きもちを焼いた。",
+    "sentence_reading": "かのじょのかつやくにやきもちをやいた。",
+    "sentence_meaning": "그녀의 활약에 질투가 났어."
+  },
+  {
+    "word_id": "93bb097f-ba4c-4e16-9a9a-272ec6311e9a",
+    "sentence_ja": "焼きもちを焼くのはやめよう。",
+    "sentence_reading": "やきもちをやくのはやめよう。",
+    "sentence_meaning": "질투하는 건 그만두자."
+  },
+  {
+    "word_id": "86a80001-e0b4-4b5c-8a22-d2c029ee3088",
+    "sentence_ja": "湯葉の料理を初めて食べた。",
+    "sentence_reading": "ゆばのりょうりをはじめてたべた。",
+    "sentence_meaning": "두부껍질 요리를 처음 먹어봤어."
+  },
+  {
+    "word_id": "86a80001-e0b4-4b5c-8a22-d2c029ee3088",
+    "sentence_ja": "京都では湯葉料理が有名です。",
+    "sentence_reading": "きょうとではゆばりょうりがゆうめいです。",
+    "sentence_meaning": "교토에서는 두부껍질 요리가 유명해요."
+  },
+  {
+    "word_id": "bc90995e-f735-4036-a92e-024b5fdc740c",
+    "sentence_ja": "大皿の料理を一人で平らげた。",
+    "sentence_reading": "おおざらのりょうりをひとりでたいらげた。",
+    "sentence_meaning": "큰 접시의 음식을 혼자 다 먹어치웠어."
+  },
+  {
+    "word_id": "bc90995e-f735-4036-a92e-024b5fdc740c",
+    "sentence_ja": "反乱を平らげるのに時間がかかった。",
+    "sentence_reading": "はんらんをたいらげるのにじかんがかかった。",
+    "sentence_meaning": "반란을 평정하는 데 시간이 걸렸어."
+  },
+  {
+    "word_id": "0d9856b9-c499-4138-a4e3-aa64579f6ec0",
+    "sentence_ja": "空腹でパンを貪り食った。",
+    "sentence_reading": "くうふくでパンをむさぼりくった。",
+    "sentence_meaning": "배가 고파서 빵을 게걸스럽게 먹었어."
+  },
+  {
+    "word_id": "0d9856b9-c499-4138-a4e3-aa64579f6ec0",
+    "sentence_ja": "子供たちがお菓子を貪り食っている。",
+    "sentence_reading": "こどもたちがおかしをむさぼりくっている。",
+    "sentence_meaning": "아이들이 과자를 게걸스럽게 먹고 있어."
+  },
+  {
+    "word_id": "91e5b785-a913-4c34-9c5a-87458a1474dc",
+    "sentence_ja": "奇々怪々な出来事が続いた。",
+    "sentence_reading": "ききかいかいなできごとがつづいた。",
+    "sentence_meaning": "기기괴괴한 사건들이 계속 일어났어."
+  },
+  {
+    "word_id": "91e5b785-a913-4c34-9c5a-87458a1474dc",
+    "sentence_ja": "その話は奇々怪々としか言えない。",
+    "sentence_reading": "そのはなしはききかいかいとしかいえない。",
+    "sentence_meaning": "그 이야기는 기기괴괴하다고밖에 말할 수 없어."
+  },
+  {
+    "word_id": "fa07a030-67e5-4d14-8484-a8f0d7dc71db",
+    "sentence_ja": "最後に一言付け足したい。",
+    "sentence_reading": "さいごにひとことつけたしたい。",
+    "sentence_meaning": "마지막으로 한 마디 덧붙이고 싶어."
+  },
+  {
+    "word_id": "fa07a030-67e5-4d14-8484-a8f0d7dc71db",
+    "sentence_ja": "説明に補足を付け足してくれた。",
+    "sentence_reading": "せつめいにほそくをつけたしてくれた。",
+    "sentence_meaning": "설명에 보충 내용을 덧붙여 줬어."
+  },
+  {
+    "word_id": "87f346ad-cd41-48e8-8e0a-0e71ef4347c6",
+    "sentence_ja": "第三期が始まろうとしている。",
+    "sentence_reading": "だいさんきがはじまろうとしている。",
+    "sentence_meaning": "3기가 시작되려 하고 있어."
+  },
+  {
+    "word_id": "87f346ad-cd41-48e8-8e0a-0e71ef4347c6",
+    "sentence_ja": "その期には大きな変化があった。",
+    "sentence_reading": "そのきにはおおきなへんかがあった。",
+    "sentence_meaning": "그 시기에는 큰 변화가 있었어."
+  },
+  {
+    "word_id": "53fdb873-c2bd-445f-82e1-23fbe68abc67",
+    "sentence_ja": "ジョージアの通貨はラリです。",
+    "sentence_reading": "ジョージアのつうかはラリです。",
+    "sentence_meaning": "조지아의 화폐는 라리예요."
+  },
+  {
+    "word_id": "53fdb873-c2bd-445f-82e1-23fbe68abc67",
+    "sentence_ja": "ラリでの支払いができますか？",
+    "sentence_reading": "ラリでのしはらいができますか？",
+    "sentence_meaning": "라리로 지불할 수 있나요?"
+  },
+  {
+    "word_id": "d439eeb5-2bdf-4c07-87f9-681b2e521650",
+    "sentence_ja": "伊豆半島を旅してきました。",
+    "sentence_reading": "いずはんとうをたびしてきました。",
+    "sentence_meaning": "이즈 반도를 여행하고 왔어요."
+  },
+  {
+    "word_id": "d439eeb5-2bdf-4c07-87f9-681b2e521650",
+    "sentence_ja": "伊豆は温泉で有名なところです。",
+    "sentence_reading": "いずはおんせんでゆうめいなところです。",
+    "sentence_meaning": "이즈는 온천으로 유명한 곳이에요."
+  },
+  {
+    "word_id": "c68d078a-a7e2-492f-bf26-8d6fce8a0b73",
+    "sentence_ja": "神社を巡る旅を計画している。",
+    "sentence_reading": "じんじゃをめぐるたびをけいかくしている。",
+    "sentence_meaning": "신사를 돌아보는 여행을 계획하고 있어."
+  },
+  {
+    "word_id": "c68d078a-a7e2-492f-bf26-8d6fce8a0b73",
+    "sentence_ja": "問題を巡る話し合いが行われた。",
+    "sentence_reading": "もんだいをめぐるはなしあいがおこなわれた。",
+    "sentence_meaning": "문제를 둘러싼 논의가 이루어졌어."
+  },
+  {
+    "word_id": "36c8fe03-b9da-4869-adac-c9439e7475af",
+    "sentence_ja": "帰り路に花屋に寄った。",
+    "sentence_reading": "かえりじにはなやによった。",
+    "sentence_meaning": "돌아오는 길에 꽃집에 들렀어."
+  },
+  {
+    "word_id": "36c8fe03-b9da-4869-adac-c9439e7475af",
+    "sentence_ja": "山路を歩くのが好きです。",
+    "sentence_reading": "やまじをあるくのがすきです。",
+    "sentence_meaning": "산길을 걷는 걸 좋아해요."
+  },
+  {
+    "word_id": "de9cc589-ad82-4724-975a-57229dfa6e74",
+    "sentence_ja": "法医学者が遺体を解剖した。",
+    "sentence_reading": "ほういがくしゃがいたいをかいぼうした。",
+    "sentence_meaning": "법의학자가 시신을 해부했어."
+  },
+  {
+    "word_id": "de9cc589-ad82-4724-975a-57229dfa6e74",
+    "sentence_ja": "事件の原因を解剖するように調べた。",
+    "sentence_reading": "じけんのげんいんをかいぼうするようにしらべた。",
+    "sentence_meaning": "사건의 원인을 해부하듯 조사했어."
+  },
+  {
+    "word_id": "92934d4b-dcd1-42d6-aebb-e4c493d75371",
+    "sentence_ja": "駿河の国は昔から栄えていた。",
+    "sentence_reading": "するがのくにはむかしからさかえていた。",
+    "sentence_meaning": "스루가 지역은 옛날부터 번성했어."
+  },
+  {
+    "word_id": "92934d4b-dcd1-42d6-aebb-e4c493d75371",
+    "sentence_ja": "駿河湾で釣りをしたことがある。",
+    "sentence_reading": "するがわんでつりをしたことがある。",
+    "sentence_meaning": "스루가만에서 낚시를 한 적이 있어."
+  },
+  {
+    "word_id": "20c4cd4e-b2c9-40e2-8b5a-1d9b9e596bc5",
+    "sentence_ja": "鞄の緒が切れてしまった。",
+    "sentence_reading": "かばんのおがきれてしまった。",
+    "sentence_meaning": "가방 끈이 끊어져버렸어."
+  },
+  {
+    "word_id": "20c4cd4e-b2c9-40e2-8b5a-1d9b9e596bc5",
+    "sentence_ja": "下駄の緒を新しく替えた。",
+    "sentence_reading": "げたのおをあたらしくかえた。",
+    "sentence_meaning": "나막신 끈을 새것으로 바꿨어."
+  },
+  {
+    "word_id": "fc676e4e-6c3e-4353-a17b-1241a1327453",
+    "sentence_ja": "この犬は雄ですか、雌ですか？",
+    "sentence_reading": "このいぬはおすですか、めすですか？",
+    "sentence_meaning": "이 개는 수컷이에요, 암컷이에요?"
+  },
+  {
+    "word_id": "fc676e4e-6c3e-4353-a17b-1241a1327453",
+    "sentence_ja": "動物園で雄のライオンを見た。",
+    "sentence_reading": "どうぶつえんでおすのライオンをみた。",
+    "sentence_meaning": "동물원에서 수컷 사자를 봤어."
+  },
+  {
+    "word_id": "6475b346-4fcf-4993-bb07-3b721e28ddad",
+    "sentence_ja": "ポットのお湯でお茶を入れた。",
+    "sentence_reading": "ポットのおゆでおちゃをいれた。",
+    "sentence_meaning": "포트의 뜨거운 물로 차를 우렸어."
+  },
+  {
+    "word_id": "6475b346-4fcf-4993-bb07-3b721e28ddad",
+    "sentence_ja": "ポットにお湯を補充しておいた。",
+    "sentence_reading": "ポットにおゆをほじゅうしておいた。",
+    "sentence_meaning": "포트에 뜨거운 물을 보충해 뒀어."
+  },
+  {
+    "word_id": "9a2b1af8-74fc-49d8-9bb4-06584468403d",
+    "sentence_ja": "煙突から煤が落ちてきた。",
+    "sentence_reading": "えんとつからすすがおちてきた。",
+    "sentence_meaning": "굴뚝에서 그을음이 떨어져 왔어."
+  },
+  {
+    "word_id": "9a2b1af8-74fc-49d8-9bb4-06584468403d",
+    "sentence_ja": "火事の後で壁に煤がついていた。",
+    "sentence_reading": "かじのあとでかべにすすがついていた。",
+    "sentence_meaning": "화재 후에 벽에 그을음이 묻어 있었어."
+  },
+  {
+    "word_id": "ebd96f14-54ce-497e-9132-ad07c6f6f6f9",
+    "sentence_ja": "早春の風はまだ少し冷たい。",
+    "sentence_reading": "そうしゅんのかぜはまだすこしつめたい。",
+    "sentence_meaning": "이른 봄 바람은 아직 조금 차가워."
+  },
+  {
+    "word_id": "ebd96f14-54ce-497e-9132-ad07c6f6f6f9",
+    "sentence_ja": "早春に梅の花が咲き始める。",
+    "sentence_reading": "そうしゅんにうめのはながさきはじめる。",
+    "sentence_meaning": "이른 봄에 매화꽃이 피기 시작해."
+  },
+  {
+    "word_id": "3d9ef128-8840-4e3c-9f41-0635e2b73ba3",
+    "sentence_ja": "静かな夜に星を眺めた。",
+    "sentence_reading": "しずかなよるにほしをながめた。",
+    "sentence_meaning": "고요한 밤에 별을 바라봤어."
+  },
+  {
+    "word_id": "3d9ef128-8840-4e3c-9f41-0635e2b73ba3",
+    "sentence_ja": "波の音を聞いて静な気持ちになった。",
+    "sentence_reading": "なみのおとをきいてしずなきもちになった。",
+    "sentence_meaning": "파도 소리를 들으며 고요한 마음이 됐어."
+  },
+  {
+    "word_id": "a40e7e01-2050-4889-a8fc-cac252b041c0",
+    "sentence_ja": "春になると菜の花が咲く。",
+    "sentence_reading": "はるになるとなのはながさく。",
+    "sentence_meaning": "봄이 되면 유채꽃이 피어."
+  },
+  {
+    "word_id": "a40e7e01-2050-4889-a8fc-cac252b041c0",
+    "sentence_ja": "畑で新鮮な菜を収穫した。",
+    "sentence_reading": "はたけでしんせんななをしゅうかくした。",
+    "sentence_meaning": "밭에서 신선한 채소를 수확했어."
+  },
+  {
+    "word_id": "e08877d3-29a0-4002-bb5e-be9cf06b0c3d",
+    "sentence_ja": "緊張して唾を飲み込んだ。",
+    "sentence_reading": "きんちょうしてつばをのみこんだ。",
+    "sentence_meaning": "긴장해서 침을 삼켰어."
+  },
+  {
+    "word_id": "e08877d3-29a0-4002-bb5e-be9cf06b0c3d",
+    "sentence_ja": "おいしそうな料理を見て唾が出た。",
+    "sentence_reading": "おいしそうなりょうりをみてつばがでた。",
+    "sentence_meaning": "맛있어 보이는 음식을 보고 침이 나왔어."
+  },
+  {
+    "word_id": "f6594b0e-5c43-4cfa-bea0-082eb2523f1b",
+    "sentence_ja": "彼の一挙一動に注目が集まった。",
+    "sentence_reading": "かれのいっきょいちどうにちゅうもくがあつまった。",
+    "sentence_meaning": "그의 일거일동에 주목이 쏠렸어."
+  },
+  {
+    "word_id": "f6594b0e-5c43-4cfa-bea0-082eb2523f1b",
+    "sentence_ja": "その挙に出るとは思わなかった。",
+    "sentence_reading": "そのきょにでるとはおもわなかった。",
+    "sentence_meaning": "그런 행동에 나올 줄은 몰랐어."
+  },
+  {
+    "word_id": "02b04721-19e4-4cf4-8fb2-d11d3170c4ec",
+    "sentence_ja": "御連絡ありがとうございます。",
+    "sentence_reading": "ごれんらくありがとうございます。",
+    "sentence_meaning": "연락 주셔서 감사합니다."
+  },
+  {
+    "word_id": "02b04721-19e4-4cf4-8fb2-d11d3170c4ec",
+    "sentence_ja": "御意見をお聞かせください。",
+    "sentence_reading": "ごいけんをおきかせください。",
+    "sentence_meaning": "의견을 들려주세요."
+  },
+  {
+    "word_id": "98f19eda-de5d-483e-9889-e7b93c685fe3",
+    "sentence_ja": "神社で御朱印帳を買いました。",
+    "sentence_reading": "じんじゃでごしゅいんちょうをかいました。",
+    "sentence_meaning": "신사에서 고슈인 수첩을 샀어요."
+  },
+  {
+    "word_id": "98f19eda-de5d-483e-9889-e7b93c685fe3",
+    "sentence_ja": "全国の御朱印を集めるのが趣味だ。",
+    "sentence_reading": "ぜんこくのごしゅいんをあつめるのがしゅみだ。",
+    "sentence_meaning": "전국의 고슈인을 모으는 게 취미야."
+  },
+  {
+    "word_id": "381f63ed-bd26-4d28-a113-1530068bd00e",
+    "sentence_ja": "来月、展覧会が開催されます。",
+    "sentence_reading": "らいげつ、てんらんかいがかいさいされます。",
+    "sentence_meaning": "다음 달에 전람회가 개최됩니다."
+  },
+  {
+    "word_id": "381f63ed-bd26-4d28-a113-1530068bd00e",
+    "sentence_ja": "イベントは無事に開催できた。",
+    "sentence_reading": "イベントはぶじにかいさいできた。",
+    "sentence_meaning": "이벤트는 무사히 개최할 수 있었어."
+  },
+  {
+    "word_id": "3616fa89-7149-4b01-bbca-39dd80d76617",
+    "sentence_ja": "美術展を見に行きませんか？",
+    "sentence_reading": "びじゅつてんをみにいきませんか？",
+    "sentence_meaning": "미술 전시를 보러 가지 않을래요?"
+  },
+  {
+    "word_id": "3616fa89-7149-4b01-bbca-39dd80d76617",
+    "sentence_ja": "個展を開く夢を持っています。",
+    "sentence_reading": "こてんをひらくゆめをもっています。",
+    "sentence_meaning": "개인 전시를 열겠다는 꿈을 갖고 있어요."
+  },
+  {
+    "word_id": "55d00020-a29e-4a03-a2e7-77af5af99dcd",
+    "sentence_ja": "布を染料に三度浸した。",
+    "sentence_reading": "ぬのをせんりょうにみたびひたした。",
+    "sentence_meaning": "천을 염료에 세 번 담갔어."
+  },
+  {
+    "word_id": "55d00020-a29e-4a03-a2e7-77af5af99dcd",
+    "sentence_ja": "この生地は何入の染めですか？",
+    "sentence_reading": "このきじはなんしおのそめですか？",
+    "sentence_meaning": "이 천은 몇 번 염색한 건가요?"
+  },
+  {
+    "word_id": "70e1fc2c-c7ed-4245-861f-07dbc5d9cc8f",
+    "sentence_ja": "コンさんは親切な人です。",
+    "sentence_reading": "こんさんはしんせつなひとです。",
+    "sentence_meaning": "콘 씨는 친절한 사람입니다."
+  },
+  {
+    "word_id": "70e1fc2c-c7ed-4245-861f-07dbc5d9cc8f",
+    "sentence_ja": "コンという名前は珍しいですね。",
+    "sentence_reading": "こんというなまえはめずらしいですね。",
+    "sentence_meaning": "콘이라는 이름은 드물군요."
+  },
+  {
+    "word_id": "775bbf49-64d7-4ccd-aea6-fd50f7d9bdb7",
+    "sentence_ja": "祖父の遺産を相続しました。",
+    "sentence_reading": "そふのいさんをそうぞくしました。",
+    "sentence_meaning": "할아버지의 유산을 상속했습니다."
+  },
+  {
+    "word_id": "775bbf49-64d7-4ccd-aea6-fd50f7d9bdb7",
+    "sentence_ja": "文化遺産を大切に守りたい。",
+    "sentence_reading": "ぶんかいさんをたいせつにまもりたい。",
+    "sentence_meaning": "문화유산을 소중히 지키고 싶다."
+  },
+  {
+    "word_id": "72761afa-4011-4033-b0b1-44e8f0ecb61c",
+    "sentence_ja": "山の景が美しかったです。",
+    "sentence_reading": "やまのけいがうつくしかったです。",
+    "sentence_meaning": "산의 경치가 아름다웠습니다."
+  },
+  {
+    "word_id": "72761afa-4011-4033-b0b1-44e8f0ecb61c",
+    "sentence_ja": "夕景を写真に収めた。",
+    "sentence_reading": "ゆうけいをしゃしんにおさめた。",
+    "sentence_meaning": "저녁 풍경을 사진에 담았다."
+  },
+  {
+    "word_id": "f1523d55-4dd1-47bb-b455-c78c334c7262",
+    "sentence_ja": "彼女は学業で秀でています。",
+    "sentence_reading": "かのじょはがくぎょうでひいでています。",
+    "sentence_meaning": "그녀는 학업에서 뛰어납니다."
+  },
+  {
+    "word_id": "f1523d55-4dd1-47bb-b455-c78c334c7262",
+    "sentence_ja": "優秀な成績を収めた。",
+    "sentence_reading": "ゆうしゅうなせいせきをおさめた。",
+    "sentence_meaning": "우수한 성적을 거뒀다."
+  },
+  {
+    "word_id": "851b33b9-f9ad-4bbd-a369-ed408e9732b5",
+    "sentence_ja": "山頂からの絶景に息をのんだ。",
+    "sentence_reading": "さんちょうからのぜっけいにいきをのんだ。",
+    "sentence_meaning": "산 정상에서 바라본 절경에 숨을 삼켰다."
+  },
+  {
+    "word_id": "851b33b9-f9ad-4bbd-a369-ed408e9732b5",
+    "sentence_ja": "ここは絶景スポットとして有名です。",
+    "sentence_reading": "ここはぜっけいすぽっととしてゆうめいです。",
+    "sentence_meaning": "이곳은 절경 명소로 유명합니다."
+  },
+  {
+    "word_id": "652f7c01-febb-4148-b1a5-9a839e8d7644",
+    "sentence_ja": "今回で三回目の挑戦です。",
+    "sentence_reading": "こんかいでさんかいめのちょうせんです。",
+    "sentence_meaning": "이번으로 세 번째 도전입니다."
+  },
+  {
+    "word_id": "652f7c01-febb-4148-b1a5-9a839e8d7644",
+    "sentence_ja": "何回も練習して上手になった。",
+    "sentence_reading": "なんかいもれんしゅうしてじょうずになった。",
+    "sentence_meaning": "몇 번이나 연습해서 잘하게 됐다."
+  },
+  {
+    "word_id": "f98b5e34-4888-45ca-93fb-ba5c7ebfad73",
+    "sentence_ja": "第一章を読み終えました。",
+    "sentence_reading": "だいいっしょうをよみおえました。",
+    "sentence_meaning": "제1장을 다 읽었습니다."
+  },
+  {
+    "word_id": "f98b5e34-4888-45ca-93fb-ba5c7ebfad73",
+    "sentence_ja": "第三問の答えがわかりません。",
+    "sentence_reading": "だいさんもんのこたえがわかりません。",
+    "sentence_meaning": "3번 문제의 답을 모르겠습니다."
+  },
+  {
+    "word_id": "839efa72-fbd2-4b0e-addd-01f855b19bae",
+    "sentence_ja": "お産のため病院に入院した。",
+    "sentence_reading": "おさんのためびょういんににゅういんした。",
+    "sentence_meaning": "출산을 위해 병원에 입원했다."
+  },
+  {
+    "word_id": "839efa72-fbd2-4b0e-addd-01f855b19bae",
+    "sentence_ja": "この地域の名産は柿です。",
+    "sentence_reading": "このちいきのめいさんはかきです。",
+    "sentence_meaning": "이 지역의 특산품은 감입니다."
+  },
+  {
+    "word_id": "9e84a870-4b8f-4c96-ae7d-7e66a67ecdc7",
+    "sentence_ja": "彼は音楽界で活躍しています。",
+    "sentence_reading": "かれはおんがくかいでかつやくしています。",
+    "sentence_meaning": "그는 음악계에서 활약하고 있습니다."
+  },
+  {
+    "word_id": "9e84a870-4b8f-4c96-ae7d-7e66a67ecdc7",
+    "sentence_ja": "世界中の人々と交流したい。",
+    "sentence_reading": "せかいじゅうのひとびととこうりゅうしたい。",
+    "sentence_meaning": "전 세계 사람들과 교류하고 싶다."
+  },
+  {
+    "word_id": "337f1d94-22b5-4346-931c-b4614444c4eb",
+    "sentence_ja": "富士は日本一高い山です。",
+    "sentence_reading": "ふじはにほんいちたかいやまです。",
+    "sentence_meaning": "후지산은 일본에서 가장 높은 산입니다."
+  },
+  {
+    "word_id": "337f1d94-22b5-4346-931c-b4614444c4eb",
+    "sentence_ja": "富士の頂上から見た景色は最高でした。",
+    "sentence_reading": "ふじのちょうじょうからみたけしきはさいこうでした。",
+    "sentence_meaning": "후지산 정상에서 바라본 경치는 최고였습니다."
+  },
+  {
+    "word_id": "7ce23566-324f-4947-8c41-004a4f219b00",
+    "sentence_ja": "静岡はお茶の産地で有名です。",
+    "sentence_reading": "しずおかはおちゃのさんちでゆうめいです。",
+    "sentence_meaning": "시즈오카는 차 산지로 유명합니다."
+  },
+  {
+    "word_id": "7ce23566-324f-4947-8c41-004a4f219b00",
+    "sentence_ja": "来年、静岡に旅行する予定です。",
+    "sentence_reading": "らいねん、しずおかにりょこうするよていです。",
+    "sentence_meaning": "내년에 시즈오카로 여행할 예정입니다."
+  },
+  {
+    "word_id": "62eec770-5cda-4a18-909f-5a48d68bd543",
+    "sentence_ja": "新着メールが届いています。",
+    "sentence_reading": "しんちゃくめーるがとどいています。",
+    "sentence_meaning": "새 메일이 도착해 있습니다."
+  },
+  {
+    "word_id": "62eec770-5cda-4a18-909f-5a48d68bd543",
+    "sentence_ja": "新着商品をチェックしました。",
+    "sentence_reading": "しんちゃくしょうひんをちぇっくしました。",
+    "sentence_meaning": "신상품을 확인했습니다."
+  },
+  {
+    "word_id": "edad24e1-9ff8-4a2d-ab14-e760fe16327a",
+    "sentence_ja": "初めてで結果が覚束ない。",
+    "sentence_reading": "はじめてでけっかがおぼつかない。",
+    "sentence_meaning": "처음이라 결과가 불안하다."
+  },
+  {
+    "word_id": "edad24e1-9ff8-4a2d-ab14-e760fe16327a",
+    "sentence_ja": "足元が覚束なくて転びそうだった。",
+    "sentence_reading": "あしもとがおぼつかなくてころびそうだった。",
+    "sentence_meaning": "발걸음이 불안정해서 넘어질 뻔했다."
+  },
+  {
+    "word_id": "4048afdf-2b6f-4ca1-a867-fefb3f41c8f4",
+    "sentence_ja": "彼は質問をうまくはぐらかした。",
+    "sentence_reading": "かれはしつもんをうまくはぐらかした。",
+    "sentence_meaning": "그는 질문을 능숙하게 따돌렸다."
+  },
+  {
+    "word_id": "4048afdf-2b6f-4ca1-a867-fefb3f41c8f4",
+    "sentence_ja": "話題をはぐらかすのは良くない。",
+    "sentence_reading": "わだいをはぐらかすのはよくない。",
+    "sentence_meaning": "화제를 회피하는 것은 좋지 않다."
+  },
+  {
+    "word_id": "888e3105-4433-4de0-9eb7-7cf030144f31",
+    "sentence_ja": "随分時間がかかりましたね。",
+    "sentence_reading": "ずいぶんじかんがかかりましたね。",
+    "sentence_meaning": "상당히 시간이 걸렸네요."
+  },
+  {
+    "word_id": "888e3105-4433-4de0-9eb7-7cf030144f31",
+    "sentence_ja": "随分と上手になりましたね。",
+    "sentence_reading": "ずいぶんとじょうずになりましたね。",
+    "sentence_meaning": "많이 실력이 늘었네요."
+  },
+  {
+    "word_id": "14070ca9-597f-451e-a142-619c515cd9a8",
+    "sentence_ja": "今日は体が怠くて動けない。",
+    "sentence_reading": "きょうはからだがだるくてうごけない。",
+    "sentence_meaning": "오늘은 몸이 나른해서 움직이지 못하겠다."
+  },
+  {
+    "word_id": "14070ca9-597f-451e-a142-619c515cd9a8",
+    "sentence_ja": "風邪気味で怠い感じがする。",
+    "sentence_reading": "かぜぎみでだるいかんじがする。",
+    "sentence_meaning": "감기 기운이 있어서 나른한 느낌이 든다."
+  },
+  {
+    "word_id": "a4629a7b-1ce9-4828-84b4-23241f9b259f",
+    "sentence_ja": "失敗して意気消沈しています。",
+    "sentence_reading": "しっぱいしていきしょうちんしています。",
+    "sentence_meaning": "실패해서 의기소침해 있습니다."
+  },
+  {
+    "word_id": "a4629a7b-1ce9-4828-84b4-23241f9b259f",
+    "sentence_ja": "叱られた後、彼は意気消沈していた。",
+    "sentence_reading": "しかられたあと、かれはいきしょうちんしていた。",
+    "sentence_meaning": "혼난 후, 그는 의기소침해 있었다."
+  },
+  {
+    "word_id": "d2379b47-ae02-4ad9-88ad-622090e97467",
+    "sentence_ja": "その話はちょっと眉唾だと思う。",
+    "sentence_reading": "そのはなしはちょっとまゆつばだとおもう。",
+    "sentence_meaning": "그 이야기는 좀 의심스럽다고 생각한다."
+  },
+  {
+    "word_id": "d2379b47-ae02-4ad9-88ad-622090e97467",
+    "sentence_ja": "眉唾な情報に惑わされないで。",
+    "sentence_reading": "まゆつばなじょうほうにまどわされないで。",
+    "sentence_meaning": "의심스러운 정보에 현혹되지 마세요."
+  },
+  {
+    "word_id": "c7e8aaf7-11da-4c65-bb13-c49dace36b44",
+    "sentence_ja": "急な変更に戸惑ってしまった。",
+    "sentence_reading": "きゅうなへんこうにとまどってしまった。",
+    "sentence_meaning": "갑작스러운 변경에 당황해 버렸다."
+  },
+  {
+    "word_id": "c7e8aaf7-11da-4c65-bb13-c49dace36b44",
+    "sentence_ja": "慣れない環境に戸惑っています。",
+    "sentence_reading": "なれないかんきょうにとまどっています。",
+    "sentence_meaning": "낯선 환경에 당황하고 있습니다."
+  },
+  {
+    "word_id": "1bca2dd6-0bf4-4d01-8ef3-e1dbd4afb8a1",
+    "sentence_ja": "峠を越えると村が見えてきた。",
+    "sentence_reading": "とうげをこえるとむらがみえてきた。",
+    "sentence_meaning": "고개를 넘으니 마을이 보이기 시작했다."
+  },
+  {
+    "word_id": "1bca2dd6-0bf4-4d01-8ef3-e1dbd4afb8a1",
+    "sentence_ja": "病気はもう峠を越しました。",
+    "sentence_reading": "びょうきはもうとうげをこしました。",
+    "sentence_meaning": "병은 이미 고비를 넘겼습니다."
+  },
+  {
+    "word_id": "7dd584b5-752c-478c-9225-6d902ab96801",
+    "sentence_ja": "無鉄砲な行動は危険だよ。",
+    "sentence_reading": "むてっぽうなこうどうはきけんだよ。",
+    "sentence_meaning": "무모한 행동은 위험해."
+  },
+  {
+    "word_id": "7dd584b5-752c-478c-9225-6d902ab96801",
+    "sentence_ja": "彼は無鉄砲にも崖を登った。",
+    "sentence_reading": "かれはむてっぽうにもがけをのぼった。",
+    "sentence_meaning": "그는 무모하게도 절벽을 올랐다."
+  },
+  {
+    "word_id": "a79bd41c-03ce-4196-825a-2d9652cef1e4",
+    "sentence_ja": "建物の様式が美しいですね。",
+    "sentence_reading": "たてもののようしきがうつくしいですね。",
+    "sentence_meaning": "건물의 양식이 아름답네요."
+  },
+  {
+    "word_id": "a79bd41c-03ce-4196-825a-2d9652cef1e4",
+    "sentence_ja": "和風の様式で家を建てたい。",
+    "sentence_reading": "わふうのようしきでいえをたてたい。",
+    "sentence_meaning": "일본식 양식으로 집을 짓고 싶다."
+  },
+  {
+    "word_id": "6f749c11-f553-425b-be7b-3e26ae7a0b3d",
+    "sentence_ja": "この街は長年にわたって繁栄してきた。",
+    "sentence_reading": "このまちはながねんにわたってはんえいしてきた。",
+    "sentence_meaning": "이 도시는 오랜 세월 동안 번영해 왔다."
+  },
+  {
+    "word_id": "6f749c11-f553-425b-be7b-3e26ae7a0b3d",
+    "sentence_ja": "会社の繁栄を願っています。",
+    "sentence_reading": "かいしゃのはんえいをねがっています。",
+    "sentence_meaning": "회사의 번영을 바라고 있습니다."
+  },
+  {
+    "word_id": "99638aa6-9e35-4157-9f80-a412f71a3fa0",
+    "sentence_ja": "夜更けに一人で歩くのは怖い。",
+    "sentence_reading": "よふけにひとりであるくのはこわい。",
+    "sentence_meaning": "늦은 밤에 혼자 걷는 것은 무섭다."
+  },
+  {
+    "word_id": "99638aa6-9e35-4157-9f80-a412f71a3fa0",
+    "sentence_ja": "夜更けまで勉強していました。",
+    "sentence_reading": "よふけまでべんきょうしていました。",
+    "sentence_meaning": "밤늦게까지 공부하고 있었습니다."
+  },
+  {
+    "word_id": "fec3464c-d6cf-4e2c-b887-a84790fb3ffb",
+    "sentence_ja": "申請用紙に記入してください。",
+    "sentence_reading": "しんせいようしにきにゅうしてください。",
+    "sentence_meaning": "신청서에 기입해 주세요."
+  },
+  {
+    "word_id": "fec3464c-d6cf-4e2c-b887-a84790fb3ffb",
+    "sentence_ja": "用紙が足りなくなりました。",
+    "sentence_reading": "ようしがたりなくなりました。",
+    "sentence_meaning": "양식지가 부족해졌습니다."
+  },
+  {
+    "word_id": "b15ad71d-1deb-4a59-bb33-36478e31e648",
+    "sentence_ja": "怒りを抑えて理性的に話した。",
+    "sentence_reading": "いかりをおさえてりせいてきにはなした。",
+    "sentence_meaning": "화를 참고 이성적으로 이야기했다."
+  },
+  {
+    "word_id": "b15ad71d-1deb-4a59-bb33-36478e31e648",
+    "sentence_ja": "理性を失ってはいけません。",
+    "sentence_reading": "りせいをうしなってはいけません。",
+    "sentence_meaning": "이성을 잃으면 안 됩니다."
+  },
+  {
+    "word_id": "4e7058d3-a83f-44f6-8b4d-91960e937f4b",
+    "sentence_ja": "タイヤが突然破裂してしまった。",
+    "sentence_reading": "たいやがとつぜんはれつしてしまった。",
+    "sentence_meaning": "타이어가 갑자기 터져 버렸다."
+  },
+  {
+    "word_id": "4e7058d3-a83f-44f6-8b4d-91960e937f4b",
+    "sentence_ja": "風船が破裂して子供が驚いた。",
+    "sentence_reading": "ふうせんがはれつしてこどもがおどろいた。",
+    "sentence_meaning": "풍선이 터져서 아이가 깜짝 놀랐다."
+  },
+  {
+    "word_id": "2acce07b-0f21-435a-ae9e-39e0f3067493",
+    "sentence_ja": "猫が日向でのんびりしている。",
+    "sentence_reading": "ねこがひなたでのんびりしている。",
+    "sentence_meaning": "고양이가 햇볕 아래에서 여유롭게 있다."
+  },
+  {
+    "word_id": "2acce07b-0f21-435a-ae9e-39e0f3067493",
+    "sentence_ja": "日向に出て体を温めた。",
+    "sentence_reading": "ひなたにでてからだをあたためた。",
+    "sentence_meaning": "햇볕이 드는 곳에 나와서 몸을 녹였다."
+  },
+  {
+    "word_id": "5503877f-d7d8-4e79-b6bc-15b27eca19ab",
+    "sentence_ja": "彼女は華々しいデビューを飾った。",
+    "sentence_reading": "かのじょははなばなしいでびゅーをかざった。",
+    "sentence_meaning": "그녀는 화려한 데뷔를 장식했다."
+  },
+  {
+    "word_id": "5503877f-d7d8-4e79-b6bc-15b27eca19ab",
+    "sentence_ja": "華々しい活躍に拍手が沸いた。",
+    "sentence_reading": "はなばなしいかつやくにはくしゅがわいた。",
+    "sentence_meaning": "화려한 활약에 박수가 쏟아졌다."
+  },
+  {
+    "word_id": "4c79334a-c73e-4e8e-8365-9aa8dbc21a38",
+    "sentence_ja": "世論調査の結果が発表された。",
+    "sentence_reading": "よろんちょうさのけっかがはっぴょうされた。",
+    "sentence_meaning": "여론조사 결과가 발표됐다."
+  },
+  {
+    "word_id": "4c79334a-c73e-4e8e-8365-9aa8dbc21a38",
+    "sentence_ja": "世論を無視した政策は失敗する。",
+    "sentence_reading": "よろんをむししたせいさくはしっぱいする。",
+    "sentence_meaning": "여론을 무시한 정책은 실패한다."
+  },
+  {
+    "word_id": "ca006878-7310-43f1-9db1-e754f2b7de25",
+    "sentence_ja": "駅寄りのマンションを探している。",
+    "sentence_reading": "えきよりのまんしょんをさがしている。",
+    "sentence_meaning": "역 근처의 맨션을 찾고 있다."
+  },
+  {
+    "word_id": "ca006878-7310-43f1-9db1-e754f2b7de25",
+    "sentence_ja": "保守寄りの意見が多かった。",
+    "sentence_reading": "ほしゅよりのいけんがおおかった。",
+    "sentence_meaning": "보수 쪽의 의견이 많았다."
+  },
+  {
+    "word_id": "a34d07b0-814e-492c-a0a2-e58d81c0b45c",
+    "sentence_ja": "前の例から類推することができます。",
+    "sentence_reading": "まえのれいからるいすいすることができます。",
+    "sentence_meaning": "이전 예시에서 유추할 수 있습니다."
+  },
+  {
+    "word_id": "a34d07b0-814e-492c-a0a2-e58d81c0b45c",
+    "sentence_ja": "意味は文脈から類推してください。",
+    "sentence_reading": "いみはぶんみゃくからるいすいしてください。",
+    "sentence_meaning": "의미는 문맥에서 유추해 주세요."
+  },
+  {
+    "word_id": "43db43f3-2395-4925-9f60-7901d730930e",
+    "sentence_ja": "巣の中に雛が三羽いた。",
+    "sentence_reading": "すのなかにひながさんわいた。",
+    "sentence_meaning": "둥지 안에 새끼 새가 세 마리 있었다."
+  },
+  {
+    "word_id": "43db43f3-2395-4925-9f60-7901d730930e",
+    "sentence_ja": "雛人形を飾る季節になりました。",
+    "sentence_reading": "ひなにんぎょうをかざるきせつになりました。",
+    "sentence_meaning": "히나 인형을 장식하는 계절이 됐습니다."
+  },
+  {
+    "word_id": "52768681-8e67-4e6a-88fe-cd886480cce2",
+    "sentence_ja": "大雨で川が氾濫しました。",
+    "sentence_reading": "おおあめでかわがはんらんしました。",
+    "sentence_meaning": "폭우로 강이 범람했습니다."
+  },
+  {
+    "word_id": "52768681-8e67-4e6a-88fe-cd886480cce2",
+    "sentence_ja": "ネットには情報が氾濫している。",
+    "sentence_reading": "ねっとにはじょうほうがはんらんしている。",
+    "sentence_meaning": "인터넷에는 정보가 넘쳐흐르고 있다."
+  },
+  {
+    "word_id": "f8080075-794c-48aa-a890-a91fc092c8ed",
+    "sentence_ja": "スマホのバッテリーが切れた。",
+    "sentence_reading": "すまほのばってりーがきれた。",
+    "sentence_meaning": "스마트폰 배터리가 방전됐다."
+  },
+  {
+    "word_id": "f8080075-794c-48aa-a890-a91fc092c8ed",
+    "sentence_ja": "バッテリーを充電してから出かけよう。",
+    "sentence_reading": "ばってりーをじゅうでんしてからでかけよう。",
+    "sentence_meaning": "배터리를 충전하고 나서 외출하자."
+  },
+  {
+    "word_id": "8aa4996a-ced7-419b-86ad-a0730c9f0b6c",
+    "sentence_ja": "健康状態は良好です。",
+    "sentence_reading": "けんこうじょうたいはりょうこうです。",
+    "sentence_meaning": "건강 상태는 양호합니다."
+  },
+  {
+    "word_id": "8aa4996a-ced7-419b-86ad-a0730c9f0b6c",
+    "sentence_ja": "二人の関係は良好に保たれている。",
+    "sentence_reading": "ふたりのかんけいはりょうこうにたもたれている。",
+    "sentence_meaning": "두 사람의 관계는 양호하게 유지되고 있다."
+  },
+  {
+    "word_id": "953c4a2c-3768-4526-9d29-3f9b093b4462",
+    "sentence_ja": "彼の予言が見事に当たった。",
+    "sentence_reading": "かれのよげんがみごとにあたった。",
+    "sentence_meaning": "그의 예언이 놀랍게도 맞아떨어졌다."
+  },
+  {
+    "word_id": "953c4a2c-3768-4526-9d29-3f9b093b4462",
+    "sentence_ja": "未来を予言できる人はいない。",
+    "sentence_reading": "みらいをよげんできるひとはいない。",
+    "sentence_meaning": "미래를 예언할 수 있는 사람은 없다."
+  },
+  {
+    "word_id": "5b58964c-f0f0-4bfc-b41a-6ff516e5829c",
+    "sentence_ja": "余暇を利用して読書をしている。",
+    "sentence_reading": "よかをりようしてどくしょをしている。",
+    "sentence_meaning": "여가를 이용해서 독서를 하고 있다."
+  },
+  {
+    "word_id": "5b58964c-f0f0-4bfc-b41a-6ff516e5829c",
+    "sentence_ja": "最近は余暇の過ごし方が変わってきた。",
+    "sentence_reading": "さいきんはよかのすごしかたがかわってきた。",
+    "sentence_meaning": "최근에는 여가를 보내는 방식이 바뀌어 왔다."
+  },
+  {
+    "word_id": "53c8fdb3-300b-48f7-a390-ce56f9551fef",
+    "sentence_ja": "何事にも善し悪しがあります。",
+    "sentence_reading": "なにごとにもよしあしがあります。",
+    "sentence_meaning": "무슨 일에도 장단점이 있습니다."
+  },
+  {
+    "word_id": "53c8fdb3-300b-48f7-a390-ce56f9551fef",
+    "sentence_ja": "善し悪しを見極める目が必要だ。",
+    "sentence_reading": "よしあしをみきわめるめがひつようだ。",
+    "sentence_meaning": "선악을 판단하는 눈이 필요하다."
+  },
+  {
+    "word_id": "c24ecd6d-6db8-4189-805a-3fdff9368dda",
+    "sentence_ja": "嫌な予感がして外出を止めた。",
+    "sentence_reading": "いやなよかんがしてがいしゅつをやめた。",
+    "sentence_meaning": "불길한 예감이 들어 외출을 그만뒀다."
+  },
+  {
+    "word_id": "c24ecd6d-6db8-4189-805a-3fdff9368dda",
+    "sentence_ja": "何か良いことが起きそうな予感がする。",
+    "sentence_reading": "なにかよいことがおきそうなよかんがする。",
+    "sentence_meaning": "뭔가 좋은 일이 생길 것 같은 예감이 든다."
+  },
+  {
+    "word_id": "6dab04e6-74b3-4d6d-bbea-ab9e9847c437",
+    "sentence_ja": "多くのお客様にご来場いただきました。",
+    "sentence_reading": "おおくのおきゃくさまにごらいじょういただきました。",
+    "sentence_meaning": "많은 고객 분들이 방문해 주셨습니다."
+  },
+  {
+    "word_id": "6dab04e6-74b3-4d6d-bbea-ab9e9847c437",
+    "sentence_ja": "来場者には記念品をお渡しします。",
+    "sentence_reading": "らいじょうしゃにはきねんひんをおわたしします。",
+    "sentence_meaning": "방문객에게는 기념품을 드립니다."
+  },
+  {
+    "word_id": "768c21fd-2ea7-408f-b411-e1e85a654e2a",
+    "sentence_ja": "祖父は最近だいぶ弱ってきた。",
+    "sentence_reading": "そふはさいきんだいぶよわってきた。",
+    "sentence_meaning": "할아버지는 최근 많이 쇠약해졌다."
+  },
+  {
+    "word_id": "768c21fd-2ea7-408f-b411-e1e85a654e2a",
+    "sentence_ja": "困ったことを頼まれて弱っている。",
+    "sentence_reading": "こまったことをたのまれてよわっている。",
+    "sentence_meaning": "곤란한 일을 부탁받아 난처하다."
+  },
+  {
+    "word_id": "19b21b8b-00ce-411c-91f4-e8a20ca1a67b",
+    "sentence_ja": "林業は山の環境を守る仕事だ。",
+    "sentence_reading": "りんぎょうはやまのかんきょうをまもるしごとだ。",
+    "sentence_meaning": "임업은 산의 환경을 지키는 일이다."
+  },
+  {
+    "word_id": "19b21b8b-00ce-411c-91f4-e8a20ca1a67b",
+    "sentence_ja": "林業の担い手が減っている。",
+    "sentence_reading": "りんぎょうのにないてがへっている。",
+    "sentence_meaning": "임업 종사자가 줄고 있다."
+  },
+  {
+    "word_id": "d0cd1e30-5541-4e37-9efb-0aaa43939b1d",
+    "sentence_ja": "環境保護の標語を考えました。",
+    "sentence_reading": "かんきょうほごのひょうごをかんがえました。",
+    "sentence_meaning": "환경 보호 슬로건을 생각했습니다."
+  },
+  {
+    "word_id": "d0cd1e30-5541-4e37-9efb-0aaa43939b1d",
+    "sentence_ja": "学校の標語が壁に掲示されている。",
+    "sentence_reading": "がっこうのひょうごがかべにけいじされている。",
+    "sentence_meaning": "학교 표어가 벽에 게시되어 있다."
+  },
+  {
+    "word_id": "6b9c9857-0e47-4737-a831-604bb48f6066",
+    "sentence_ja": "戦争の悲惨さを忘れてはいけない。",
+    "sentence_reading": "せんそうのひさんさをわすれてはいけない。",
+    "sentence_meaning": "전쟁의 비참함을 잊으면 안 된다."
+  },
+  {
+    "word_id": "6b9c9857-0e47-4737-a831-604bb48f6066",
+    "sentence_ja": "その事故は本当に悲惨でした。",
+    "sentence_reading": "そのじこはほんとうにひさんでした。",
+    "sentence_meaning": "그 사고는 정말 비참했습니다."
+  },
+  {
+    "word_id": "06f4a399-8185-4d7c-903e-9d44fb47c256",
+    "sentence_ja": "男女の比率が半々になっています。",
+    "sentence_reading": "だんじょのひりつがはんはんになっています。",
+    "sentence_meaning": "남녀 비율이 반반이 되어 있습니다."
+  },
+  {
+    "word_id": "06f4a399-8185-4d7c-903e-9d44fb47c256",
+    "sentence_ja": "成功の比率を上げるために練習した。",
+    "sentence_reading": "せいこうのひりつをあげるためにれんしゅうした。",
+    "sentence_meaning": "성공 비율을 높이기 위해 연습했다."
+  },
+  {
+    "word_id": "bbf2574c-3f04-443d-9dd7-5eeeee626b5c",
+    "sentence_ja": "改善の余地がまだあります。",
+    "sentence_reading": "かいぜんのよちがまだあります。",
+    "sentence_meaning": "개선의 여지가 아직 있습니다."
+  },
+  {
+    "word_id": "bbf2574c-3f04-443d-9dd7-5eeeee626b5c",
+    "sentence_ja": "部屋に余地がなくて荷物が置けない。",
+    "sentence_reading": "へやによちがなくてにもつがおけない。",
+    "sentence_meaning": "방에 여유 공간이 없어서 짐을 둘 수 없다."
+  },
+  {
+    "word_id": "0d941686-cdce-41ff-b047-0e8eb157e2c9",
+    "sentence_ja": "よって、この結論に至りました。",
+    "sentence_reading": "よって、このけつろんにいたりました。",
+    "sentence_meaning": "따라서, 이 결론에 이르렀습니다."
+  },
+  {
+    "word_id": "0d941686-cdce-41ff-b047-0e8eb157e2c9",
+    "sentence_ja": "証拠がない、よって無罪だ。",
+    "sentence_reading": "しょうこがない、よってむざいだ。",
+    "sentence_meaning": "증거가 없다, 그러므로 무죄다."
+  },
+  {
+    "word_id": "6343d7ff-d3c7-4613-bba0-f80ed9446a61",
+    "sentence_ja": "屋根からつららが落下した。",
+    "sentence_reading": "やねからつららがらっかした。",
+    "sentence_meaning": "지붕에서 고드름이 낙하했다."
+  },
+  {
+    "word_id": "6343d7ff-d3c7-4613-bba0-f80ed9446a61",
+    "sentence_ja": "飛行機が急降下して落下した。",
+    "sentence_reading": "ひこうきがきゅうこうかしてらっかした。",
+    "sentence_meaning": "비행기가 급강하해서 추락했다."
+  },
+  {
+    "word_id": "fe4a5911-c80d-46ba-bf36-bf138e4bbf1b",
+    "sentence_ja": "洋風のインテリアが好きです。",
+    "sentence_reading": "ようふうのいんてりあがすきです。",
+    "sentence_meaning": "서양식 인테리어를 좋아합니다."
+  },
+  {
+    "word_id": "fe4a5911-c80d-46ba-bf36-bf138e4bbf1b",
+    "sentence_ja": "洋風に改装されたカフェに行った。",
+    "sentence_reading": "ようふうにかいそうされたかふぇにいった。",
+    "sentence_meaning": "서양풍으로 개조된 카페에 갔다."
+  },
+  {
+    "word_id": "10cd4565-9658-4a90-8b15-5f25150922d1",
+    "sentence_ja": "銀行の利子が上がった。",
+    "sentence_reading": "ぎんこうのりしがあがった。",
+    "sentence_meaning": "은행 이자가 올랐다."
+  },
+  {
+    "word_id": "10cd4565-9658-4a90-8b15-5f25150922d1",
+    "sentence_ja": "ローンの利子を払うのが大変だ。",
+    "sentence_reading": "ローンのりしをはらうのがたいへんだ。",
+    "sentence_meaning": "대출 이자를 내는 게 힘들다."
+  },
+  {
+    "word_id": "29f7fd7a-2138-43fb-9c4e-98546920193a",
+    "sentence_ja": "彼は良識のある人だと思う。",
+    "sentence_reading": "かれはりょうしきのあるひとだとおもう。",
+    "sentence_meaning": "그는 분별력 있는 사람이라고 생각한다."
+  },
+  {
+    "word_id": "29f7fd7a-2138-43fb-9c4e-98546920193a",
+    "sentence_ja": "良識を持って行動してください。",
+    "sentence_reading": "りょうしきをもってこうどうしてください。",
+    "sentence_meaning": "분별력을 갖고 행동해 주세요."
+  },
+  {
+    "word_id": "744ca3f1-4cfd-47dd-9d4a-550056f7a7d9",
+    "sentence_ja": "車をよけて道を渡った。",
+    "sentence_reading": "くるまをよけてみちをわたった。",
+    "sentence_meaning": "차를 피해서 길을 건넜다."
+  },
+  {
+    "word_id": "744ca3f1-4cfd-47dd-9d4a-550056f7a7d9",
+    "sentence_ja": "問題をよけて通ることはできない。",
+    "sentence_reading": "もんだいをよけてとおることはできない。",
+    "sentence_meaning": "문제를 회피해서 지나갈 수는 없다."
+  },
+  {
+    "word_id": "33c7833f-3de4-4a9e-ba8e-19a2223a6971",
+    "sentence_ja": "花火が夜空に火花を散らした。",
+    "sentence_reading": "はなびがよぞらにひばなをちらした。",
+    "sentence_meaning": "불꽃놀이가 밤하늘에 불꽃을 흩뿌렸다."
+  },
+  {
+    "word_id": "33c7833f-3de4-4a9e-ba8e-19a2223a6971",
+    "sentence_ja": "二人の議論は火花を散らした。",
+    "sentence_reading": "ふたりのぎろんはひばなをちらした。",
+    "sentence_meaning": "두 사람의 논쟁은 불꽃을 튀겼다."
+  },
+  {
+    "word_id": "894847b1-e7d8-430d-bd67-d5e593a7f684",
+    "sentence_ja": "審判の判定に選手が不満を示した。",
+    "sentence_reading": "しんぱんのはんていにせんしゅがふまんをしめした。",
+    "sentence_meaning": "심판의 판정에 선수가 불만을 나타냈다."
+  },
+  {
+    "word_id": "894847b1-e7d8-430d-bd67-d5e593a7f684",
+    "sentence_ja": "この件の判定は難しい。",
+    "sentence_reading": "このけんのはんていはむずかしい。",
+    "sentence_meaning": "이 건의 판정은 어렵다."
+  },
+  {
+    "word_id": "3f56df6e-2cfd-4be3-9bf1-a3fa13c6ad8f",
+    "sentence_ja": "チームはすぐに反撃に出た。",
+    "sentence_reading": "チームはすぐにはんげきにでた。",
+    "sentence_meaning": "팀은 곧바로 반격에 나섰다."
+  },
+  {
+    "word_id": "3f56df6e-2cfd-4be3-9bf1-a3fa13c6ad8f",
+    "sentence_ja": "批判に対して反撃する準備をした。",
+    "sentence_reading": "ひはんにたいしてはんげきするじゅんびをした。",
+    "sentence_meaning": "비판에 맞서 반격할 준비를 했다."
+  },
+  {
+    "word_id": "25aa0e9c-43d8-4091-9d22-be99f305af56",
+    "sentence_ja": "試合の結果がはらはらした。",
+    "sentence_reading": "しあいのけっかがはらはらした。",
+    "sentence_meaning": "경기 결과가 조마조마했다."
+  },
+  {
+    "word_id": "25aa0e9c-43d8-4091-9d22-be99f305af56",
+    "sentence_ja": "子供が高い所に登ってはらはらした。",
+    "sentence_reading": "こどもがたかいところにのぼってはらはらした。",
+    "sentence_meaning": "아이가 높은 곳에 올라가서 조마조마했다."
+  },
+  {
+    "word_id": "eb33254e-a7f3-4d8e-a13c-18159e1894dc",
+    "sentence_ja": "彼は長い旅の末に果てた。",
+    "sentence_reading": "かれはながいたびのすえにはてた。",
+    "sentence_meaning": "그는 긴 여행 끝에 지쳐 쓰러졌다."
+  },
+  {
+    "word_id": "eb33254e-a7f3-4d8e-a13c-18159e1894dc",
+    "sentence_ja": "体力が果てるまで走り続けた。",
+    "sentence_reading": "たいりょくがはてるまではしりつづけた。",
+    "sentence_meaning": "체력이 소진될 때까지 계속 달렸다."
+  },
+  {
+    "word_id": "f07274c7-0396-409f-b6d3-c13b799fe8bd",
+    "sentence_ja": "最近ゲームにはまっている。",
+    "sentence_reading": "さいきんゲームにはまっている。",
+    "sentence_meaning": "요즘 게임에 빠져 있다."
+  },
+  {
+    "word_id": "f07274c7-0396-409f-b6d3-c13b799fe8bd",
+    "sentence_ja": "このドレスはあなたにぴったりはまっている。",
+    "sentence_reading": "このドレスはあなたにぴったりはまっている。",
+    "sentence_meaning": "이 드레스가 당신에게 딱 맞는다."
+  },
+  {
+    "word_id": "9a0c3db3-fd9c-453e-a8ab-85489e81a745",
+    "sentence_ja": "海で遊んで日焼けしてしまった。",
+    "sentence_reading": "うみでたいせつにひやけしてしまった。",
+    "sentence_meaning": "바다에서 놀다가 햇볕에 타버렸다."
+  },
+  {
+    "word_id": "9a0c3db3-fd9c-453e-a8ab-85489e81a745",
+    "sentence_ja": "日焼け止めを塗ってから出かけた。",
+    "sentence_reading": "ひやけどめをぬってからでかけた。",
+    "sentence_meaning": "선크림을 바르고 나서 외출했다."
+  },
+  {
+    "word_id": "a24bf8a9-35e3-434d-927a-0d8159b52d59",
+    "sentence_ja": "重いかばんを引きずって歩いた。",
+    "sentence_reading": "おもいかばんをひきずってあるいた。",
+    "sentence_meaning": "무거운 가방을 끌며 걸었다."
+  },
+  {
+    "word_id": "a24bf8a9-35e3-434d-927a-0d8159b52d59",
+    "sentence_ja": "失恋をいつまでも引きずっている。",
+    "sentence_reading": "しつれんをいつまでもひきずっている。",
+    "sentence_meaning": "실연을 언제까지고 질질 끌고 있다."
+  },
+  {
+    "word_id": "0de1f34a-1804-4c94-b518-cbf97ed3ed43",
+    "sentence_ja": "一頃はここもにぎやかだった。",
+    "sentence_reading": "ひところはここもにぎやかだった。",
+    "sentence_meaning": "한때는 이곳도 활기찼었다."
+  },
+  {
+    "word_id": "0de1f34a-1804-4c94-b518-cbf97ed3ed43",
+    "sentence_ja": "一頃彼女と毎日会っていた。",
+    "sentence_reading": "ひところかのじょとまいにちあっていた。",
+    "sentence_meaning": "한때는 그녀와 매일 만났었다."
+  },
+  {
+    "word_id": "3ac0fa2d-839c-4dc7-b0dc-149775395696",
+    "sentence_ja": "この彫刻は立体感があって素晴らしい。",
+    "sentence_reading": "このちょうこくはりったいかんがあってすばらしい。",
+    "sentence_meaning": "이 조각은 입체감이 있어서 훌륭하다."
+  },
+  {
+    "word_id": "3ac0fa2d-839c-4dc7-b0dc-149775395696",
+    "sentence_ja": "子供が紙で立体を作った。",
+    "sentence_reading": "こどもがかみでりったいをつくった。",
+    "sentence_meaning": "아이가 종이로 입체 도형을 만들었다."
+  },
+  {
+    "word_id": "cfee6e6e-81a3-4d84-8690-0f55c0369979",
+    "sentence_ja": "鏡に光が反射して眩しい。",
+    "sentence_reading": "かがみにひかりがはんしゃしてまぶしい。",
+    "sentence_meaning": "거울에 빛이 반사되어 눈부시다."
+  },
+  {
+    "word_id": "cfee6e6e-81a3-4d84-8690-0f55c0369979",
+    "sentence_ja": "熱いものを触ると反射的に手を引く。",
+    "sentence_reading": "あついものをさわるとはんしゃてきにてをひく。",
+    "sentence_meaning": "뜨거운 것을 만지면 반사적으로 손을 뺀다."
+  },
+  {
+    "word_id": "c26cb35e-5bfd-4559-9816-92b76916395b",
+    "sentence_ja": "来週のレースに向けて練習している。",
+    "sentence_reading": "らいしゅうのレースにむけてれんしゅうしている。",
+    "sentence_meaning": "다음 주 레이스를 앞두고 연습하고 있다."
+  },
+  {
+    "word_id": "c26cb35e-5bfd-4559-9816-92b76916395b",
+    "sentence_ja": "ドレスのレースがとても繊細だ。",
+    "sentence_reading": "ドレスのレースがとてもせんさいだ。",
+    "sentence_meaning": "드레스의 레이스가 매우 섬세하다."
+  },
+  {
+    "word_id": "96613e32-632d-4e30-8409-a577a86305f8",
+    "sentence_ja": "新しいルールに反発する声が多い。",
+    "sentence_reading": "あたらしいルールにはんぱつするこえがおおい。",
+    "sentence_meaning": "새로운 규칙에 반발하는 목소리가 많다."
+  },
+  {
+    "word_id": "96613e32-632d-4e30-8409-a577a86305f8",
+    "sentence_ja": "ボールが壁に当たって反発した。",
+    "sentence_reading": "ボールがかべにあたってはんぱつした。",
+    "sentence_meaning": "공이 벽에 부딪혀 튕겨났다."
+  },
+  {
+    "word_id": "9fe2a8d6-3492-46ec-b94c-34749eddf0e1",
+    "sentence_ja": "彼女は微笑みながら答えた。",
+    "sentence_reading": "かのじょはびしょうみながらこたえた。",
+    "sentence_meaning": "그녀는 미소 지으며 대답했다."
+  },
+  {
+    "word_id": "9fe2a8d6-3492-46ec-b94c-34749eddf0e1",
+    "sentence_ja": "赤ちゃんの微笑に心が和んだ。",
+    "sentence_reading": "あかちゃんのびしょうにこころがなごんだ。",
+    "sentence_meaning": "아기의 미소에 마음이 따뜻해졌다."
+  },
+  {
+    "word_id": "7993e122-8849-4270-adb2-3900231af163",
+    "sentence_ja": "彼は左利きでギターを弾く。",
+    "sentence_reading": "かれはひだりききでギターをひく。",
+    "sentence_meaning": "그는 왼손잡이로 기타를 친다."
+  },
+  {
+    "word_id": "7993e122-8849-4270-adb2-3900231af163",
+    "sentence_ja": "左利き用のハサミを探している。",
+    "sentence_reading": "ひだりききようのハサミをさがしている。",
+    "sentence_meaning": "왼손잡이용 가위를 찾고 있다."
+  },
+  {
+    "word_id": "40cf92ae-0035-41d8-a682-a60708ab898d",
+    "sentence_ja": "パンをスープに浸して食べた。",
+    "sentence_reading": "パンをスープにひたしてたべた。",
+    "sentence_meaning": "빵을 수프에 적셔서 먹었다."
+  },
+  {
+    "word_id": "40cf92ae-0035-41d8-a682-a60708ab898d",
+    "sentence_ja": "布を水に浸してから絞った。",
+    "sentence_reading": "ぬのをみずにひたしてからしぼった。",
+    "sentence_meaning": "천을 물에 담갔다가 짰다."
+  },
+  {
+    "word_id": "5510b6e8-87bb-4d2b-be84-a7a4b338c3f0",
+    "sentence_ja": "オリンピックで日の丸を見て感動した。",
+    "sentence_reading": "オリンピックでひのまるをみてかんどうした。",
+    "sentence_meaning": "올림픽에서 일장기를 보고 감동했다."
+  },
+  {
+    "word_id": "5510b6e8-87bb-4d2b-be84-a7a4b338c3f0",
+    "sentence_ja": "日の丸のお弁当を作った。",
+    "sentence_reading": "ひのまるのおべんとうをつくった。",
+    "sentence_meaning": "일장기 도시락(히노마루 도시락)을 만들었다."
+  },
+  {
+    "word_id": "ef8e78f6-7ec3-405f-8fba-dd3d17496440",
+    "sentence_ja": "カレーにライスをつけて食べた。",
+    "sentence_reading": "カレーにライスをつけてたべた。",
+    "sentence_meaning": "카레에 밥을 곁들여 먹었다."
+  },
+  {
+    "word_id": "ef8e78f6-7ec3-405f-8fba-dd3d17496440",
+    "sentence_ja": "ライスかパンかどちらにしますか？",
+    "sentence_reading": "ライスかパンかどちらにしますか？",
+    "sentence_meaning": "밥으로 하시겠어요, 빵으로 하시겠어요?"
+  },
+  {
+    "word_id": "5c372d77-fa40-445d-88a6-850cfce7c16e",
+    "sentence_ja": "駅前でびらを配っている人がいた。",
+    "sentence_reading": "えきまえでびらをくばっているひとがいた。",
+    "sentence_meaning": "역 앞에서 전단지를 나눠주는 사람이 있었다."
+  },
+  {
+    "word_id": "5c372d77-fa40-445d-88a6-850cfce7c16e",
+    "sentence_ja": "セールのびらが郵便受けに入っていた。",
+    "sentence_reading": "セールのびらがゆうびんうけにはいっていた。",
+    "sentence_meaning": "세일 전단지가 우편함에 들어 있었다."
+  },
+  {
+    "word_id": "02150702-7b8b-4fab-a0fd-fb717be3bae0",
+    "sentence_ja": "余程疲れていたのか、すぐ寝た。",
+    "sentence_reading": "よほどつかれていたのか、すぐねた。",
+    "sentence_meaning": "꽤 피곤했던 건지, 바로 잠들었다."
+  },
+  {
+    "word_id": "02150702-7b8b-4fab-a0fd-fb717be3bae0",
+    "sentence_ja": "余程のことがない限り行かない。",
+    "sentence_reading": "よほどのことがないかぎりいかない。",
+    "sentence_meaning": "웬만한 일이 없는 한 가지 않는다."
+  },
+  {
+    "word_id": "3e9f9b6f-1f42-4b1c-924b-e3e04c612200",
+    "sentence_ja": "彼は密かに彼女を好きだった。",
+    "sentence_reading": "かれはひそかにかのじょをすきだった。",
+    "sentence_meaning": "그는 몰래 그녀를 좋아하고 있었다."
+  },
+  {
+    "word_id": "3e9f9b6f-1f42-4b1c-924b-e3e04c612200",
+    "sentence_ja": "計画は密かに進められていた。",
+    "sentence_reading": "けいかくはひそかにすすめられていた。",
+    "sentence_meaning": "계획은 은밀하게 진행되고 있었다."
+  },
+  {
+    "word_id": "7aae7b3f-7251-4a6e-9e10-13b03fb47b56",
+    "sentence_ja": "人目を気にしながら歩いた。",
+    "sentence_reading": "ひとめをきにしながらあるいた。",
+    "sentence_meaning": "사람들 눈을 신경 쓰면서 걸었다."
+  },
+  {
+    "word_id": "7aae7b3f-7251-4a6e-9e10-13b03fb47b56",
+    "sentence_ja": "人目のある場所では喧嘩しないで。",
+    "sentence_reading": "ひとめのあるばしょではけんかしないで。",
+    "sentence_meaning": "사람들이 보는 곳에서는 싸우지 마."
+  },
+  {
+    "word_id": "3cd56954-b124-417f-884b-1c61c0a5563d",
+    "sentence_ja": "彼女はまさにレディーだと思う。",
+    "sentence_reading": "かのじょはまさにレディーだとおもう。",
+    "sentence_meaning": "그녀는 정말 숙녀라고 생각한다."
+  },
+  {
+    "word_id": "3cd56954-b124-417f-884b-1c61c0a5563d",
+    "sentence_ja": "レディーファーストを忘れないで。",
+    "sentence_reading": "レディーファーストをわすれないで。",
+    "sentence_meaning": "레이디 퍼스트를 잊지 마."
+  },
+  {
+    "word_id": "f536c6ab-2db7-40b2-9452-104a9e517edc",
+    "sentence_ja": "フレームが熱で歪んでしまった。",
+    "sentence_reading": "フレームがねつでひずんでしまった。",
+    "sentence_meaning": "프레임이 열 때문에 휘어버렸다."
+  },
+  {
+    "word_id": "f536c6ab-2db7-40b2-9452-104a9e517edc",
+    "sentence_ja": "社会のひずみが問題になっている。",
+    "sentence_reading": "しゃかいのひずみがもんだいになっている。",
+    "sentence_meaning": "사회의 왜곡이 문제가 되고 있다."
+  },
+  {
+    "word_id": "dc775b7d-7f00-42ff-9372-199effb6f867",
+    "sentence_ja": "独裁政権が国民を抑圧している。",
+    "sentence_reading": "どくさいせいけんがこくみんをよくあつしている。",
+    "sentence_meaning": "독재 정권이 국민을 억압하고 있다."
+  },
+  {
+    "word_id": "dc775b7d-7f00-42ff-9372-199effb6f867",
+    "sentence_ja": "感情の抑圧は体に悪い。",
+    "sentence_reading": "かんじょうのよくあつはからだにわるい。",
+    "sentence_meaning": "감정 억압은 몸에 좋지 않다."
+  },
+  {
+    "word_id": "37cad404-bc84-418c-8d33-0611346dd22c",
+    "sentence_ja": "健康のためにお酒を控えている。",
+    "sentence_reading": "けんこうのためにおさけをひかえている。",
+    "sentence_meaning": "건강을 위해 술을 삼가고 있다."
+  },
+  {
+    "word_id": "37cad404-bc84-418c-8d33-0611346dd22c",
+    "sentence_ja": "発言を控えるよう言われた。",
+    "sentence_reading": "はつげんをひかえるようにいわれた。",
+    "sentence_meaning": "발언을 자제하라는 말을 들었다."
+  },
+  {
+    "word_id": "f328ec7c-e8bd-4100-819f-94a7585f93f6",
+    "sentence_ja": "パーティーで余興として歌を歌った。",
+    "sentence_reading": "パーティーでよきょうとしてうたをうたった。",
+    "sentence_meaning": "파티에서 여흥으로 노래를 불렀다."
+  },
+  {
+    "word_id": "f328ec7c-e8bd-4100-819f-94a7585f93f6",
+    "sentence_ja": "宴会の余興が盛り上がった。",
+    "sentence_reading": "えんかいのよきょうがもりあがった。",
+    "sentence_meaning": "연회의 여흥이 흥겨워졌다."
+  },
+  {
+    "word_id": "5717c4bf-49dc-4fb8-8439-4a9572254a02",
+    "sentence_ja": "薬を飲んだら反応が出た。",
+    "sentence_reading": "くすりをのんだらはんのうがでた。",
+    "sentence_meaning": "약을 먹었더니 반응이 나타났다."
+  },
+  {
+    "word_id": "5717c4bf-49dc-4fb8-8439-4a9572254a02",
+    "sentence_ja": "お客さんの反応がとても良かった。",
+    "sentence_reading": "おきゃくさんのはんのうがとてもよかった。",
+    "sentence_meaning": "손님들의 반응이 매우 좋았다."
+  },
+  {
+    "word_id": "bdf6a37a-2b22-4006-bb8c-1db5ebcf4acf",
+    "sentence_ja": "会社の利潤が今年は増えた。",
+    "sentence_reading": "かいしゃのりじゅんがことしはふえた。",
+    "sentence_meaning": "회사의 이익이 올해는 늘었다."
+  },
+  {
+    "word_id": "bdf6a37a-2b22-4006-bb8c-1db5ebcf4acf",
+    "sentence_ja": "利潤を追求するだけが目的ではない。",
+    "sentence_reading": "りじゅんをついきゅうするだけがもくてきではない。",
+    "sentence_meaning": "이익 추구만이 목적은 아니다."
+  },
+  {
+    "word_id": "7860c17b-fb18-4401-88f3-684fdf9bdd8f",
+    "sentence_ja": "立法機関が新しい法律を作った。",
+    "sentence_reading": "りっぽうきかんがあたらしいほうりつをつくった。",
+    "sentence_meaning": "입법 기관이 새로운 법률을 만들었다."
+  },
+  {
+    "word_id": "7860c17b-fb18-4401-88f3-684fdf9bdd8f",
+    "sentence_ja": "立法の過程は複雑だ。",
+    "sentence_reading": "りっぽうのかていはふくざつだ。",
+    "sentence_meaning": "입법 과정은 복잡하다."
+  },
+  {
+    "word_id": "c09c27e2-ec6b-4e7f-a014-f8dd2b1ebcb6",
+    "sentence_ja": "結婚式の日取りが決まった。",
+    "sentence_reading": "けっこんしきのひどりがきまった。",
+    "sentence_meaning": "결혼식 날짜가 정해졌다."
+  },
+  {
+    "word_id": "c09c27e2-ec6b-4e7f-a014-f8dd2b1ebcb6",
+    "sentence_ja": "引っ越しの日取りを相談しよう。",
+    "sentence_reading": "ひっこしのひどりをそうだんしよう。",
+    "sentence_meaning": "이사 날짜를 상의해 보자."
+  },
+  {
+    "word_id": "fc85dbb7-1e2a-4e89-b0b4-bd02ac0f8859",
+    "sentence_ja": "戦争中に町が略奪された。",
+    "sentence_reading": "せんそうちゅうにまちがりゃくだつされた。",
+    "sentence_meaning": "전쟁 중에 마을이 약탈당했다."
+  },
+  {
+    "word_id": "fc85dbb7-1e2a-4e89-b0b4-bd02ac0f8859",
+    "sentence_ja": "文化財の略奪は許されない。",
+    "sentence_reading": "ぶんかざいのりゃくだつはゆるされない。",
+    "sentence_meaning": "문화재 약탈은 용납할 수 없다."
+  },
+  {
+    "word_id": "4e1fc857-ae29-46f3-b5a9-93c4329d618d",
+    "sentence_ja": "一息ついてからまた始めよう。",
+    "sentence_reading": "ひといきついてからまたはじめよう。",
+    "sentence_meaning": "잠깐 쉬고 나서 다시 시작하자."
+  },
+  {
+    "word_id": "4e1fc857-ae29-46f3-b5a9-93c4329d618d",
+    "sentence_ja": "山の頂上でやっと一息ついた。",
+    "sentence_reading": "やまのちょうじょうでやっとひといきついた。",
+    "sentence_meaning": "산 정상에서 겨우 한숨 돌렸다."
+  },
+  {
+    "word_id": "6ccc3437-4687-40ff-b779-e0519b800e86",
+    "sentence_ja": "機械のレバーを引いて動かした。",
+    "sentence_reading": "きかいのレバーをひいてうごかした。",
+    "sentence_meaning": "기계의 레버를 당겨서 작동시켰다."
+  },
+  {
+    "word_id": "6ccc3437-4687-40ff-b779-e0519b800e86",
+    "sentence_ja": "レバー炒めを夕飯に作った。",
+    "sentence_reading": "レバーいためをゆうはんにつくった。",
+    "sentence_meaning": "간볶음을 저녁으로 만들었다."
+  },
+  {
+    "word_id": "bafcb6a7-baab-4ac4-a59c-1996d66d16f0",
+    "sentence_ja": "事故の要因を調査している。",
+    "sentence_reading": "じこのよういんをちょうさしている。",
+    "sentence_meaning": "사고의 주요 원인을 조사하고 있다."
+  },
+  {
+    "word_id": "bafcb6a7-baab-4ac4-a59c-1996d66d16f0",
+    "sentence_ja": "成功の要因はチームワークだった。",
+    "sentence_reading": "せいこうのよういんはチームワークだった。",
+    "sentence_meaning": "성공의 주된 이유는 팀워크였다."
+  },
+  {
+    "word_id": "fa1e6778-1b79-4314-8e56-b9c056d1028a",
+    "sentence_ja": "彼女の人柄はとても温かい。",
+    "sentence_reading": "かのじょのひとがらはとてもあたたかい。",
+    "sentence_meaning": "그녀의 인품은 매우 따뜻하다."
+  },
+  {
+    "word_id": "fa1e6778-1b79-4314-8e56-b9c056d1028a",
+    "sentence_ja": "人柄の良さが伝わってくる。",
+    "sentence_reading": "ひとがらのよさがつたわってくる。",
+    "sentence_meaning": "좋은 인품이 전해져 온다."
+  },
+  {
+    "word_id": "2f215cbe-53ee-401b-9ace-b589a3a37cac",
+    "sentence_ja": "友達に新しい髪型を冷やかされた。",
+    "sentence_reading": "ともだちにあたらしいかみがたをひやかされた。",
+    "sentence_meaning": "친구에게 새 머리 스타일로 놀림받았다."
+  },
+  {
+    "word_id": "2f215cbe-53ee-401b-9ace-b589a3a37cac",
+    "sentence_ja": "店をぶらぶら冷やかして回った。",
+    "sentence_reading": "みせをぶらぶらひやかしてまわった。",
+    "sentence_meaning": "가게를 그냥 구경하며 돌아다녔다."
+  },
+  {
+    "word_id": "392ddcee-2734-4e9b-a479-ac8547c7a95e",
+    "sentence_ja": "ネジが緩んで外れてしまった。",
+    "sentence_reading": "ネジがゆるんではずれてしまった。",
+    "sentence_meaning": "나사가 느슨해져서 빠져버렸다."
+  },
+  {
+    "word_id": "392ddcee-2734-4e9b-a479-ac8547c7a95e",
+    "sentence_ja": "試験が終わって気が緩んだ。",
+    "sentence_reading": "しけんがおわってきがゆるんだ。",
+    "sentence_meaning": "시험이 끝나서 긴장이 풀렸다."
+  },
+  {
+    "word_id": "63dc3d0d-f521-4e48-bbc8-19ee847453de",
+    "sentence_ja": "不注意が事故を引き起こした。",
+    "sentence_reading": "ふちゅういがじこをひきおこした。",
+    "sentence_meaning": "부주의가 사고를 일으켰다."
+  },
+  {
+    "word_id": "63dc3d0d-f521-4e48-bbc8-19ee847453de",
+    "sentence_ja": "彼の発言が議論を引き起こした。",
+    "sentence_reading": "かれのはつげんがぎろんをひきおこした。",
+    "sentence_meaning": "그의 발언이 논쟁을 야기했다."
+  },
+  {
+    "word_id": "55efbe8a-560d-4340-9564-90fe5cf0c646",
+    "sentence_ja": "実験で塩を水に溶かして溶液を作った。",
+    "sentence_reading": "じっけんでしおをみずにとかしてようえきをつくった。",
+    "sentence_meaning": "실험에서 소금을 물에 녹여 용액을 만들었다."
+  },
+  {
+    "word_id": "55efbe8a-560d-4340-9564-90fe5cf0c646",
+    "sentence_ja": "この溶液は酸性なので注意してください。",
+    "sentence_reading": "このようえきはさんせいなのでちゅういしてください。",
+    "sentence_meaning": "이 용액은 산성이니 주의해 주세요."
+  },
+  {
+    "word_id": "5b292762-5c85-4cbd-b426-c85896bac53e",
+    "sentence_ja": "ベルトを少し緩めて楽にした。",
+    "sentence_reading": "ベルトをすこしゆるめてらくにした。",
+    "sentence_meaning": "벨트를 조금 느슨하게 해서 편하게 했다."
+  },
+  {
+    "word_id": "5b292762-5c85-4cbd-b426-c85896bac53e",
+    "sentence_ja": "ペースを緩めて後続を待った。",
+    "sentence_reading": "ペースをゆるめてこうぞくをまった。",
+    "sentence_meaning": "속도를 늦추고 뒤따라오는 사람을 기다렸다."
+  },
+  {
+    "word_id": "b9d140a4-a435-432b-a062-3bde5f97e7a4",
+    "sentence_ja": "壁にひびが入っていて危ない。",
+    "sentence_reading": "かべにひびがはいっていてあぶない。",
+    "sentence_meaning": "벽에 균열이 생겨서 위험하다."
+  },
+  {
+    "word_id": "b9d140a4-a435-432b-a062-3bde5f97e7a4",
+    "sentence_ja": "皿が落ちてひびが入ってしまった。",
+    "sentence_reading": "さらがおちてひびがはいってしまった。",
+    "sentence_meaning": "접시가 떨어져서 금이 가버렸다."
+  },
+  {
+    "word_id": "e3059dda-8a45-4ff1-9255-74ea6de8f5b1",
+    "sentence_ja": "履歴書に職歴を書いた。",
+    "sentence_reading": "りれきしょにしょくれきをかいた。",
+    "sentence_meaning": "이력서에 직업 경력을 적었다."
+  },
+  {
+    "word_id": "e3059dda-8a45-4ff1-9255-74ea6de8f5b1",
+    "sentence_ja": "ブラウザの履歴を消した。",
+    "sentence_reading": "ブラウザのりれきをけした。",
+    "sentence_meaning": "브라우저 기록을 삭제했다."
+  },
+  {
+    "word_id": "e1689884-8f45-47dd-8f4f-2e271ef3c930",
+    "sentence_ja": "運転中に余所見をしてはいけない。",
+    "sentence_reading": "うんてんちゅうによそみをしてはいけない。",
+    "sentence_meaning": "운전 중에 한눈을 팔면 안 된다."
+  },
+  {
+    "word_id": "e1689884-8f45-47dd-8f4f-2e271ef3c930",
+    "sentence_ja": "先生に余所見しないよう注意された。",
+    "sentence_reading": "せんせいによそみしないようちゅういされた。",
+    "sentence_meaning": "선생님에게 한눈팔지 말라고 주의를 받았다."
+  },
+  {
+    "word_id": "9c7a1ded-7377-46cb-b751-62c009a30865",
+    "sentence_ja": "雛祭りに娘のために雛人形を飾った。",
+    "sentence_reading": "ひなまつりにむすめのためにひなにんぎょうをかざった。",
+    "sentence_meaning": "히나마쓰리에 딸을 위해 히나 인형을 장식했다."
+  },
+  {
+    "word_id": "9c7a1ded-7377-46cb-b751-62c009a30865",
+    "sentence_ja": "雛祭りはちらし寿司を食べる習慣がある。",
+    "sentence_reading": "ひなまつりはちらしずしをたべるしゅうかんがある。",
+    "sentence_meaning": "히나마쓰리에는 치라시 초밥을 먹는 관습이 있다."
+  },
+  {
+    "word_id": "a53ea0eb-af1a-473e-9770-6ad1cc4c6cf3",
+    "sentence_ja": "美術館で有名な絵を見てきた。",
+    "sentence_reading": "びじゅつかんでゆうめいなえをみてきた。",
+    "sentence_meaning": "미술관에서 유명한 그림을 보고 왔다."
+  },
+  {
+    "word_id": "a53ea0eb-af1a-473e-9770-6ad1cc4c6cf3",
+    "sentence_ja": "彼女は美術の才能がある。",
+    "sentence_reading": "かのじょはびじゅつのさいのうがある。",
+    "sentence_meaning": "그녀는 미술에 재능이 있다."
+  },
+  {
+    "word_id": "db2dc864-ccb0-4883-994a-481d1a4e7a5a",
+    "sentence_ja": "停電でランプをつけて過ごした。",
+    "sentence_reading": "ていでんでランプをつけてすごした。",
+    "sentence_meaning": "정전으로 램프를 켜고 지냈다."
+  },
+  {
+    "word_id": "db2dc864-ccb0-4883-994a-481d1a4e7a5a",
+    "sentence_ja": "古いランプが部屋を温かく照らした。",
+    "sentence_reading": "ふるいランプがへやをあたたかくてらした。",
+    "sentence_meaning": "오래된 램프가 방을 따뜻하게 비췄다."
+  },
+  {
+    "word_id": "e470f7d3-7735-43c2-b455-d96982d6c3ea",
+    "sentence_ja": "彼の理屈は全然わからない。",
+    "sentence_reading": "かれのりくつはぜんぜんわからない。",
+    "sentence_meaning": "그의 이론은 전혀 이해가 안 된다."
+  },
+  {
+    "word_id": "e470f7d3-7735-43c2-b455-d96982d6c3ea",
+    "sentence_ja": "理屈はいいから早くやって。",
+    "sentence_reading": "りくつはいいからはやくやって。",
+    "sentence_meaning": "이유는 됐으니까 빨리 해."
+  },
+  {
+    "word_id": "ec38af6f-fc40-43e9-999a-b4bbcb5a2244",
+    "sentence_ja": "一辺が5センチの立方体を描いて。",
+    "sentence_reading": "いっぺんが5せんちのりっぽうたいをかいて。",
+    "sentence_meaning": "한 변이 5센티미터인 정육면체를 그려봐."
+  },
+  {
+    "word_id": "ec38af6f-fc40-43e9-999a-b4bbcb5a2244",
+    "sentence_ja": "立方の体積を計算してください。",
+    "sentence_reading": "りっぽうのたいせきをけいさんしてください。",
+    "sentence_meaning": "정육면체의 부피를 계산해 주세요."
+  },
+  {
+    "word_id": "77c866a5-8af1-40f2-b409-1c4c9275c6c3",
+    "sentence_ja": "この坂は緩やかで歩きやすい。",
+    "sentence_reading": "このさかはゆるやかであるきやすい。",
+    "sentence_meaning": "이 언덕은 완만해서 걷기 편하다."
+  },
+  {
+    "word_id": "77c866a5-8af1-40f2-b409-1c4c9275c6c3",
+    "sentence_ja": "彼女は緩やかな口調で話した。",
+    "sentence_reading": "かのじょはゆるやかなくちょうではなした。",
+    "sentence_meaning": "그녀는 느긋한 말투로 이야기했다."
+  },
+  {
+    "word_id": "90bed5be-7130-4166-bfba-f5a843223c29",
+    "sentence_ja": "自転車のタイヤがパンクした。",
+    "sentence_reading": "じてんしゃのたいやがぱんくした。",
+    "sentence_meaning": "자전거 타이어가 펑크 났다."
+  },
+  {
+    "word_id": "90bed5be-7130-4166-bfba-f5a843223c29",
+    "sentence_ja": "彼はパンクバンドの大ファンだ。",
+    "sentence_reading": "かれはぱんくばんどのおおふぁんだ。",
+    "sentence_meaning": "그는 펑크 밴드의 열렬한 팬이다."
+  },
+  {
+    "word_id": "00924b99-eae7-42d6-9796-64e6ea6a8061",
+    "sentence_ja": "それは初耳だ、本当に？",
+    "sentence_reading": "それははつみみだ、ほんとうに？",
+    "sentence_meaning": "그건 처음 듣는 얘기인데, 정말이야?"
+  },
+  {
+    "word_id": "00924b99-eae7-42d6-9796-64e6ea6a8061",
+    "sentence_ja": "彼が結婚したなんて初耳だよ。",
+    "sentence_reading": "かれがけっこんしたなんてはつみみだよ。",
+    "sentence_meaning": "그가 결혼했다니 처음 듣는 소리야."
+  },
+  {
+    "word_id": "a4077c9c-f229-4550-ac95-fa7c40604d9e",
+    "sentence_ja": "彼は壁に寄り掛かって立っていた。",
+    "sentence_reading": "かれはかべによりかかってたっていた。",
+    "sentence_meaning": "그는 벽에 기대어 서 있었다."
+  },
+  {
+    "word_id": "a4077c9c-f229-4550-ac95-fa7c40604d9e",
+    "sentence_ja": "親に寄り掛かってばかりいられない。",
+    "sentence_reading": "おやによりかかってばかりいられない。",
+    "sentence_meaning": "부모에게만 의지하고 있을 수는 없다."
+  },
+  {
+    "word_id": "09f47cef-a1c5-46ea-b910-76eee3da08af",
+    "sentence_ja": "この音楽は万人に愛されている。",
+    "sentence_reading": "このおんがくはばんにんにあいされている。",
+    "sentence_meaning": "이 음악은 모든 사람에게 사랑받고 있다."
+  },
+  {
+    "word_id": "09f47cef-a1c5-46ea-b910-76eee3da08af",
+    "sentence_ja": "万人向けのデザインを心がけた。",
+    "sentence_reading": "ばんにんむけのでざいんをこころがけた。",
+    "sentence_meaning": "모든 사람을 위한 디자인을 신경 썼다."
+  },
+  {
+    "word_id": "c1a735b3-badc-4a43-a983-4c909df41e50",
+    "sentence_ja": "駅の前で友達を呼び止めた。",
+    "sentence_reading": "えきのまえでともだちをよびとめた。",
+    "sentence_meaning": "역 앞에서 친구를 불러 세웠다."
+  },
+  {
+    "word_id": "c1a735b3-badc-4a43-a983-4c909df41e50",
+    "sentence_ja": "警察官が車を呼び止めた。",
+    "sentence_reading": "けいさつかんがくるまをよびとめた。",
+    "sentence_meaning": "경찰관이 차를 세웠다."
+  },
+  {
+    "word_id": "e42d56a4-b822-45fa-8158-ec57e082db3a",
+    "sentence_ja": "シャツに汚れがついてしまった。",
+    "sentence_reading": "しゃつによごれがついてしまった。",
+    "sentence_meaning": "셔츠에 때가 묻어 버렸다."
+  },
+  {
+    "word_id": "e42d56a4-b822-45fa-8158-ec57e082db3a",
+    "sentence_ja": "この洗剤は頑固な汚れにも効く。",
+    "sentence_reading": "このせんざいはがんこなよごれにもきく。",
+    "sentence_meaning": "이 세제는 완고한 때에도 효과가 있다."
+  },
+  {
+    "word_id": "86fac2a3-5058-450e-bb94-39b382dc9fab",
+    "sentence_ja": "浜辺を散歩するのが好きです。",
+    "sentence_reading": "はまべをさんぽするのがすきです。",
+    "sentence_meaning": "해변을 산책하는 것을 좋아합니다."
+  },
+  {
+    "word_id": "86fac2a3-5058-450e-bb94-39b382dc9fab",
+    "sentence_ja": "浜辺に打ち上げられた貝を拾った。",
+    "sentence_reading": "はまべにうちあげられたかいをひろった。",
+    "sentence_meaning": "해변에 떠밀려 온 조개를 주웠다."
+  },
+  {
+    "word_id": "92fd1ee5-111f-4034-9146-2dc1226a2191",
+    "sentence_ja": "夏の暑さでばててしまった。",
+    "sentence_reading": "なつのあつさでばててしまった。",
+    "sentence_meaning": "여름 더위에 지쳐 버렸다."
+  },
+  {
+    "word_id": "92fd1ee5-111f-4034-9146-2dc1226a2191",
+    "sentence_ja": "マラソンの途中でばてて歩いた。",
+    "sentence_reading": "まらそんのとちゅうでばてておいた。",
+    "sentence_meaning": "마라톤 도중에 지쳐서 걸었다."
+  },
+  {
+    "word_id": "0787e118-d28b-458b-a7de-3180facb790a",
+    "sentence_ja": "銀行に預金を預けに行った。",
+    "sentence_reading": "ぎんこうによきんをあずけにいった。",
+    "sentence_meaning": "은행에 예금을 맡기러 갔다."
+  },
+  {
+    "word_id": "0787e118-d28b-458b-a7de-3180facb790a",
+    "sentence_ja": "預金残高を確認してください。",
+    "sentence_reading": "よきんざんだかをかくにんしてください。",
+    "sentence_meaning": "예금 잔액을 확인해 주세요."
+  },
+  {
+    "word_id": "66762910-d550-47ff-9b80-5c3fe1af8c63",
+    "sentence_ja": "彼の発言は強い非難を受けた。",
+    "sentence_reading": "かれのはつげんはつよいひなんをうけた。",
+    "sentence_meaning": "그의 발언은 강한 비난을 받았다."
+  },
+  {
+    "word_id": "66762910-d550-47ff-9b80-5c3fe1af8c63",
+    "sentence_ja": "政府の政策を非難する声が多い。",
+    "sentence_reading": "せいふのせいさくをひなんするこえがおおい。",
+    "sentence_meaning": "정부 정책을 비난하는 목소리가 많다."
+  },
+  {
+    "word_id": "d283b729-a6c1-4876-a8a1-645ed1d6fa42",
+    "sentence_ja": "彼の実力は世界トップに匹敵する。",
+    "sentence_reading": "かれのじつりょくはせかいとっぷにひってきする。",
+    "sentence_meaning": "그의 실력은 세계 최고에 필적한다."
+  },
+  {
+    "word_id": "d283b729-a6c1-4876-a8a1-645ed1d6fa42",
+    "sentence_ja": "この製品の品質は海外製に匹敵する。",
+    "sentence_reading": "このせいひんのひんしつはかいがいせいにひってきする。",
+    "sentence_meaning": "이 제품의 품질은 해외 제품에 필적한다."
+  },
+  {
+    "word_id": "02184c77-31ac-484f-b709-3c90d7dab945",
+    "sentence_ja": "その結果は甚だ残念だった。",
+    "sentence_reading": "そのけっかははなはだざんねんだった。",
+    "sentence_meaning": "그 결과는 매우 유감스러웠다."
+  },
+  {
+    "word_id": "02184c77-31ac-484f-b709-3c90d7dab945",
+    "sentence_ja": "彼の態度は甚だ失礼だと思う。",
+    "sentence_reading": "かれのたいどははなはだしつれいだとおもう。",
+    "sentence_meaning": "그의 태도는 매우 무례하다고 생각한다."
+  },
+  {
+    "word_id": "1da8acfb-32b4-44f8-92c6-6a9bb4bd893e",
+    "sentence_ja": "彼はスポーツ万能で何でもできる。",
+    "sentence_reading": "かれはすぽーつばんのうでなんでもできる。",
+    "sentence_meaning": "그는 스포츠 만능으로 뭐든지 잘한다."
+  },
+  {
+    "word_id": "1da8acfb-32b4-44f8-92c6-6a9bb4bd893e",
+    "sentence_ja": "万能薬なんてこの世には存在しない。",
+    "sentence_reading": "まんのうやくなんてこのよにはそんざいしない。",
+    "sentence_meaning": "만병통치약 같은 건 이 세상에 존재하지 않는다."
+  },
+  {
+    "word_id": "7c402066-2d9e-49c3-82c8-68baa8f21318",
+    "sentence_ja": "彼女はひたすら練習を続けた。",
+    "sentence_reading": "かのじょはひたすられんしゅうをつづけた。",
+    "sentence_meaning": "그녀는 꾸준히 연습을 계속했다."
+  },
+  {
+    "word_id": "7c402066-2d9e-49c3-82c8-68baa8f21318",
+    "sentence_ja": "合格するためにひたすら勉強した。",
+    "sentence_reading": "ごうかくするためにひたすらべんきょうした。",
+    "sentence_meaning": "합격하기 위해 열심히 공부했다."
+  },
+  {
+    "word_id": "8377cb16-e814-480a-b2cb-83d32818d44d",
+    "sentence_ja": "理不尽な要求に腹立ちを感じた。",
+    "sentence_reading": "りふじんなようきゅうにはらだちをかんじた。",
+    "sentence_meaning": "부당한 요구에 화를 느꼈다."
+  },
+  {
+    "word_id": "8377cb16-e814-480a-b2cb-83d32818d44d",
+    "sentence_ja": "彼の嘘に腹立ちが収まらない。",
+    "sentence_reading": "かれのうそにはらだちがおさまらない。",
+    "sentence_meaning": "그의 거짓말에 분노가 가라앉지 않는다."
+  },
+  {
+    "word_id": "98adf5d1-8f63-4651-95f0-8f83cfe0bdf9",
+    "sentence_ja": "犯人は人質を解放した。",
+    "sentence_reading": "はんにんはひとじちをかいほうした。",
+    "sentence_meaning": "범인은 인질을 석방했다."
+  },
+  {
+    "word_id": "98adf5d1-8f63-4651-95f0-8f83cfe0bdf9",
+    "sentence_ja": "人質の安全が第一優先だ。",
+    "sentence_reading": "ひとじちのあんぜんがだいいちゆうせんだ。",
+    "sentence_meaning": "인질의 안전이 최우선이다."
+  },
+  {
+    "word_id": "9a867292-330f-4df2-bf90-78b8438dd3c1",
+    "sentence_ja": "この庭園には独特の美がある。",
+    "sentence_reading": "このていえんにはどくとくのびがある。",
+    "sentence_meaning": "이 정원에는 독특한 아름다움이 있다."
+  },
+  {
+    "word_id": "9a867292-330f-4df2-bf90-78b8438dd3c1",
+    "sentence_ja": "彼女は内面の美を大切にしている。",
+    "sentence_reading": "かのじょはないめんのびをたいせつにしている。",
+    "sentence_meaning": "그녀는 내면의 아름다움을 소중히 여기고 있다."
+  },
+  {
+    "word_id": "ed3fee8b-90fc-46da-bf9f-870e9a7b920f",
+    "sentence_ja": "よし、今日こそやり遂げるぞ！",
+    "sentence_reading": "よし、きょうこそやりとげるぞ！",
+    "sentence_meaning": "좋아, 오늘이야말로 해내고 말겠어!"
+  },
+  {
+    "word_id": "ed3fee8b-90fc-46da-bf9f-870e9a7b920f",
+    "sentence_ja": "よし、準備はできた、行こう！",
+    "sentence_reading": "よし、じゅんびはできた、いこう！",
+    "sentence_meaning": "좋아, 준비됐다, 가자!"
+  },
+  {
+    "word_id": "9c9adf5f-a526-46c3-a571-1c7b64cd9ecd",
+    "sentence_ja": "用件は何ですか、手短にどうぞ。",
+    "sentence_reading": "ようけんはなんですか、てみじかにどうぞ。",
+    "sentence_meaning": "용건이 뭔가요, 간단히 말씀해 주세요."
+  },
+  {
+    "word_id": "9c9adf5f-a526-46c3-a571-1c7b64cd9ecd",
+    "sentence_ja": "用件だけ伝えてすぐ電話を切った。",
+    "sentence_reading": "ようけんだけつたえてすぐでんわをきった。",
+    "sentence_meaning": "용건만 전하고 바로 전화를 끊었다."
+  },
+  {
+    "word_id": "56c7de43-73a0-4651-8cf9-478d6131257c",
+    "sentence_ja": "テーブルの表面が平たくなっている。",
+    "sentence_reading": "てーぶるのひょうめんがひらたくなっている。",
+    "sentence_meaning": "테이블 표면이 평평하게 되어 있다."
+  },
+  {
+    "word_id": "56c7de43-73a0-4651-8cf9-478d6131257c",
+    "sentence_ja": "平たく言えば、要するに失敗です。",
+    "sentence_reading": "ひらたくいえば、ようするにしっぱいです。",
+    "sentence_meaning": "쉽게 말하면, 요컨대 실패입니다."
+  },
+  {
+    "word_id": "4c1572fb-4a9e-43b0-b6dc-19b0ccbc789d",
+    "sentence_ja": "よし、この計画で行こう！",
+    "sentence_reading": "よし、このけいかくでいこう！",
+    "sentence_meaning": "좋아, 이 계획대로 가자!"
+  },
+  {
+    "word_id": "4c1572fb-4a9e-43b0-b6dc-19b0ccbc789d",
+    "sentence_ja": "成績が上がった、よし！",
+    "sentence_reading": "せいせきがあがった、よし！",
+    "sentence_meaning": "성적이 올랐다, 좋아!"
+  },
+  {
+    "word_id": "16f436ff-b801-412e-96d5-b8fe9d7c5b0a",
+    "sentence_ja": "ピアノのレッスンを始めたばかりだ。",
+    "sentence_reading": "ぴあののれっすんをはじめたばかりだ。",
+    "sentence_meaning": "피아노 레슨을 막 시작했다."
+  },
+  {
+    "word_id": "16f436ff-b801-412e-96d5-b8fe9d7c5b0a",
+    "sentence_ja": "英語のレッスンは週三回あります。",
+    "sentence_reading": "えいごのれっすんはしゅうさんかいあります。",
+    "sentence_meaning": "영어 레슨은 주 3회 있습니다."
+  },
+  {
+    "word_id": "4014fc9b-8ce9-449c-94ab-6280711feacc",
+    "sentence_ja": "バットで力いっぱいボールを打った。",
+    "sentence_reading": "ばってちからいっぱいぼーるをうった。",
+    "sentence_meaning": "배트로 힘껏 공을 쳤다."
+  },
+  {
+    "word_id": "4014fc9b-8ce9-449c-94ab-6280711feacc",
+    "sentence_ja": "木製のバットは金属製より重い。",
+    "sentence_reading": "もくせいのばっとはきんぞくせいよりおもい。",
+    "sentence_meaning": "나무 배트는 금속 배트보다 무겁다."
+  },
+  {
+    "word_id": "1a1680e2-0b50-44de-8296-508768ed0ebb",
+    "sentence_ja": "彼はいつも楽観的に考える。",
+    "sentence_reading": "かれはいつもらっかんてきにかんがえる。",
+    "sentence_meaning": "그는 항상 낙관적으로 생각한다."
+  },
+  {
+    "word_id": "1a1680e2-0b50-44de-8296-508768ed0ebb",
+    "sentence_ja": "楽観しすぎるのも危険だと思う。",
+    "sentence_reading": "らっかんしすぎるのもきけんだとおもう。",
+    "sentence_meaning": "너무 낙관하는 것도 위험하다고 생각한다."
+  },
+  {
+    "word_id": "6284b506-55dc-439a-b64e-3a059c2c129d",
+    "sentence_ja": "ビジネスで成功するのは簡単ではない。",
+    "sentence_reading": "びじねすでせいこうするのはかんたんではない。",
+    "sentence_meaning": "비즈니스에서 성공하는 것은 쉽지 않다."
+  },
+  {
+    "word_id": "6284b506-55dc-439a-b64e-3a059c2c129d",
+    "sentence_ja": "新しいビジネスを立ち上げた。",
+    "sentence_reading": "あたらしいびじねすをたちあげた。",
+    "sentence_meaning": "새로운 사업을 시작했다."
+  },
+  {
+    "word_id": "17564544-752f-4343-aafa-59347ad2ccc7",
+    "sentence_ja": "転んで足首が腫れてしまった。",
+    "sentence_reading": "ころんであしくびがはれてしまった。",
+    "sentence_meaning": "넘어져서 발목이 부어 버렸다."
+  },
+  {
+    "word_id": "17564544-752f-4343-aafa-59347ad2ccc7",
+    "sentence_ja": "虫に刺されて腕が腫れている。",
+    "sentence_reading": "むしにさされてうでがはれている。",
+    "sentence_meaning": "벌레에 물려서 팔이 부어 있다."
+  },
+  {
+    "word_id": "d74e6d9f-87e6-4277-89b3-88adba50c4d8",
+    "sentence_ja": "久しい友との再会に感動した。",
+    "sentence_reading": "ひさしいともとのさいかいにかんどうした。",
+    "sentence_meaning": "오랜 친구와의 재회에 감동했다."
+  },
+  {
+    "word_id": "d74e6d9f-87e6-4277-89b3-88adba50c4d8",
+    "sentence_ja": "久しぶりに故郷へ帰ってきた。",
+    "sentence_reading": "ひさしぶりにふるさとへかえってきた。",
+    "sentence_meaning": "오랜만에 고향으로 돌아왔다."
+  },
+  {
+    "word_id": "2ff41938-9456-4bb3-a41a-1f48fefa2d96",
+    "sentence_ja": "彼はAIの領域で活躍している。",
+    "sentence_reading": "かれはえーあいのりょういきでかつやくしている。",
+    "sentence_meaning": "그는 AI 분야에서 활약하고 있다."
+  },
+  {
+    "word_id": "2ff41938-9456-4bb3-a41a-1f48fefa2d96",
+    "sentence_ja": "この問題は私の領域外です。",
+    "sentence_reading": "このもんだいはわたしのりょういきがいです。",
+    "sentence_meaning": "이 문제는 제 영역 밖입니다."
+  },
+  {
+    "word_id": "037600ef-079f-446b-b250-84ca029bd588",
+    "sentence_ja": "工事が終わり機材を引き上げた。",
+    "sentence_reading": "こうじがおわりきざいをひきあげた。",
+    "sentence_meaning": "공사가 끝나고 장비를 철수했다."
+  },
+  {
+    "word_id": "037600ef-079f-446b-b250-84ca029bd588",
+    "sentence_ja": "海に沈んだ宝を引き上げた。",
+    "sentence_reading": "うみにしずんだたからをひきあげた。",
+    "sentence_meaning": "바다에 가라앉은 보물을 끌어올렸다."
+  },
+  {
+    "word_id": "a1cc07e4-f715-4935-ac36-1260187e18a6",
+    "sentence_ja": "猫が腕を引っ掻いて痛い。",
+    "sentence_reading": "ねこがうでをひっかいていたい。",
+    "sentence_meaning": "고양이가 팔을 긁어서 아프다."
+  },
+  {
+    "word_id": "a1cc07e4-f715-4935-ac36-1260187e18a6",
+    "sentence_ja": "かゆくて肌を引っ掻いてしまった。",
+    "sentence_reading": "かゆくてはだをひっかいてしまった。",
+    "sentence_meaning": "가려워서 피부를 긁어 버렸다."
+  },
+  {
+    "word_id": "709e0d10-a3f9-4145-851e-058c0c74453d",
+    "sentence_ja": "彼の言い方に強い反感を覚えた。",
+    "sentence_reading": "かれのいいかたにつよいはんかんをおぼえた。",
+    "sentence_meaning": "그의 말투에 강한 반감을 느꼈다."
+  },
+  {
+    "word_id": "709e0d10-a3f9-4145-851e-058c0c74453d",
+    "sentence_ja": "増税に対する反感が広がっている。",
+    "sentence_reading": "ぞうぜいにたいするはんかんがひろがっている。",
+    "sentence_meaning": "증세에 대한 반감이 퍼지고 있다."
+  },
+  {
+    "word_id": "c2b2a61a-6108-40e3-a851-8e8c6dbf9aeb",
+    "sentence_ja": "この店は昔から繁盛している。",
+    "sentence_reading": "このみせはむかしからはんじょうしている。",
+    "sentence_meaning": "이 가게는 예전부터 번성하고 있다."
+  },
+  {
+    "word_id": "c2b2a61a-6108-40e3-a851-8e8c6dbf9aeb",
+    "sentence_ja": "商売繁盛を祈って神社に参った。",
+    "sentence_reading": "しょうばいはんじょうをいのってじんじゃにまいった。",
+    "sentence_meaning": "장사 번창을 빌며 신사에 참배했다."
+  },
+  {
+    "word_id": "1f40bb90-3775-400e-8b77-49d509ad4f7a",
+    "sentence_ja": "オンライン授業の利点は通学不要なこと。",
+    "sentence_reading": "おんらいんじゅぎょうのりてんはつうがくふようなこと。",
+    "sentence_meaning": "온라인 수업의 장점은 통학이 필요 없다는 것이다."
+  },
+  {
+    "word_id": "1f40bb90-3775-400e-8b77-49d509ad4f7a",
+    "sentence_ja": "この方法には多くの利点がある。",
+    "sentence_reading": "このほうほうにはおおくのりてんがある。",
+    "sentence_meaning": "이 방법에는 많은 장점이 있다."
+  },
+  {
+    "word_id": "63bac2f4-5a71-4590-98fb-254646d60c8a",
+    "sentence_ja": "ストレスで病気が発病することがある。",
+    "sentence_reading": "すとれすでびょうきがはつびょうすることがある。",
+    "sentence_meaning": "스트레스로 인해 병이 발병하는 경우가 있다."
+  },
+  {
+    "word_id": "63bac2f4-5a71-4590-98fb-254646d60c8a",
+    "sentence_ja": "症状が出てから発病まで時間がかかる。",
+    "sentence_reading": "しょうじょうがでてからはつびょうまでじかんがかかる。",
+    "sentence_meaning": "증상이 나타나고 나서 발병까지 시간이 걸린다."
+  },
+  {
+    "word_id": "da665778-f0fb-4151-9f38-aa9a69dcc2e4",
+    "sentence_ja": "欲を出しすぎると失敗するよ。",
+    "sentence_reading": "よくをだしすぎるとしっぱいするよ。",
+    "sentence_meaning": "욕심을 너무 부리면 실패해."
+  },
+  {
+    "word_id": "da665778-f0fb-4151-9f38-aa9a69dcc2e4",
+    "sentence_ja": "知識への欲がある人は成長が早い。",
+    "sentence_reading": "ちしきへのよくがあるひとはせいちょうがはやい。",
+    "sentence_meaning": "지식에 대한 욕구가 있는 사람은 성장이 빠르다."
+  },
+  {
+    "word_id": "9c64ac68-719c-43a4-be1e-e4359f1b8e5d",
+    "sentence_ja": "彼はお金に欲深い人だと思う。",
+    "sentence_reading": "かれはおかねによくふかいひとだとおもう。",
+    "sentence_meaning": "그는 돈에 욕심 많은 사람이라고 생각한다."
+  },
+  {
+    "word_id": "9c64ac68-719c-43a4-be1e-e4359f1b8e5d",
+    "sentence_ja": "欲深い行動は人の信頼を失う。",
+    "sentence_reading": "よくふかいこうどうはひとのしんらいをうしなう。",
+    "sentence_meaning": "탐욕스러운 행동은 사람의 신뢰를 잃는다."
+  },
+  {
+    "word_id": "5a03696e-1536-42c1-8026-a53fc79bf609",
+    "sentence_ja": "事態は深刻な様相を呈している。",
+    "sentence_reading": "じたいはしんこくなようそうをていしている。",
+    "sentence_meaning": "사태는 심각한 양상을 띠고 있다."
+  },
+  {
+    "word_id": "5a03696e-1536-42c1-8026-a53fc79bf609",
+    "sentence_ja": "戦争の様相が変わってきた。",
+    "sentence_reading": "せんそうのようそうがかわってきた。",
+    "sentence_meaning": "전쟁의 양상이 달라져 왔다."
+  },
+  {
+    "word_id": "04f0a519-2825-44d4-aa7a-17c831472887",
+    "sentence_ja": "彼は晩年を故郷で過ごした。",
+    "sentence_reading": "かれはばんねんをふるさとですごした。",
+    "sentence_meaning": "그는 말년을 고향에서 보냈다."
+  },
+  {
+    "word_id": "04f0a519-2825-44d4-aa7a-17c831472887",
+    "sentence_ja": "晩年には穏やかな生活を望んでいる。",
+    "sentence_reading": "ばんねんにはおだやかなせいかつをのぞんでいる。",
+    "sentence_meaning": "말년에는 평온한 생활을 바라고 있다."
+  },
+  {
+    "word_id": "bb7c4bdc-f384-4bb9-a87b-bf5309a2bbc5",
+    "sentence_ja": "世界の果てまで旅をしたい。",
+    "sentence_reading": "せかいのはてまでたびをしたい。",
+    "sentence_meaning": "세상의 끝까지 여행하고 싶다."
+  },
+  {
+    "word_id": "bb7c4bdc-f384-4bb9-a87b-bf5309a2bbc5",
+    "sentence_ja": "努力の果てに夢を叶えた。",
+    "sentence_reading": "どりょくのはてにゆめをかなえた。",
+    "sentence_meaning": "노력 끝에 꿈을 이루었다."
+  },
+  {
+    "word_id": "7281e50a-7310-43bc-84b7-9682ddf50d1a",
+    "sentence_ja": "キャンプ用品を全部揃えた。",
+    "sentence_reading": "きゃんぷようひんをぜんぶそろえた。",
+    "sentence_meaning": "캠핑 용품을 전부 갖췄다."
+  },
+  {
+    "word_id": "7281e50a-7310-43bc-84b7-9682ddf50d1a",
+    "sentence_ja": "事務用品が足りなくなってきた。",
+    "sentence_reading": "じむようひんがたりなくなってきた。",
+    "sentence_meaning": "사무 용품이 부족해지기 시작했다."
+  },
+  {
+    "word_id": "bc7fd0f1-989d-4943-b4aa-215a809ed27a",
+    "sentence_ja": "了解しました、すぐ対応します。",
+    "sentence_reading": "りょうかいしました、すぐたいおうします。",
+    "sentence_meaning": "알겠습니다, 바로 대응하겠습니다."
+  },
+  {
+    "word_id": "bc7fd0f1-989d-4943-b4aa-215a809ed27a",
+    "sentence_ja": "計画の内容を了解してもらえた。",
+    "sentence_reading": "けいかくのないようをりょうかいしてもらえた。",
+    "sentence_meaning": "계획 내용을 이해받을 수 있었다."
+  },
+  {
+    "word_id": "97edb3ca-f808-4af8-99e7-4c7c7168bc4a",
+    "sentence_ja": "その映画は大きな反響を呼んだ。",
+    "sentence_reading": "そのえいがはおおきなはんきょうをよんだ。",
+    "sentence_meaning": "그 영화는 큰 반향을 불러일으켰다."
+  },
+  {
+    "word_id": "97edb3ca-f808-4af8-99e7-4c7c7168bc4a",
+    "sentence_ja": "スピーチへの反響が予想より大きかった。",
+    "sentence_reading": "すぴーちへのはんきょうがよそうよりおおきかった。",
+    "sentence_meaning": "연설에 대한 반향이 예상보다 컸다."
+  },
+  {
+    "word_id": "e20f726b-2c32-428f-bf6a-221a406b3df9",
+    "sentence_ja": "数学は理系の必修科目だ。",
+    "sentence_reading": "すうがくはりけいのひっしゅうかもくだ。",
+    "sentence_meaning": "수학은 이과의 필수 과목이다."
+  },
+  {
+    "word_id": "e20f726b-2c32-428f-bf6a-221a406b3df9",
+    "sentence_ja": "必修の授業を全部取り終えた。",
+    "sentence_reading": "ひっしゅうのじゅぎょうをぜんぶとりおえた。",
+    "sentence_meaning": "필수 수업을 전부 다 들었다."
+  },
+  {
+    "word_id": "8b8f866c-f4ed-4d8b-8392-7e2c5342536e",
+    "sentence_ja": "仕事と育児を両立させるのは大変だ。",
+    "sentence_reading": "しごとといくじをりょうりつさせるのはたいへんだ。",
+    "sentence_meaning": "일과 육아를 양립시키는 것은 힘들다."
+  },
+  {
+    "word_id": "8b8f866c-f4ed-4d8b-8392-7e2c5342536e",
+    "sentence_ja": "勉強とスポーツを両立している学生だ。",
+    "sentence_reading": "べんきょうとすぽーつをりょうりつしているがくせいだ。",
+    "sentence_meaning": "공부와 스포츠를 양립하고 있는 학생이다."
+  },
+  {
+    "word_id": "85745545-b9e4-4cd9-ac69-56aa62ca3507",
+    "sentence_ja": "将来を悲観する必要はないよ。",
+    "sentence_reading": "しょうらいをひかんするひつようはないよ。",
+    "sentence_meaning": "미래를 비관할 필요는 없어."
+  },
+  {
+    "word_id": "85745545-b9e4-4cd9-ac69-56aa62ca3507",
+    "sentence_ja": "失敗して悲観的になってしまった。",
+    "sentence_reading": "しっぱいしてひかんてきになってしまった。",
+    "sentence_meaning": "실패하고 나서 비관적이 되어 버렸다."
+  },
+  {
+    "word_id": "e58f2178-82f5-429d-bcf2-096c74b36f5f",
+    "sentence_ja": "環境問題はひいては地球の未来に関わる。",
+    "sentence_reading": "かんきょうもんだいはひいてはちきゅうのみらいにかかわる。",
+    "sentence_meaning": "환경 문제는 나아가 지구의 미래와 관련된다."
+  },
+  {
+    "word_id": "e58f2178-82f5-429d-bcf2-096c74b36f5f",
+    "sentence_ja": "個人の健康はひいては社会全体に影響する。",
+    "sentence_reading": "こじんのけんこうはひいてはしゃかいぜんたいにえいきょうする。",
+    "sentence_meaning": "개인의 건강은 결과적으로 사회 전체에 영향을 미친다."
+  },
+  {
+    "word_id": "87975c30-762c-46f8-bd4e-bf939c882785",
+    "sentence_ja": "風でチラシがばらまかれた。",
+    "sentence_reading": "かぜでちらしがばらまかれた。",
+    "sentence_meaning": "바람으로 전단지가 흩뿌려졌다."
+  },
+  {
+    "word_id": "87975c30-762c-46f8-bd4e-bf939c882785",
+    "sentence_ja": "うわさをばらまくのはよくない。",
+    "sentence_reading": "うわさをばらまくのはよくない。",
+    "sentence_meaning": "소문을 퍼뜨리는 것은 좋지 않다."
+  },
+  {
+    "word_id": "23ff7bdb-a879-4be7-82ee-ce8774e0b469",
+    "sentence_ja": "この魚は春に繁殖する。",
+    "sentence_reading": "このさかなははるにはんしょくする。",
+    "sentence_meaning": "이 물고기는 봄에 번식한다."
+  },
+  {
+    "word_id": "23ff7bdb-a879-4be7-82ee-ce8774e0b469",
+    "sentence_ja": "細菌が急速に繁殖している。",
+    "sentence_reading": "さいきんがきゅうそくにはんしょくしている。",
+    "sentence_meaning": "세균이 빠르게 증식하고 있다."
+  },
+  {
+    "word_id": "e20a6cb6-0930-4e8a-bc81-9f50d0e7b7ac",
+    "sentence_ja": "「AI」は略語です。",
+    "sentence_reading": "「えーあい」はりゃくごです。",
+    "sentence_meaning": "「AI」는 약어입니다."
+  },
+  {
+    "word_id": "e20a6cb6-0930-4e8a-bc81-9f50d0e7b7ac",
+    "sentence_ja": "その略語の意味を教えて。",
+    "sentence_reading": "そのりゃくごのいみをおしえて。",
+    "sentence_meaning": "그 약어의 뜻을 알려줘."
+  },
+  {
+    "word_id": "cbbf7050-0364-4eac-bbab-b22b8776e760",
+    "sentence_ja": "暗闇に人影が見えた。",
+    "sentence_reading": "くらやみにひとかげがみえた。",
+    "sentence_meaning": "어둠 속에 사람 그림자가 보였다."
+  },
+  {
+    "word_id": "cbbf7050-0364-4eac-bbab-b22b8776e760",
+    "sentence_ja": "窓の外に人影があった。",
+    "sentence_reading": "まどのそとにひとかげがあった。",
+    "sentence_meaning": "창문 밖에 사람 그림자가 있었다."
+  },
+  {
+    "word_id": "596f6636-4d6c-4ce1-91c2-e2fc8183bf7e",
+    "sentence_ja": "商品の流通を改善した。",
+    "sentence_reading": "しょうひんのりゅうつうをかいぜんした。",
+    "sentence_meaning": "상품 유통을 개선했다."
+  },
+  {
+    "word_id": "596f6636-4d6c-4ce1-91c2-e2fc8183bf7e",
+    "sentence_ja": "このお金は流通していない。",
+    "sentence_reading": "このおかねはりゅうつうしていない。",
+    "sentence_meaning": "이 돈은 유통되지 않고 있다."
+  },
+  {
+    "word_id": "0d1a33ad-71a1-4e78-afa6-b4fb0c9f125b",
+    "sentence_ja": "彼は時間にルーズだ。",
+    "sentence_reading": "かれはじかんにルーズだ。",
+    "sentence_meaning": "그는 시간에 느슨하다(시간 관념이 없다)."
+  },
+  {
+    "word_id": "0d1a33ad-71a1-4e78-afa6-b4fb0c9f125b",
+    "sentence_ja": "ルーズな服装で来てもいい。",
+    "sentence_reading": "ルーズなふくそうできてもいい。",
+    "sentence_meaning": "헐렁한 옷차림으로 와도 괜찮아."
+  },
+  {
+    "word_id": "49f9f859-41f7-4a3b-a26b-f678a98c089d",
+    "sentence_ja": "子供たちが原っぱで遊んだ。",
+    "sentence_reading": "こどもたちがはらっぱであそんだ。",
+    "sentence_meaning": "아이들이 공터에서 놀았다."
+  },
+  {
+    "word_id": "49f9f859-41f7-4a3b-a26b-f678a98c089d",
+    "sentence_ja": "近くの原っぱに花が咲いた。",
+    "sentence_reading": "ちかくのはらっぱにはながさいた。",
+    "sentence_meaning": "근처 빈터에 꽃이 피었다."
+  },
+  {
+    "word_id": "6ab71e93-2a4f-4d22-81d7-65c07e965634",
+    "sentence_ja": "与党が選挙で勝った。",
+    "sentence_reading": "よとうがせんきょでかった。",
+    "sentence_meaning": "여당이 선거에서 이겼다."
+  },
+  {
+    "word_id": "6ab71e93-2a4f-4d22-81d7-65c07e965634",
+    "sentence_ja": "与党と野党が激しく対立した。",
+    "sentence_reading": "よとうとやとうがはげしくたいりつした。",
+    "sentence_meaning": "여당과 야당이 격렬하게 대립했다."
+  },
+  {
+    "word_id": "ddf12ad6-3c10-49b1-ac54-b1bdca235bc6",
+    "sentence_ja": "薬の用法を守ってください。",
+    "sentence_reading": "くすりのようほうをまもってください。",
+    "sentence_meaning": "약의 사용법을 지켜주세요."
+  },
+  {
+    "word_id": "ddf12ad6-3c10-49b1-ac54-b1bdca235bc6",
+    "sentence_ja": "この言葉の用法は難しい。",
+    "sentence_reading": "このことばのようほうはむずかしい。",
+    "sentence_meaning": "이 단어의 사용법은 어렵다."
+  },
+  {
+    "word_id": "fb412c13-e061-44de-b409-f026e0e9fc13",
+    "sentence_ja": "父は酪農を営んでいる。",
+    "sentence_reading": "ちちはらくのうをいとなんでいる。",
+    "sentence_meaning": "아버지는 낙농업을 운영하고 있다."
+  },
+  {
+    "word_id": "fb412c13-e061-44de-b409-f026e0e9fc13",
+    "sentence_ja": "北海道は酪農が盛んだ。",
+    "sentence_reading": "ほっかいどうはらくのうがさかんだ。",
+    "sentence_meaning": "홋카이도는 낙농업이 활발하다."
+  },
+  {
+    "word_id": "0a2229ae-0b44-437e-a7a8-d3c93d6781a7",
+    "sentence_ja": "彼の理論は正しいと思う。",
+    "sentence_reading": "かれのりろんはただしいとおもう。",
+    "sentence_meaning": "그의 이론은 맞다고 생각한다."
+  },
+  {
+    "word_id": "0a2229ae-0b44-437e-a7a8-d3c93d6781a7",
+    "sentence_ja": "理論と実践は違う。",
+    "sentence_reading": "りろんとじっせんはちがう。",
+    "sentence_meaning": "이론과 실천은 다르다."
+  },
+  {
+    "word_id": "f5c532c2-4463-4eef-9373-9985550a6278",
+    "sentence_ja": "価格を引き下げることにした。",
+    "sentence_reading": "かかくをひきさげることにした。",
+    "sentence_meaning": "가격을 낮추기로 했다."
+  },
+  {
+    "word_id": "f5c532c2-4463-4eef-9373-9985550a6278",
+    "sentence_ja": "税率を引き下げる案が出た。",
+    "sentence_reading": "ぜいりつをひきさげるあんがでた。",
+    "sentence_meaning": "세율을 낮추는 안이 나왔다."
+  },
+  {
+    "word_id": "ac4e4210-2d09-4eef-878d-ba8bfa33c35d",
+    "sentence_ja": "雨でびっしょり濡れた。",
+    "sentence_reading": "あめでびっしょりぬれた。",
+    "sentence_meaning": "비에 흠뻑 젖었다."
+  },
+  {
+    "word_id": "ac4e4210-2d09-4eef-878d-ba8bfa33c35d",
+    "sentence_ja": "汗でシャツがびっしょりだ。",
+    "sentence_reading": "あせでシャツがびっしょりだ。",
+    "sentence_meaning": "땀으로 셔츠가 흠뻑 젖었다."
+  },
+  {
+    "word_id": "77af33d3-8edb-49ab-9e37-2b22a17d343e",
+    "sentence_ja": "犬にリードをつけて散歩した。",
+    "sentence_reading": "いぬにリードをつけてさんぽした。",
+    "sentence_meaning": "개에게 리드줄을 채워 산책했다."
+  },
+  {
+    "word_id": "77af33d3-8edb-49ab-9e37-2b22a17d343e",
+    "sentence_ja": "チームをリードしてほしい。",
+    "sentence_reading": "チームをリードしてほしい。",
+    "sentence_meaning": "팀을 이끌어 주었으면 한다."
+  },
+  {
+    "word_id": "1adf29a5-8147-413c-a194-cb5e5b8339c6",
+    "sentence_ja": "政府に支援を要請した。",
+    "sentence_reading": "せいふにしえんをようせいした。",
+    "sentence_meaning": "정부에 지원을 요청했다."
+  },
+  {
+    "word_id": "1adf29a5-8147-413c-a194-cb5e5b8339c6",
+    "sentence_ja": "協力を要請するメールを送った。",
+    "sentence_reading": "きょうりょくをようせいするメールをおくった。",
+    "sentence_meaning": "협력을 요청하는 이메일을 보냈다."
+  },
+  {
+    "word_id": "d51a8568-33fe-41e8-9168-e2be6c3013ed",
+    "sentence_ja": "旅券の有効期限を確認した。",
+    "sentence_reading": "りょけんのゆうこうきげんをかくにんした。",
+    "sentence_meaning": "여권의 유효기간을 확인했다."
+  },
+  {
+    "word_id": "d51a8568-33fe-41e8-9168-e2be6c3013ed",
+    "sentence_ja": "旅券を紛失してしまった。",
+    "sentence_reading": "りょけんをふんしつしてしまった。",
+    "sentence_meaning": "여권을 분실해 버렸다."
+  },
+  {
+    "word_id": "eec95261-45b2-43a4-b7d1-08cfc3f328e7",
+    "sentence_ja": "社長の秘書として働いている。",
+    "sentence_reading": "しゃちょうのひしょとしてはたらいている。",
+    "sentence_meaning": "사장의 비서로 일하고 있다."
+  },
+  {
+    "word_id": "eec95261-45b2-43a4-b7d1-08cfc3f328e7",
+    "sentence_ja": "秘書がスケジュールを管理した。",
+    "sentence_reading": "ひしょがスケジュールをかんりした。",
+    "sentence_meaning": "비서가 스케줄을 관리했다."
+  },
+  {
+    "word_id": "1a321e59-b3c0-44ec-9bee-1a055e3240a7",
+    "sentence_ja": "銀行の利息が増えた。",
+    "sentence_reading": "ぎんこうのりそくがふえた。",
+    "sentence_meaning": "은행 이자가 늘었다."
+  },
+  {
+    "word_id": "1a321e59-b3c0-44ec-9bee-1a055e3240a7",
+    "sentence_ja": "利息を計算してみた。",
+    "sentence_reading": "りそくをけいさんしてみた。",
+    "sentence_meaning": "이자를 계산해 보았다."
+  },
+  {
+    "word_id": "cb6a3dc9-b282-4783-a5a0-867b7af04fd4",
+    "sentence_ja": "二人は恋愛して結婚した。",
+    "sentence_reading": "ふたりはれんあいしてけっこんした。",
+    "sentence_meaning": "둘은 연애해서 결혼했다."
+  },
+  {
+    "word_id": "cb6a3dc9-b282-4783-a5a0-867b7af04fd4",
+    "sentence_ja": "恋愛映画を見て泣いた。",
+    "sentence_reading": "れんあいえいがをみてないた。",
+    "sentence_meaning": "연애 영화를 보고 울었다."
+  },
+  {
+    "word_id": "682efa24-d36a-4fd4-bb65-a74b975f2ec1",
+    "sentence_ja": "英語の比重が高くなった。",
+    "sentence_reading": "えいごのひじゅうがたかくなった。",
+    "sentence_meaning": "영어의 비중이 높아졌다."
+  },
+  {
+    "word_id": "682efa24-d36a-4fd4-bb65-a74b975f2ec1",
+    "sentence_ja": "この物質の比重を測った。",
+    "sentence_reading": "このぶっしつのひじゅうをはかった。",
+    "sentence_meaning": "이 물질의 비중(비중값)을 측정했다."
+  },
+  {
+    "word_id": "860bf87f-f4de-4323-a6d3-8d0e8634f77f",
+    "sentence_ja": "彼は冷酷な人だと思った。",
+    "sentence_reading": "かれはれいこくなひとだとおもった。",
+    "sentence_meaning": "그는 냉혹한 사람이라고 생각했다."
+  },
+  {
+    "word_id": "860bf87f-f4de-4323-a6d3-8d0e8634f77f",
+    "sentence_ja": "冷酷な判断が必要な時もある。",
+    "sentence_reading": "れいこくなはんだんがひつようなときもある。",
+    "sentence_meaning": "냉혹한 판단이 필요할 때도 있다."
+  },
+  {
+    "word_id": "fb945f5b-4481-45c3-a2a5-2794b706dc0f",
+    "sentence_ja": "良心に従って行動した。",
+    "sentence_reading": "りょうしんにしたがってこうどうした。",
+    "sentence_meaning": "양심에 따라 행동했다."
+  },
+  {
+    "word_id": "fb945f5b-4481-45c3-a2a5-2794b706dc0f",
+    "sentence_ja": "彼には良心がないのかな。",
+    "sentence_reading": "かれにはりょうしんがないのかな。",
+    "sentence_meaning": "그에게는 양심이 없는 걸까."
+  },
+  {
+    "word_id": "decd3b3b-c93f-4669-a500-b200135f67fd",
+    "sentence_ja": "美術館で版画を見た。",
+    "sentence_reading": "びじゅつかんではんがをみた。",
+    "sentence_meaning": "미술관에서 판화를 보았다."
+  },
+  {
+    "word_id": "decd3b3b-c93f-4669-a500-b200135f67fd",
+    "sentence_ja": "祖母は版画を趣味にしていた。",
+    "sentence_reading": "そぼははんがをしゅみにしていた。",
+    "sentence_meaning": "할머니는 판화를 취미로 하고 있었다."
+  },
+  {
+    "word_id": "76b2741a-34dc-43b1-a5c8-f434fca155d4",
+    "sentence_ja": "ビールスに感染した可能性がある。",
+    "sentence_reading": "ビールスにかんせんしたかのうせいがある。",
+    "sentence_meaning": "바이러스에 감염됐을 가능성이 있다."
+  },
+  {
+    "word_id": "76b2741a-34dc-43b1-a5c8-f434fca155d4",
+    "sentence_ja": "このビールスは変異しやすい。",
+    "sentence_reading": "このビールスはへんいしやすい。",
+    "sentence_meaning": "이 바이러스는 변이하기 쉽다."
+  },
+  {
+    "word_id": "98a186bf-5593-4ddb-a18f-5b3134a713b5",
+    "sentence_ja": "二つの製品は類似している。",
+    "sentence_reading": "ふたつのせいひんはるいじしている。",
+    "sentence_meaning": "두 제품은 서로 유사하다."
+  },
+  {
+    "word_id": "98a186bf-5593-4ddb-a18f-5b3134a713b5",
+    "sentence_ja": "類似した事件が続いた。",
+    "sentence_reading": "るいじしたじけんがつづいた。",
+    "sentence_meaning": "유사한 사건이 계속되었다."
+  },
+  {
+    "word_id": "51cf5162-f712-4b45-9091-656def94aeda",
+    "sentence_ja": "感情を抑制するのは難しい。",
+    "sentence_reading": "かんじょうをよくせいするのはむずかしい。",
+    "sentence_meaning": "감정을 억제하는 것은 어렵다."
+  },
+  {
+    "word_id": "51cf5162-f712-4b45-9091-656def94aeda",
+    "sentence_ja": "物価の上昇を抑制している。",
+    "sentence_reading": "ぶっかのじょうしょうをよくせいしている。",
+    "sentence_meaning": "물가 상승을 억제하고 있다."
+  },
+  {
+    "word_id": "abac6b92-e3c0-4373-8290-5517927f9936",
+    "sentence_ja": "裁判所が判決を下した。",
+    "sentence_reading": "さいばんしょがはんけつをくだした。",
+    "sentence_meaning": "법원이 판결을 내렸다."
+  },
+  {
+    "word_id": "abac6b92-e3c0-4373-8290-5517927f9936",
+    "sentence_ja": "無罪の判決が出た。",
+    "sentence_reading": "むざいのはんけつがでた。",
+    "sentence_meaning": "무죄 판결이 나왔다."
+  },
+  {
+    "word_id": "9704fa4a-7e50-4370-9634-3b72ff044e0d",
+    "sentence_ja": "電柱に張り紙が貼ってあった。",
+    "sentence_reading": "でんちゅうにはりがみがはってあった。",
+    "sentence_meaning": "전봇대에 벽보가 붙어 있었다."
+  },
+  {
+    "word_id": "9704fa4a-7e50-4370-9634-3b72ff044e0d",
+    "sentence_ja": "張り紙で連絡先を知らせた。",
+    "sentence_reading": "はりがみでれんらくさきをしらせた。",
+    "sentence_meaning": "벽보로 연락처를 알렸다."
+  },
+  {
+    "word_id": "4204d185-63f4-4db9-8ee9-aa869030a75c",
+    "sentence_ja": "良質な食材を使っている。",
+    "sentence_reading": "りょうしつなしょくざいをつかっている。",
+    "sentence_meaning": "양질의 식재료를 사용하고 있다."
+  },
+  {
+    "word_id": "4204d185-63f4-4db9-8ee9-aa869030a75c",
+    "sentence_ja": "良質な睡眠が大切だ。",
+    "sentence_reading": "りょうしつなすいみんがたいせつだ。",
+    "sentence_meaning": "양질의 수면이 중요하다."
+  },
+  {
+    "word_id": "17c454a4-909d-48b1-89e6-114d1dea3630",
+    "sentence_ja": "浴室を毎日掃除している。",
+    "sentence_reading": "よくしつをまいにちそうじしている。",
+    "sentence_meaning": "욕실을 매일 청소하고 있다."
+  },
+  {
+    "word_id": "17c454a4-909d-48b1-89e6-114d1dea3630",
+    "sentence_ja": "広い浴室のある家に住みたい。",
+    "sentence_reading": "ひろいよくしつのあるいえにすみたい。",
+    "sentence_meaning": "넓은 욕실이 있는 집에 살고 싶다."
+  },
+  {
+    "word_id": "9a7bcbc9-ea33-4568-b9a9-7356f0d4a812",
+    "sentence_ja": "横綱が土俵に上がった。",
+    "sentence_reading": "よこづながどひょうにあがった。",
+    "sentence_meaning": "요코즈나가 씨름판에 올라갔다."
+  },
+  {
+    "word_id": "9a7bcbc9-ea33-4568-b9a9-7356f0d4a812",
+    "sentence_ja": "新しい横綱が誕生した。",
+    "sentence_reading": "あたらしいよこづながたんじょうした。",
+    "sentence_meaning": "새로운 요코즈나가 탄생했다."
+  },
+  {
+    "word_id": "59cad41a-ef93-4c9f-87b1-d468bb5b5256",
+    "sentence_ja": "日頃から運動する習慣をつけた。",
+    "sentence_reading": "ひごろからうんどうするしゅうかんをつけた。",
+    "sentence_meaning": "평소부터 운동하는 습관을 들였다."
+  },
+  {
+    "word_id": "59cad41a-ef93-4c9f-87b1-d468bb5b5256",
+    "sentence_ja": "日頃のお礼を言いたかった。",
+    "sentence_reading": "ひごろのおれいをいいたかった。",
+    "sentence_meaning": "평소의 감사 인사를 전하고 싶었다."
+  },
+  {
+    "word_id": "5e1fe799-5f7a-4c53-b5ba-5226d566b240",
+    "sentence_ja": "彼はレギュラーメンバーだ。",
+    "sentence_reading": "かれはレギュラーメンバーだ。",
+    "sentence_meaning": "그는 레귤러 멤버다."
+  },
+  {
+    "word_id": "5e1fe799-5f7a-4c53-b5ba-5226d566b240",
+    "sentence_ja": "レギュラーサイズを注文した。",
+    "sentence_reading": "レギュラーサイズをちゅうもんした。",
+    "sentence_meaning": "레귤러 사이즈를 주문했다."
+  },
+  {
+    "word_id": "a54ec8e1-cd2a-4c0a-b1a9-7507929ea0e4",
+    "sentence_ja": "魚は冷蔵して保存してください。",
+    "sentence_reading": "さかなはれいぞうしてほぞんしてください。",
+    "sentence_meaning": "생선은 냉장해서 보관해 주세요."
+  },
+  {
+    "word_id": "a54ec8e1-cd2a-4c0a-b1a9-7507929ea0e4",
+    "sentence_ja": "冷蔵庫に入れておいた。",
+    "sentence_reading": "れいぞうこにいれておいた。",
+    "sentence_meaning": "냉장고에 넣어 두었다."
+  },
+  {
+    "word_id": "603aa527-9929-4e71-a508-0ea472cbc815",
+    "sentence_ja": "浜を散歩するのが好きだ。",
+    "sentence_reading": "はまをさんぽするのがすきだ。",
+    "sentence_meaning": "해변을 산책하는 것을 좋아한다."
+  },
+  {
+    "word_id": "603aa527-9929-4e71-a508-0ea472cbc815",
+    "sentence_ja": "浜で貝を拾って遊んだ。",
+    "sentence_reading": "はまでかいをひろってあそんだ。",
+    "sentence_meaning": "해변에서 조개를 주우며 놀았다."
+  },
+  {
+    "word_id": "8f55810d-3d0b-4e95-be06-019f0bc90a48",
+    "sentence_ja": "台風で避難指示が出た。",
+    "sentence_reading": "たいふうでひなんしじがでた。",
+    "sentence_meaning": "태풍으로 대피 지시가 내려졌다."
+  },
+  {
+    "word_id": "8f55810d-3d0b-4e95-be06-019f0bc90a48",
+    "sentence_ja": "近くの体育館に避難した。",
+    "sentence_reading": "ちかくのたいいくかんにひなんした。",
+    "sentence_meaning": "근처 체육관으로 대피했다."
+  },
+  {
+    "word_id": "ef7264dd-06b0-4250-a8de-296d62655970",
+    "sentence_ja": "その領地をめぐって争った。",
+    "sentence_reading": "そのりょうちをめぐってあらそった。",
+    "sentence_meaning": "그 영토를 둘러싸고 다퉜다."
+  },
+  {
+    "word_id": "ef7264dd-06b0-4250-a8de-296d62655970",
+    "sentence_ja": "王は広大な領地を持っていた。",
+    "sentence_reading": "おうはこうだいなりょうちをもっていた。",
+    "sentence_meaning": "왕은 광대한 영지를 가지고 있었다."
+  },
+  {
+    "word_id": "d0a9718d-b9fe-4132-89e5-08699e46fc05",
+    "sentence_ja": "故郷は遥か遠くにある。",
+    "sentence_reading": "こきょうははるかとおくにある。",
+    "sentence_meaning": "고향은 아득히 먼 곳에 있다."
+  },
+  {
+    "word_id": "d0a9718d-b9fe-4132-89e5-08699e46fc05",
+    "sentence_ja": "遥か昔の話だ。",
+    "sentence_reading": "はるかむかしのはなしだ。",
+    "sentence_meaning": "아득히 먼 옛날 이야기다."
+  },
+  {
+    "word_id": "86c49628-abfa-4022-b86c-476c3c2bf493",
+    "sentence_ja": "失敗は必然だったと思う。",
+    "sentence_reading": "しっぱいはひつぜんだったとおもう。",
+    "sentence_meaning": "실패는 필연이었다고 생각한다."
+  },
+  {
+    "word_id": "86c49628-abfa-4022-b86c-476c3c2bf493",
+    "sentence_ja": "二人の出会いは必然だった。",
+    "sentence_reading": "ふたりのであいはひつぜんだった。",
+    "sentence_meaning": "두 사람의 만남은 필연이었다."
+  },
+  {
+    "word_id": "b824d2e6-6697-4d5c-aa47-2a1ec541832e",
+    "sentence_ja": "出発を一時間早めることにした。",
+    "sentence_reading": "しゅっぱつをいちじかんはやめることにした。",
+    "sentence_meaning": "출발을 한 시간 앞당기기로 했다."
+  },
+  {
+    "word_id": "b824d2e6-6697-4d5c-aa47-2a1ec541832e",
+    "sentence_ja": "回復を早めるため安静にした。",
+    "sentence_reading": "かいふくをはやめるためあんせいにした。",
+    "sentence_meaning": "회복을 앞당기기 위해 안정을 취했다."
+  },
+  {
+    "word_id": "d58b279c-61d2-46c6-a54c-0d297b3ad7c4",
+    "sentence_ja": "夜更しをして体が辛い。",
+    "sentence_reading": "よふかしをしてからだがつらい。",
+    "sentence_meaning": "밤늦게까지 깨어 있어서 몸이 힘들다."
+  },
+  {
+    "word_id": "d58b279c-61d2-46c6-a54c-0d297b3ad7c4",
+    "sentence_ja": "試験前は夜更しが続いた。",
+    "sentence_reading": "しけんまえはよふかしがつづいた。",
+    "sentence_meaning": "시험 전에는 밤샘이 계속되었다."
+  },
+  {
+    "word_id": "fe967242-6308-499b-a4b8-4270c567db8b",
+    "sentence_ja": "意見が両極に分かれた。",
+    "sentence_reading": "いけんがりょうきょくにわかれた。",
+    "sentence_meaning": "의견이 양극으로 나뉘었다."
+  },
+  {
+    "word_id": "fe967242-6308-499b-a4b8-4270c567db8b",
+    "sentence_ja": "両極端な考え方は危険だ。",
+    "sentence_reading": "りょうきょくたんなかんがえかたはきけんだ。",
+    "sentence_meaning": "양극단적인 사고방식은 위험하다."
+  },
+  {
+    "word_id": "a3d06e73-4f62-4a22-aaf7-cc48d936ded3",
+    "sentence_ja": "その案は否決されてしまった。",
+    "sentence_reading": "そのあんはひけつされてしまった。",
+    "sentence_meaning": "그 안은 부결되어 버렸다."
+  },
+  {
+    "word_id": "a3d06e73-4f62-4a22-aaf7-cc48d936ded3",
+    "sentence_ja": "予算案が議会で否決された。",
+    "sentence_reading": "よさんあんがぎかいでひけつされた。",
+    "sentence_meaning": "예산안이 의회에서 부결되었다."
+  },
+  {
+    "word_id": "ffe98bbf-90fa-4937-a685-ba58935725c6",
+    "sentence_ja": "突然の悲鳴が聞こえた。",
+    "sentence_reading": "とつぜんのひめいがきこえた。",
+    "sentence_meaning": "갑자기 비명이 들렸다."
+  },
+  {
+    "word_id": "ffe98bbf-90fa-4937-a685-ba58935725c6",
+    "sentence_ja": "怖くて悲鳴を上げてしまった。",
+    "sentence_reading": "こわくてひめいをあげてしまった。",
+    "sentence_meaning": "무서워서 비명을 질러버렸다."
+  },
+  {
+    "word_id": "06e37941-e8d3-45f8-aa8a-a1f042c1268e",
+    "sentence_ja": "彼女はチームを率いている。",
+    "sentence_reading": "かのじょはチームをひきいている。",
+    "sentence_meaning": "그녀는 팀을 이끌고 있다."
+  },
+  {
+    "word_id": "06e37941-e8d3-45f8-aa8a-a1f042c1268e",
+    "sentence_ja": "将軍が軍を率いて進んだ。",
+    "sentence_reading": "しょうぐんがぐんをひきいてすすんだ。",
+    "sentence_meaning": "장군이 군을 이끌고 진격했다."
+  },
+  {
+    "word_id": "d1d810e9-8f28-471a-ae53-7e06c628d30c",
+    "sentence_ja": "この類の問題は難しい。",
+    "sentence_reading": "このるいのもんだいはむずかしい。",
+    "sentence_meaning": "이런 종류의 문제는 어렵다."
+  },
+  {
+    "word_id": "d1d810e9-8f28-471a-ae53-7e06c628d30c",
+    "sentence_ja": "動物を類ごとに分類した。",
+    "sentence_reading": "どうぶつをるいごとにぶんるいした。",
+    "sentence_meaning": "동물을 종류별로 분류했다."
+  },
+  {
+    "word_id": "b881d875-95db-4a49-a08a-72e24d2a81c9",
+    "sentence_ja": "テストでびりになってしまった。",
+    "sentence_reading": "テストでびりになってしまった。",
+    "sentence_meaning": "시험에서 꼴찌가 되어버렸다."
+  },
+  {
+    "word_id": "b881d875-95db-4a49-a08a-72e24d2a81c9",
+    "sentence_ja": "マラソンでびりだったが完走した。",
+    "sentence_reading": "マラソンでびりだったがかんそうした。",
+    "sentence_meaning": "마라톤에서 꼴찌였지만 완주했다."
+  },
+  {
+    "word_id": "bb860bbd-4642-4120-bd45-aa639bfa8555",
+    "sentence_ja": "規則に反することはできない。",
+    "sentence_reading": "きそくにはんすることはできない。",
+    "sentence_meaning": "규칙에 반하는 일은 할 수 없다."
+  },
+  {
+    "word_id": "bb860bbd-4642-4120-bd45-aa639bfa8555",
+    "sentence_ja": "常識に反した行動をとった。",
+    "sentence_reading": "じょうしきにはんしたこうどうをとった。",
+    "sentence_meaning": "상식에 반하는 행동을 취했다."
+  },
+  {
+    "word_id": "3d59f5af-9477-481f-8c4f-bdc6641b492f",
+    "sentence_ja": "彼の態度は冷淡に感じた。",
+    "sentence_reading": "かれのたいどはれいたんにかんじた。",
+    "sentence_meaning": "그의 태도는 냉담하게 느껴졌다."
+  },
+  {
+    "word_id": "3d59f5af-9477-481f-8c4f-bdc6641b492f",
+    "sentence_ja": "冷淡な返事が返ってきた。",
+    "sentence_reading": "れいたんなへんじがかえってきた。",
+    "sentence_meaning": "냉담한 답변이 돌아왔다."
+  },
+  {
+    "word_id": "c2d04c70-7a36-46fe-bf48-dcdf9d8ea446",
+    "sentence_ja": "悪天候が計画を阻んだ。",
+    "sentence_reading": "あくてんこうがけいかくをはばんだ。",
+    "sentence_meaning": "악천후가 계획을 방해했다."
+  },
+  {
+    "word_id": "c2d04c70-7a36-46fe-bf48-dcdf9d8ea446",
+    "sentence_ja": "彼の進歩を阻もうとした。",
+    "sentence_reading": "かれのしんぽをはばもうとした。",
+    "sentence_meaning": "그의 발전을 막으려고 했다."
+  },
+  {
+    "word_id": "ba4e78a7-140d-4b4e-9398-e1c48b6dcc29",
+    "sentence_ja": "養護施設で子供を世話した。",
+    "sentence_reading": "ようごしせつでこどもをせわした。",
+    "sentence_meaning": "양호 시설에서 아이를 돌봤다."
+  },
+  {
+    "word_id": "ba4e78a7-140d-4b4e-9398-e1c48b6dcc29",
+    "sentence_ja": "学校の養護教諭に相談した。",
+    "sentence_reading": "がっこうのようごきょうゆにそうだんした。",
+    "sentence_meaning": "학교 양호 교사에게 상담했다."
+  },
+  {
+    "word_id": "26becc45-2d62-4779-8284-45bd781444f1",
+    "sentence_ja": "兵士たちが反乱を起こした。",
+    "sentence_reading": "へいしたちがはんらんをおこした。",
+    "sentence_meaning": "병사들이 반란을 일으켰다."
+  },
+  {
+    "word_id": "26becc45-2d62-4779-8284-45bd781444f1",
+    "sentence_ja": "反乱はすぐに鎮圧された。",
+    "sentence_reading": "はんらんはすぐにちんあつされた。",
+    "sentence_meaning": "반란은 곧바로 진압되었다."
+  },
+  {
+    "word_id": "1a86c339-37b2-4863-bd18-d9bcd94d84ad",
+    "sentence_ja": "控室で出番を待っています。",
+    "sentence_reading": "ひかえしつででばんをまっています。",
+    "sentence_meaning": "대기실에서 차례를 기다리고 있습니다."
+  },
+  {
+    "word_id": "1a86c339-37b2-4863-bd18-d9bcd94d84ad",
+    "sentence_ja": "選手は控室で体を温めた。",
+    "sentence_reading": "せんしゅはひかえしつでからだをあたためた。",
+    "sentence_meaning": "선수는 대기실에서 몸을 풀었다."
+  },
+  {
+    "word_id": "e6dde880-5607-4f9e-8f9b-c900d88f1ee7",
+    "sentence_ja": "旅客の安全が最優先です。",
+    "sentence_reading": "りょかくのあんぜんがさいゆうせんです。",
+    "sentence_meaning": "승객의 안전이 최우선입니다."
+  },
+  {
+    "word_id": "e6dde880-5607-4f9e-8f9b-c900d88f1ee7",
+    "sentence_ja": "旅客機が無事に着陸した。",
+    "sentence_reading": "りょかくきがぶじにちゃくりくした。",
+    "sentence_meaning": "여객기가 무사히 착륙했다."
+  },
+  {
+    "word_id": "2d9c9d7d-4d85-454f-a559-e837dc99eed4",
+    "sentence_ja": "人間の欲望には限りがない。",
+    "sentence_reading": "にんげんのよくぼうにはかぎりがない。",
+    "sentence_meaning": "인간의 욕망에는 끝이 없다."
+  },
+  {
+    "word_id": "2d9c9d7d-4d85-454f-a559-e837dc99eed4",
+    "sentence_ja": "欲望に負けて浪費してしまった。",
+    "sentence_reading": "よくぼうにまけてろうひしてしまった。",
+    "sentence_meaning": "욕망에 지고 말아 낭비해버렸다."
+  },
+  {
+    "word_id": "8ab9f529-1178-4664-94d7-74e3eebb81e6",
+    "sentence_ja": "桜の花びらが風で舞った。",
+    "sentence_reading": "さくらのはなびらがかぜでまった。",
+    "sentence_meaning": "벚꽃 잎이 바람에 흩날렸다."
+  },
+  {
+    "word_id": "8ab9f529-1178-4664-94d7-74e3eebb81e6",
+    "sentence_ja": "花びらが池に落ちていった。",
+    "sentence_reading": "はなびらがいけにおちていった。",
+    "sentence_meaning": "꽃잎이 연못에 떨어져 내려갔다."
+  },
+  {
+    "word_id": "fde90c95-dbce-4ed0-b250-fd517afc7c1b",
+    "sentence_ja": "半端な気持ちでは続かない。",
+    "sentence_reading": "はんぱなきもちではつづかない。",
+    "sentence_meaning": "어중간한 마음으로는 계속하지 못한다."
+  },
+  {
+    "word_id": "fde90c95-dbce-4ed0-b250-fd517afc7c1b",
+    "sentence_ja": "半端に残った料理を片付けた。",
+    "sentence_reading": "はんぱにのこったりょうりをかたづけた。",
+    "sentence_meaning": "어중간하게 남은 요리를 치웠다."
+  },
+  {
+    "word_id": "b349d659-2656-4650-9357-8c08c8ccd5b2",
+    "sentence_ja": "権限を濫用してはいけない。",
+    "sentence_reading": "けんげんをらんようしてはいけない。",
+    "sentence_meaning": "권한을 남용해서는 안 된다."
+  },
+  {
+    "word_id": "b349d659-2656-4650-9357-8c08c8ccd5b2",
+    "sentence_ja": "薬を濫用すると体に悪い。",
+    "sentence_reading": "くすりをらんようするとからだにわるい。",
+    "sentence_meaning": "약을 남용하면 몸에 좋지 않다."
+  },
+  {
+    "word_id": "c361a6ed-40fb-4f13-8cd4-0f69c6bbaecf",
+    "sentence_ja": "先生が名簿を読み上げた。",
+    "sentence_reading": "せんせいがめいぼをよみあげた。",
+    "sentence_meaning": "선생님이 명부를 소리 내어 읽었다."
+  },
+  {
+    "word_id": "c361a6ed-40fb-4f13-8cd4-0f69c6bbaecf",
+    "sentence_ja": "結果を一つずつ読み上げる。",
+    "sentence_reading": "けっかをひとつずつよみあげる。",
+    "sentence_meaning": "결과를 하나씩 낭독한다."
+  },
+  {
+    "word_id": "a008b28c-1e77-4e58-a6f5-78b01718cc6e",
+    "sentence_ja": "この作業は時間を要する。",
+    "sentence_reading": "このさぎょうはじかんをようする。",
+    "sentence_meaning": "이 작업은 시간이 필요하다."
+  },
+  {
+    "word_id": "a008b28c-1e77-4e58-a6f5-78b01718cc6e",
+    "sentence_ja": "手術は細心の注意を要した。",
+    "sentence_reading": "しゅじゅつはさいしんのちゅういをようした。",
+    "sentence_meaning": "수술은 세심한 주의를 요했다."
+  },
+  {
+    "word_id": "68e95f40-a2a0-4036-845c-075908026714",
+    "sentence_ja": "その船は領海に侵入した。",
+    "sentence_reading": "そのふねはりょうかいにしんにゅうした。",
+    "sentence_meaning": "그 배는 영해에 침입했다."
+  },
+  {
+    "word_id": "68e95f40-a2a0-4036-845c-075908026714",
+    "sentence_ja": "領海の範囲は法律で決まる。",
+    "sentence_reading": "りょうかいのはんいはほうりつできまる。",
+    "sentence_meaning": "영해의 범위는 법률로 정해진다."
+  },
+  {
+    "word_id": "d2ce90d6-715a-4928-9eae-f5d3ba1ec929",
+    "sentence_ja": "領土問題は解決が難しい。",
+    "sentence_reading": "りょうどもんだいはかいけつがむずかしい。",
+    "sentence_meaning": "영토 문제는 해결이 어렵다."
+  },
+  {
+    "word_id": "d2ce90d6-715a-4928-9eae-f5d3ba1ec929",
+    "sentence_ja": "その国は広大な領土を持つ。",
+    "sentence_reading": "そのくにはこうだいなりょうどをもつ。",
+    "sentence_meaning": "그 나라는 광대한 영토를 가진다."
+  },
+  {
+    "word_id": "6504aa3b-4d77-467c-a424-8a23456aca19",
+    "sentence_ja": "ひょっとしたら彼が来るかも。",
+    "sentence_reading": "ひょっとしたらかれがくるかも。",
+    "sentence_meaning": "혹시 그가 올지도 모른다."
+  },
+  {
+    "word_id": "6504aa3b-4d77-467c-a424-8a23456aca19",
+    "sentence_ja": "ひょっと気づいたら夜だった。",
+    "sentence_reading": "ひょっときづいたらよるだった。",
+    "sentence_meaning": "문득 정신 차리고 보니 밤이었다."
+  },
+  {
+    "word_id": "62aae931-e565-4d76-8749-e83bebadbbfb",
+    "sentence_ja": "夜の公園には人気がなかった。",
+    "sentence_reading": "よるのこうえんにはひとけがなかった。",
+    "sentence_meaning": "밤의 공원에는 인적이 없었다."
+  },
+  {
+    "word_id": "62aae931-e565-4d76-8749-e83bebadbbfb",
+    "sentence_ja": "その路地は人気が少なくて怖い。",
+    "sentence_reading": "そのろじはひとけがすくなくてこわい。",
+    "sentence_meaning": "그 골목은 인적이 드물어서 무섭다."
+  },
+  {
+    "word_id": "ed272ad0-c755-4555-80e3-39ea8afa7fff",
+    "sentence_ja": "パトカーがサイレンを鳴らした。",
+    "sentence_reading": "パトカーがサイレンをならした。",
+    "sentence_meaning": "순찰차가 사이렌을 울렸다."
+  },
+  {
+    "word_id": "ed272ad0-c755-4555-80e3-39ea8afa7fff",
+    "sentence_ja": "パトカーが現場に急行した。",
+    "sentence_reading": "パトカーがげんばにきゅうこうした。",
+    "sentence_meaning": "순찰차가 현장으로 급히 달려갔다."
+  },
+  {
+    "word_id": "29effe61-b432-4339-8367-2a9e2bdf8da0",
+    "sentence_ja": "市民から多くの要望が届いた。",
+    "sentence_reading": "しみんからおおくのようぼうがとどいた。",
+    "sentence_meaning": "시민들로부터 많은 요구가 들어왔다."
+  },
+  {
+    "word_id": "29effe61-b432-4339-8367-2a9e2bdf8da0",
+    "sentence_ja": "お客様の要望にお応えします。",
+    "sentence_reading": "おきゃくさまのようぼうにおこたえします。",
+    "sentence_meaning": "고객의 요구에 응해 드리겠습니다."
+  },
+  {
+    "word_id": "f308d5b4-f1d2-437d-b4ca-ad0bd2c28aea",
+    "sentence_ja": "華やかな衣装で舞台に立った。",
+    "sentence_reading": "はなやかないしょうでぶたいにたった。",
+    "sentence_meaning": "화려한 의상을 입고 무대에 섰다."
+  },
+  {
+    "word_id": "f308d5b4-f1d2-437d-b4ca-ad0bd2c28aea",
+    "sentence_ja": "彼女の笑顔は華やかだった。",
+    "sentence_reading": "かのじょのえがおははなやかだった。",
+    "sentence_meaning": "그녀의 미소는 눈부시게 아름다웠다."
+  },
+  {
+    "word_id": "e5285567-2b65-4d87-9eac-950fac5a03f8",
+    "sentence_ja": "荷物を引取りに来てください。",
+    "sentence_reading": "にもつをひきとりにきてください。",
+    "sentence_meaning": "짐을 찾으러 와 주세요."
+  },
+  {
+    "word_id": "e5285567-2b65-4d87-9eac-950fac5a03f8",
+    "sentence_ja": "彼は野良猫を引取って育てた。",
+    "sentence_reading": "かれはのらねこをひきとってそだてた。",
+    "sentence_meaning": "그는 길고양이를 입양해서 키웠다."
+  },
+  {
+    "word_id": "15ae4562-9359-4a2d-8ace-162baca1bcae",
+    "sentence_ja": "服をハンガーにかけておいた。",
+    "sentence_reading": "ふくをハンガーにかけておいた。",
+    "sentence_meaning": "옷을 옷걸이에 걸어 두었다."
+  },
+  {
+    "word_id": "15ae4562-9359-4a2d-8ace-162baca1bcae",
+    "sentence_ja": "ハンガーが足りないから買ってきて。",
+    "sentence_reading": "ハンガーがたりないからかってきて。",
+    "sentence_meaning": "옷걸이가 부족하니까 사 와줘."
+  },
+  {
+    "word_id": "ac860a6e-fbb1-42f1-8516-bd0203b675a7",
+    "sentence_ja": "彼女は研究一筋に生きてきた。",
+    "sentence_reading": "かのじょはけんきゅうひとすじにいきてきた。",
+    "sentence_meaning": "그녀는 연구에만 전념하며 살아왔다."
+  },
+  {
+    "word_id": "ac860a6e-fbb1-42f1-8516-bd0203b675a7",
+    "sentence_ja": "空に一筋の光が差した。",
+    "sentence_reading": "そらにひとすじのひかりがさした。",
+    "sentence_meaning": "하늘에 한 줄기 빛이 비쳤다."
+  },
+  {
+    "word_id": "dd8cdd12-8d34-47f5-a58f-335bb4856e9a",
+    "sentence_ja": "この小説の人物描写は細かい。",
+    "sentence_reading": "このしょうせつのじんぶつびょうしゃはこまかい。",
+    "sentence_meaning": "이 소설의 인물 묘사는 섬세하다."
+  },
+  {
+    "word_id": "dd8cdd12-8d34-47f5-a58f-335bb4856e9a",
+    "sentence_ja": "風景の描写がとても美しかった。",
+    "sentence_reading": "ふうけいのびょうしゃがとてもうつくしかった。",
+    "sentence_meaning": "풍경 묘사가 매우 아름다웠다."
+  },
+  {
+    "word_id": "c5a180f8-c627-4602-a3c8-ba257baf0a6a",
+    "sentence_ja": "飛行機の模型を作るのが趣味だ。",
+    "sentence_reading": "ひこうきのもけいをつくるのがしゅみだ。",
+    "sentence_meaning": "비행기 모형을 만드는 것이 취미다."
+  },
+  {
+    "word_id": "c5a180f8-c627-4602-a3c8-ba257baf0a6a",
+    "sentence_ja": "模型店で新しいキットを買った。",
+    "sentence_reading": "もけいてんであたらしいキットをかった。",
+    "sentence_meaning": "모형 가게에서 새 키트를 샀다."
+  },
+  {
+    "word_id": "0dc0e9c6-511c-4499-9db1-84198932bfe5",
+    "sentence_ja": "放射能汚染は長く続くことがある。",
+    "sentence_reading": "ほうしゃのうおせんはながくつづくことがある。",
+    "sentence_meaning": "방사능 오염은 오래 지속될 수 있다."
+  },
+  {
+    "word_id": "0dc0e9c6-511c-4499-9db1-84198932bfe5",
+    "sentence_ja": "放射能の影響を調べている。",
+    "sentence_reading": "ほうしゃのうのえいきょうをしらべている。",
+    "sentence_meaning": "방사능의 영향을 조사하고 있다."
+  },
+  {
+    "word_id": "529c061c-3188-408f-8e34-eb11a8235b68",
+    "sentence_ja": "試合に負けて無念だった。",
+    "sentence_reading": "しあいにまけてむねんだった。",
+    "sentence_meaning": "시합에 져서 너무 억울했다."
+  },
+  {
+    "word_id": "529c061c-3188-408f-8e34-eb11a8235b68",
+    "sentence_ja": "無念の涙を流しながら引退した。",
+    "sentence_reading": "むねんのなみだをながしながらいんたいした。",
+    "sentence_meaning": "한을 품은 눈물을 흘리며 은퇴했다."
+  },
+  {
+    "word_id": "cc5f00bd-5a1f-4adf-94b3-1ecae77fb2ba",
+    "sentence_ja": "説明に補足があれば教えてください。",
+    "sentence_reading": "せつめいにほそくがあればおしえてください。",
+    "sentence_meaning": "설명에 보충할 내용이 있으면 알려 주세요."
+  },
+  {
+    "word_id": "cc5f00bd-5a1f-4adf-94b3-1ecae77fb2ba",
+    "sentence_ja": "資料の補足として図を追加した。",
+    "sentence_reading": "しりょうのほそくとしてずをついかした。",
+    "sentence_meaning": "자료의 보완으로 그림을 추가했다."
+  },
+  {
+    "word_id": "b9e7fd6b-db28-486c-afd9-ed81950577c9",
+    "sentence_ja": "借りたお金を返還してほしい。",
+    "sentence_reading": "かりたおかねをへんかんしてほしい。",
+    "sentence_meaning": "빌린 돈을 반환해 주었으면 한다."
+  },
+  {
+    "word_id": "b9e7fd6b-db28-486c-afd9-ed81950577c9",
+    "sentence_ja": "占領地の返還を求める声が高い。",
+    "sentence_reading": "せんりょうちのへんかんをもとめるこえがたかい。",
+    "sentence_meaning": "점령지의 반환을 요구하는 목소리가 높다."
+  },
+  {
+    "word_id": "2aaa8a67-82d2-4c74-9a95-fe7036742581",
+    "sentence_ja": "授業料の免除を申請した。",
+    "sentence_reading": "じゅぎょうりょうのめんじょをしんせいした。",
+    "sentence_meaning": "수업료 면제를 신청했다."
+  },
+  {
+    "word_id": "2aaa8a67-82d2-4c74-9a95-fe7036742581",
+    "sentence_ja": "その条件を満たせば税が免除される。",
+    "sentence_reading": "そのじょうけんをみたせばぜいがめんじょされる。",
+    "sentence_meaning": "그 조건을 충족하면 세금이 면제된다."
+  },
+  {
+    "word_id": "1569e552-ee3c-47ec-a718-4c4cf267da9d",
+    "sentence_ja": "この品種は寒さに強い。",
+    "sentence_reading": "このひんしゅはさむさにつよい。",
+    "sentence_meaning": "이 품종은 추위에 강하다."
+  },
+  {
+    "word_id": "1569e552-ee3c-47ec-a718-4c4cf267da9d",
+    "sentence_ja": "新しい品種の開発に取り組んでいる。",
+    "sentence_reading": "あたらしいひんしゅのかいはつにとりくんでいる。",
+    "sentence_meaning": "새로운 품종 개발에 힘쓰고 있다."
+  },
+  {
+    "word_id": "e8e1821b-73d1-43c2-8855-e566039523c8",
+    "sentence_ja": "弟をチェスで負かしてやった。",
+    "sentence_reading": "おとうとをチェスでまかしてやった。",
+    "sentence_meaning": "남동생을 체스에서 이겨줬다."
+  },
+  {
+    "word_id": "e8e1821b-73d1-43c2-8855-e566039523c8",
+    "sentence_ja": "誰でも負かせる自信がある。",
+    "sentence_reading": "だれでもまかせるじしんがある。",
+    "sentence_meaning": "누구든 이길 수 있다는 자신이 있다."
+  },
+  {
+    "word_id": "b046dbda-364e-4d8c-bea5-e50a6a0216fe",
+    "sentence_ja": "今日はやけに疲れている。",
+    "sentence_reading": "きょうはやけにつかれている。",
+    "sentence_meaning": "오늘은 유독 피곤하다."
+  },
+  {
+    "word_id": "b046dbda-364e-4d8c-bea5-e50a6a0216fe",
+    "sentence_ja": "彼女はやけに元気そうだった。",
+    "sentence_reading": "かのじょはやけにげんきそうだった。",
+    "sentence_meaning": "그녀는 유달리 기운차 보였다."
+  },
+  {
+    "word_id": "c22d91ee-7b23-42c5-b5d4-21d8a605d218",
+    "sentence_ja": "新しい法案が議会で審議された。",
+    "sentence_reading": "あたらしいほうあんがぎかいでしんぎされた。",
+    "sentence_meaning": "새로운 법안이 의회에서 심의되었다."
+  },
+  {
+    "word_id": "c22d91ee-7b23-42c5-b5d4-21d8a605d218",
+    "sentence_ja": "その法案は賛成多数で可決された。",
+    "sentence_reading": "そのほうあんはさんせいたすうでかけつされた。",
+    "sentence_meaning": "그 법안은 찬성 다수로 가결되었다."
+  },
+  {
+    "word_id": "233c64c3-52db-46cc-9baa-58775ae079cd",
+    "sentence_ja": "都市部は人口密度が高い。",
+    "sentence_reading": "としぶはじんこうみつどがたかい。",
+    "sentence_meaning": "도심부는 인구 밀도가 높다."
+  },
+  {
+    "word_id": "233c64c3-52db-46cc-9baa-58775ae079cd",
+    "sentence_ja": "この森は木の密度がとても高い。",
+    "sentence_reading": "このもりはきのみつどがとてもたかい。",
+    "sentence_meaning": "이 숲은 나무의 밀도가 매우 높다."
+  },
+  {
+    "word_id": "3ec33b54-201e-4093-9955-9fee2f07c919",
+    "sentence_ja": "申出を丁寧に断った。",
+    "sentence_reading": "もうしでをていねいにことわった。",
+    "sentence_meaning": "요청을 정중하게 거절했다."
+  },
+  {
+    "word_id": "3ec33b54-201e-4093-9955-9fee2f07c919",
+    "sentence_ja": "担当者に申出をしてみた。",
+    "sentence_reading": "たんとうしゃにもうしでをしてみた。",
+    "sentence_meaning": "담당자에게 요청을 해봤다."
+  },
+  {
+    "word_id": "a09a411b-6a0a-422a-ae0c-b40857647d45",
+    "sentence_ja": "無線で仲間に連絡を取った。",
+    "sentence_reading": "むせんでなかまにれんらくをとった。",
+    "sentence_meaning": "무선으로 동료에게 연락을 취했다."
+  },
+  {
+    "word_id": "a09a411b-6a0a-422a-ae0c-b40857647d45",
+    "sentence_ja": "無線LANが繋がらなくて困った。",
+    "sentence_reading": "むせんランがつながらなくてこまった。",
+    "sentence_meaning": "무선 랜이 연결되지 않아 곤란했다."
+  },
+  {
+    "word_id": "a31a539b-24cd-4b8f-9636-48e03e0327fe",
+    "sentence_ja": "このスープは塩味が効いている。",
+    "sentence_reading": "このスープはしおみがきいている。",
+    "sentence_meaning": "이 수프는 짠맛이 잘 살아 있다."
+  },
+  {
+    "word_id": "a31a539b-24cd-4b8f-9636-48e03e0327fe",
+    "sentence_ja": "料理に甘味を加えると食べやすい。",
+    "sentence_reading": "りょうりにあまみをくわえるとたべやすい。",
+    "sentence_meaning": "요리에 단맛을 더하면 먹기 쉽다."
+  },
+  {
+    "word_id": "7eb1d238-7aa1-44f9-9314-d0e6be2700f2",
+    "sentence_ja": "冒頭から引き込まれる物語だった。",
+    "sentence_reading": "ぼうとうからひきこまれるものがたりだった。",
+    "sentence_meaning": "서두부터 빠져드는 이야기였다."
+  },
+  {
+    "word_id": "7eb1d238-7aa1-44f9-9314-d0e6be2700f2",
+    "sentence_ja": "スピーチの冒頭で自己紹介した。",
+    "sentence_reading": "スピーチのぼうとうでじこしょうかいした。",
+    "sentence_meaning": "스피치의 서두에서 자기소개를 했다."
+  },
+  {
+    "word_id": "bbcc4de9-4de6-43db-a127-0964bc05ef79",
+    "sentence_ja": "前置きはいいので本題に入ろう。",
+    "sentence_reading": "まえおきはいいのでほんだいにはいろう。",
+    "sentence_meaning": "서론은 됐으니 본론으로 들어가자."
+  },
+  {
+    "word_id": "bbcc4de9-4de6-43db-a127-0964bc05ef79",
+    "sentence_ja": "長い前置きの後で話が始まった。",
+    "sentence_reading": "ながいまえおきのあとではなしがはじまった。",
+    "sentence_meaning": "긴 서문 후에 이야기가 시작되었다."
+  },
+  {
+    "word_id": "85d820f4-64e1-4d24-bd27-2a58f1933962",
+    "sentence_ja": "どんな困難もやりとげる覚悟だ。",
+    "sentence_reading": "どんなこんなんもやりとげるかくごだ。",
+    "sentence_meaning": "어떤 어려움도 끝까지 해내겠다는 각오다."
+  },
+  {
+    "word_id": "85d820f4-64e1-4d24-bd27-2a58f1933962",
+    "sentence_ja": "彼はマラソンを見事にやりとげた。",
+    "sentence_reading": "かれはマラソンをみごとにやりとげた。",
+    "sentence_meaning": "그는 마라톤을 훌륭하게 완주해냈다."
+  },
+  {
+    "word_id": "1f6d3bf5-b60d-447c-a961-f5c7a1d83ffd",
+    "sentence_ja": "転んでもろに地面に打ちつけた。",
+    "sentence_reading": "ころんでもろにじめんにうちつけた。",
+    "sentence_meaning": "넘어져 온몸으로 땅바닥에 부딪쳤다."
+  },
+  {
+    "word_id": "1f6d3bf5-b60d-447c-a961-f5c7a1d83ffd",
+    "sentence_ja": "批判をもろに受けて落ち込んだ。",
+    "sentence_reading": "ひはんをもろにうけておちこんだ。",
+    "sentence_meaning": "비판을 정면으로 받고 풀이 죽었다."
+  },
+  {
+    "word_id": "fce46dfd-81c4-4476-9f5e-790f68618c90",
+    "sentence_ja": "新しい施設の名称が決まった。",
+    "sentence_reading": "あたらしいしせつのめいしょうがきまった。",
+    "sentence_meaning": "새로운 시설의 명칭이 정해졌다."
+  },
+  {
+    "word_id": "fce46dfd-81c4-4476-9f5e-790f68618c90",
+    "sentence_ja": "正式な名称を確認してください。",
+    "sentence_reading": "せいしきなめいしょうをかくにんしてください。",
+    "sentence_meaning": "정식 명칭을 확인해 주세요."
+  },
+  {
+    "word_id": "bb3e80ab-e715-4d59-9f98-a1be72bd30e2",
+    "sentence_ja": "十字路で右に曲がってください。",
+    "sentence_reading": "じゅうじろでみぎにまがってください。",
+    "sentence_meaning": "사거리에서 오른쪽으로 돌아 주세요."
+  },
+  {
+    "word_id": "bb3e80ab-e715-4d59-9f98-a1be72bd30e2",
+    "sentence_ja": "十字路に信号が設置された。",
+    "sentence_reading": "じゅうじろにしんごうがせっちされた。",
+    "sentence_meaning": "교차로에 신호등이 설치되었다."
+  },
+  {
+    "word_id": "04fa6671-463e-4812-8258-309d15a94f5b",
+    "sentence_ja": "覆面をした男が現れた。",
+    "sentence_reading": "ふくめんをしたおとこがあらわれた。",
+    "sentence_meaning": "가면을 쓴 남자가 나타났다."
+  },
+  {
+    "word_id": "04fa6671-463e-4812-8258-309d15a94f5b",
+    "sentence_ja": "覆面パトカーに捕まってしまった。",
+    "sentence_reading": "ふくめんパトカーにつかまってしまった。",
+    "sentence_meaning": "위장 순찰차에 붙잡혀 버렸다."
+  },
+  {
+    "word_id": "3bb32fa2-5dbe-44dd-9b65-965b2b51cff7",
+    "sentence_ja": "布巾でテーブルをきれいに拭いた。",
+    "sentence_reading": "ふきんでテーブルをきれいにふいた。",
+    "sentence_meaning": "행주로 테이블을 깨끗이 닦았다."
+  },
+  {
+    "word_id": "3bb32fa2-5dbe-44dd-9b65-965b2b51cff7",
+    "sentence_ja": "使った布巾はすぐ洗ってください。",
+    "sentence_reading": "つかったふきんはすぐあらってください。",
+    "sentence_meaning": "사용한 행주는 바로 씻어 주세요."
+  },
+  {
+    "word_id": "34b66334-1927-4902-acff-9302bac0def2",
+    "sentence_ja": "子どもが塾に通い始めた。",
+    "sentence_reading": "こどもがじゅくにかよいはじめた。",
+    "sentence_meaning": "아이가 학원에 다니기 시작했다."
+  },
+  {
+    "word_id": "34b66334-1927-4902-acff-9302bac0def2",
+    "sentence_ja": "塾の宿題が多くて大変だ。",
+    "sentence_reading": "じゅくのしゅくだいがおおくてたいへんだ。",
+    "sentence_meaning": "학원 숙제가 많아서 힘들다."
+  },
+  {
+    "word_id": "4f1a1317-f508-4609-bc0c-8afe6b1e96a8",
+    "sentence_ja": "終日雨が降り続いた。",
+    "sentence_reading": "しゅうじつあめがふりつづいた。",
+    "sentence_meaning": "하루 종일 비가 계속 내렸다."
+  },
+  {
+    "word_id": "4f1a1317-f508-4609-bc0c-8afe6b1e96a8",
+    "sentence_ja": "終日かけて報告書を仕上げた。",
+    "sentence_reading": "しゅうじつかけてほうこくしょをしあげた。",
+    "sentence_meaning": "하루 종일 걸려 보고서를 완성했다."
+  },
+  {
+    "word_id": "76002d1b-bbf1-4c75-9309-06d611c9482d",
+    "sentence_ja": "安っぽい服ばかり売っている店だ。",
+    "sentence_reading": "やすっぽいふくばかりうっているみせだ。",
+    "sentence_meaning": "싸구려 옷만 파는 가게다."
+  },
+  {
+    "word_id": "76002d1b-bbf1-4c75-9309-06d611c9482d",
+    "sentence_ja": "安っぽく見えない工夫が大切だ。",
+    "sentence_reading": "やすっぽくみえないくふうがたいせつだ。",
+    "sentence_meaning": "싸 보이지 않게 하는 궁리가 중요하다."
+  },
+  {
+    "word_id": "0fffe9a1-b283-4885-94d4-95e71a18a5db",
+    "sentence_ja": "仕事を途中で放り出してしまった。",
+    "sentence_reading": "しごとをとちゅうでほうりだしてしまった。",
+    "sentence_meaning": "일을 중간에 내팽개쳐 버렸다."
+  },
+  {
+    "word_id": "0fffe9a1-b283-4885-94d4-95e71a18a5db",
+    "sentence_ja": "荷物を廊下に放り出した。",
+    "sentence_reading": "にもつをろうかにほうりだした。",
+    "sentence_meaning": "짐을 복도에 내던졌다."
+  },
+  {
+    "word_id": "0395d457-c959-4be7-a114-465fd2ffd9ee",
+    "sentence_ja": "彼の目論見は見事に外れた。",
+    "sentence_reading": "かれのもくろみはみごとにはずれた。",
+    "sentence_meaning": "그의 계획은 완전히 빗나갔다."
+  },
+  {
+    "word_id": "0395d457-c959-4be7-a114-465fd2ffd9ee",
+    "sentence_ja": "目論見通りに事が進んでいる。",
+    "sentence_reading": "もくろみどおりにことがすすんでいる。",
+    "sentence_meaning": "계획대로 일이 진행되고 있다."
+  },
+  {
+    "word_id": "aee119f9-7d5d-4691-b910-96e6f67bb140",
+    "sentence_ja": "手術の前に麻酔をかけられた。",
+    "sentence_reading": "しゅじゅつのまえにますいをかけられた。",
+    "sentence_meaning": "수술 전에 마취를 받았다."
+  },
+  {
+    "word_id": "aee119f9-7d5d-4691-b910-96e6f67bb140",
+    "sentence_ja": "麻酔が切れると痛みが出てきた。",
+    "sentence_reading": "ますいがきれるといたみがでてきた。",
+    "sentence_meaning": "마취가 풀리자 통증이 생겼다."
+  },
+  {
+    "word_id": "55f8640f-ec1b-405d-b8d8-8cad4550c195",
+    "sentence_ja": "被災地に物資を届けた。",
+    "sentence_reading": "ひさいちにぶっしをとどけた。",
+    "sentence_meaning": "피해 지역에 물자를 전달했다."
+  },
+  {
+    "word_id": "55f8640f-ec1b-405d-b8d8-8cad4550c195",
+    "sentence_ja": "戦時中は物資が不足していた。",
+    "sentence_reading": "せんじちゅうはぶっしがふそくしていた。",
+    "sentence_meaning": "전시 중에는 물자가 부족했다."
+  },
+  {
+    "word_id": "4ad336c4-e171-48dd-9e49-255e24a87701",
+    "sentence_ja": "夏休みが待ち遠しくてたまらない。",
+    "sentence_reading": "なつやすみがまちどおしくてたまらない。",
+    "sentence_meaning": "여름 방학이 너무너무 기다려진다."
+  },
+  {
+    "word_id": "4ad336c4-e171-48dd-9e49-255e24a87701",
+    "sentence_ja": "彼女に会う日が待ち遠しい。",
+    "sentence_reading": "かのじょにあうひがまちどおしい。",
+    "sentence_meaning": "그녀를 만날 날이 손꼽아 기다려진다."
+  },
+  {
+    "word_id": "2232e251-c69f-4245-8a42-590e38f7d26a",
+    "sentence_ja": "子供の無邪気な笑顔が好きだ。",
+    "sentence_reading": "こどものむじゃきなえがおがすきだ。",
+    "sentence_meaning": "아이의 천진난만한 미소가 좋다."
+  },
+  {
+    "word_id": "2232e251-c69f-4245-8a42-590e38f7d26a",
+    "sentence_ja": "彼女は無邪気に質問してきた。",
+    "sentence_reading": "かのじょはむじゃきにしつもんしてきた。",
+    "sentence_meaning": "그녀는 순진하게 질문해 왔다."
+  },
+  {
+    "word_id": "0e94d165-fb27-408b-887e-b9a891df9c71",
+    "sentence_ja": "その国は戦争で滅びてしまった。",
+    "sentence_reading": "そのくにはせんそうでほろびてしまった。",
+    "sentence_meaning": "그 나라는 전쟁으로 멸망해 버렸다."
+  },
+  {
+    "word_id": "0e94d165-fb27-408b-887e-b9a891df9c71",
+    "sentence_ja": "恐竜はなぜ滅びたのか。",
+    "sentence_reading": "きょうりゅうはなぜほろびたのか。",
+    "sentence_meaning": "공룡은 왜 멸종했는가."
+  },
+  {
+    "word_id": "5b02d7f1-2533-402f-907c-d855d915fd74",
+    "sentence_ja": "彼はいつもへりくだって話す。",
+    "sentence_reading": "かれはいつもへりくだってはなす。",
+    "sentence_meaning": "그는 항상 겸손하게 말한다."
+  },
+  {
+    "word_id": "5b02d7f1-2533-402f-907c-d855d915fd74",
+    "sentence_ja": "日本人はよくへりくだる傾向がある。",
+    "sentence_reading": "にほんじんはよくへりくだるけいこうがある。",
+    "sentence_meaning": "일본인은 자신을 낮추는 경향이 있다."
+  },
+  {
+    "word_id": "f4f48781-2470-494d-89ca-f81ab31a4fa2",
+    "sentence_ja": "もしかして、道に迷いましたか？",
+    "sentence_reading": "もしかして、みちにまよいましたか？",
+    "sentence_meaning": "혹시 길을 잃으셨나요?"
+  },
+  {
+    "word_id": "f4f48781-2470-494d-89ca-f81ab31a4fa2",
+    "sentence_ja": "もしかして彼女が好きなの？",
+    "sentence_reading": "もしかしてかのじょがすきなの？",
+    "sentence_meaning": "혹시 그녀를 좋아하는 거야?"
+  },
+  {
+    "word_id": "d547183f-a590-4a7f-a6d7-480bc3df43b6",
+    "sentence_ja": "上司の怒りに辟易してしまった。",
+    "sentence_reading": "じょうしのいかりにへきえきしてしまった。",
+    "sentence_meaning": "상사의 화에 질려 버렸다."
+  },
+  {
+    "word_id": "d547183f-a590-4a7f-a6d7-480bc3df43b6",
+    "sentence_ja": "毎日の残業に辟易している。",
+    "sentence_reading": "まいにちのざんぎょうにへきえきしている。",
+    "sentence_meaning": "매일 야근에 지쳐있다."
+  },
+  {
+    "word_id": "9022c78e-f250-496b-978c-f3759f871911",
+    "sentence_ja": "その寺は重要な文化財に指定された。",
+    "sentence_reading": "そのてらはじゅうようなぶんかざいにしていされた。",
+    "sentence_meaning": "그 절은 중요한 문화재로 지정되었다."
+  },
+  {
+    "word_id": "9022c78e-f250-496b-978c-f3759f871911",
+    "sentence_ja": "文化財を守ることは大切だ。",
+    "sentence_reading": "ぶんかざいをまもることはたいせつだ。",
+    "sentence_meaning": "문화재를 보호하는 것은 중요하다."
+  },
+  {
+    "word_id": "57b88485-edc6-468a-8f3a-eb8d60bc8dc7",
+    "sentence_ja": "核兵器の廃絶を求める声が高まった。",
+    "sentence_reading": "かくへいきのはいぜつをもとめるこえがたかまった。",
+    "sentence_meaning": "핵무기 폐기를 요구하는 목소리가 높아졌다."
+  },
+  {
+    "word_id": "57b88485-edc6-468a-8f3a-eb8d60bc8dc7",
+    "sentence_ja": "新しい兵器の開発が進んでいる。",
+    "sentence_reading": "あたらしいへいきのかいはつがすすんでいる。",
+    "sentence_meaning": "새로운 무기 개발이 진행되고 있다."
+  },
+  {
+    "word_id": "c42c8ce2-a43a-42cc-8c31-51cb32edd473",
+    "sentence_ja": "パンが焼き過ぎて膨れてしまった。",
+    "sentence_reading": "ぱんがやきすぎてふくれてしまった。",
+    "sentence_meaning": "빵이 너무 구워져서 부풀어 버렸다."
+  },
+  {
+    "word_id": "c42c8ce2-a43a-42cc-8c31-51cb32edd473",
+    "sentence_ja": "怒って頬が膨れている。",
+    "sentence_reading": "おこってほおがふくれている。",
+    "sentence_meaning": "화가 나서 볼이 부풀어 있다."
+  },
+  {
+    "word_id": "589cb48c-e942-40cf-8dd2-c0a71e5da292",
+    "sentence_ja": "彼の言葉は侮辱だと感じた。",
+    "sentence_reading": "かれのことばはぶじょくだとかんじた。",
+    "sentence_meaning": "그의 말은 모욕이라고 느꼈다."
+  },
+  {
+    "word_id": "589cb48c-e942-40cf-8dd2-c0a71e5da292",
+    "sentence_ja": "人を侮辱するようなことを言ってはいけない。",
+    "sentence_reading": "ひとをぶじょくするようなことをいってはいけない。",
+    "sentence_meaning": "사람을 모욕하는 말을 해서는 안 된다."
+  },
+  {
+    "word_id": "5cfc31a6-3111-4d6f-af5d-40a965d93b31",
+    "sentence_ja": "父は家族五人を養っている。",
+    "sentence_reading": "ちちはかぞくごにんをやしなっている。",
+    "sentence_meaning": "아버지는 가족 다섯 명을 부양하고 있다."
+  },
+  {
+    "word_id": "5cfc31a6-3111-4d6f-af5d-40a965d93b31",
+    "sentence_ja": "毎日運動して体力を養っている。",
+    "sentence_reading": "まいにちうんどうしてたいりょくをやしなっている。",
+    "sentence_meaning": "매일 운동해서 체력을 기르고 있다."
+  },
+  {
+    "word_id": "40b12ff2-8e1d-495a-9a3e-729a863a4452",
+    "sentence_ja": "りんごを丸ごとかじった。",
+    "sentence_reading": "りんごをまるごとかじった。",
+    "sentence_meaning": "사과를 통째로 베어 먹었다."
+  },
+  {
+    "word_id": "40b12ff2-8e1d-495a-9a3e-729a863a4452",
+    "sentence_ja": "荷物を丸ごと車に積んだ。",
+    "sentence_reading": "にもつをまるごとくるまにつんだ。",
+    "sentence_meaning": "짐을 전부 차에 실었다."
+  },
+  {
+    "word_id": "6350f47d-4e6c-41b7-b0a7-0a17ffffaa98",
+    "sentence_ja": "突然の知らせに呆然と立ちすくんだ。",
+    "sentence_reading": "とつぜんのしらせにぼうぜんとたちすくんだ。",
+    "sentence_meaning": "갑작스러운 소식에 멍하니 굳어버렸다."
+  },
+  {
+    "word_id": "6350f47d-4e6c-41b7-b0a7-0a17ffffaa98",
+    "sentence_ja": "試験の結果に呆然としてしまった。",
+    "sentence_reading": "しけんのけっかにぼうぜんとしてしまった。",
+    "sentence_meaning": "시험 결과에 멍해져 버렸다."
+  },
+  {
+    "word_id": "010eedb3-97a9-43e5-aa4d-0b40f63c1464",
+    "sentence_ja": "雌のライオンが子育てをしている。",
+    "sentence_reading": "めすのらいおんがこそだてをしている。",
+    "sentence_meaning": "암사자가 새끼를 키우고 있다."
+  },
+  {
+    "word_id": "010eedb3-97a9-43e5-aa4d-0b40f63c1464",
+    "sentence_ja": "この猫は雌だから子猫を産める。",
+    "sentence_reading": "このねこはめすだからこねこをうめる。",
+    "sentence_meaning": "이 고양이는 암컷이라 새끼를 낳을 수 있다."
+  },
+  {
+    "word_id": "08872126-8122-4e5d-8f6c-613e77b87df4",
+    "sentence_ja": "花の蜜に虫が群がっている。",
+    "sentence_reading": "はなのみつにむしがむらがっている。",
+    "sentence_meaning": "꽃의 꿀에 벌레들이 떼 지어 모여 있다."
+  },
+  {
+    "word_id": "08872126-8122-4e5d-8f6c-613e77b87df4",
+    "sentence_ja": "売り出しに人々が群がった。",
+    "sentence_reading": "うりだしにひとびとがむらがった。",
+    "sentence_meaning": "세일에 사람들이 몰려들었다."
+  },
+  {
+    "word_id": "b2b3d96c-14a0-4189-86b5-69299b118f7d",
+    "sentence_ja": "ライブで会場が盛り上がった。",
+    "sentence_reading": "らいぶでかいじょうがもりあがった。",
+    "sentence_meaning": "라이브 공연으로 공연장이 달아올랐다."
+  },
+  {
+    "word_id": "b2b3d96c-14a0-4189-86b5-69299b118f7d",
+    "sentence_ja": "パーティーがどんどん盛り上がってきた。",
+    "sentence_reading": "ぱーてぃーがどんどんもりあがってきた。",
+    "sentence_meaning": "파티가 점점 흥겨워졌다."
+  },
+  {
+    "word_id": "c2060cd0-0a2f-43b9-8f8a-38af1b82e001",
+    "sentence_ja": "都市部の不動産価格が上がっている。",
+    "sentence_reading": "としぶのふどうさんかかくがあがっている。",
+    "sentence_meaning": "도심 부동산 가격이 오르고 있다."
+  },
+  {
+    "word_id": "c2060cd0-0a2f-43b9-8f8a-38af1b82e001",
+    "sentence_ja": "不動産の売買には時間がかかる。",
+    "sentence_reading": "ふどうさんのばいばいにはじかんがかかる。",
+    "sentence_meaning": "부동산 매매에는 시간이 걸린다."
+  },
+  {
+    "word_id": "fd924753-2cce-4586-a845-73b0939d1c13",
+    "sentence_ja": "会議の纏めを報告書にまとめた。",
+    "sentence_reading": "かいぎのまとめをほうこくしょにまとめた。",
+    "sentence_meaning": "회의 정리 내용을 보고서로 작성했다."
+  },
+  {
+    "word_id": "fd924753-2cce-4586-a845-73b0939d1c13",
+    "sentence_ja": "今日の授業の纏めをノートに書いた。",
+    "sentence_reading": "きょうのじゅぎょうのまとめをのーとにかいた。",
+    "sentence_meaning": "오늘 수업 정리를 노트에 적었다."
+  },
+  {
+    "word_id": "d2f27d93-e272-46d3-b909-8470e28d2f0b",
+    "sentence_ja": "このレストランは食材をふんだんに使っている。",
+    "sentence_reading": "このれすとらんはしょくざいをふんだんにつかっている。",
+    "sentence_meaning": "이 레스토랑은 식재료를 풍부하게 사용하고 있다."
+  },
+  {
+    "word_id": "d2f27d93-e272-46d3-b909-8470e28d2f0b",
+    "sentence_ja": "夏はふんだんに野菜が手に入る。",
+    "sentence_reading": "なつはふんだんにやさいがてにはいる。",
+    "sentence_meaning": "여름에는 채소를 풍성하게 구할 수 있다."
+  },
+  {
+    "word_id": "9753c834-be78-4856-9c6f-a3f35696d74f",
+    "sentence_ja": "若い兵士が戦場に送られた。",
+    "sentence_reading": "わかいへいしがせんじょうにおくられた。",
+    "sentence_meaning": "젊은 병사가 전장으로 보내졌다."
+  },
+  {
+    "word_id": "9753c834-be78-4856-9c6f-a3f35696d74f",
+    "sentence_ja": "兵士たちは命令に従って行動した。",
+    "sentence_reading": "へいしたちはめいれいにしたがってこうどうした。",
+    "sentence_meaning": "병사들은 명령에 따라 행동했다."
+  },
+  {
+    "word_id": "e2b5dbbe-c71d-46d4-bfe8-5c3da2fd574e",
+    "sentence_ja": "医者に痛み止め薬を処方された。",
+    "sentence_reading": "いしゃにいたみどめやくをしょほうされた。",
+    "sentence_meaning": "의사에게 진통제를 처방받았다."
+  },
+  {
+    "word_id": "e2b5dbbe-c71d-46d4-bfe8-5c3da2fd574e",
+    "sentence_ja": "この風邪薬はよく効く。",
+    "sentence_reading": "このかぜぐすりはよくきく。",
+    "sentence_meaning": "이 감기약은 잘 듣는다."
+  },
+  {
+    "word_id": "c75b3a06-ae60-4406-89ce-eada6c412bfa",
+    "sentence_ja": "温度計の目盛りを読んでください。",
+    "sentence_reading": "おんどけいのめもりをよんでください。",
+    "sentence_meaning": "온도계의 눈금을 읽어 주세요."
+  },
+  {
+    "word_id": "c75b3a06-ae60-4406-89ce-eada6c412bfa",
+    "sentence_ja": "定規の目盛りで長さを測った。",
+    "sentence_reading": "じょうぎのめもりでながさをはかった。",
+    "sentence_meaning": "자의 눈금으로 길이를 쟀다."
+  },
+  {
+    "word_id": "99ea15cf-5c15-4bf3-8e81-b8d93d29bcd9",
+    "sentence_ja": "この仕事は君に任す。",
+    "sentence_reading": "このしごとはきみにまかす。",
+    "sentence_meaning": "이 일은 너에게 맡기겠다."
+  },
+  {
+    "word_id": "99ea15cf-5c15-4bf3-8e81-b8d93d29bcd9",
+    "sentence_ja": "細かいことは部下に任している。",
+    "sentence_reading": "こまかいことはぶかにまかしている。",
+    "sentence_meaning": "세세한 것은 부하에게 맡기고 있다."
+  },
+  {
+    "word_id": "ecb243da-ca50-476c-aaad-8dac46232c25",
+    "sentence_ja": "地図にマークを付けておいた。",
+    "sentence_reading": "ちずにまーくをつけておいた。",
+    "sentence_meaning": "지도에 표시를 해 두었다."
+  },
+  {
+    "word_id": "ecb243da-ca50-476c-aaad-8dac46232c25",
+    "sentence_ja": "そのチームのロゴマークは有名だ。",
+    "sentence_reading": "そのちーむのろごまーくはゆうめいだ。",
+    "sentence_meaning": "그 팀의 로고 마크는 유명하다."
+  },
+  {
+    "word_id": "3deaa89d-9673-4dde-ab1d-5f1cf61461a6",
+    "sentence_ja": "営業部門の売上が伸びている。",
+    "sentence_reading": "えいぎょうぶもんのうりあげがのびている。",
+    "sentence_meaning": "영업 부문의 매출이 늘고 있다."
+  },
+  {
+    "word_id": "3deaa89d-9673-4dde-ab1d-5f1cf61461a6",
+    "sentence_ja": "どの部門に配属されるか楽しみだ。",
+    "sentence_reading": "どのぶもんにはいぞくされるかたのしみだ。",
+    "sentence_meaning": "어느 부서에 배속될지 기대된다."
+  },
+  {
+    "word_id": "70cc03c1-a241-431d-97e0-99d7abf74969",
+    "sentence_ja": "旅の途中でモーテルに泊まった。",
+    "sentence_reading": "たびのとちゅうでもーてるにとまった。",
+    "sentence_meaning": "여행 도중에 모텔에 묵었다."
+  },
+  {
+    "word_id": "70cc03c1-a241-431d-97e0-99d7abf74969",
+    "sentence_ja": "高速道路沿いにモーテルがある。",
+    "sentence_reading": "こうそくどうろぞいにもーてるがある。",
+    "sentence_meaning": "고속도로 옆에 모텔이 있다."
+  },
+  {
+    "word_id": "bb92f43c-aa01-47e6-b2cd-8f69d50ef6a8",
+    "sentence_ja": "夕暮れ時に海岸を散歩した。",
+    "sentence_reading": "ゆうぐれどきにかいがんをさんぽした。",
+    "sentence_meaning": "저녁 무렵에 해안을 산책했다."
+  },
+  {
+    "word_id": "bb92f43c-aa01-47e6-b2cd-8f69d50ef6a8",
+    "sentence_ja": "夕暮れの空がとても美しかった。",
+    "sentence_reading": "ゆうぐれのそらがとてもうつくしかった。",
+    "sentence_meaning": "황혼의 하늘이 매우 아름다웠다."
+  },
+  {
+    "word_id": "71637d33-e7df-4dbb-8d1c-02ba5f0e9a87",
+    "sentence_ja": "難民を収容するための施設が作られた。",
+    "sentence_reading": "なんみんをしゅうようするためのしせつがつくられた。",
+    "sentence_meaning": "난민을 수용하기 위한 시설이 만들어졌다."
+  },
+  {
+    "word_id": "71637d33-e7df-4dbb-8d1c-02ba5f0e9a87",
+    "sentence_ja": "このホールは千人を収容できる。",
+    "sentence_reading": "このほーるはせんにんをしゅうようできる。",
+    "sentence_meaning": "이 홀은 천 명을 수용할 수 있다."
+  },
+  {
+    "word_id": "eed04d15-e76b-412d-94fb-477111ed2957",
+    "sentence_ja": "期限切れのクーポンは無効になった。",
+    "sentence_reading": "きげんぎれのくーぽんはむこうになった。",
+    "sentence_meaning": "기한이 지난 쿠폰은 무효가 되었다."
+  },
+  {
+    "word_id": "eed04d15-e76b-412d-94fb-477111ed2957",
+    "sentence_ja": "その契約は無効と判断された。",
+    "sentence_reading": "そのけいやくはむこうとはんだんされた。",
+    "sentence_meaning": "그 계약은 무효라고 판단되었다."
+  },
+  {
+    "word_id": "22e1ea56-5de7-414b-b1d3-96e843f8bbe6",
+    "sentence_ja": "子供にも難しい、まして大人には無理だ。",
+    "sentence_reading": "こどもにもむずかしい、ましておとなにはむりだ。",
+    "sentence_meaning": "아이에게도 어렵고, 어른에게는 더욱 무리다."
+  },
+  {
+    "word_id": "22e1ea56-5de7-414b-b1d3-96e843f8bbe6",
+    "sentence_ja": "歩いても遠い、まして自転車では難しい。",
+    "sentence_reading": "あるいてもとおい、ましてじてんしゃではむずかしい。",
+    "sentence_meaning": "걸어도 멀고, 자전거로는 더더욱 힘들다."
+  },
+  {
+    "word_id": "5b4be8f5-cc08-4df4-a09b-66b2f404d53e",
+    "sentence_ja": "大事故を免れることができた。",
+    "sentence_reading": "だいじこをまぬがれることができた。",
+    "sentence_meaning": "큰 사고를 면할 수 있었다."
+  },
+  {
+    "word_id": "5b4be8f5-cc08-4df4-a09b-66b2f404d53e",
+    "sentence_ja": "税金は免れないものだ。",
+    "sentence_reading": "ぜいきんはまぬがれないものだ。",
+    "sentence_meaning": "세금은 피할 수 없는 것이다."
+  },
+  {
+    "word_id": "bea8307f-8a27-4f56-a0a1-47138f10702d",
+    "sentence_ja": "警察が犯人の部屋に踏み込んだ。",
+    "sentence_reading": "けいさつがはんにんのへやにふみこんだ。",
+    "sentence_meaning": "경찰이 범인의 방에 들이닥쳤다."
+  },
+  {
+    "word_id": "bea8307f-8a27-4f56-a0a1-47138f10702d",
+    "sentence_ja": "プライベートな領域に踏み込まないでほしい。",
+    "sentence_reading": "ぷらいべーとなりょういきにふみこまないでほしい。",
+    "sentence_meaning": "사적인 영역에 침범하지 않았으면 한다."
+  },
+  {
+    "word_id": "66fc4e86-1c2a-435f-b0ee-e88e41803d11",
+    "sentence_ja": "嵐が大きな被害をもたらした。",
+    "sentence_reading": "あらしがおおきなひがいをもたらした。",
+    "sentence_meaning": "폭풍이 큰 피해를 가져왔다."
+  },
+  {
+    "word_id": "66fc4e86-1c2a-435f-b0ee-e88e41803d11",
+    "sentence_ja": "その発見は革命をもたらすかもしれない。",
+    "sentence_reading": "そのはっけんはかくめいをもたらすかもしれない。",
+    "sentence_meaning": "그 발견은 혁명을 가져올지도 모른다."
+  },
+  {
+    "word_id": "06727c6c-86db-4e7e-bccb-1004f07b9c55",
+    "sentence_ja": "ご便宜を図っていただけますか。",
+    "sentence_reading": "ごべんぎをはかっていただけますか。",
+    "sentence_meaning": "편의를 봐주실 수 있으신가요?"
+  },
+  {
+    "word_id": "06727c6c-86db-4e7e-bccb-1004f07b9c55",
+    "sentence_ja": "皆様のご便宜のために準備しました。",
+    "sentence_reading": "みなさまのごべんぎのためにじゅんびしました。",
+    "sentence_meaning": "여러분의 편의를 위해 준비했습니다."
+  },
+  {
+    "word_id": "a3586bee-a31a-46e3-b1de-9b16bf7a4a78",
+    "sentence_ja": "末期がんと診断されてしまった。",
+    "sentence_reading": "まっきがんとしんだんされてしまった。",
+    "sentence_meaning": "말기 암으로 진단받아 버렸다."
+  },
+  {
+    "word_id": "a3586bee-a31a-46e3-b1de-9b16bf7a4a78",
+    "sentence_ja": "末期の症状が出始めた。",
+    "sentence_reading": "まっきのしょうじょうがではじめた。",
+    "sentence_meaning": "말기 증상이 나타나기 시작했다."
+  },
+  {
+    "word_id": "f5899b75-73c7-4e04-a1ec-96ce53e206d5",
+    "sentence_ja": "彼の嘘は明白だった。",
+    "sentence_reading": "かれのうそはめいはくだった。",
+    "sentence_meaning": "그의 거짓말은 명백했다."
+  },
+  {
+    "word_id": "f5899b75-73c7-4e04-a1ec-96ce53e206d5",
+    "sentence_ja": "証拠から犯人は明白だ。",
+    "sentence_reading": "しょうこからはんにんはめいはくだ。",
+    "sentence_meaning": "증거로 보면 범인은 명백하다."
+  },
+  {
+    "word_id": "71590974-42da-4020-ad0f-528e67ad0685",
+    "sentence_ja": "子供を扶養している親は控除が受けられる。",
+    "sentence_reading": "こどもをふようしているおやはこうじょがうけられる。",
+    "sentence_meaning": "자녀를 부양하는 부모는 공제를 받을 수 있다."
+  },
+  {
+    "word_id": "71590974-42da-4020-ad0f-528e67ad0685",
+    "sentence_ja": "扶養家族が増えて生活が大変になった。",
+    "sentence_reading": "ふようかぞくがふえてせいかつがたいへんになった。",
+    "sentence_meaning": "부양가족이 늘어서 생활이 힘들어졌다."
+  },
+  {
+    "word_id": "b8bea4ec-ccc0-413a-8080-a3e0105f225a",
+    "sentence_ja": "今回の試合でベストを尽くした。",
+    "sentence_reading": "こんかいのしあいでべすとをつくした。",
+    "sentence_meaning": "이번 경기에서 최선을 다했다."
+  },
+  {
+    "word_id": "b8bea4ec-ccc0-413a-8080-a3e0105f225a",
+    "sentence_ja": "スーツの上にベストを着ている。",
+    "sentence_reading": "すーつのうえにべすとをきている。",
+    "sentence_meaning": "정장 위에 조끼를 입고 있다."
+  },
+  {
+    "word_id": "8618621a-180a-4b05-b42b-a6aa57a1f8f6",
+    "sentence_ja": "旅行で疲れた体を休めた。",
+    "sentence_reading": "りょこうでつかれたからだをやすめた。",
+    "sentence_meaning": "여행으로 지친 몸을 쉬게 했다."
+  },
+  {
+    "word_id": "8618621a-180a-4b05-b42b-a6aa57a1f8f6",
+    "sentence_ja": "しばらく目を休めてください。",
+    "sentence_reading": "しばらくめをやすめてください。",
+    "sentence_meaning": "잠깐 눈을 쉬게 해 주세요."
+  },
+  {
+    "word_id": "7694787b-448b-4e3e-9f04-6ca1dc666c40",
+    "sentence_ja": "駅の真ん前にコンビニがある。",
+    "sentence_reading": "えきのまんまえにこんびにがある。",
+    "sentence_meaning": "역 바로 앞에 편의점이 있다."
+  },
+  {
+    "word_id": "7694787b-448b-4e3e-9f04-6ca1dc666c40",
+    "sentence_ja": "先生の真ん前に座ってしまった。",
+    "sentence_reading": "せんせいのまんまえにすわってしまった。",
+    "sentence_meaning": "선생님 바로 앞에 앉아 버렸다."
+  },
+  {
+    "word_id": "a60e2df0-5cf5-46e5-acff-81693d18c48e",
+    "sentence_ja": "彼女は頻繁にメッセージを送ってくる。",
+    "sentence_reading": "かのじょはひんぱんにめっせーじをおくってくる。",
+    "sentence_meaning": "그녀는 자주 메시지를 보내온다."
+  },
+  {
+    "word_id": "a60e2df0-5cf5-46e5-acff-81693d18c48e",
+    "sentence_ja": "頻繁な出張で疲れてしまった。",
+    "sentence_reading": "ひんぱんなしゅっちょうでつかれてしまった。",
+    "sentence_meaning": "잦은 출장으로 지쳐 버렸다."
+  },
+  {
+    "word_id": "c660c252-c716-4e96-bf0d-c108374fb3dc",
+    "sentence_ja": "国境が封鎖されて入れなくなった。",
+    "sentence_reading": "こっきょうがふうさされてはいれなくなった。",
+    "sentence_meaning": "국경이 봉쇄되어 들어갈 수 없게 되었다."
+  },
+  {
+    "word_id": "c660c252-c716-4e96-bf0d-c108374fb3dc",
+    "sentence_ja": "警察が道路を封鎖して捜査した。",
+    "sentence_reading": "けいさつがどうろをふうさしてそうさした。",
+    "sentence_meaning": "경찰이 도로를 차단하고 수사했다."
+  },
+  {
+    "word_id": "67438932-089c-4954-ac98-dcc408d2fbd7",
+    "sentence_ja": "店内のムードが落ち着いていてよかった。",
+    "sentence_reading": "てんないのむーどがおちついていてよかった。",
+    "sentence_meaning": "매장 분위기가 차분해서 좋았다."
+  },
+  {
+    "word_id": "67438932-089c-4954-ac98-dcc408d2fbd7",
+    "sentence_ja": "パーティーのムードを盛り上げようとした。",
+    "sentence_reading": "ぱーてぃーのむーどをもりあげようとした。",
+    "sentence_meaning": "파티 분위기를 띄우려고 했다."
+  },
+  {
+    "word_id": "89ae2ae4-e0aa-4429-bd40-00b4e76c4953",
+    "sentence_ja": "母親が子を守ろうとするのは本能だ。",
+    "sentence_reading": "ははおやがこをまもろうとするのはほんのうだ。",
+    "sentence_meaning": "어머니가 자식을 지키려는 것은 본능이다."
+  },
+  {
+    "word_id": "89ae2ae4-e0aa-4429-bd40-00b4e76c4953",
+    "sentence_ja": "危険を感じると本能的に逃げてしまう。",
+    "sentence_reading": "きけんをかんじるとほんのうてきにげてしまう。",
+    "sentence_meaning": "위험을 느끼면 본능적으로 도망쳐 버린다."
+  },
+  {
+    "word_id": "21f6081f-c67c-422b-9fcc-4070e956bed5",
+    "sentence_ja": "先生は生徒を正しい道に導いた。",
+    "sentence_reading": "せんせいはせいとをただしいみちにみちびいた。",
+    "sentence_meaning": "선생님은 학생을 올바른 길로 인도했다."
+  },
+  {
+    "word_id": "21f6081f-c67c-422b-9fcc-4070e956bed5",
+    "sentence_ja": "データが新しい発見に導くこともある。",
+    "sentence_reading": "でーたがあたらしいはっけんにみちびくこともある。",
+    "sentence_meaning": "데이터가 새로운 발견으로 이어지기도 한다."
+  },
+  {
+    "word_id": "08414b55-bf19-4891-91e8-d4a2e7df235a",
+    "sentence_ja": "今年は豊作で米がたくさん取れた。",
+    "sentence_reading": "ことしはほうさくでこめがたくさんとれた。",
+    "sentence_meaning": "올해는 풍작으로 쌀을 많이 수확했다."
+  },
+  {
+    "word_id": "08414b55-bf19-4891-91e8-d4a2e7df235a",
+    "sentence_ja": "豊作を神様に感謝する祭りが行われた。",
+    "sentence_reading": "ほうさくをかみさまにかんしゃするまつりがおこなわれた。",
+    "sentence_meaning": "풍작을 신에게 감사하는 축제가 열렸다."
+  },
+  {
+    "word_id": "d34f0d0c-b592-4421-99da-eab324f93957",
+    "sentence_ja": "股の筋肉を鍛えるといいですよ。",
+    "sentence_reading": "もものきんにくをきたえるといいですよ。",
+    "sentence_meaning": "허벅지 근육을 단련하면 좋아요."
+  },
+  {
+    "word_id": "d34f0d0c-b592-4421-99da-eab324f93957",
+    "sentence_ja": "股に大きなあざができてしまった。",
+    "sentence_reading": "ももにおおきなあざができてしまった。",
+    "sentence_meaning": "허벅지에 큰 멍이 생겨 버렸다."
+  },
+  {
+    "word_id": "28c1d6e1-65f2-41be-b0dc-bcad25ac45b5",
+    "sentence_ja": "手芸サークルで刺繍を習っている。",
+    "sentence_reading": "しゅげいさーくるでししゅうをならっている。",
+    "sentence_meaning": "수공예 동아리에서 자수를 배우고 있다."
+  },
+  {
+    "word_id": "28c1d6e1-65f2-41be-b0dc-bcad25ac45b5",
+    "sentence_ja": "母は手芸が得意で、よく小物を作る。",
+    "sentence_reading": "はははしゅげいがとくいで、よくこものをつくる。",
+    "sentence_meaning": "어머니는 수공예를 잘해서 자주 소품을 만든다."
+  },
+  {
+    "word_id": "7e123c43-3b58-4d6e-8927-a909a1b90fc0",
+    "sentence_ja": "日本の民俗文化を研究している。",
+    "sentence_reading": "にほんのみんぞくぶんかをけんきゅうしている。",
+    "sentence_meaning": "일본의 민속 문화를 연구하고 있다."
+  },
+  {
+    "word_id": "7e123c43-3b58-4d6e-8927-a909a1b90fc0",
+    "sentence_ja": "各地の民俗を調べる旅に出た。",
+    "sentence_reading": "かくちのみんぞくをしらべるたびにでた。",
+    "sentence_meaning": "각 지역의 민속을 조사하는 여행을 떠났다."
+  },
+  {
+    "word_id": "4a6e0f2d-e559-4906-a682-8bc6441a6fca",
+    "sentence_ja": "腿の筋肉痛がひどくて歩けない。",
+    "sentence_reading": "もものきんにくつうがひどくてあるけない。",
+    "sentence_meaning": "허벅지 근육통이 심해서 걸을 수 없다."
+  },
+  {
+    "word_id": "4a6e0f2d-e559-4906-a682-8bc6441a6fca",
+    "sentence_ja": "スクワットで腿を鍛えるといい。",
+    "sentence_reading": "すくわっとでももをきたえるといい。",
+    "sentence_meaning": "스쿼트로 허벅지를 단련하면 좋다."
+  },
+  {
+    "word_id": "e962dc9c-0ad7-4880-8b67-d7cc9ebac75c",
+    "sentence_ja": "新しい部署を設けることになった。",
+    "sentence_reading": "あたらしいぶしょをもうけることになった。",
+    "sentence_meaning": "새로운 부서를 설립하기로 했다."
+  },
+  {
+    "word_id": "e962dc9c-0ad7-4880-8b67-d7cc9ebac75c",
+    "sentence_ja": "会議室を設けて話し合いをした。",
+    "sentence_reading": "かいぎしつをもうけてはなしあいをした。",
+    "sentence_meaning": "회의실을 마련해서 협의를 했다."
+  },
+  {
+    "word_id": "7d6d347b-de8b-4302-a2f3-72cfa4ad963d",
+    "sentence_ja": "ポンプで水を汲み上げた。",
+    "sentence_reading": "ぽんぷでみずをくみあげた。",
+    "sentence_meaning": "펌프로 물을 퍼 올렸다."
+  },
+  {
+    "word_id": "7d6d347b-de8b-4302-a2f3-72cfa4ad963d",
+    "sentence_ja": "自転車のポンプが壊れた。",
+    "sentence_reading": "じてんしゃのぽんぷがこわれた。",
+    "sentence_meaning": "자전거 펌프가 고장났다."
+  },
+  {
+    "word_id": "6bdb4c1c-7305-4b1e-810a-b4df8a9227b0",
+    "sentence_ja": "彼女は皆の模範となった。",
+    "sentence_reading": "かのじょはみなのもはんとなった。",
+    "sentence_meaning": "그녀는 모두의 모범이 되었다."
+  },
+  {
+    "word_id": "6bdb4c1c-7305-4b1e-810a-b4df8a9227b0",
+    "sentence_ja": "模範的な行動を心がけている。",
+    "sentence_reading": "もはんてきなこうどうをこころがけている。",
+    "sentence_meaning": "모범적인 행동을 하려고 노력하고 있다."
+  },
+  {
+    "word_id": "36d0aeeb-00d8-4344-bdbc-abe27b747f4e",
+    "sentence_ja": "町の復興に力を尽くした。",
+    "sentence_reading": "まちのふっこうにちからをつくした。",
+    "sentence_meaning": "마을 부흥을 위해 힘을 다했다."
+  },
+  {
+    "word_id": "36d0aeeb-00d8-4344-bdbc-abe27b747f4e",
+    "sentence_ja": "震災後の復興は長くかかった。",
+    "sentence_reading": "しんさいごのふっこうはながくかかった。",
+    "sentence_meaning": "지진 재해 이후 부흥에는 오랜 시간이 걸렸다."
+  },
+  {
+    "word_id": "8705a7da-a2f9-452e-987f-24fc3a1f5b10",
+    "sentence_ja": "政府が戒厳令を布告した。",
+    "sentence_reading": "せいふがかいげんれいをふこくした。",
+    "sentence_meaning": "정부가 계엄령을 포고했다."
+  },
+  {
+    "word_id": "8705a7da-a2f9-452e-987f-24fc3a1f5b10",
+    "sentence_ja": "新しい法令が布告された。",
+    "sentence_reading": "あたらしいほうれいがふこくされた。",
+    "sentence_meaning": "새로운 법령이 선포되었다."
+  },
+  {
+    "word_id": "6da9ea0d-1c77-49c6-abac-c5b91a1a9b39",
+    "sentence_ja": "ぼつぼつ出発の時間だね。",
+    "sentence_reading": "ぼつぼつしゅっぱつのじかんだね。",
+    "sentence_meaning": "슬슬 출발할 시간이네."
+  },
+  {
+    "word_id": "6da9ea0d-1c77-49c6-abac-c5b91a1a9b39",
+    "sentence_ja": "庭にぼつぼつ花が咲き始めた。",
+    "sentence_reading": "にわにぼつぼつはながさきはじめた。",
+    "sentence_meaning": "정원 여기저기에 꽃이 피기 시작했다."
+  },
+  {
+    "word_id": "1577a002-2801-49a3-97c5-0c38928cc55c",
+    "sentence_ja": "本気で練習すれば上手くなる。",
+    "sentence_reading": "ほんきでれんしゅうすればうまくなる。",
+    "sentence_meaning": "진지하게 연습하면 잘하게 된다."
+  },
+  {
+    "word_id": "1577a002-2801-49a3-97c5-0c38928cc55c",
+    "sentence_ja": "彼は本気で怒っているようだ。",
+    "sentence_reading": "かれはほんきでおこっているようだ。",
+    "sentence_meaning": "그는 진심으로 화가 나 있는 것 같다."
+  },
+  {
+    "word_id": "a1343976-b0cf-4404-8440-d973843a94ed",
+    "sentence_ja": "新しいスターが出現した。",
+    "sentence_reading": "あたらしいすたーがしゅつげんした。",
+    "sentence_meaning": "새로운 스타가 등장했다."
+  },
+  {
+    "word_id": "a1343976-b0cf-4404-8440-d973843a94ed",
+    "sentence_ja": "画面に謎の文字が出現した。",
+    "sentence_reading": "がめんになぞのもじがしゅつげんした。",
+    "sentence_meaning": "화면에 정체 모를 문자가 나타났다."
+  },
+  {
+    "word_id": "24ac1f6f-5cd8-4596-b06e-8cce5ae76a66",
+    "sentence_ja": "電話もしくはメールで連絡して。",
+    "sentence_reading": "でんわもしくはめーるでれんらくして。",
+    "sentence_meaning": "전화 또는 이메일로 연락해."
+  },
+  {
+    "word_id": "24ac1f6f-5cd8-4596-b06e-8cce5ae76a66",
+    "sentence_ja": "現金もしくはカードで払えます。",
+    "sentence_reading": "げんきんもしくはかーどではらえます。",
+    "sentence_meaning": "현금 혹은 카드로 결제할 수 있습니다."
+  },
+  {
+    "word_id": "15b649cb-dd56-4ff8-979f-71081b32f761",
+    "sentence_ja": "お客様を丁寧にもてなした。",
+    "sentence_reading": "おきゃくさまをていねいにもてなした。",
+    "sentence_meaning": "손님을 정중하게 접대했다."
+  },
+  {
+    "word_id": "15b649cb-dd56-4ff8-979f-71081b32f761",
+    "sentence_ja": "旅館では心を込めてもてなしてくれた。",
+    "sentence_reading": "りょかんではこころをこめてもてなしてくれた。",
+    "sentence_meaning": "여관에서는 정성껏 환대해 주었다."
+  },
+  {
+    "word_id": "98e67597-7c29-4ee2-b5d9-a5b481189d1f",
+    "sentence_ja": "貴重品は金庫に保管してください。",
+    "sentence_reading": "きちょうひんはきんこにほかんしてください。",
+    "sentence_meaning": "귀중품은 금고에 보관해 주세요."
+  },
+  {
+    "word_id": "98e67597-7c29-4ee2-b5d9-a5b481189d1f",
+    "sentence_ja": "書類を安全な場所に保管した。",
+    "sentence_reading": "しょるいをあんぜんなばしょにほかんした。",
+    "sentence_meaning": "서류를 안전한 장소에 보관했다."
+  },
+  {
+    "word_id": "5002d25e-8b50-41fb-9058-f6697dd6497e",
+    "sentence_ja": "マイカップを会社に持参した。",
+    "sentence_reading": "まいかっぷをかいしゃにじさんした。",
+    "sentence_meaning": "내 컵을 회사에 가져갔다."
+  },
+  {
+    "word_id": "5002d25e-8b50-41fb-9058-f6697dd6497e",
+    "sentence_ja": "マイバッグを使えばゴミが減る。",
+    "sentence_reading": "まいばっぐをつかえばごみがへる。",
+    "sentence_meaning": "내 장바구니를 쓰면 쓰레기가 줄어든다."
+  },
+  {
+    "word_id": "563e5ef4-ffa8-43a0-87cd-133d27445408",
+    "sentence_ja": "彼女がその映画に主演した。",
+    "sentence_reading": "かのじょがそのえいがにしゅえんした。",
+    "sentence_meaning": "그녀가 그 영화에 주연했다."
+  },
+  {
+    "word_id": "563e5ef4-ffa8-43a0-87cd-133d27445408",
+    "sentence_ja": "主演俳優の演技に感動した。",
+    "sentence_reading": "しゅえんはいゆうのえんぎにかんどうした。",
+    "sentence_meaning": "주연 배우의 연기에 감동받았다."
+  },
+  {
+    "word_id": "632302c9-ff0b-45c8-875b-298f887966e1",
+    "sentence_ja": "目下、計画を検討している。",
+    "sentence_reading": "もっか、けいかくをけんとうしている。",
+    "sentence_meaning": "현재 계획을 검토하고 있다."
+  },
+  {
+    "word_id": "632302c9-ff0b-45c8-875b-298f887966e1",
+    "sentence_ja": "目下の状況では判断が難しい。",
+    "sentence_reading": "もっかのじょうきょうでははんだんがむずかしい。",
+    "sentence_meaning": "현재 상황에서는 판단이 어렵다."
+  },
+  {
+    "word_id": "3ddcb48b-9d41-42e5-87b6-ed69b9e16a5a",
+    "sentence_ja": "停電後、電力が復旧した。",
+    "sentence_reading": "ていでんご、でんりょくがふっきゅうした。",
+    "sentence_meaning": "정전 후 전력이 복구되었다."
+  },
+  {
+    "word_id": "3ddcb48b-9d41-42e5-87b6-ed69b9e16a5a",
+    "sentence_ja": "道路の復旧工事が始まった。",
+    "sentence_reading": "どうろのふっきゅうこうじがはじまった。",
+    "sentence_meaning": "도로 복구 공사가 시작되었다."
+  },
+  {
+    "word_id": "a9118535-ff1c-4ff3-b029-2caa43353bc2",
+    "sentence_ja": "この本には付録がついている。",
+    "sentence_reading": "このほんにはふろくがついている。",
+    "sentence_meaning": "이 책에는 부록이 붙어 있다."
+  },
+  {
+    "word_id": "a9118535-ff1c-4ff3-b029-2caa43353bc2",
+    "sentence_ja": "雑誌の付録がかわいかった。",
+    "sentence_reading": "ざっしのふろくがかわいかった。",
+    "sentence_meaning": "잡지 부록이 귀여웠다."
+  },
+  {
+    "word_id": "ba09a326-b3a1-49db-a304-2aeffea606c3",
+    "sentence_ja": "社会福祉の充実が求められている。",
+    "sentence_reading": "しゃかいふくしのじゅうじつがもとめられている。",
+    "sentence_meaning": "사회 복지의 충실함이 요구되고 있다."
+  },
+  {
+    "word_id": "ba09a326-b3a1-49db-a304-2aeffea606c3",
+    "sentence_ja": "福祉施設でボランティアをした。",
+    "sentence_reading": "ふくしせつでぼらんてぃあをした。",
+    "sentence_meaning": "복지 시설에서 봉사활동을 했다."
+  },
+  {
+    "word_id": "401f7a5d-f436-4846-8602-ec76d23638ae",
+    "sentence_ja": "マイクロフォンに向かって話した。",
+    "sentence_reading": "まいくろふぉんにむかってはなした。",
+    "sentence_meaning": "마이크로폰을 향해 말했다."
+  },
+  {
+    "word_id": "401f7a5d-f436-4846-8602-ec76d23638ae",
+    "sentence_ja": "マイクロフォンの音量を調整した。",
+    "sentence_reading": "まいくろふぉんのおんりょうをちょうせいした。",
+    "sentence_meaning": "마이크로폰 음량을 조절했다."
+  },
+  {
+    "word_id": "e7879018-7886-4767-bece-34f57fb029a1",
+    "sentence_ja": "昼飯は近くの定食屋で食べた。",
+    "sentence_reading": "ひるめしはちかくのていしょくやでたべた。",
+    "sentence_meaning": "점심은 근처 정식집에서 먹었다."
+  },
+  {
+    "word_id": "e7879018-7886-4767-bece-34f57fb029a1",
+    "sentence_ja": "昼飯を食べる時間もなかった。",
+    "sentence_reading": "ひるめしをたべるじかんもなかった。",
+    "sentence_meaning": "점심 먹을 시간도 없었다."
+  },
+  {
+    "word_id": "238b231e-a902-4d96-bb8c-24aad106c715",
+    "sentence_ja": "そのメロディーが頭から離れない。",
+    "sentence_reading": "そのめろでぃーがあたまからはなれない。",
+    "sentence_meaning": "그 멜로디가 머릿속에서 떠나지 않는다."
+  },
+  {
+    "word_id": "238b231e-a902-4d96-bb8c-24aad106c715",
+    "sentence_ja": "美しいメロディーに心が癒された。",
+    "sentence_reading": "うつくしいめろでぃーにこころがいやされた。",
+    "sentence_meaning": "아름다운 멜로디에 마음이 치유되었다."
+  },
+  {
+    "word_id": "c890b690-c8d5-4a84-b1e1-d28f5caf6916",
+    "sentence_ja": "この部屋は約20平方メートルだ。",
+    "sentence_reading": "このへやはやく20へいほうめーとるだ。",
+    "sentence_meaning": "이 방은 약 20평방미터이다."
+  },
+  {
+    "word_id": "c890b690-c8d5-4a84-b1e1-d28f5caf6916",
+    "sentence_ja": "3の平方は9になる。",
+    "sentence_reading": "さんのへいほうはきゅうになる。",
+    "sentence_meaning": "3의 제곱은 9이다."
+  },
+  {
+    "word_id": "027fd04a-2d34-42aa-a4bf-a6c108820e4a",
+    "sentence_ja": "暴風で木が倒れてしまった。",
+    "sentence_reading": "ぼうふうできがたおれてしまった。",
+    "sentence_meaning": "폭풍으로 나무가 쓰러져 버렸다."
+  },
+  {
+    "word_id": "027fd04a-2d34-42aa-a4bf-a6c108820e4a",
+    "sentence_ja": "暴風警報が発令されている。",
+    "sentence_reading": "ぼうふうけいほうがはつれいされている。",
+    "sentence_meaning": "폭풍 경보가 발령되어 있다."
+  },
+  {
+    "word_id": "78831acc-6efd-46af-b403-6f8c615f53cd",
+    "sentence_ja": "水の分子はH₂Oで表される。",
+    "sentence_reading": "みずのぶんしはえいちつーおーであらわされる。",
+    "sentence_meaning": "물의 분자는 H₂O로 나타낸다."
+  },
+  {
+    "word_id": "78831acc-6efd-46af-b403-6f8c615f53cd",
+    "sentence_ja": "分子の構造を顕微鏡で調べた。",
+    "sentence_reading": "ぶんしのこうぞうをけんびきょうでしらべた。",
+    "sentence_meaning": "분자 구조를 현미경으로 조사했다."
+  },
+  {
+    "word_id": "d83bf80f-b5d4-4a84-9d44-8f7a09940ee5",
+    "sentence_ja": "オランダには風車が多い。",
+    "sentence_reading": "おらんだにはふうしゃがおおい。",
+    "sentence_meaning": "네덜란드에는 풍차가 많다."
+  },
+  {
+    "word_id": "d83bf80f-b5d4-4a84-9d44-8f7a09940ee5",
+    "sentence_ja": "風車で電力を作る試みが進んでいる。",
+    "sentence_reading": "ふうしゃででんりょくをつくるこころみがすすんでいる。",
+    "sentence_meaning": "풍차로 전력을 만드는 시도가 진행되고 있다."
+  },
+  {
+    "word_id": "36c2085e-9dda-469d-84b1-15c4a8af2ffe",
+    "sentence_ja": "彼女の帰りを待ち望んでいる。",
+    "sentence_reading": "かのじょのかえりをまちのぞんでいる。",
+    "sentence_meaning": "그녀가 돌아오기를 간절히 기다리고 있다."
+  },
+  {
+    "word_id": "36c2085e-9dda-469d-84b1-15c4a8af2ffe",
+    "sentence_ja": "春の訪れを待ち望んでいた。",
+    "sentence_reading": "はるのおとずれをまちのぞんでいた。",
+    "sentence_meaning": "봄의 찾아옴을 간절히 기다리고 있었다."
+  },
+  {
+    "word_id": "51b5d034-148e-4c6f-b2b4-10fed5a844f9",
+    "sentence_ja": "国の防衛を強化する必要がある。",
+    "sentence_reading": "くにのぼうえいをきょうかするひつようがある。",
+    "sentence_meaning": "나라의 방위를 강화할 필요가 있다."
+  },
+  {
+    "word_id": "51b5d034-148e-4c6f-b2b4-10fed5a844f9",
+    "sentence_ja": "防衛省の予算が増えた。",
+    "sentence_reading": "ぼうえいしょうのよさんがふえた。",
+    "sentence_meaning": "방위성의 예산이 늘었다."
+  },
+  {
+    "word_id": "622d821f-d986-4964-86cd-426ad7c86867",
+    "sentence_ja": "警察が犯人を捕獲した。",
+    "sentence_reading": "けいさつがはんにんをほかくした。",
+    "sentence_meaning": "경찰이 범인을 체포했다."
+  },
+  {
+    "word_id": "622d821f-d986-4964-86cd-426ad7c86867",
+    "sentence_ja": "野生動物の捕獲は禁止されている。",
+    "sentence_reading": "やせいどうぶつのほかくはきんしされている。",
+    "sentence_meaning": "야생동물 포획은 금지되어 있다."
+  },
+  {
+    "word_id": "9a7d9d19-1aec-4d78-a052-2f16c70948e5",
+    "sentence_ja": "これはまさしく私が探していたものだ。",
+    "sentence_reading": "これはまさしくわたしがさがしていたものだ。",
+    "sentence_meaning": "이것은 틀림없이 내가 찾고 있던 것이다."
+  },
+  {
+    "word_id": "9a7d9d19-1aec-4d78-a052-2f16c70948e5",
+    "sentence_ja": "彼の言ったことはまさしく正しい。",
+    "sentence_reading": "かれのいったことはまさしくただしい。",
+    "sentence_meaning": "그가 말한 것은 분명히 옳다."
+  },
+  {
+    "word_id": "a490d32f-d556-468e-b625-855aa9d9e478",
+    "sentence_ja": "不正行為でゲームが没収された。",
+    "sentence_reading": "ふせいこういでげーむがぼっしゅうされた。",
+    "sentence_meaning": "부정행위로 게임이 몰수되었다."
+  },
+  {
+    "word_id": "a490d32f-d556-468e-b625-855aa9d9e478",
+    "sentence_ja": "密輸品が税関で没収された。",
+    "sentence_reading": "みつゆひんがぜいかんでぼっしゅうされた。",
+    "sentence_meaning": "밀수품이 세관에서 압수되었다."
+  },
+  {
+    "word_id": "44ffcc6d-9b2c-4ea2-bf93-d49e3a6665ba",
+    "sentence_ja": "街で暴動が起きてしまった。",
+    "sentence_reading": "まちでぼうどうがおきてしまった。",
+    "sentence_meaning": "거리에서 폭동이 일어나고 말았다."
+  },
+  {
+    "word_id": "44ffcc6d-9b2c-4ea2-bf93-d49e3a6665ba",
+    "sentence_ja": "暴動を鎮めるために警官が出動した。",
+    "sentence_reading": "ぼうどうをしずめるためにけいかんがしゅつどうした。",
+    "sentence_meaning": "폭동을 진압하기 위해 경관이 출동했다."
+  },
+  {
+    "word_id": "b6d486a4-2ea3-4b7c-b0db-33c35482bc03",
+    "sentence_ja": "兵士たちは完全に武装していた。",
+    "sentence_reading": "へいしたちはかんぜんにぶそうしていた。",
+    "sentence_meaning": "병사들은 완전히 무장하고 있었다."
+  },
+  {
+    "word_id": "b6d486a4-2ea3-4b7c-b0db-33c35482bc03",
+    "sentence_ja": "武装した集団が現れたと報じられた。",
+    "sentence_reading": "ぶそうしたしゅうだんがあらわれたとほうじられた。",
+    "sentence_meaning": "무장한 집단이 나타났다고 보도되었다."
+  },
+  {
+    "word_id": "395efd9d-bc17-4659-a0f1-f9783b0e4e64",
+    "sentence_ja": "彼女は柔軟な考え方を持っている。",
+    "sentence_reading": "かのじょはじゅうなんなかんがえかたをもっている。",
+    "sentence_meaning": "그녀는 유연한 사고방식을 가지고 있다."
+  },
+  {
+    "word_id": "395efd9d-bc17-4659-a0f1-f9783b0e4e64",
+    "sentence_ja": "毎朝ストレッチで体を柔軟にしている。",
+    "sentence_reading": "まいあさすとれっちでからだをじゅうなんにしている。",
+    "sentence_meaning": "매일 아침 스트레칭으로 몸을 유연하게 하고 있다."
+  },
+  {
+    "word_id": "41e45052-4753-44e7-9080-e67def5b9263",
+    "sentence_ja": "的を絞って練習することが大切だ。",
+    "sentence_reading": "まとをしぼってれんしゅうすることがたいせつだ。",
+    "sentence_meaning": "목표를 좁혀서 연습하는 것이 중요하다."
+  },
+  {
+    "word_id": "41e45052-4753-44e7-9080-e67def5b9263",
+    "sentence_ja": "矢が的の中心に当たった。",
+    "sentence_reading": "やがまとのちゅうしんにあたった。",
+    "sentence_meaning": "화살이 표적의 중심에 맞았다."
+  },
+  {
+    "word_id": "bb1406ce-3eb1-4bdf-8182-5a8e68028186",
+    "sentence_ja": "未知の領域に挑戦するのは怖い。",
+    "sentence_reading": "みちのりょういきにちょうせんするのはこわい。",
+    "sentence_meaning": "아직 알지 못하는 영역에 도전하는 것은 두렵다."
+  },
+  {
+    "word_id": "bb1406ce-3eb1-4bdf-8182-5a8e68028186",
+    "sentence_ja": "宇宙にはまだ未知の星が多い。",
+    "sentence_reading": "うちゅうにはまだみちのほしがおおい。",
+    "sentence_meaning": "우주에는 아직 미지의 별이 많다."
+  },
+  {
+    "word_id": "fb723189-54d8-4714-9bb5-c8c5f8e3786e",
+    "sentence_ja": "祖父は若い頃紡績工場で働いていた。",
+    "sentence_reading": "そふはわかいころぼうせきこうじょうではたらいていた。",
+    "sentence_meaning": "할아버지는 젊은 시절 방적 공장에서 일했다."
+  },
+  {
+    "word_id": "fb723189-54d8-4714-9bb5-c8c5f8e3786e",
+    "sentence_ja": "日本の紡績業は明治時代に発展した。",
+    "sentence_reading": "にほんのぼうせきぎょうはめいじじだいにはってんした。",
+    "sentence_meaning": "일본의 방적업은 메이지 시대에 발전했다."
+  },
+  {
+    "word_id": "a2c7837a-3634-44a7-b9eb-c93e09ea7f8f",
+    "sentence_ja": "無能なリーダーのせいで失敗した。",
+    "sentence_reading": "むのうなりーだーのせいでしっぱいした。",
+    "sentence_meaning": "무능한 리더 때문에 실패했다."
+  },
+  {
+    "word_id": "a2c7837a-3634-44a7-b9eb-c93e09ea7f8f",
+    "sentence_ja": "自分が無能だと感じることがある。",
+    "sentence_reading": "じぶんがむのうだとかんじることがある。",
+    "sentence_meaning": "자신이 무능하다고 느낄 때가 있다."
+  },
+  {
+    "word_id": "9a42c8cb-4a4d-4664-8b1e-f0fe3e1e46d3",
+    "sentence_ja": "母国の文化をとても大切にしている。",
+    "sentence_reading": "ぼこくのぶんかをとてもたいせつにしている。",
+    "sentence_meaning": "모국의 문화를 매우 소중히 여기고 있다."
+  },
+  {
+    "word_id": "9a42c8cb-4a4d-4664-8b1e-f0fe3e1e46d3",
+    "sentence_ja": "海外に住んでいても母国が恋しい。",
+    "sentence_reading": "かいがいにすんでいてもぼこくがこいしい。",
+    "sentence_meaning": "해외에 살아도 모국이 그립다."
+  },
+  {
+    "word_id": "95cd5fd1-d240-4600-829e-ce8751cde7cc",
+    "sentence_ja": "彼女の身の上を聞いて驚いた。",
+    "sentence_reading": "かのじょのみのうえをきいておどろいた。",
+    "sentence_meaning": "그녀의 신상 이야기를 듣고 놀랐다."
+  },
+  {
+    "word_id": "95cd5fd1-d240-4600-829e-ce8751cde7cc",
+    "sentence_ja": "子供たちの身の上を心配している。",
+    "sentence_reading": "こどもたちのみのうえをしんぱいしている。",
+    "sentence_meaning": "아이들의 장래를 걱정하고 있다."
+  },
+  {
+    "word_id": "4b384930-c7fa-4250-8db5-71b81077e602",
+    "sentence_ja": "それは主観的な意見に過ぎない。",
+    "sentence_reading": "それはしゅかんてきないけんにすぎない。",
+    "sentence_meaning": "그것은 주관적인 의견에 불과하다."
+  },
+  {
+    "word_id": "4b384930-c7fa-4250-8db5-71b81077e602",
+    "sentence_ja": "主観と客観のバランスが大事だ。",
+    "sentence_reading": "しゅかんときゃっかんのばらんすがだいじだ。",
+    "sentence_meaning": "주관과 객관의 균형이 중요하다."
+  },
+  {
+    "word_id": "ebfb3e12-6698-43ec-8959-1333bd3386d9",
+    "sentence_ja": "大事なメールを見逃してしまった。",
+    "sentence_reading": "だいじなめーるをみのがしてしまった。",
+    "sentence_meaning": "중요한 이메일을 놓쳐 버렸다."
+  },
+  {
+    "word_id": "ebfb3e12-6698-43ec-8959-1333bd3386d9",
+    "sentence_ja": "チャンスを見逃さないようにしよう。",
+    "sentence_reading": "ちゃんすをみのがさないようにしよう。",
+    "sentence_meaning": "기회를 놓치지 않도록 하자."
+  },
+  {
+    "word_id": "c1cafc13-cdde-44cd-a727-3821f7d8b3d0",
+    "sentence_ja": "その地域独特の風習が残っている。",
+    "sentence_reading": "そのちいきどくとくのふうしゅうがのこっている。",
+    "sentence_meaning": "그 지역 특유의 풍습이 남아 있다."
+  },
+  {
+    "word_id": "c1cafc13-cdde-44cd-a727-3821f7d8b3d0",
+    "sentence_ja": "古い風習を守り続けている村がある。",
+    "sentence_reading": "ふるいふうしゅうをまもりつづけているむらがある。",
+    "sentence_meaning": "오래된 풍습을 계속 지켜나가는 마을이 있다."
+  },
+  {
+    "word_id": "6ec094f4-82f7-4963-8d46-cf4051243d38",
+    "sentence_ja": "真ん円い月が空に浮かんでいた。",
+    "sentence_reading": "まんまるいつきがそらにうかんでいた。",
+    "sentence_meaning": "완벽하게 둥근 달이 하늘에 떠 있었다."
+  },
+  {
+    "word_id": "6ec094f4-82f7-4963-8d46-cf4051243d38",
+    "sentence_ja": "赤ちゃんの真ん円い瞳がかわいい。",
+    "sentence_reading": "あかちゃんのまんまるいひとみがかわいい。",
+    "sentence_meaning": "아기의 동그란 눈동자가 귀엽다."
+  },
+  {
+    "word_id": "b4e5f6e2-c20d-410b-9d53-c826a45862cc",
+    "sentence_ja": "ポットのお湯でコーヒーを入れた。",
+    "sentence_reading": "ぽっとのおゆでこーひーをいれた。",
+    "sentence_meaning": "주전자의 뜨거운 물로 커피를 탔다."
+  },
+  {
+    "word_id": "b4e5f6e2-c20d-410b-9d53-c826a45862cc",
+    "sentence_ja": "電気ポットがすぐ沸騰した。",
+    "sentence_reading": "でんきぽっとがすぐふっとうした。",
+    "sentence_meaning": "전기 주전자가 금방 끓었다."
+  },
+  {
+    "word_id": "e5ffce27-ee51-44fc-8a19-fe4e9354d988",
+    "sentence_ja": "山に埋蔵金があるという噂がある。",
+    "sentence_reading": "やまにまいぞうきんがあるといううわさがある。",
+    "sentence_meaning": "산에 매장된 금이 있다는 소문이 있다."
+  },
+  {
+    "word_id": "e5ffce27-ee51-44fc-8a19-fe4e9354d988",
+    "sentence_ja": "この地域には石油が埋蔵されている。",
+    "sentence_reading": "このちいきにはせきゆがまいぞうされている。",
+    "sentence_meaning": "이 지역에는 석유가 매장되어 있다."
+  },
+  {
+    "word_id": "7ef8a9cf-8802-43b9-bdef-1685a847eed2",
+    "sentence_ja": "分母が同じなら足し算が簡単だ。",
+    "sentence_reading": "ぶんぼがおなじならたしざんがかんたんだ。",
+    "sentence_meaning": "분모가 같으면 덧셈이 간단하다."
+  },
+  {
+    "word_id": "7ef8a9cf-8802-43b9-bdef-1685a847eed2",
+    "sentence_ja": "分数の分母を揃えて計算した。",
+    "sentence_reading": "ぶんすうのぶんぼをそろえてけいさんした。",
+    "sentence_meaning": "분수의 분모를 맞추어 계산했다."
+  },
+  {
+    "word_id": "01b0a60c-fd66-4c31-b646-dbf40a7d696c",
+    "sentence_ja": "重要な文書を誤って削除してしまった。",
+    "sentence_reading": "じゅうようなぶんしょをあやまってさくじょしてしまった。",
+    "sentence_meaning": "중요한 문서를 실수로 삭제해 버렸다."
+  },
+  {
+    "word_id": "01b0a60c-fd66-4c31-b646-dbf40a7d696c",
+    "sentence_ja": "契約文書にサインをお願いします。",
+    "sentence_reading": "けいやくぶんしょにさいんをおねがいします。",
+    "sentence_meaning": "계약 문서에 서명을 부탁드립니다."
+  },
+  {
+    "word_id": "3f0c7dcf-46f7-46b9-ac77-ef88821e40b7",
+    "sentence_ja": "音楽の楽しさは普遍的なものだ。",
+    "sentence_reading": "おんがくのたのしさはふへんてきなものだ。",
+    "sentence_meaning": "음악의 즐거움은 보편적인 것이다."
+  },
+  {
+    "word_id": "3f0c7dcf-46f7-46b9-ac77-ef88821e40b7",
+    "sentence_ja": "愛という感情は普遍的に存在する。",
+    "sentence_reading": "あいというかんじょうはふへんてきにそんざいする。",
+    "sentence_meaning": "사랑이라는 감정은 보편적으로 존재한다."
+  },
+  {
+    "word_id": "edd3ae8f-1a74-4d9d-8566-24d62feef234",
+    "sentence_ja": "最近キャンプがブームになっている。",
+    "sentence_reading": "さいきんきゃんぷがぶーむになっている。",
+    "sentence_meaning": "최근 캠핑이 붐이 되고 있다."
+  },
+  {
+    "word_id": "edd3ae8f-1a74-4d9d-8566-24d62feef234",
+    "sentence_ja": "健康食品のブームが続いている。",
+    "sentence_reading": "けんこうしょくひんのぶーむがつづいている。",
+    "sentence_meaning": "건강식품 붐이 계속되고 있다."
+  },
+  {
+    "word_id": "07177f30-399a-4b90-8eb7-b9eaa5e73f05",
+    "sentence_ja": "手紙の封を丁寧に開けた。",
+    "sentence_reading": "てがみのふうをていねいにあけた。",
+    "sentence_meaning": "편지의 봉인을 조심스럽게 열었다."
+  },
+  {
+    "word_id": "07177f30-399a-4b90-8eb7-b9eaa5e73f05",
+    "sentence_ja": "封をしたまま棚に置いておいた。",
+    "sentence_reading": "ふうをしたままたなにおいておいた。",
+    "sentence_meaning": "봉인한 채로 선반에 올려두었다."
+  },
+  {
+    "word_id": "08bb4514-dbdb-44ea-8dcb-9cc8c37fd479",
+    "sentence_ja": "その計画には大きな盲点があった。",
+    "sentence_reading": "そのけいかくにはおおきなもうてんがあった。",
+    "sentence_meaning": "그 계획에는 큰 맹점이 있었다."
+  },
+  {
+    "word_id": "08bb4514-dbdb-44ea-8dcb-9cc8c37fd479",
+    "sentence_ja": "セキュリティの盲点を突かれた。",
+    "sentence_reading": "せきゅりてぃのもうてんをつかれた。",
+    "sentence_meaning": "보안의 맹점을 찔렸다."
+  },
+  {
+    "word_id": "81e015a1-3f02-4f3a-b88f-774fc9181268",
+    "sentence_ja": "まだ未熟なので先輩に教わっている。",
+    "sentence_reading": "まだみじゅくなのでせんぱいにおそわっている。",
+    "sentence_meaning": "아직 미숙해서 선배에게 배우고 있다."
+  },
+  {
+    "word_id": "81e015a1-3f02-4f3a-b88f-774fc9181268",
+    "sentence_ja": "未熟な果物はまだ食べられない。",
+    "sentence_reading": "みじゅくなくだものはまだたべられない。",
+    "sentence_meaning": "덜 익은 과일은 아직 먹을 수 없다."
+  },
+  {
+    "word_id": "29283c59-f88b-4705-864e-9545d2943c08",
+    "sentence_ja": "彼女のデザインはユニークだね。",
+    "sentence_reading": "かのじょのでざいんはゆにーくだね。",
+    "sentence_meaning": "그녀의 디자인은 독특하네."
+  },
+  {
+    "word_id": "29283c59-f88b-4705-864e-9545d2943c08",
+    "sentence_ja": "このカフェはユニークな雰囲気がある。",
+    "sentence_reading": "このかふぇはゆにーくなふんいきがある。",
+    "sentence_meaning": "이 카페는 독특한 분위기가 있다."
+  },
+  {
+    "word_id": "5b87cbc6-cdd1-4c7f-862d-1260ad5635f5",
+    "sentence_ja": "彼は同僚に対して優越感を持っている。",
+    "sentence_reading": "かれはどうりょうにたいしてゆうえつかんをもっている。",
+    "sentence_meaning": "그는 동료에 대해 우월감을 갖고 있다."
+  },
+  {
+    "word_id": "5b87cbc6-cdd1-4c7f-862d-1260ad5635f5",
+    "sentence_ja": "技術面での優越は明らかだった。",
+    "sentence_reading": "ぎじゅつめんでのゆうえつはあきらかだった。",
+    "sentence_meaning": "기술 면에서의 우월함은 분명했다."
+  },
+  {
+    "word_id": "2950b99c-cb67-4189-a015-d9de2d7abe5d",
+    "sentence_ja": "彼の出生地は大阪だそうです。",
+    "sentence_reading": "かれのしゅっしょうちはおおさかだそうです。",
+    "sentence_meaning": "그의 출생지는 오사카라고 합니다."
+  },
+  {
+    "word_id": "2950b99c-cb67-4189-a015-d9de2d7abe5d",
+    "sentence_ja": "出生率が年々下がっている。",
+    "sentence_reading": "しゅっしょうりつがねんねんさがっている。",
+    "sentence_meaning": "출생률이 해마다 낮아지고 있다."
+  },
+  {
+    "word_id": "3811dc24-5634-4dbf-8667-f62471564ea0",
+    "sentence_ja": "無断で部屋に入らないでください。",
+    "sentence_reading": "むだんでへやにはいらないでください。",
+    "sentence_meaning": "무단으로 방에 들어오지 마세요."
+  },
+  {
+    "word_id": "3811dc24-5634-4dbf-8667-f62471564ea0",
+    "sentence_ja": "無断欠席は困ります。",
+    "sentence_reading": "むだんけっせきはこまります。",
+    "sentence_meaning": "무단결석은 곤란합니다."
+  },
+  {
+    "word_id": "2555e756-6b92-4e88-9799-2bec42558f08",
+    "sentence_ja": "この会議の趣旨を説明してください。",
+    "sentence_reading": "このかいぎのしゅしをせつめいしてください。",
+    "sentence_meaning": "이 회의의 취지를 설명해 주세요."
+  },
+  {
+    "word_id": "2555e756-6b92-4e88-9799-2bec42558f08",
+    "sentence_ja": "プロジェクトの趣旨が伝わった。",
+    "sentence_reading": "ぷろじぇくとのしゅしがつたわった。",
+    "sentence_meaning": "프로젝트의 취지가 전달되었다."
+  },
+  {
+    "word_id": "1e46ca12-a564-4880-a954-8d21e95129c3",
+    "sentence_ja": "最近ゆとりがなくて疲れています。",
+    "sentence_reading": "さいきんゆとりがなくてつかれています。",
+    "sentence_meaning": "요즘 여유가 없어서 지쳐 있어요."
+  },
+  {
+    "word_id": "1e46ca12-a564-4880-a954-8d21e95129c3",
+    "sentence_ja": "もう少しゆとりを持って生きたい。",
+    "sentence_reading": "もうすこしゆとりをもってきたい。",
+    "sentence_meaning": "좀 더 여유롭게 살고 싶다."
+  },
+  {
+    "word_id": "fb706daa-d47a-4be3-9d96-741030ae732f",
+    "sentence_ja": "面接には身なりを整えていきましょう。",
+    "sentence_reading": "めんせつにはみなりをととのえていきましょう。",
+    "sentence_meaning": "면접에는 차림새를 갖추고 갑시다."
+  },
+  {
+    "word_id": "fb706daa-d47a-4be3-9d96-741030ae732f",
+    "sentence_ja": "彼女はいつも身なりがきちんとしている。",
+    "sentence_reading": "かのじょはいつもみなりがきちんとしている。",
+    "sentence_meaning": "그녀는 항상 차림새가 단정하다."
+  },
+  {
+    "word_id": "074d11c9-990e-4000-b430-853ffbdc570b",
+    "sentence_ja": "最近急に老けた気がする。",
+    "sentence_reading": "さいきんきゅうにふけたきがする。",
+    "sentence_meaning": "요즘 갑자기 늙은 것 같다."
+  },
+  {
+    "word_id": "074d11c9-990e-4000-b430-853ffbdc570b",
+    "sentence_ja": "ストレスで顔が老けてしまった。",
+    "sentence_reading": "すとれすでかおがふけてしまった。",
+    "sentence_meaning": "스트레스로 얼굴이 늙어 버렸다."
+  },
+  {
+    "word_id": "e97afc2f-0b27-4747-9200-ed866f534f91",
+    "sentence_ja": "大きな木の幹に手を当てた。",
+    "sentence_reading": "おおきなきのみきにてをあてた。",
+    "sentence_meaning": "큰 나무 줄기에 손을 얹었다."
+  },
+  {
+    "word_id": "e97afc2f-0b27-4747-9200-ed866f534f91",
+    "sentence_ja": "嵐で幹が折れてしまった。",
+    "sentence_reading": "あらしでみきがおれてしまった。",
+    "sentence_meaning": "폭풍으로 줄기가 부러져 버렸다."
+  },
+  {
+    "word_id": "0c09dd1b-6b19-467d-b40a-24f46ea1bb3f",
+    "sentence_ja": "彼は保守的な考え方を持っている。",
+    "sentence_reading": "かれはほしゅてきなかんがえかたをもっている。",
+    "sentence_meaning": "그는 보수적인 사고방식을 갖고 있다."
+  },
+  {
+    "word_id": "0c09dd1b-6b19-467d-b40a-24f46ea1bb3f",
+    "sentence_ja": "システムの保守には時間がかかる。",
+    "sentence_reading": "しすてむのほしゅにはじかんがかかる。",
+    "sentence_meaning": "시스템 유지보수에는 시간이 걸린다."
+  },
+  {
+    "word_id": "1e03f6ee-981c-4733-8640-4554aff0667e",
+    "sentence_ja": "道の脇に溝が掘られていた。",
+    "sentence_reading": "みちのわきにみぞがほられていた。",
+    "sentence_meaning": "길 옆에 도랑이 파여 있었다."
+  },
+  {
+    "word_id": "1e03f6ee-981c-4733-8640-4554aff0667e",
+    "sentence_ja": "二人の間に深い溝ができてしまった。",
+    "sentence_reading": "ふたりのあいだにふかいみぞができてしまった。",
+    "sentence_meaning": "두 사람 사이에 깊은 골이 생겨 버렸다."
+  },
+  {
+    "word_id": "f9bc10da-7687-4401-9abc-c440e56f8f73",
+    "sentence_ja": "ヤング世代に人気のブランドだ。",
+    "sentence_reading": "やんぐせだいににんきのぶらんどだ。",
+    "sentence_meaning": "젊은 세대에게 인기 있는 브랜드다."
+  },
+  {
+    "word_id": "f9bc10da-7687-4401-9abc-c440e56f8f73",
+    "sentence_ja": "このイベントはヤング向けに企画された。",
+    "sentence_reading": "このいべんとはやんぐむけにきかくされた。",
+    "sentence_meaning": "이 이벤트는 젊은 층을 대상으로 기획되었다."
+  },
+  {
+    "word_id": "2c8500c1-0c34-4b23-b296-0bdc0b7369f8",
+    "sentence_ja": "彼は読書に耽っていた。",
+    "sentence_reading": "かれはどくしょにふけっていた。",
+    "sentence_meaning": "그는 독서에 몰두해 있었다."
+  },
+  {
+    "word_id": "2c8500c1-0c34-4b23-b296-0bdc0b7369f8",
+    "sentence_ja": "深夜まで思索に耽るのが好きだ。",
+    "sentence_reading": "しんやまでしさくにふけるのがすきだ。",
+    "sentence_meaning": "한밤중까지 사색에 잠기는 것을 좋아한다."
+  },
+  {
+    "word_id": "866ae707-a268-4940-b578-7bf913480cc0",
+    "sentence_ja": "彼女は音に敏感で、少しの音でも目が覚める。",
+    "sentence_reading": "かのじょはおとにびんかんで、すこしのおとでもめがさめる。",
+    "sentence_meaning": "그녀는 소리에 민감해서 작은 소리에도 잠이 깬다."
+  },
+  {
+    "word_id": "866ae707-a268-4940-b578-7bf913480cc0",
+    "sentence_ja": "肌が敏感なので日焼け止めを使っています。",
+    "sentence_reading": "はだがびんかんなのでひやけどめをつかっています。",
+    "sentence_meaning": "피부가 민감해서 자외선 차단제를 사용하고 있어요."
+  },
+  {
+    "word_id": "bbdc498a-fe05-41cb-a1e9-c32c9a2bdfe3",
+    "sentence_ja": "頑張ったのに結果が出なくて空しい。",
+    "sentence_reading": "がんばったのにけっかがでなくてむなしい。",
+    "sentence_meaning": "열심히 했는데 결과가 나오지 않아 허무하다."
+  },
+  {
+    "word_id": "bbdc498a-fe05-41cb-a1e9-c32c9a2bdfe3",
+    "sentence_ja": "一人で過ごす夜は空しく感じる。",
+    "sentence_reading": "ひとりですごすよるはむなしくかんじる。",
+    "sentence_meaning": "혼자 보내는 밤은 공허하게 느껴진다."
+  },
+  {
+    "word_id": "cf870455-bb79-41cc-b74c-61d6e71fb986",
+    "sentence_ja": "最近体の不調が続いている。",
+    "sentence_reading": "さいきんからだのふちょうがつづいている。",
+    "sentence_meaning": "요즘 몸 상태가 계속 좋지 않다."
+  },
+  {
+    "word_id": "cf870455-bb79-41cc-b74c-61d6e71fb986",
+    "sentence_ja": "チームの不調で試合に負けてしまった。",
+    "sentence_reading": "ちーむのふちょうでしあいにまけてしまった。",
+    "sentence_meaning": "팀의 부진으로 경기에 져 버렸다."
+  },
+  {
+    "word_id": "7e30e559-719d-4789-813c-2a9df9289be4",
+    "sentence_ja": "わが社はこの分野で優位に立っている。",
+    "sentence_reading": "わがしゃはこのぶんやでゆういにたっている。",
+    "sentence_meaning": "우리 회사는 이 분야에서 우위에 있다."
+  },
+  {
+    "word_id": "7e30e559-719d-4789-813c-2a9df9289be4",
+    "sentence_ja": "交渉では優位を保つことが大切だ。",
+    "sentence_reading": "こうしょうではゆういをたもつことがたいせつだ。",
+    "sentence_meaning": "협상에서는 우위를 유지하는 것이 중요하다."
+  },
+  {
+    "word_id": "dc83ba23-3552-4238-abf8-20bce27d1142",
+    "sentence_ja": "彼は転職を申し出た。",
+    "sentence_reading": "かれはてんしょくをもうしでた。",
+    "sentence_meaning": "그는 이직을 신청했다."
+  },
+  {
+    "word_id": "dc83ba23-3552-4238-abf8-20bce27d1142",
+    "sentence_ja": "ボランティアを申し出てくれた人がいた。",
+    "sentence_reading": "ぼらんてぃあをもうしでてくれたひとがいた。",
+    "sentence_meaning": "자원봉사를 신청해 준 사람이 있었다."
+  },
+  {
+    "word_id": "dbb1db4d-a934-4c98-a861-7b0896983c06",
+    "sentence_ja": "守衛さんに入館証を見せた。",
+    "sentence_reading": "しゅえいさんににゅうかんしょうをみせた。",
+    "sentence_meaning": "경비원에게 입관증을 보여줬다."
+  },
+  {
+    "word_id": "dbb1db4d-a934-4c98-a861-7b0896983c06",
+    "sentence_ja": "夜間は守衛が建物を見回っている。",
+    "sentence_reading": "やかんはしゅえいがたてものをみまわっている。",
+    "sentence_meaning": "야간에는 경비원이 건물을 순찰하고 있다."
+  },
+  {
+    "word_id": "5ab319f9-e19e-462d-9394-77ecd1fc4589",
+    "sentence_ja": "誠に申し訳ございません。",
+    "sentence_reading": "まことにもうしわけございません。",
+    "sentence_meaning": "진심으로 죄송합니다."
+  },
+  {
+    "word_id": "5ab319f9-e19e-462d-9394-77ecd1fc4589",
+    "sentence_ja": "誠にありがとうございます。",
+    "sentence_reading": "まことにありがとうございます。",
+    "sentence_meaning": "진심으로 감사합니다."
+  },
+  {
+    "word_id": "94613a1f-e45c-4977-b835-d298ae4f486a",
+    "sentence_ja": "オリーブ油で野菜を炒めました。",
+    "sentence_reading": "おりーぶゆでやさいをいためました。",
+    "sentence_meaning": "올리브유로 채소를 볶았습니다."
+  },
+  {
+    "word_id": "94613a1f-e45c-4977-b835-d298ae4f486a",
+    "sentence_ja": "ごま油を少し加えると風味が増す。",
+    "sentence_reading": "ごまゆをすこしくわえるとふうみがます。",
+    "sentence_meaning": "참기름을 조금 더하면 풍미가 좋아진다."
+  },
+  {
+    "word_id": "313e34c5-c25f-4813-87a3-5e73e4047a89",
+    "sentence_ja": "健康と仕事は密接に関係している。",
+    "sentence_reading": "けんこうとしごとはみっせつにかんけいしている。",
+    "sentence_meaning": "건강과 일은 밀접하게 관련되어 있다."
+  },
+  {
+    "word_id": "313e34c5-c25f-4813-87a3-5e73e4047a89",
+    "sentence_ja": "二つの事件は密接なつながりがある。",
+    "sentence_reading": "ふたつのじけんはみっせつなつながりがある。",
+    "sentence_meaning": "두 사건은 밀접한 연관이 있다."
+  },
+  {
+    "word_id": "858eadf4-25d5-4946-a11a-adfd1fedd1e1",
+    "sentence_ja": "彼は名誉ある賞を受け取った。",
+    "sentence_reading": "かれはめいよあるしょうをうけとった。",
+    "sentence_meaning": "그는 명예로운 상을 받았다."
+  },
+  {
+    "word_id": "858eadf4-25d5-4946-a11a-adfd1fedd1e1",
+    "sentence_ja": "名誉を守るために戦った。",
+    "sentence_reading": "めいよをまもるためにたたかった。",
+    "sentence_meaning": "명예를 지키기 위해 싸웠다."
+  },
+  {
+    "word_id": "3be07e63-aec1-4d46-92d9-b0182ed7456b",
+    "sentence_ja": "稲の穂が黄金色に輝いていた。",
+    "sentence_reading": "いねのほがこがねいろにかがやいていた。",
+    "sentence_meaning": "벼 이삭이 황금색으로 빛나고 있었다."
+  },
+  {
+    "word_id": "3be07e63-aec1-4d46-92d9-b0182ed7456b",
+    "sentence_ja": "麦の穂が風にそよいでいる。",
+    "sentence_reading": "むぎのほがかぜにそよいでいる。",
+    "sentence_meaning": "밀 이삭이 바람에 살랑거리고 있다."
+  },
+  {
+    "word_id": "51ffce05-2359-4448-a900-4a6931d99c04",
+    "sentence_ja": "コンサートホールに大勢の人が集まった。",
+    "sentence_reading": "こんさーとほーるにおおぜいのひとがあつまった。",
+    "sentence_meaning": "콘서트홀에 많은 사람들이 모였다."
+  },
+  {
+    "word_id": "51ffce05-2359-4448-a900-4a6931d99c04",
+    "sentence_ja": "ボールがホールに入った。",
+    "sentence_reading": "ぼーるがほーるにはいった。",
+    "sentence_meaning": "공이 홀에 들어갔다."
+  },
+  {
+    "word_id": "f2a588a0-813a-4d44-85ab-c8a99133489e",
+    "sentence_ja": "荷物を箱に放り込んだ。",
+    "sentence_reading": "にもつをはこにほうりこんだ。",
+    "sentence_meaning": "짐을 상자에 던져 넣었다."
+  },
+  {
+    "word_id": "f2a588a0-813a-4d44-85ab-c8a99133489e",
+    "sentence_ja": "洗濯物を洗濯機に放り込む。",
+    "sentence_reading": "せんたくものをせんたくきにほうりこむ。",
+    "sentence_meaning": "세탁물을 세탁기에 던져 넣는다."
+  },
+  {
+    "word_id": "7da4f469-c078-4cef-81a3-140b47687840",
+    "sentence_ja": "無事に出産を終えました。",
+    "sentence_reading": "ぶじにしゅっさんをおえました。",
+    "sentence_meaning": "무사히 출산을 마쳤습니다."
+  },
+  {
+    "word_id": "7da4f469-c078-4cef-81a3-140b47687840",
+    "sentence_ja": "出産後は体を休めることが大切です。",
+    "sentence_reading": "しゅっさんごはからだをやすめることがたいせつです。",
+    "sentence_meaning": "출산 후에는 몸을 쉬게 하는 것이 중요합니다."
+  },
+  {
+    "word_id": "7ddcba09-2cb4-4186-a179-56e0fc950c0b",
+    "sentence_ja": "探検隊は未開の地へと向かった。",
+    "sentence_reading": "たんけんたいはみかいのちへとむかった。",
+    "sentence_meaning": "탐험대는 미개척지로 향했다."
+  },
+  {
+    "word_id": "7ddcba09-2cb4-4186-a179-56e0fc950c0b",
+    "sentence_ja": "未開の森にはまだ知られていない生物がいる。",
+    "sentence_reading": "みかいのもりにはまだしられていないせいぶつがいる。",
+    "sentence_meaning": "미개척 숲에는 아직 알려지지 않은 생물이 있다."
+  },
+  {
+    "word_id": "f8e0a396-2e45-48e3-9028-ba75bf0ecba0",
+    "sentence_ja": "銀行から融資を受けることができた。",
+    "sentence_reading": "ぎんこうからゆうしをうけることができた。",
+    "sentence_meaning": "은행으로부터 융자를 받을 수 있었다."
+  },
+  {
+    "word_id": "f8e0a396-2e45-48e3-9028-ba75bf0ecba0",
+    "sentence_ja": "中小企業への融資が増えている。",
+    "sentence_reading": "ちゅうしょうきぎょうへのゆうしがふえている。",
+    "sentence_meaning": "중소기업에 대한 융자가 늘어나고 있다."
+  },
+  {
+    "word_id": "822761d2-7041-4592-a25e-3d314a14c5b0",
+    "sentence_ja": "無闇に人を疑ってはいけない。",
+    "sentence_reading": "むやみにひとをうたがってはいけない。",
+    "sentence_meaning": "무턱대고 사람을 의심해서는 안 된다."
+  },
+  {
+    "word_id": "822761d2-7041-4592-a25e-3d314a14c5b0",
+    "sentence_ja": "無闇に食べると太るよ。",
+    "sentence_reading": "むやみにたべるとふとるよ。",
+    "sentence_meaning": "무분별하게 먹으면 살쪄."
+  },
+  {
+    "word_id": "e3aecf5b-dd60-48c0-9ee1-51198096d51e",
+    "sentence_ja": "安全を優先して行動してください。",
+    "sentence_reading": "あんぜんをゆうせんしてこうどうしてください。",
+    "sentence_meaning": "안전을 우선으로 행동해 주세요."
+  },
+  {
+    "word_id": "e3aecf5b-dd60-48c0-9ee1-51198096d51e",
+    "sentence_ja": "子どもの教育を優先に考えている。",
+    "sentence_reading": "こどものきょういくをゆうせんにかんがえている。",
+    "sentence_meaning": "아이의 교육을 우선으로 생각하고 있다."
+  },
+  {
+    "word_id": "bad82cfe-365a-4745-bdf7-5d2256d8960c",
+    "sentence_ja": "そんな無礼な言い方はやめなさい。",
+    "sentence_reading": "そんなぶれいないいかたはやめなさい。",
+    "sentence_meaning": "그런 무례한 말투는 그만해."
+  },
+  {
+    "word_id": "bad82cfe-365a-4745-bdf7-5d2256d8960c",
+    "sentence_ja": "彼の無礼な態度に腹が立った。",
+    "sentence_reading": "かれのぶれいなたいどにはらがたった。",
+    "sentence_meaning": "그의 무례한 태도에 화가 났다."
+  },
+  {
+    "word_id": "ec92ccad-96b7-4c22-adc5-a6383f06647a",
+    "sentence_ja": "眼鏡がないと文字がぼやける。",
+    "sentence_reading": "めがねがないともじがぼやける。",
+    "sentence_meaning": "안경이 없으면 글자가 흐릿해진다."
+  },
+  {
+    "word_id": "ec92ccad-96b7-4c22-adc5-a6383f06647a",
+    "sentence_ja": "写真の背景がぼやけていた。",
+    "sentence_reading": "しゃしんのはいけいがぼやけていた。",
+    "sentence_meaning": "사진의 배경이 흐릿했다."
+  },
+  {
+    "word_id": "74e106c0-f44b-4314-91e9-ba369509bfdb",
+    "sentence_ja": "貧困問題は世界中で深刻だ。",
+    "sentence_reading": "ひんこんもんだいはせかいじゅうでしんこくだ。",
+    "sentence_meaning": "빈곤 문제는 전 세계적으로 심각하다."
+  },
+  {
+    "word_id": "74e106c0-f44b-4314-91e9-ba369509bfdb",
+    "sentence_ja": "貧困から抜け出す機会が必要だ。",
+    "sentence_reading": "ひんこんからぬけだすきかいがひつようだ。",
+    "sentence_meaning": "빈곤에서 벗어날 기회가 필요하다."
+  },
+  {
+    "word_id": "587930bf-b38b-4977-aa38-51a790131323",
+    "sentence_ja": "婿を家族として迎え入れた。",
+    "sentence_reading": "むこをかぞくとしてむかえいれた。",
+    "sentence_meaning": "사위를 가족으로 받아들였다."
+  },
+  {
+    "word_id": "587930bf-b38b-4977-aa38-51a790131323",
+    "sentence_ja": "婿が初めて挨拶に来た。",
+    "sentence_reading": "むこがはじめてあいさつにきた。",
+    "sentence_meaning": "사위가 처음으로 인사하러 왔다."
+  },
+  {
+    "word_id": "00c5806d-7301-45fe-be57-6e92591e9e8f",
+    "sentence_ja": "休日は街をぶらぶら歩いた。",
+    "sentence_reading": "きゅうじつはまちをぶらぶらあるいた。",
+    "sentence_meaning": "휴일에는 거리를 어슬렁어슬렁 걸었다."
+  },
+  {
+    "word_id": "00c5806d-7301-45fe-be57-6e92591e9e8f",
+    "sentence_ja": "手がぶらぶらと揺れていた。",
+    "sentence_reading": "てがぶらぶらとゆれていた。",
+    "sentence_meaning": "손이 달랑달랑 흔들리고 있었다."
+  },
+  {
+    "word_id": "54fc649e-719d-4234-84c9-0a5673fe467d",
+    "sentence_ja": "彼は有望な若手選手として注目されている。",
+    "sentence_reading": "かれはゆうぼうなわかてせんしゅとしてちゅうもくされている。",
+    "sentence_meaning": "그는 유망한 젊은 선수로서 주목받고 있다."
+  },
+  {
+    "word_id": "54fc649e-719d-4234-84c9-0a5673fe467d",
+    "sentence_ja": "この技術は有望な分野だと思う。",
+    "sentence_reading": "このぎじゅつはゆうぼうなぶんやだとおもう。",
+    "sentence_meaning": "이 기술은 유망한 분야라고 생각한다."
+  },
+  {
+    "word_id": "37107cad-3b73-4478-adb3-1228bb9bfbfe",
+    "sentence_ja": "水と食料の補給が必要だ。",
+    "sentence_reading": "みずとしょくりょうのほきゅうがひつようだ。",
+    "sentence_meaning": "물과 식량 보급이 필요하다."
+  },
+  {
+    "word_id": "37107cad-3b73-4478-adb3-1228bb9bfbfe",
+    "sentence_ja": "燃料を補給してから出発した。",
+    "sentence_reading": "ねんりょうをほきゅうしてからしゅっぱつした。",
+    "sentence_meaning": "연료를 보급한 후 출발했다."
+  },
+  {
+    "word_id": "b46dc5d0-fb12-4e11-9ee3-d2c9f15ac1d0",
+    "sentence_ja": "溺れそうになってもがいた。",
+    "sentence_reading": "おぼれそうになってもがいた。",
+    "sentence_meaning": "익사할 뻔하며 몸부림쳤다."
+  },
+  {
+    "word_id": "b46dc5d0-fb12-4e11-9ee3-d2c9f15ac1d0",
+    "sentence_ja": "締め切りに追われてもがいている。",
+    "sentence_reading": "しめきりにおわれてもがいている。",
+    "sentence_meaning": "마감에 쫓겨 안간힘을 쓰고 있다."
+  },
+  {
+    "word_id": "9add8e76-c212-454e-ad1e-bc63ce121455",
+    "sentence_ja": "心が病んでいるみたいだ。",
+    "sentence_reading": "こころがやんでいるみたいだ。",
+    "sentence_meaning": "마음이 병든 것 같다."
+  },
+  {
+    "word_id": "9add8e76-c212-454e-ad1e-bc63ce121455",
+    "sentence_ja": "長い間病んでいた彼がようやく回復した。",
+    "sentence_reading": "ながいあいだやんでいたかれがようやくかいふくした。",
+    "sentence_meaning": "오랫동안 아팠던 그가 마침내 회복했다."
+  },
+  {
+    "word_id": "07bf23e8-41dc-401a-96b9-6441e2fb9bad",
+    "sentence_ja": "赤ちゃんの顔は真ん丸い。",
+    "sentence_reading": "あかちゃんのかおはまんまるい。",
+    "sentence_meaning": "아기 얼굴은 동그랗다."
+  },
+  {
+    "word_id": "07bf23e8-41dc-401a-96b9-6441e2fb9bad",
+    "sentence_ja": "真ん丸いお月様が空に浮かんでいた。",
+    "sentence_reading": "まんまるいおつきさまがそらにうかんでいた。",
+    "sentence_meaning": "동그란 달이 하늘에 떠 있었다."
+  },
+  {
+    "word_id": "55b1c13e-96cb-49dc-aaf1-99424c20a58c",
+    "sentence_ja": "牧場にブルが一頭いた。",
+    "sentence_reading": "ぼくじょうにぶるがいっとうぼくじょうにいた。",
+    "sentence_meaning": "목장에 황소가 한 마리 있었다."
+  },
+  {
+    "word_id": "55b1c13e-96cb-49dc-aaf1-99424c20a58c",
+    "sentence_ja": "ブルは力強く走り出した。",
+    "sentence_reading": "ぶるはちからづよくはしりだした。",
+    "sentence_meaning": "황소는 힘차게 달리기 시작했다."
+  },
+  {
+    "word_id": "f47a297c-edb7-4aed-aaa0-43a20d15093e",
+    "sentence_ja": "二つのアイデアを結び付けて考えた。",
+    "sentence_reading": "ふたつのあいでぃあをむすびつけてかんがえた。",
+    "sentence_meaning": "두 아이디어를 연결해서 생각했다."
+  },
+  {
+    "word_id": "f47a297c-edb7-4aed-aaa0-43a20d15093e",
+    "sentence_ja": "紐で荷物をしっかり結び付けた。",
+    "sentence_reading": "ひもでにもつをしっかりむすびつけた。",
+    "sentence_meaning": "끈으로 짐을 단단히 묶었다."
+  },
+  {
+    "word_id": "548a550b-3298-4ed4-aa8a-867c49334f97",
+    "sentence_ja": "展望台から街を見渡した。",
+    "sentence_reading": "てんぼうだいからまちをみわたした。",
+    "sentence_meaning": "전망대에서 도시를 내다봤다."
+  },
+  {
+    "word_id": "548a550b-3298-4ed4-aa8a-867c49334f97",
+    "sentence_ja": "山頂から広い景色を見渡せた。",
+    "sentence_reading": "さんちょうからひろいけしきをみわたせた。",
+    "sentence_meaning": "산 정상에서 넓은 경치를 조망할 수 있었다."
+  },
+  {
+    "word_id": "a973390e-9834-4b0e-853d-9e0fa03cb08a",
+    "sentence_ja": "今日は充実した一日だった。",
+    "sentence_reading": "きょうはじゅうじつしたいちにちだった。",
+    "sentence_meaning": "오늘은 알찬 하루였다."
+  },
+  {
+    "word_id": "a973390e-9834-4b0e-853d-9e0fa03cb08a",
+    "sentence_ja": "内容の充実したセミナーに参加した。",
+    "sentence_reading": "ないようのじゅうじつしたせみなーにさんかした。",
+    "sentence_meaning": "내용이 충실한 세미나에 참가했다."
+  }
+]
