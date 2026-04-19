@@ -447,6 +447,13 @@ export interface Translations {
     cards: string;
     days: string;
   };
+  kanji: {
+    onReading: string;
+    kunReading: string;
+    strokes: (n: number) => string;
+    noData: string;
+    loading: string;
+  };
   achievements: {
     title: string;
     unlocked: string;

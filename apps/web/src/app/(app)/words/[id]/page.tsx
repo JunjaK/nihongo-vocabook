@@ -13,6 +13,7 @@ import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import { WordForm } from '@/components/word/word-form';
 import { AddToWordbookDialog } from '@/components/wordbook/add-to-wordbook-dialog';
+import { KanjiText } from '@/components/kanji/kanji-text';
 import { useRepository } from '@/lib/repository/provider';
 import { useAuthStore } from '@/stores/auth-store';
 import { useTranslation } from '@/lib/i18n';
@@ -429,7 +430,7 @@ export default function WordDetailPage({
               </div>
               {/* Kanji */}
               <div className="mt-1 text-kanji-lg font-medium leading-tight text-foreground">
-                {word.term}
+                <KanjiText text={word.term} />
               </div>
               {/* Meaning */}
               <div
@@ -556,7 +557,9 @@ export default function WordDetailPage({
                 <div className={sectionLabel}>{t.wordDetail.examples}</div>
                 {examples.map((ex) => (
                   <div key={ex.id} className="flex flex-col gap-1 rounded-lg bg-secondary p-3">
-                    <div className="text-body font-medium">{ex.sentenceJa}</div>
+                    <div className="text-body font-medium">
+                      <KanjiText text={ex.sentenceJa} />
+                    </div>
                     {ex.sentenceReading && (
                       <div className="text-reading text-text-secondary">{ex.sentenceReading}</div>
                     )}

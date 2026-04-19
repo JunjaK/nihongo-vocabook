@@ -2,10 +2,10 @@ export type RubySegment =
   | { type: 'ruby'; base: string; annotation: string }
   | { type: 'text'; text: string };
 
-const KANJI_REGEX = /[\u4e00-\u9faf\u3400-\u4dbf]/;
+export const KANJI_REGEX = /[\u4e00-\u9faf\u3400-\u4dbf]/;
 const KANJI_GROUP_REGEX = /([\u4e00-\u9faf\u3400-\u4dbf]+|[^\u4e00-\u9faf\u3400-\u4dbf]+)/g;
 
-function isKanji(char: string): boolean {
+export function isKanji(char: string): boolean {
   return KANJI_REGEX.test(char);
 }
 
