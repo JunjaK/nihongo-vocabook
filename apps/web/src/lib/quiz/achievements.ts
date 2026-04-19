@@ -67,7 +67,7 @@ export async function checkAndUnlockAchievements(
       },
     },
 
-    // Accuracy week 80
+    // Accuracy week 80 — at least 3 active days in the past 7, all >= 80%
     {
       type: 'accuracy_week_80',
       condition: async () => {
@@ -78,17 +78,21 @@ export async function checkAndUnlockAchievements(
           getLocalDateString(startDate),
           getLocalDateString(today),
         );
-        if (stats.length < 7) return false;
-        return stats.every((s) => {
-          const acc = computeWeightedAccuracy(s);
-          return acc >= 80;
-        });
+        const active = stats.filter((s) => (s.reviewCount ?? 0) > 0);
+        if (active.length < 3) return false;
+        return active.every((s) => computeWeightedAccuracy(s) >= 80);
       },
     },
 
-    // Daily volume
-    { type: 'daily_50', condition: async () => todayReviewCount >= 50 },
-    { type: 'daily_100', condition: async () => todayReviewCount >= 100 },
+    // Daily goal streak — consecutive days hitting the daily goal
+    {
+      type: 'daily_goal_streak_7',
+      condition: async () => (await countDailyGoalStreak(repo)) >= 7,
+    },
+    {
+      type: 'daily_goal_streak_30',
+      condition: async () => (await countDailyGoalStreak(repo)) >= 30,
+    },
   ];
 
   for (const { type, condition } of checks) {
@@ -101,4 +105,44 @@ export async function checkAndUnlockAchievements(
   }
 
   return unlocked;
+}
+
+/**
+ * Count consecutive days (ending today or yesterday) where the user completed
+ * at least `dailyGoal` cards.
+ */
+async function countDailyGoalStreak(repo: DataRepository): Promise<number> {
+  const settings = await repo.study.getQuizSettings();
+  const goal = settings.dailyGoal;
+  if (goal <= 0) return 0;
+
+  const today = new Date();
+  const start = new Date(today);
+  start.setDate(start.getDate() - 100);
+  const stats = await repo.study.getDailyStatsRange(
+    getLocalDateString(start),
+    getLocalDateString(today),
+  );
+  const byDate = new Map(stats.map((s) => [s.date, s]));
+
+  let streak = 0;
+  const cursor = new Date(today);
+  // Allow today OR yesterday as the anchor — today may not yet be complete
+  const todayStats = byDate.get(getLocalDateString(cursor));
+  const todayCount = (todayStats?.reviewCount ?? 0) + (todayStats?.masteredInSessionCount ?? 0);
+  if (todayCount < goal) {
+    cursor.setDate(cursor.getDate() - 1);
+  }
+  while (true) {
+    const key = getLocalDateString(cursor);
+    const s = byDate.get(key);
+    const count = (s?.reviewCount ?? 0) + (s?.masteredInSessionCount ?? 0);
+    if (count >= goal) {
+      streak += 1;
+      cursor.setDate(cursor.getDate() - 1);
+    } else {
+      break;
+    }
+  }
+  return streak;
 }

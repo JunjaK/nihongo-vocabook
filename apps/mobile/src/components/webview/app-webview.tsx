@@ -68,20 +68,6 @@ export function AppWebView() {
           await SecureStore.setItemAsync(AUTH_KEY, message.refreshToken);
           break;
 
-        case 'REQUEST_PUSH_TOKEN': {
-          const { status } = await Notifications.requestPermissionsAsync();
-          if (status === 'granted') {
-            const token = await Notifications.getExpoPushTokenAsync();
-            sendToWeb({ type: 'PUSH_TOKEN', token: token.data });
-          } else {
-            sendToWeb({
-              type: 'PUSH_TOKEN_ERROR',
-              error: 'Permission denied',
-            });
-          }
-          break;
-        }
-
         case 'HAPTIC_FEEDBACK': {
           const style =
             message.style === 'heavy'
@@ -120,27 +106,6 @@ export function AppWebView() {
 
         case 'SET_BADGE_COUNT':
           await Notifications.setBadgeCountAsync(message.count);
-          break;
-
-        case 'SCHEDULE_NOTIFICATION':
-          // Cancel existing before scheduling new
-          await Notifications.cancelScheduledNotificationAsync('daily-quiz-reminder').catch(() => {});
-          await Notifications.scheduleNotificationAsync({
-            identifier: 'daily-quiz-reminder',
-            content: {
-              title: 'NiVoca',
-              body: 'Time to review your words! 📚',
-            },
-            trigger: {
-              type: Notifications.SchedulableTriggerInputTypes.DAILY,
-              hour: message.hour,
-              minute: message.minute,
-            },
-          });
-          break;
-
-        case 'CANCEL_NOTIFICATION':
-          await Notifications.cancelScheduledNotificationAsync('daily-quiz-reminder').catch(() => {});
           break;
 
         // Future: SHARE, OPEN_EXTERNAL_URL
