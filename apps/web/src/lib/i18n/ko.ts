@@ -455,6 +455,13 @@ const ko: Translations = {
     cards: '장',
     days: '일',
   },
+  kanji: {
+    onReading: '음독',
+    kunReading: '훈독',
+    strokes: (n: number) => `${n}획`,
+    noData: '한자 정보 없음',
+    loading: '한자 정보 불러오는 중...',
+  },
   achievements: {
     title: '업적',
     unlocked: '달성',

@@ -56,3 +56,6 @@ next-env.d.ts
 # other
 .playwright-mcp
 supabase/.temp/
+
+# seed data (bulk fixture files, not checked in)
+apps/web/scripts/data/
