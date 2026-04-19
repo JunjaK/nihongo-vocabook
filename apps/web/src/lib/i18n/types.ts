@@ -278,6 +278,14 @@ export interface Translations {
     resetStudyDataDesc: string;
     resetStudyDataConfirm: string;
     resetStudyDataSuccess: string;
+    notifications: string;
+    notificationEnabled: string;
+    notificationEnabledDesc: string;
+    notificationTime: string;
+    notificationHour: string;
+    notificationMinute: string;
+    notificationPermissionDenied: string;
+    notificationPermissionDeniedDesc: string;
   };
   wordbooks: {
     title: string;

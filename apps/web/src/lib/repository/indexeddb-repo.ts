@@ -590,6 +590,9 @@ class IndexedDBStudyRepository implements StudyRepository {
       priorityFilter: settings.priorityFilter,
       cardDirection: (settings.cardDirection ?? 'term_first') as QuizSettings['cardDirection'],
       leechThreshold: settings.leechThreshold ?? 8,
+      notificationEnabled: settings.notificationEnabled ?? false,
+      notificationHour: settings.notificationHour ?? 21,
+      notificationMinute: settings.notificationMinute ?? 0,
     };
   }
 

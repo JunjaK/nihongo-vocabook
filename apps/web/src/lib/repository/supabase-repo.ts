@@ -912,6 +912,9 @@ class SupabaseStudyRepository implements StudyRepository {
         priorityFilter: data.priority_filter,
         cardDirection: data.card_direction ?? 'term_first',
         leechThreshold: data.leech_threshold ?? 8,
+        notificationEnabled: data.notification_enabled ?? false,
+        notificationHour: data.notification_hour ?? 21,
+        notificationMinute: data.notification_minute ?? 0,
       };
     });
   }
@@ -927,6 +930,9 @@ class SupabaseStudyRepository implements StudyRepository {
     if (settings.priorityFilter !== undefined) updateData.priority_filter = settings.priorityFilter;
     if (settings.cardDirection !== undefined) updateData.card_direction = settings.cardDirection;
     if (settings.leechThreshold !== undefined) updateData.leech_threshold = settings.leechThreshold;
+    if (settings.notificationEnabled !== undefined) updateData.notification_enabled = settings.notificationEnabled;
+    if (settings.notificationHour !== undefined) updateData.notification_hour = settings.notificationHour;
+    if (settings.notificationMinute !== undefined) updateData.notification_minute = settings.notificationMinute;
 
     const { error } = await this.supabase
       .from('quiz_settings')

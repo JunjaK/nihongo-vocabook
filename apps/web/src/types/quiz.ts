@@ -9,6 +9,9 @@ export interface QuizSettings {
   priorityFilter: number | null;
   cardDirection: CardDirection;
   leechThreshold: number;
+  notificationEnabled: boolean;
+  notificationHour: number; // 0-23, KST
+  notificationMinute: number; // 0-59
 }
 
 export type QuizCard =
@@ -102,4 +105,7 @@ export const DEFAULT_QUIZ_SETTINGS: QuizSettings = {
   priorityFilter: null,
   cardDirection: 'term_first',
   leechThreshold: 8,
+  notificationEnabled: false,
+  notificationHour: 21,
+  notificationMinute: 0,
 };
