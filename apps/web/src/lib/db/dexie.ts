@@ -56,17 +56,12 @@ export interface LocalWordbookItem {
 
 export interface LocalQuizSettings {
   id?: number;
-  newPerDay: number;
-  maxReviewsPerDay: number;
+  dailyGoal: number;
+  exampleQuizRatio: number;
   jlptFilter: number | null;
   priorityFilter: number | null;
-  newCardOrder?: string; // deprecated, kept for backward compat with existing DB rows
   cardDirection: string;
-  sessionSize: number;
   leechThreshold: number;
-  notificationEnabled: boolean;
-  notificationHour: number;
-  notificationMinute: number;
 }
 
 export interface LocalDailyStats {
@@ -279,6 +274,35 @@ class VocaBookDB extends Dexie {
             settings.notificationHour = 9;
             settings.notificationMinute = 0;
           }
+        });
+      });
+
+    // v8 — Quiz redesign: dailyGoal / exampleQuizRatio replace legacy size fields
+    this.version(8)
+      .stores({
+        words: '++id, term, reading, meaning, *tags, jlptLevel, createdAt',
+        userWordState: '++id, wordId, mastered',
+        studyProgress: '++id, wordId, nextReview',
+        wordbooks: '++id, name, createdAt',
+        wordbookItems: '++id, wordbookId, wordId, [wordbookId+wordId]',
+        quizSettings: '++id',
+        dailyStats: '++id, date',
+        achievements: '++id, type',
+        wordExamples: '++id, wordId',
+      })
+      .upgrade(async (tx) => {
+        await tx.table('quizSettings').toCollection().modify((settings) => {
+          if (settings.dailyGoal === undefined) {
+            settings.dailyGoal = Math.max(10, Math.min(100, settings.sessionSize ?? 20));
+            settings.exampleQuizRatio = 30;
+          }
+          delete settings.newPerDay;
+          delete settings.maxReviewsPerDay;
+          delete settings.sessionSize;
+          delete settings.newCardOrder;
+          delete settings.notificationEnabled;
+          delete settings.notificationHour;
+          delete settings.notificationMinute;
         });
       });
   }

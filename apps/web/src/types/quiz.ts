@@ -1,17 +1,24 @@
+import type { Word, WordExample, WordWithProgress } from './word';
+
 export type CardDirection = 'term_first' | 'meaning_first' | 'random';
 
 export interface QuizSettings {
-  newPerDay: number;
-  maxReviewsPerDay: number;
+  dailyGoal: number;
+  exampleQuizRatio: number; // 0-100 (%)
   jlptFilter: number | null;
   priorityFilter: number | null;
   cardDirection: CardDirection;
-  sessionSize: number;
   leechThreshold: number;
-  notificationEnabled: boolean;
-  notificationHour: number;   // 0-23
-  notificationMinute: number; // 0-59
 }
+
+export type QuizCard =
+  | { kind: 'word'; word: WordWithProgress }
+  | {
+      kind: 'example';
+      word: WordWithProgress;
+      example: WordExample;
+      distractors: [Word, Word];
+    };
 
 export interface DailyStats {
   id: string;
@@ -38,7 +45,6 @@ export const ACCURACY_WEIGHTS: Record<number, number> = {
 };
 export const MASTERED_ACCURACY_WEIGHT = 100;
 
-/** Compute weighted accuracy from daily stats fields */
 export function computeWeightedAccuracy(stats: {
   againCount: number;
   hardCount: number;
@@ -80,8 +86,8 @@ export type AchievementType =
   | 'reviews_5000'
   | 'perfect_session'
   | 'accuracy_week_80'
-  | 'daily_50'
-  | 'daily_100';
+  | 'daily_goal_streak_7'
+  | 'daily_goal_streak_30';
 
 export interface Achievement {
   id: string;
@@ -90,14 +96,10 @@ export interface Achievement {
 }
 
 export const DEFAULT_QUIZ_SETTINGS: QuizSettings = {
-  newPerDay: 20,
-  maxReviewsPerDay: 100,
+  dailyGoal: 20,
+  exampleQuizRatio: 30,
   jlptFilter: null,
   priorityFilter: null,
   cardDirection: 'term_first',
-  sessionSize: 20,
   leechThreshold: 8,
-  notificationEnabled: false,
-  notificationHour: 9,
-  notificationMinute: 0,
 };

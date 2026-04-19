@@ -52,9 +52,9 @@ export const ACHIEVEMENT_DEFS: AchievementDef[] = [
   { type: 'perfect_session', category: 'accuracy', icon: Target, colorClass: 'text-yellow-500', labelKey: 'perfectSession', descKey: 'perfectSessionDesc' },
   { type: 'accuracy_week_80', category: 'accuracy', icon: Target, colorClass: 'text-green-500', labelKey: 'accuracyWeek80', descKey: 'accuracyWeek80Desc' },
 
-  // Daily volume
-  { type: 'daily_50', category: 'volume', icon: Trophy, colorClass: 'text-violet-500', labelKey: 'daily50', descKey: 'daily50Desc', threshold: 50 },
-  { type: 'daily_100', category: 'volume', icon: Trophy, colorClass: 'text-fuchsia-500', labelKey: 'daily100', descKey: 'daily100Desc', threshold: 100 },
+  // Daily goal consistency
+  { type: 'daily_goal_streak_7', category: 'streak', icon: Trophy, colorClass: 'text-violet-500', labelKey: 'dailyGoalStreak7', descKey: 'dailyGoalStreak7Desc', threshold: 7 },
+  { type: 'daily_goal_streak_30', category: 'streak', icon: Trophy, colorClass: 'text-fuchsia-500', labelKey: 'dailyGoalStreak30', descKey: 'dailyGoalStreak30Desc', threshold: 30 },
 ];
 
 export const CATEGORY_ORDER: AchievementCategory[] = ['special', 'milestone', 'streak', 'volume', 'accuracy'];

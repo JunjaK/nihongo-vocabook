@@ -591,6 +591,24 @@ class SupabaseWordRepository implements WordRepository {
     if (error) throw error;
     return (data as DbWordExample[]).map(dbExampleToExample);
   }
+
+  async getExamplesForWords(wordIds: string[]): Promise<Map<string, WordExample[]>> {
+    const map = new Map<string, WordExample[]>();
+    if (wordIds.length === 0) return map;
+    const { data, error } = await this.supabase
+      .from('word_examples')
+      .select('*')
+      .in('word_id', wordIds)
+      .order('created_at', { ascending: true });
+    if (error) throw error;
+    for (const row of data as DbWordExample[]) {
+      const ex = dbExampleToExample(row);
+      const list = map.get(ex.wordId) ?? [];
+      list.push(ex);
+      map.set(ex.wordId, list);
+    }
+    return map;
+  }
 }
 
 /** Cached userId helper shared across repositories */
@@ -701,13 +719,12 @@ class SupabaseStudyRepository implements StudyRepository {
       return true;
     }).length;
 
-    const remainingNew = Math.max(0, settings.newPerDay - (todayStats?.newCount ?? 0));
-    const cappedNew = Math.min(totalNew, remainingNew);
-    const totalDue = reviewDue + cappedNew;
-    const remainingReviews = Math.max(0, settings.maxReviewsPerDay - (todayStats?.reviewCount ?? 0));
+    const todayDone = (todayStats?.reviewCount ?? 0) + (todayStats?.masteredInSessionCount ?? 0);
+    const remainingGoal = Math.max(0, settings.dailyGoal - todayDone);
+    const totalDue = reviewDue + totalNew;
 
-    // Cap to sessionSize so badge matches what the next session would actually contain
-    return Math.min(totalDue, remainingReviews, settings.sessionSize);
+    // Badge count = what the next session would actually show
+    return Math.min(totalDue, remainingGoal);
   }
 
   async getDueWords(limit = 20): Promise<WordWithProgress[]> {
@@ -738,9 +755,11 @@ class SupabaseStudyRepository implements StudyRepository {
         };
       });
 
-    // Fetch new words (no progress), cap at remainingNew
-    const remainingNew = Math.max(0, settings.newPerDay - (todayStats?.newCount ?? 0));
+    const todayDone = (todayStats?.reviewCount ?? 0) + (todayStats?.masteredInSessionCount ?? 0);
+    const remainingGoal = Math.max(0, settings.dailyGoal - todayDone);
+    if (remainingGoal === 0) return [];
 
+    // Fetch new word candidates (no progress)
     let newWordsQuery = this.supabase
       .from('words')
       .select('*, study_progress(id), user_word_state(*)')
@@ -750,7 +769,7 @@ class SupabaseStudyRepository implements StudyRepository {
       newWordsQuery = newWordsQuery.eq('jlpt_level', settings.jlptFilter);
     }
 
-    const { data: newWordsData, error: wordsError } = await newWordsQuery.limit(remainingNew * 3);
+    const { data: newWordsData, error: wordsError } = await newWordsQuery.limit(remainingGoal * 3);
     if (wordsError) throw wordsError;
 
     const filteredNewRows = (newWordsData ?? [])
@@ -763,7 +782,6 @@ class SupabaseStudyRepository implements StudyRepository {
     shuffleArray(filteredNewRows);
 
     const newWords: WordWithProgress[] = filteredNewRows
-      .slice(0, remainingNew)
       .map((row: Record<string, unknown>) => {
         const state = extractState(row);
         return {
@@ -773,9 +791,7 @@ class SupabaseStudyRepository implements StudyRepository {
       });
 
     const candidates = [...reviewWords, ...newWords];
-    const remainingReviews = Math.max(0, settings.maxReviewsPerDay - (todayStats?.reviewCount ?? 0));
-    const effectiveLimit = Math.min(limit, remainingReviews);
-
+    const effectiveLimit = Math.min(limit, remainingGoal);
     return selectDueWords(candidates, effectiveLimit, settings.jlptFilter);
   }
 
@@ -890,16 +906,12 @@ class SupabaseStudyRepository implements StudyRepository {
         throw error;
       }
       return {
-        newPerDay: data.new_per_day,
-        maxReviewsPerDay: data.max_reviews_per_day,
+        dailyGoal: data.daily_goal ?? 20,
+        exampleQuizRatio: data.example_quiz_ratio ?? 30,
         jlptFilter: data.jlpt_filter,
         priorityFilter: data.priority_filter,
         cardDirection: data.card_direction ?? 'term_first',
-        sessionSize: data.session_size ?? 20,
         leechThreshold: data.leech_threshold ?? 8,
-        notificationEnabled: data.notification_enabled ?? false,
-        notificationHour: data.notification_hour ?? 9,
-        notificationMinute: data.notification_minute ?? 0,
       };
     });
   }
@@ -909,16 +921,12 @@ class SupabaseStudyRepository implements StudyRepository {
     const userId = userData.user!.id;
 
     const updateData: Record<string, unknown> = { updated_at: new Date().toISOString() };
-    if (settings.newPerDay !== undefined) updateData.new_per_day = settings.newPerDay;
-    if (settings.maxReviewsPerDay !== undefined) updateData.max_reviews_per_day = settings.maxReviewsPerDay;
+    if (settings.dailyGoal !== undefined) updateData.daily_goal = settings.dailyGoal;
+    if (settings.exampleQuizRatio !== undefined) updateData.example_quiz_ratio = settings.exampleQuizRatio;
     if (settings.jlptFilter !== undefined) updateData.jlpt_filter = settings.jlptFilter;
     if (settings.priorityFilter !== undefined) updateData.priority_filter = settings.priorityFilter;
     if (settings.cardDirection !== undefined) updateData.card_direction = settings.cardDirection;
-    if (settings.sessionSize !== undefined) updateData.session_size = settings.sessionSize;
     if (settings.leechThreshold !== undefined) updateData.leech_threshold = settings.leechThreshold;
-    if (settings.notificationEnabled !== undefined) updateData.notification_enabled = settings.notificationEnabled;
-    if (settings.notificationHour !== undefined) updateData.notification_hour = settings.notificationHour;
-    if (settings.notificationMinute !== undefined) updateData.notification_minute = settings.notificationMinute;
 
     const { error } = await this.supabase
       .from('quiz_settings')

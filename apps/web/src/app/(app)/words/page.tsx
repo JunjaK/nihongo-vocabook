@@ -4,7 +4,7 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { BookOpen, Loader2, PhotoScan } from '@/components/ui/icons';
+import { BookOpen, Loader2, PhotoScan, Shuffle } from '@/components/ui/icons';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Header } from '@/components/layout/header';
 import { ListToolbar } from '@/components/layout/list-toolbar';
@@ -185,6 +185,11 @@ export default function WordsPage() {
                 {scanStatus === 'preview' && (
                   <span className="absolute -top-0.5 -right-0.5 size-2.5 rounded-full bg-primary" />
                 )}
+              </Button>
+            </Link>
+            <Link href="/words/random-practice">
+              <Button variant="ghost" size="icon-sm" data-testid="words-random-practice-button" aria-label={t.quiz.randomPractice}>
+                <Shuffle className="size-5" />
               </Button>
             </Link>
           </div>

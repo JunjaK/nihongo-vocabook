@@ -78,7 +78,7 @@ export function WordCard({ word, showReading, showMeaning, detailHref, onClick }
             <div className="text-caption text-muted-foreground">{word.reading}</div>
           )}
           {meaningVisible && (
-            <div className="text-badge text-muted-foreground">{word.meaning}</div>
+            <div className="text-badge text-primary dark:text-accent-muted">{word.meaning}</div>
           )}
         </div>
       </div>
