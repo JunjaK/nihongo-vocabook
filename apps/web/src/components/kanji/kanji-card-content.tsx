@@ -1,5 +1,6 @@
 'use client';
 
+import { toHiragana } from 'wanakana';
 import { useTranslation } from '@/lib/i18n';
 import type { Kanji } from '@/types/kanji';
 import { sectionLabel, textKanji, textCaption } from '@/lib/styles';
@@ -46,7 +47,7 @@ export function KanjiCardContent({ character, data, loading }: KanjiCardContentP
           <ul className="flex flex-col gap-1">
             {onReadings.map((r) => (
               <li key={`on-${r.reading}`} className="flex flex-wrap items-baseline gap-2">
-                <span className="font-ja text-body font-medium">{r.reading}</span>
+                <span className="font-ja text-body font-medium">{toHiragana(r.reading)}</span>
                 <span className={`${textCaption} text-text-secondary`}>
                   {renderMeanings(r.meanings, r.meaningsKo)}
                 </span>
