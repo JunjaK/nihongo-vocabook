@@ -455,6 +455,13 @@ const en: Translations = {
     cards: 'cards',
     days: 'days',
   },
+  kanji: {
+    onReading: 'On reading',
+    kunReading: 'Kun reading',
+    strokes: (n: number) => `${n} strokes`,
+    noData: 'No kanji data',
+    loading: 'Loading kanji info...',
+  },
   achievements: {
     title: 'Achievements',
     unlocked: 'Unlocked',

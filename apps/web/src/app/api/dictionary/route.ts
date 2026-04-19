@@ -2,6 +2,10 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { translateToKorean } from '@/lib/dictionary/translate';
 import { createLogger } from '@/lib/logger';
+import {
+  createAnonymousRateLimiter,
+  shouldBlockAnonymousBot,
+} from '@/lib/api/rate-limit';
 
 interface JishoResult {
   slug: string;
@@ -24,17 +28,8 @@ interface DictionaryRow {
 }
 
 const SEARCH_RESULT_LIMIT = 10;
-const ANON_RATE_WINDOW_MS = 60_000;
-const ANON_RATE_MAX_REQUESTS = 30;
-const BOT_UA_PATTERN =
-  /(bot|crawler|spider|curl|wget|python-requests|httpclient|axios|postman|insomnia|node-fetch)/i;
-const anonymousRateLimitStore = new Map<string, { count: number; windowStartMs: number }>();
 const logger = createLogger('api/dictionary');
-
-interface BlockDecision {
-  status: 403 | 429;
-  error: string;
-}
+const isAnonymousRateLimited = createAnonymousRateLimiter();
 
 function mapRowToJisho(row: DictionaryRow): JishoResult {
   return {
@@ -65,47 +60,6 @@ function hideKoreanDefinitions(results: JishoResult[]): JishoResult[] {
       korean_definitions: undefined,
     })),
   }));
-}
-
-/**
- * Resolve best-effort client IP from proxy headers.
- */
-function getClientIp(request: NextRequest): string {
-  const forwardedFor = request.headers.get('x-forwarded-for');
-  if (forwardedFor) return forwardedFor.split(',')[0].trim();
-  return request.headers.get('x-real-ip') ?? 'unknown';
-}
-
-/**
- * Decide whether an anonymous request should be blocked as bot traffic.
- */
-function shouldBlockAnonymousBot(request: NextRequest): BlockDecision | null {
-  const userAgent = request.headers.get('user-agent') ?? '';
-  if (!userAgent || BOT_UA_PATTERN.test(userAgent)) {
-    return { status: 403, error: 'BOT_TRAFFIC_BLOCKED' };
-  }
-  return null;
-}
-
-/**
- * Apply in-memory rate limiting for anonymous callers.
- */
-function isAnonymousRateLimited(request: NextRequest, nowMs = Date.now()): boolean {
-  const userAgent = request.headers.get('user-agent') ?? 'unknown';
-  const key = `${getClientIp(request)}:${userAgent.slice(0, 120)}`;
-  const current = anonymousRateLimitStore.get(key);
-
-  if (!current || nowMs - current.windowStartMs >= ANON_RATE_WINDOW_MS) {
-    anonymousRateLimitStore.set(key, { count: 1, windowStartMs: nowMs });
-    return false;
-  }
-
-  current.count += 1;
-  if (current.count > ANON_RATE_MAX_REQUESTS) {
-    return true;
-  }
-  anonymousRateLimitStore.set(key, current);
-  return false;
 }
 
 async function fetchJishoWithRetry(
