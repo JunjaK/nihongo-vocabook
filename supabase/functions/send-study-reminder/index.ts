@@ -117,7 +117,13 @@ function buildMessage(remaining: number, streak: number): { title: string; body:
   };
 }
 
-Deno.serve(async () => {
+Deno.serve(async (req) => {
+  // Shared-secret auth: pg_cron sends x-cron-secret; anything else is rejected.
+  const cronSecret = Deno.env.get('CRON_SECRET');
+  if (!cronSecret || req.headers.get('x-cron-secret') !== cronSecret) {
+    return new Response(JSON.stringify({ error: 'UNAUTHORIZED' }), { status: 401 });
+  }
+
   const supabase = createClient(
     Deno.env.get('SUPABASE_URL')!,
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
