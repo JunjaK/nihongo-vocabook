@@ -6,6 +6,7 @@ import { AuthProvider } from '@/components/layout/auth-provider';
 import { RepositoryProvider } from '@/lib/repository/provider';
 import { I18nProvider } from '@/lib/i18n';
 import { MobileShell } from '@/components/layout/mobile-shell';
+import { NotificationSync } from '@/components/layout/notification-sync';
 import { SwUpdateNotifier } from '@/components/layout/sw-update-notifier';
 import './globals.css';
 
@@ -86,6 +87,7 @@ export default function RootLayout({
           <I18nProvider>
             <AuthProvider>
               <RepositoryProvider>
+                <NotificationSync />
                 <MobileShell>
                   {children}
                 </MobileShell>

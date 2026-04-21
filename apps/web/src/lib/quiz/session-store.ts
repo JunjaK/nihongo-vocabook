@@ -1,17 +1,20 @@
 export { getLocalDateString } from './date-utils';
 import { getLocalDateString } from './date-utils';
 
-export type QuizMode = 'general' | 'quickstart';
-
+/**
+ * Persisted session snapshot (localStorage).
+ *
+ * Stores the word IDs that make up today's session plus progress tracking.
+ * Card types (word vs example) are re-derived on load so we don't persist
+ * heavy example/distractor payloads.
+ */
 export type QuizSessionSnapshot = {
-  version: 2;
-  mode: QuizMode;
-  date: string; // YYYY-MM-DD in browser-local timezone — invalid if date rolled
+  version: 3;
+  date: string; // YYYY-MM-DD in browser-local tz; invalid if rolled
   updatedAt: number;
-  wordIds: string[]; // full ordered word ID list
+  wordIds: string[]; // ordered word list for the session
   currentIndex: number;
   completed: number;
-  totalSessionSize: number; // original word count at session start (stable denominator)
   sessionStats: {
     totalReviewed: number;
     newCards: number;
@@ -25,43 +28,20 @@ export type QuizSessionSnapshot = {
   };
 };
 
-function sessionKey(mode: QuizMode): string {
-  return `quiz:session:${mode}`;
-}
+const SESSION_KEY = 'quiz:session';
 
-export function readSession(mode: QuizMode): QuizSessionSnapshot | null {
+export function readSession(): QuizSessionSnapshot | null {
   if (typeof window === 'undefined') return null;
   try {
-    const raw = window.localStorage.getItem(sessionKey(mode));
+    const raw = window.localStorage.getItem(SESSION_KEY);
     if (!raw) return null;
     const parsed = JSON.parse(raw) as QuizSessionSnapshot;
-    if (!parsed) return null;
-    const version = (parsed as Record<string, unknown>).version;
-    if (version !== 1 && version !== 2) return null;
+    if (!parsed || parsed.version !== 3) return null;
     if (!Array.isArray(parsed.wordIds) || parsed.wordIds.length === 0) return null;
-    // Accept both new `date` and legacy `kstDate` field
-    const storedDate = parsed.date ?? (parsed as Record<string, unknown>)['kstDate'];
-    if (storedDate !== getLocalDateString()) {
-      window.localStorage.removeItem(sessionKey(mode));
+    if (parsed.date !== getLocalDateString()) {
+      window.localStorage.removeItem(SESSION_KEY);
       return null;
     }
-    // Backfill split accuracy fields for old sessions (v1)
-    if (parsed.sessionStats.reviewAgainCount === undefined) {
-      parsed.sessionStats.reviewAgainCount = 0;
-      parsed.sessionStats.newAgainCount = 0;
-    }
-    // Backfill per-rating counts for v1 sessions
-    if (parsed.sessionStats.hardCount === undefined) {
-      parsed.sessionStats.hardCount = 0;
-      parsed.sessionStats.goodCount = 0;
-      parsed.sessionStats.easyCount = 0;
-      parsed.sessionStats.masteredCount = 0;
-    }
-    // Backfill totalSessionSize for sessions saved before this field existed
-    if (!parsed.totalSessionSize) {
-      parsed.totalSessionSize = parsed.wordIds.length + (parsed.sessionStats.masteredCount ?? 0);
-    }
-    parsed.version = 2;
     return parsed;
   } catch {
     return null;
@@ -71,41 +51,46 @@ export function readSession(mode: QuizMode): QuizSessionSnapshot | null {
 export function writeSession(snapshot: QuizSessionSnapshot): void {
   if (typeof window === 'undefined') return;
   try {
-    window.localStorage.setItem(sessionKey(snapshot.mode), JSON.stringify(snapshot));
+    window.localStorage.setItem(SESSION_KEY, JSON.stringify(snapshot));
   } catch {
     // Quota exceeded — graceful degradation
   }
 }
 
-export function clearSession(mode: QuizMode): void {
+export function clearSession(): void {
   if (typeof window === 'undefined') return;
   try {
-    window.localStorage.removeItem(sessionKey(mode));
+    window.localStorage.removeItem(SESSION_KEY);
   } catch {
     // Ignore
   }
 }
 
-export function clearAllSessions(): void {
-  clearSession('general');
-  clearSession('quickstart');
-}
-
+/**
+ * Remove legacy localStorage keys from prior quiz versions.
+ * Runs idempotently (guarded by a flag key).
+ */
 export function cleanupLegacyKeys(): void {
   if (typeof window === 'undefined') return;
-  if (window.localStorage.getItem('quiz:legacy-cleanup-done')) return;
+  if (window.localStorage.getItem('quiz:legacy-cleanup-v3')) return;
   try {
     const keysToRemove: string[] = [];
-    for (let i = 0; i < window.localStorage.length; i++) {
+    for (let i = 0; i < window.localStorage.length; i += 1) {
       const key = window.localStorage.key(i);
-      if (key?.startsWith('quiz:srs-session:')) {
+      if (!key) continue;
+      if (
+        key.startsWith('quiz:srs-session:') ||
+        key === 'quiz:session:general' ||
+        key === 'quiz:session:quickstart' ||
+        key === 'quiz:legacy-cleanup-done'
+      ) {
         keysToRemove.push(key);
       }
     }
     for (const key of keysToRemove) {
       window.localStorage.removeItem(key);
     }
-    window.localStorage.setItem('quiz:legacy-cleanup-done', '1');
+    window.localStorage.setItem('quiz:legacy-cleanup-v3', '1');
   } catch {
     // Ignore
   }

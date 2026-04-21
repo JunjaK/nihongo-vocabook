@@ -196,6 +196,14 @@ export interface Translations {
     masteredInSession: (n: number) => string;
     practiceAgain: string;
     backToWordbook: string;
+    fillTheBlank: string;
+    correct: string;
+    incorrect: string;
+    dailyGoalReached: string;
+    dailyGoalReachedDesc: string;
+    randomPractice: string;
+    randomPracticeDesc: string;
+    exampleQuiz: string;
   };
   settings: {
     title: string;
@@ -244,8 +252,10 @@ export interface Translations {
     openSource: string;
     quizSettings: string;
     quizStats: string;
-    newPerDay: string;
-    maxReviewsPerDay: string;
+    dailyGoal: string;
+    dailyGoalDesc: string;
+    exampleQuizRatio: string;
+    exampleQuizRatioDesc: string;
     jlptFilter: string;
     priorityFilter: string;
     allLevels: string;
@@ -258,7 +268,6 @@ export interface Translations {
     ratingHardDesc: string;
     ratingGoodDesc: string;
     ratingEasyDesc: string;
-    sessionSize: string;
     leechThreshold: string;
     leechThresholdDesc: string;
     cardDirection: string;
@@ -275,6 +284,8 @@ export interface Translations {
     notificationTime: string;
     notificationHour: string;
     notificationMinute: string;
+    notificationPermissionDenied: string;
+    notificationPermissionDeniedDesc: string;
   };
   wordbooks: {
     title: string;
@@ -506,10 +517,10 @@ export interface Translations {
     perfectSessionDesc: string;
     accuracyWeek80: string;
     accuracyWeek80Desc: string;
-    daily50: string;
-    daily50Desc: string;
-    daily100: string;
-    daily100Desc: string;
+    dailyGoalStreak7: string;
+    dailyGoalStreak7Desc: string;
+    dailyGoalStreak30: string;
+    dailyGoalStreak30Desc: string;
     progress: (current: number, target: number) => string;
   };
 }

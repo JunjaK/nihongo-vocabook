@@ -45,6 +45,7 @@ export default function WordDetailPage({
   const [word, setWord] = useState<Word | null>(null);
   const [progress, setProgress] = useState<StudyProgress | null>(null);
   const [examples, setExamples] = useState<WordExample[]>([]);
+  const [revealedExamples, setRevealedExamples] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
   const [wordbookDialogOpen, setWordbookDialogOpen] = useState(false);
@@ -555,19 +556,54 @@ export default function WordDetailPage({
               <div className="h-px bg-secondary" />
               <div className="flex flex-col gap-3">
                 <div className={sectionLabel}>{t.wordDetail.examples}</div>
-                {examples.map((ex) => (
-                  <div key={ex.id} className="flex flex-col gap-1 rounded-lg bg-secondary p-3">
-                    <div className="text-body font-medium">
-                      <KanjiText text={ex.sentenceJa} />
+                {examples.map((ex) => {
+                  const revealed = revealedExamples.has(ex.id);
+                  const toggle = () => setRevealedExamples((prev) => {
+                    const next = new Set(prev);
+                    if (next.has(ex.id)) next.delete(ex.id);
+                    else next.add(ex.id);
+                    return next;
+                  });
+                  return (
+                    <div
+                      key={ex.id}
+                      role="button"
+                      tabIndex={0}
+                      onClick={toggle}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          toggle();
+                        }
+                      }}
+                      className="flex cursor-pointer flex-col gap-1 rounded-lg bg-secondary p-3 text-left"
+                    >
+                      <div className="text-body font-medium">
+                        <KanjiText text={ex.sentenceJa} />
+                      </div>
+                      {ex.sentenceReading && (
+                        <div
+                          className={cn(
+                            'text-reading text-text-secondary transition-[opacity,filter] duration-300 ease-out',
+                            revealed ? 'opacity-100 blur-0' : 'opacity-60 blur-[3px] select-none',
+                          )}
+                        >
+                          {ex.sentenceReading}
+                        </div>
+                      )}
+                      {ex.sentenceMeaning && (
+                        <div
+                          className={cn(
+                            'text-caption text-primary dark:text-accent-muted transition-[opacity,filter] duration-300 ease-out',
+                            revealed ? 'opacity-100 blur-0' : 'opacity-60 blur-[3px] select-none',
+                          )}
+                        >
+                          {ex.sentenceMeaning}
+                        </div>
+                      )}
                     </div>
-                    {ex.sentenceReading && (
-                      <div className="text-reading text-text-secondary">{ex.sentenceReading}</div>
-                    )}
-                    {ex.sentenceMeaning && (
-                      <div className="text-caption text-primary dark:text-accent-muted">{ex.sentenceMeaning}</div>
-                    )}
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </>
           )}

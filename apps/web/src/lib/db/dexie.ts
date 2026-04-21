@@ -56,13 +56,11 @@ export interface LocalWordbookItem {
 
 export interface LocalQuizSettings {
   id?: number;
-  newPerDay: number;
-  maxReviewsPerDay: number;
+  dailyGoal: number;
+  exampleQuizRatio: number;
   jlptFilter: number | null;
   priorityFilter: number | null;
-  newCardOrder?: string; // deprecated, kept for backward compat with existing DB rows
   cardDirection: string;
-  sessionSize: number;
   leechThreshold: number;
   notificationEnabled: boolean;
   notificationHour: number;
@@ -277,6 +275,58 @@ class VocaBookDB extends Dexie {
           if (settings.notificationEnabled === undefined) {
             settings.notificationEnabled = false;
             settings.notificationHour = 9;
+            settings.notificationMinute = 0;
+          }
+        });
+      });
+
+    // v8 — Quiz redesign: dailyGoal / exampleQuizRatio replace legacy size fields
+    this.version(8)
+      .stores({
+        words: '++id, term, reading, meaning, *tags, jlptLevel, createdAt',
+        userWordState: '++id, wordId, mastered',
+        studyProgress: '++id, wordId, nextReview',
+        wordbooks: '++id, name, createdAt',
+        wordbookItems: '++id, wordbookId, wordId, [wordbookId+wordId]',
+        quizSettings: '++id',
+        dailyStats: '++id, date',
+        achievements: '++id, type',
+        wordExamples: '++id, wordId',
+      })
+      .upgrade(async (tx) => {
+        await tx.table('quizSettings').toCollection().modify((settings) => {
+          if (settings.dailyGoal === undefined) {
+            settings.dailyGoal = Math.max(10, Math.min(100, settings.sessionSize ?? 20));
+            settings.exampleQuizRatio = 30;
+          }
+          delete settings.newPerDay;
+          delete settings.maxReviewsPerDay;
+          delete settings.sessionSize;
+          delete settings.newCardOrder;
+          delete settings.notificationEnabled;
+          delete settings.notificationHour;
+          delete settings.notificationMinute;
+        });
+      });
+
+    // v9 — Restore notification settings for web push
+    this.version(9)
+      .stores({
+        words: '++id, term, reading, meaning, *tags, jlptLevel, createdAt',
+        userWordState: '++id, wordId, mastered',
+        studyProgress: '++id, wordId, nextReview',
+        wordbooks: '++id, name, createdAt',
+        wordbookItems: '++id, wordbookId, wordId, [wordbookId+wordId]',
+        quizSettings: '++id',
+        dailyStats: '++id, date',
+        achievements: '++id, type',
+        wordExamples: '++id, wordId',
+      })
+      .upgrade(async (tx) => {
+        await tx.table('quizSettings').toCollection().modify((settings) => {
+          if (settings.notificationEnabled === undefined) {
+            settings.notificationEnabled = false;
+            settings.notificationHour = 21;
             settings.notificationMinute = 0;
           }
         });

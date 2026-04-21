@@ -1,10 +1,15 @@
 'use client';
 
+import { useEffect, useRef } from 'react';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Flame, BookOpenCheck, Target, Sparkles, Crown, CheckCircle, TrendingUp, AlertTriangle, PartyPopper } from '@/components/ui/icons';
 import { useTranslation } from '@/lib/i18n';
 import { computeWeightedAccuracy } from '@/types/quiz';
 import { bottomBar, bottomSep } from '@/lib/styles';
+import { useRepository } from '@/lib/repository/provider';
+import { checkAndUnlockAchievements } from '@/lib/quiz/achievements';
+import { ACHIEVEMENT_DEFS } from '@/lib/quiz/achievement-defs';
 
 interface SessionReportProps {
   stats: {
@@ -37,6 +42,7 @@ export function SessionReport({
   onHome,
 }: SessionReportProps) {
   const { t } = useTranslation();
+  const repo = useRepository();
 
   const { totalReviewed, newCards } = stats;
 
@@ -44,6 +50,30 @@ export function SessionReport({
     ...stats,
     masteredInSessionCount: stats.masteredCount,
   });
+
+  // Check achievements once per mount (after the session completes)
+  const checkedRef = useRef(false);
+  useEffect(() => {
+    if (checkedRef.current) return;
+    checkedRef.current = true;
+    (async () => {
+      try {
+        const unlocked = await checkAndUnlockAchievements(repo, {
+          weightedAccuracy: accuracy,
+          totalReviewed: stats.totalReviewed,
+        });
+        for (const type of unlocked) {
+          const def = ACHIEVEMENT_DEFS.find((d) => d.type === type);
+          const label = def
+            ? (t.achievements as unknown as Record<string, string>)[def.labelKey] ?? type
+            : type;
+          toast.success(label);
+        }
+      } catch {
+        // Achievement check is non-critical
+      }
+    })();
+  }, [repo, accuracy, stats.totalReviewed, t]);
 
   const feedbackIcon = accuracy === 100 ? PartyPopper
     : accuracy >= 80 ? CheckCircle

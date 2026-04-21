@@ -1,19 +1,17 @@
 'use client';
 
-import { useEffect, useRef, type ReactNode } from 'react';
+import { useEffect, type ReactNode } from 'react';
 import { useAuthStore } from '@/stores/auth-store';
 import { createClient } from '@/lib/supabase/client';
 import {
   isNativeApp,
   notifyReady,
   persistAuthToken,
-  requestPushToken,
   onNativeMessage,
 } from '@/lib/native-bridge';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const setUser = useAuthStore((s) => s.setUser);
-  const pushTokenRequestedRef = useRef(false);
 
   // Core auth: get user + listen for state changes
   useEffect(() => {
@@ -31,12 +29,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Persist refresh token to native SecureStore
       if (isNativeApp() && session?.refresh_token) {
         persistAuthToken(session.refresh_token);
-      }
-
-      // Request push token once after first sign-in in native
-      if (isNativeApp() && session?.user && !pushTokenRequestedRef.current) {
-        pushTokenRequestedRef.current = true;
-        requestPushToken();
       }
     });
 
@@ -61,13 +53,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       }
 
-      if (msg.type === 'PUSH_TOKEN') {
-        fetch('/api/notifications/token', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ token: msg.token, platform: 'expo' }),
-        }).catch(() => {});
-      }
     });
 
     notifyReady();
