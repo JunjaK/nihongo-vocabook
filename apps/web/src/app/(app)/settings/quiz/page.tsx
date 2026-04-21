@@ -23,7 +23,7 @@ import {
 const DAILY_GOAL_OPTIONS = [10, 15, 20, 30, 50, 100];
 const EXAMPLE_RATIO_OPTIONS = [0, 20, 30, 50, 70, 100];
 const LEECH_THRESHOLD_OPTIONS = [4, 6, 8, 10, 15];
-const NOTIFICATION_HOUR_OPTIONS = [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22];
+const NOTIFICATION_HOUR_OPTIONS = Array.from({ length: 24 }, (_, i) => i);
 const NOTIFICATION_MINUTE_OPTIONS = [0, 15, 30, 45];
 
 const chipBase = 'text-muted-foreground';
