@@ -159,8 +159,7 @@ export default function SettingsPage() {
     setResetting(true);
     try {
       await repo.study.resetStudyData();
-      clearSession('general');
-      clearSession('quickstart');
+      clearSession();
       requestDueCountRefresh();
       toast.success(t.settings.resetStudyDataSuccess);
     } catch {

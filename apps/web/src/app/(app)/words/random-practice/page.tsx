@@ -1,6 +1,6 @@
 'use client';
 
-import { use, useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { BookOpenCheck } from '@/components/ui/icons';
@@ -21,12 +21,11 @@ import { getLocalDateString } from '@/lib/quiz/session-store';
 import type { Word } from '@/types/word';
 import type { CardDirection } from '@/types/quiz';
 
-export default function PracticePage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const { id: wordbookId } = use(params);
+/**
+ * Freestyle random practice across the user's entire vocabulary.
+ * Does NOT affect FSRS progress — only tracks practice stats.
+ */
+export default function RandomPracticePage() {
   const router = useRouter();
   const repo = useRepository();
   const authLoading = useAuthStore((s) => s.loading);
@@ -34,7 +33,6 @@ export default function PracticePage({
 
   useWakeLock(!authLoading);
 
-  const [wordbookName, setWordbookName] = useState('');
   const [practiceWords, setPracticeWords] = useState<Word[]>([]);
   const [practiceIndex, setPracticeIndex] = useState(0);
   const [practiceStats, setPracticeStats] = useState({ total: 0, knownCount: 0, masteredCount: 0 });
@@ -42,20 +40,17 @@ export default function PracticePage({
   const [cardDirection, setCardDirection] = useState<CardDirection>('term_first');
 
   const [loading, reload] = useLoader(async () => {
-    const [settings, wb, allWords] = await Promise.all([
+    const [settings, allWords] = await Promise.all([
       repo.study.getQuizSettings(),
-      repo.wordbooks.getById(wordbookId),
-      repo.wordbooks.getWords(wordbookId),
+      repo.words.getNonMastered(),
     ]);
-    if (wb) setWordbookName(wb.name);
     setCardDirection(settings.cardDirection);
-    const nonMastered = allWords.filter((w) => !w.mastered);
-    const selected = selectPracticeWords(nonMastered, settings.dailyGoal, settings.jlptFilter);
+    const selected = selectPracticeWords(allWords, settings.dailyGoal, settings.jlptFilter);
     setPracticeWords(selected);
     setPracticeIndex(0);
     setPracticeStats({ total: selected.length, knownCount: 0, masteredCount: 0 });
     setPracticeComplete(false);
-  }, [repo, wordbookId], { skip: authLoading });
+  }, [repo], { skip: authLoading });
 
   useEffect(() => {
     return () => {
@@ -68,9 +63,7 @@ export default function PracticePage({
   const advancePractice = useCallback(() => {
     setPracticeWords((words) => {
       setPracticeIndex((idx) => {
-        if (idx + 1 < words.length) {
-          return idx + 1;
-        }
+        if (idx + 1 < words.length) return idx + 1;
         setPracticeComplete(true);
         return idx;
       });
@@ -128,8 +121,8 @@ export default function PracticePage({
     await reload();
   };
 
-  const handleBackToWordbook = () => {
-    router.push(`/wordbooks/${wordbookId}`);
+  const handleBackToWords = () => {
+    router.push('/words');
   };
 
   const currentWord = practiceWords[practiceIndex];
@@ -165,8 +158,8 @@ export default function PracticePage({
               <Button className="flex-1" variant="outline" onClick={handlePracticeAgain}>
                 {t.quiz.practiceAgain}
               </Button>
-              <Button className="flex-1" onClick={handleBackToWordbook}>
-                {t.quiz.backToWordbook}
+              <Button className="flex-1" onClick={handleBackToWords}>
+                {t.quiz.backToHome}
               </Button>
             </div>
           </div>
@@ -178,7 +171,7 @@ export default function PracticePage({
   return (
     <>
       <Header
-        title={wordbookName || t.quiz.wordbookQuiz}
+        title={t.quiz.randomPractice}
         showBack
         actions={
           <div className="flex items-center gap-1.5">

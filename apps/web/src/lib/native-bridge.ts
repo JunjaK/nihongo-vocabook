@@ -13,19 +13,14 @@
 
 type WebToNativeMessage =
   | { type: 'READY'; bridgeVersion: number }
-  | { type: 'REQUEST_PUSH_TOKEN' }
   | { type: 'AUTH_TOKEN'; refreshToken: string }
   | { type: 'REQUEST_CAMERA'; options?: { source: 'camera' | 'gallery' } }
   | { type: 'HAPTIC_FEEDBACK'; style: 'light' | 'medium' | 'heavy' }
   | { type: 'SET_BADGE_COUNT'; count: number }
   | { type: 'OPEN_EXTERNAL_URL'; url: string }
-  | { type: 'SHARE'; text: string; url?: string }
-  | { type: 'SCHEDULE_NOTIFICATION'; hour: number; minute: number }
-  | { type: 'CANCEL_NOTIFICATION' };
+  | { type: 'SHARE'; text: string; url?: string };
 
 type NativeToWebMessage =
-  | { type: 'PUSH_TOKEN'; token: string }
-  | { type: 'PUSH_TOKEN_ERROR'; error: string }
   | { type: 'RESTORE_AUTH'; refreshToken: string }
   | { type: 'CAMERA_RESULT'; images: string[] }
   | { type: 'CAMERA_CANCELLED' }
@@ -83,11 +78,6 @@ export function persistAuthToken(refreshToken: string): void {
   }
 }
 
-/** Request push notification token from native */
-export function requestPushToken(): void {
-  sendToNative({ type: 'REQUEST_PUSH_TOKEN' });
-}
-
 /** Request native camera or gallery picker */
 export function requestCamera(source: 'camera' | 'gallery' = 'camera'): void {
   sendToNative({ type: 'REQUEST_CAMERA', options: { source } });
@@ -119,20 +109,6 @@ export function onNativeMessage(
   };
   window.addEventListener('nativeMessage', listener);
   return () => window.removeEventListener('nativeMessage', listener);
-}
-
-/** Schedule a daily local notification on native at the given hour/minute */
-export function scheduleNotification(hour: number, minute: number): void {
-  if (isNativeApp()) {
-    sendToNative({ type: 'SCHEDULE_NOTIFICATION', hour, minute });
-  }
-}
-
-/** Cancel the daily quiz reminder notification on native */
-export function cancelNotification(): void {
-  if (isNativeApp()) {
-    sendToNative({ type: 'CANCEL_NOTIFICATION' });
-  }
 }
 
 export type { WebToNativeMessage, NativeToWebMessage };

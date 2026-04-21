@@ -1,0 +1,6 @@
+# Supabase Edge Functions config
+
+[functions.send-study-reminder]
+# pg_cron invokes from inside Postgres — no user JWT. Protected via an
+# x-cron-secret header matched against the CRON_SECRET env var.
+verify_jwt = false

@@ -48,6 +48,7 @@ export interface WordRepository {
   delete(id: string): Promise<void>;
   setMastered(id: string, mastered: boolean): Promise<Word>;
   getExamples(wordId: string): Promise<WordExample[]>;
+  getExamplesForWords(wordIds: string[]): Promise<Map<string, WordExample[]>>;
 }
 
 export interface StudyRepository {

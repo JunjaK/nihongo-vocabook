@@ -391,6 +391,20 @@ class IndexedDBWordRepository implements WordRepository {
     const rows = await db.wordExamples.where('wordId').equals(Number(wordId)).toArray();
     return rows.map((r) => localExampleToExample(r as LocalWordExample & { id: number }));
   }
+
+  async getExamplesForWords(wordIds: string[]): Promise<Map<string, WordExample[]>> {
+    const map = new Map<string, WordExample[]>();
+    if (wordIds.length === 0) return map;
+    const numIds = wordIds.map((id) => Number(id));
+    const rows = await db.wordExamples.where('wordId').anyOf(numIds).toArray();
+    for (const row of rows) {
+      const ex = localExampleToExample(row as LocalWordExample & { id: number });
+      const list = map.get(ex.wordId) ?? [];
+      list.push(ex);
+      map.set(ex.wordId, list);
+    }
+    return map;
+  }
 }
 
 class IndexedDBStudyRepository implements StudyRepository {
@@ -449,13 +463,10 @@ class IndexedDBStudyRepository implements StudyRepository {
       }
     }
 
-    const remainingNew = Math.max(0, settings.newPerDay - (todayStats?.newCount ?? 0));
-    const cappedNew = Math.min(totalNew, remainingNew);
-    const totalDue = reviewDue + cappedNew;
-    const remainingReviews = Math.max(0, settings.maxReviewsPerDay - (todayStats?.reviewCount ?? 0));
-
-    // Cap to sessionSize so badge matches what the next session would actually contain
-    return Math.min(totalDue, remainingReviews, settings.sessionSize);
+    const todayDone = (todayStats?.reviewCount ?? 0) + (todayStats?.masteredInSessionCount ?? 0);
+    const remainingGoal = Math.max(0, settings.dailyGoal - todayDone);
+    const totalDue = reviewDue + totalNew;
+    return Math.min(totalDue, remainingGoal);
   }
 
   async getDueWords(limit = 20): Promise<WordWithProgress[]> {
@@ -496,14 +507,13 @@ class IndexedDBStudyRepository implements StudyRepository {
       }
     }
 
-    const remainingNew = Math.max(0, settings.newPerDay - (todayStats?.newCount ?? 0));
+    const todayDone = (todayStats?.reviewCount ?? 0) + (todayStats?.masteredInSessionCount ?? 0);
+    const remainingGoal = Math.max(0, settings.dailyGoal - todayDone);
+    if (remainingGoal === 0) return [];
+
     shuffleArray(newWords);
-    const cappedNewWords = newWords.slice(0, remainingNew);
-    const candidates = [...reviewWords, ...cappedNewWords];
-
-    const remainingReviews = Math.max(0, settings.maxReviewsPerDay - (todayStats?.reviewCount ?? 0));
-    const effectiveLimit = Math.min(limit, remainingReviews);
-
+    const candidates = [...reviewWords, ...newWords];
+    const effectiveLimit = Math.min(limit, remainingGoal);
     return selectDueWords(candidates, effectiveLimit, settings.jlptFilter);
   }
 
@@ -574,15 +584,14 @@ class IndexedDBStudyRepository implements StudyRepository {
     const settings = await db.quizSettings.toCollection().first();
     if (!settings) return { ...DEFAULT_QUIZ_SETTINGS };
     return {
-      newPerDay: settings.newPerDay,
-      maxReviewsPerDay: settings.maxReviewsPerDay,
+      dailyGoal: settings.dailyGoal ?? 20,
+      exampleQuizRatio: settings.exampleQuizRatio ?? 30,
       jlptFilter: settings.jlptFilter,
       priorityFilter: settings.priorityFilter,
       cardDirection: (settings.cardDirection ?? 'term_first') as QuizSettings['cardDirection'],
-      sessionSize: settings.sessionSize ?? 20,
       leechThreshold: settings.leechThreshold ?? 8,
       notificationEnabled: settings.notificationEnabled ?? false,
-      notificationHour: settings.notificationHour ?? 9,
+      notificationHour: settings.notificationHour ?? 21,
       notificationMinute: settings.notificationMinute ?? 0,
     };
   }
