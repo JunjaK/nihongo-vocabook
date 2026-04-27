@@ -84,7 +84,7 @@ async function reconstructCards(
 
   const [progressMap, examplesMap, allUserWords] = await Promise.all([
     repo.study.getProgressByIds(nonMastered.map((w) => w.id)),
-    repo.words.getExamplesForWords(nonMastered.map((w) => w.id)),
+    repo.words.getExamplesForDictionaryEntries(nonMastered.map((w) => w.dictionaryEntryId)),
     repo.words.getAll(),
   ]);
 
@@ -96,7 +96,7 @@ async function reconstructCards(
   const cards: QuizCard[] = [];
   for (const word of withProgress) {
     const rolled = Math.random() * 100 < settings.exampleQuizRatio;
-    const examples = examplesMap.get(word.id) ?? [];
+    const examples = examplesMap.get(word.dictionaryEntryId) ?? [];
     if (rolled && examples.length > 0 && allUserWords.length >= 3) {
       const card = buildExampleCard(word, examples, allUserWords);
       if (card) {
@@ -180,12 +180,14 @@ function QuizContent() {
       repo.words.getAll(),
     ]);
 
-    const examplesMap = await repo.words.getExamplesForWords(candidates.map((w) => w.id));
+    const examplesMap = await repo.words.getExamplesForDictionaryEntries(
+      candidates.map((w) => w.dictionaryEntryId),
+    );
 
     const built = buildSessionCards({
       settings,
       candidates,
-      examplesByWordId: examplesMap,
+      examplesByDictId: examplesMap,
       distractorPool: allUserWords,
       remainingSlots: remaining,
     });

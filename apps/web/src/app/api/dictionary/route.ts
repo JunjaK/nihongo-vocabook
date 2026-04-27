@@ -8,6 +8,7 @@ import {
 } from '@/lib/api/rate-limit';
 
 interface JishoResult {
+  id?: string;
   slug: string;
   japanese: { word?: string; reading: string }[];
   senses: {
@@ -19,6 +20,7 @@ interface JishoResult {
 }
 
 interface DictionaryRow {
+  id?: string;
   term: string;
   reading: string;
   meanings: string[];
@@ -33,6 +35,7 @@ const isAnonymousRateLimited = createAnonymousRateLimiter();
 
 function mapRowToJisho(row: DictionaryRow): JishoResult {
   return {
+    id: row.id,
     slug: row.term,
     japanese: [{ word: row.term, reading: row.reading }],
     senses: [
@@ -188,7 +191,7 @@ export async function GET(request: NextRequest) {
   // 1. Try local DB first (search both term and reading)
   const { data: rows } = await supabase
     .from('dictionary_entries')
-    .select('term, reading, meanings, meanings_ko, parts_of_speech, jlpt_level')
+    .select('id, term, reading, meanings, meanings_ko, parts_of_speech, jlpt_level')
     .or(`term.eq.${query},reading.eq.${query}`)
     .limit(SEARCH_RESULT_LIMIT);
 
@@ -233,13 +236,37 @@ export async function GET(request: NextRequest) {
 
       const entries = results.map(mapJishoResultToRow);
 
-      // 4. Fire-and-forget dictionary cache (regardless of auth)
-      supabase
+      // 4. Await dictionary upsert so we can return ids with the response.
+      //    This also lets us kick off example generation for newly created entries.
+      const { data: upserted, error: upsertErr } = await supabase
         .from('dictionary_entries')
         .upsert(entries, { onConflict: 'term,reading' })
-        .then(({ error }) => {
-          if (error) logger.error('Dictionary cache error', error.message);
-        });
+        .select('id, term, reading');
+      if (upsertErr) logger.error('Dictionary cache error', upsertErr.message);
+
+      // Attach ids back to `results` by (term, reading) match.
+      const idByKey = new Map<string, string>();
+      for (const row of upserted ?? []) {
+        idByKey.set(`${row.term}|${row.reading}`, (row as { id: string }).id);
+      }
+      for (const r of results) {
+        const jp = r.japanese[0];
+        const key = `${jp?.word ?? jp?.reading ?? r.slug}|${jp?.reading ?? ''}`;
+        const id = idByKey.get(key);
+        if (id) r.id = id;
+      }
+
+      // Fire-and-forget example generation for the resolved entries.
+      // The endpoint itself is idempotent (skips entries that already have examples).
+      for (const r of results) {
+        if (!r.id) continue;
+        const origin = request.nextUrl.origin;
+        fetch(`${origin}/api/examples/generate`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ dictionaryEntryId: r.id }),
+        }).catch((err) => logger.warn('Example gen trigger failed', err));
+      }
 
       return NextResponse.json({
         data: locale === 'ko' ? results : hideKoreanDefinitions(results),

@@ -12,6 +12,7 @@ import type { DictionaryEntry } from '@/types/word';
 
 interface WordSearchProps {
   onSelect: (entry: {
+    dictionaryEntryId: string;
     term: string;
     reading: string;
     englishMeaning: string;
@@ -68,7 +69,13 @@ export function WordSearch({ onSelect, onLoadingChange }: WordSearchProps) {
     const sense = entry.senses[0];
     const jlptMatch = entry.jlptLevels[0]?.match(/\d/);
 
+    if (!entry.id) {
+      // Backend failed to resolve a dict id — caller blocks save via canSubmit.
+      return;
+    }
+
     onSelect({
+      dictionaryEntryId: entry.id,
       term: jp?.word ?? jp?.reading ?? '',
       reading: jp?.reading ?? '',
       englishMeaning: sense?.englishDefinitions.join(', ') ?? '',

@@ -32,6 +32,7 @@ import type {
 interface DbWord {
   id: string;
   user_id: string;
+  dictionary_entry_id: string;
   term: string;
   reading: string;
   meaning: string;
@@ -92,7 +93,7 @@ interface DbWordbookItem {
 
 interface DbWordExample {
   id: string;
-  word_id: string;
+  dictionary_entry_id: string;
   sentence_ja: string;
   sentence_reading: string | null;
   sentence_meaning: string | null;
@@ -103,6 +104,7 @@ interface DbWordExample {
 function dbWordToWord(row: DbWord, state?: DbUserWordState | null, currentUserId?: string): Word {
   return {
     id: row.id,
+    dictionaryEntryId: row.dictionary_entry_id,
     term: row.term,
     reading: row.reading,
     meaning: row.meaning,
@@ -171,7 +173,7 @@ function dbWordbookToWordbook(row: DbWordbook): Wordbook {
 function dbExampleToExample(row: DbWordExample): WordExample {
   return {
     id: row.id,
-    wordId: row.word_id,
+    dictionaryEntryId: row.dictionary_entry_id,
     sentenceJa: row.sentence_ja,
     sentenceReading: row.sentence_reading,
     sentenceMeaning: row.sentence_meaning,
@@ -261,6 +263,7 @@ class SupabaseWordRepository implements WordRepository {
       const dbRow = row as unknown as DbWord & { priority: number; mastered: boolean; mastered_at: string | null; is_leech: boolean; leech_at: string | null };
       return {
         id: dbRow.id,
+        dictionaryEntryId: dbRow.dictionary_entry_id,
         term: dbRow.term,
         reading: dbRow.reading,
         meaning: dbRow.meaning,
@@ -384,6 +387,7 @@ class SupabaseWordRepository implements WordRepository {
       const dbRow = row as unknown as DbWord & { priority: number; mastered: boolean; mastered_at: string | null; is_leech: boolean; leech_at: string | null };
       return {
         id: dbRow.id,
+        dictionaryEntryId: dbRow.dictionary_entry_id,
         term: dbRow.term,
         reading: dbRow.reading,
         meaning: dbRow.meaning,
@@ -420,6 +424,7 @@ class SupabaseWordRepository implements WordRepository {
       .from('words')
       .insert({
         user_id: userId,
+        dictionary_entry_id: input.dictionaryEntryId,
         term: input.term,
         reading: input.reading,
         meaning: input.meaning,
@@ -454,7 +459,7 @@ class SupabaseWordRepository implements WordRepository {
   async update(id: string, input: UpdateWordInput): Promise<Word> {
     const userId = await this.getUserId();
     const updatesWordContent =
-      input.term !== undefined ||
+      input.dictionaryEntryId !== undefined ||
       input.reading !== undefined ||
       input.meaning !== undefined ||
       input.notes !== undefined ||
@@ -488,7 +493,7 @@ class SupabaseWordRepository implements WordRepository {
     }
 
     const updateData: Record<string, unknown> = { updated_at: new Date().toISOString() };
-    if (input.term !== undefined) updateData.term = input.term;
+    if (input.dictionaryEntryId !== undefined) updateData.dictionary_entry_id = input.dictionaryEntryId;
     if (input.reading !== undefined) updateData.reading = input.reading;
     if (input.meaning !== undefined) updateData.meaning = input.meaning;
     if (input.notes !== undefined) updateData.notes = input.notes;
@@ -582,30 +587,32 @@ class SupabaseWordRepository implements WordRepository {
     return dbWordToWord(row as unknown as DbWord, extractState(row), userId);
   }
 
-  async getExamples(wordId: string): Promise<WordExample[]> {
+  async getExamples(dictionaryEntryId: string): Promise<WordExample[]> {
     const { data, error } = await this.supabase
       .from('word_examples')
       .select('*')
-      .eq('word_id', wordId)
+      .eq('dictionary_entry_id', dictionaryEntryId)
       .order('created_at', { ascending: true });
     if (error) throw error;
     return (data as DbWordExample[]).map(dbExampleToExample);
   }
 
-  async getExamplesForWords(wordIds: string[]): Promise<Map<string, WordExample[]>> {
+  async getExamplesForDictionaryEntries(
+    dictionaryEntryIds: string[],
+  ): Promise<Map<string, WordExample[]>> {
     const map = new Map<string, WordExample[]>();
-    if (wordIds.length === 0) return map;
+    if (dictionaryEntryIds.length === 0) return map;
     const { data, error } = await this.supabase
       .from('word_examples')
       .select('*')
-      .in('word_id', wordIds)
+      .in('dictionary_entry_id', dictionaryEntryIds)
       .order('created_at', { ascending: true });
     if (error) throw error;
     for (const row of data as DbWordExample[]) {
       const ex = dbExampleToExample(row);
-      const list = map.get(ex.wordId) ?? [];
+      const list = map.get(ex.dictionaryEntryId) ?? [];
       list.push(ex);
-      map.set(ex.wordId, list);
+      map.set(ex.dictionaryEntryId, list);
     }
     return map;
   }
@@ -1727,6 +1734,32 @@ export class SupabaseRepository implements DataRepository {
     this.wordbooks = new SupabaseWordbookRepository(supabase);
   }
 
+  /** Look up a dict entry by (term, reading); upsert from the provided meaning if absent. */
+  private async resolveOrCreateDictEntry(
+    term: string,
+    reading: string,
+    meaning: string,
+  ): Promise<string> {
+    const { data: existing } = await this.supabase
+      .from('dictionary_entries')
+      .select('id')
+      .eq('term', term)
+      .eq('reading', reading)
+      .maybeSingle();
+    if (existing) return (existing as { id: string }).id;
+
+    const { data: inserted, error } = await this.supabase
+      .from('dictionary_entries')
+      .upsert(
+        { term, reading, meanings: [meaning], source: 'import' },
+        { onConflict: 'term,reading' },
+      )
+      .select('id')
+      .single();
+    if (error) throw error;
+    return (inserted as { id: string }).id;
+  }
+
   async exportAll(): Promise<ExportData> {
     const words = await this.words.getAll();
     const studyProgress: StudyProgress[] = [];
@@ -1787,9 +1820,16 @@ export class SupabaseRepository implements DataRepository {
     const wordIdMap = new Map<string, string>();
 
     for (const word of data.words) {
+      const dictionaryEntryId = await this.resolveOrCreateDictEntry(
+        word.term,
+        word.reading,
+        word.meaning,
+      );
+
       let created: Word;
       try {
         created = await this.words.create({
+          dictionaryEntryId,
           term: word.term,
           reading: word.reading,
           meaning: word.meaning,

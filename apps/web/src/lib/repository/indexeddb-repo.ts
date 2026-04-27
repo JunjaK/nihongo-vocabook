@@ -4,7 +4,6 @@ import {
   type LocalUserWordState,
   type LocalStudyProgress,
   type LocalWordbook,
-  type LocalWordExample,
   type LocalDailyStats,
   type LocalQuizSettings,
   type LocalAchievement,
@@ -42,6 +41,8 @@ import type {
 function localWordToWord(local: LocalWord & { id: number }, state?: LocalUserWordState | null): Word {
   return {
     id: String(local.id),
+    // Legacy guest-mode rows have no dict linkage; surface as read-only.
+    dictionaryEntryId: '',
     term: local.term,
     reading: local.reading,
     meaning: local.meaning,
@@ -56,18 +57,6 @@ function localWordToWord(local: LocalWord & { id: number }, state?: LocalUserWor
     isOwned: true, // IndexedDB = guest mode, all words are owned
     createdAt: local.createdAt,
     updatedAt: local.updatedAt,
-  };
-}
-
-function localExampleToExample(local: LocalWordExample & { id: number }): WordExample {
-  return {
-    id: String(local.id),
-    wordId: String(local.wordId),
-    sentenceJa: local.sentenceJa,
-    sentenceReading: local.sentenceReading,
-    sentenceMeaning: local.sentenceMeaning,
-    source: local.source,
-    createdAt: local.createdAt,
   };
 }
 
@@ -264,51 +253,16 @@ class IndexedDBWordRepository implements WordRepository {
     return new Set(existing.map((w) => w.term));
   }
 
-  async create(input: CreateWordInput): Promise<Word> {
-    // Check for duplicate term
-    const existing = await db.words.where('term').equals(input.term).first();
-    if (existing) throw new Error('DUPLICATE_WORD');
-
-    const now = new Date();
-    const localWord: LocalWord = {
-      term: input.term,
-      reading: input.reading,
-      meaning: input.meaning,
-      notes: input.notes ?? null,
-      tags: input.tags ?? [],
-      jlptLevel: input.jlptLevel ?? null,
-      createdAt: now,
-      updatedAt: now,
-    };
-    const id = await db.words.add(localWord);
-    const numId = id as number;
-
-    // Create userWordState row
-    const priority = input.priority ?? 2;
-    await db.userWordState.add({
-      wordId: numId,
-      mastered: false,
-      masteredAt: null,
-      priority,
-      isLeech: false,
-      leechAt: null,
-    });
-
-    const state = await getState(numId);
-    return localWordToWord({ ...localWord, id: numId }, state);
+  async create(_input: CreateWordInput): Promise<Word> {
+    // Guest mode: word creation is disabled. Users must sign in to save words
+    // (they must pick a canonical dictionary_entries row, which is Supabase-only).
+    throw new Error('LOGIN_REQUIRED');
   }
 
   async update(id: string, input: UpdateWordInput): Promise<Word> {
     const numId = Number(id);
-    // Check for duplicate term (if term is being changed)
-    if (input.term !== undefined) {
-      const existing = await db.words.where('term').equals(input.term).first();
-      if (existing && (existing as LocalWord & { id: number }).id !== numId) {
-        throw new Error('DUPLICATE_WORD');
-      }
-    }
+    // Guest-mode update: only per-user fields; dict linkage is Supabase-only.
     const wordUpdate: Partial<LocalWord> = { updatedAt: new Date() };
-    if (input.term !== undefined) wordUpdate.term = input.term;
     if (input.reading !== undefined) wordUpdate.reading = input.reading;
     if (input.meaning !== undefined) wordUpdate.meaning = input.meaning;
     if (input.notes !== undefined) wordUpdate.notes = input.notes;
@@ -387,23 +341,15 @@ class IndexedDBWordRepository implements WordRepository {
     return localWordToWord(word as LocalWord & { id: number }, state);
   }
 
-  async getExamples(wordId: string): Promise<WordExample[]> {
-    const rows = await db.wordExamples.where('wordId').equals(Number(wordId)).toArray();
-    return rows.map((r) => localExampleToExample(r as LocalWordExample & { id: number }));
+  async getExamples(_dictionaryEntryId: string): Promise<WordExample[]> {
+    // Examples live in Supabase only (shared resource keyed by dict entry).
+    return [];
   }
 
-  async getExamplesForWords(wordIds: string[]): Promise<Map<string, WordExample[]>> {
-    const map = new Map<string, WordExample[]>();
-    if (wordIds.length === 0) return map;
-    const numIds = wordIds.map((id) => Number(id));
-    const rows = await db.wordExamples.where('wordId').anyOf(numIds).toArray();
-    for (const row of rows) {
-      const ex = localExampleToExample(row as LocalWordExample & { id: number });
-      const list = map.get(ex.wordId) ?? [];
-      list.push(ex);
-      map.set(ex.wordId, list);
-    }
-    return map;
+  async getExamplesForDictionaryEntries(
+    _dictionaryEntryIds: string[],
+  ): Promise<Map<string, WordExample[]>> {
+    return new Map();
   }
 }
 

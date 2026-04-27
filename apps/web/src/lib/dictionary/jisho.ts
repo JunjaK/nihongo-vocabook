@@ -5,6 +5,7 @@ interface JishoApiResponse {
 }
 
 interface JishoResult {
+  id?: string;
   slug: string;
   japanese: { word?: string; reading: string }[];
   senses: {
@@ -48,6 +49,7 @@ function withTimeoutSignal(signal?: AbortSignal, timeoutMs = DICTIONARY_FETCH_TI
 
 function mapResult(result: JishoResult): DictionaryEntry {
   return {
+    id: result.id ?? '',
     slug: result.slug,
     japanese: result.japanese.map((j) => ({
       word: j.word,

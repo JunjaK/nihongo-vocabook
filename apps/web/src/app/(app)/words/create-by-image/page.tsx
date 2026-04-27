@@ -32,7 +32,9 @@ export default function CreateByImagePage() {
       router.replace('/words/scan');
       return;
     }
-    setWords(JSON.parse(raw));
+    // Only words with a resolved dict entry can be saved (dict-first rule).
+    const parsed: ExtractedWord[] = JSON.parse(raw);
+    setWords(parsed.filter((w) => !!w.dictionaryEntryId));
   }, [router]);
 
   const isLast = currentIndex >= words.length - 1;
@@ -124,8 +126,11 @@ export default function CreateByImagePage() {
   if (!currentWord) return null;
 
   const editedData = editedWords.get(currentIndex);
+  // dictionaryEntryId is guaranteed non-null here thanks to the filter at load.
+  const dictId = editedData?.dictionaryEntryId ?? currentWord.dictionaryEntryId ?? '';
   const initialValues = editedData
     ? {
+        dictionaryEntryId: dictId,
         term: editedData.term,
         reading: editedData.reading,
         meaning: editedData.meaning,
@@ -134,6 +139,7 @@ export default function CreateByImagePage() {
         jlptLevel: editedData.jlptLevel,
       }
     : {
+        dictionaryEntryId: dictId,
         term: currentWord.term,
         reading: currentWord.reading,
         meaning: currentWord.meaning,

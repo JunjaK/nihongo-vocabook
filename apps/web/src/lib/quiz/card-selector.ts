@@ -56,7 +56,7 @@ function shuffle<T>(arr: T[]): T[] {
 interface BuildSessionOpts {
   settings: QuizSettings;
   candidates: WordWithProgress[]; // non-mastered words with FSRS progress
-  examplesByWordId: Map<string, WordExample[]>;
+  examplesByDictId: Map<string, WordExample[]>;
   distractorPool: Word[]; // user's full vocabulary for distractors
   remainingSlots: number; // dailyGoal - todayCompleted
   now?: Date;
@@ -72,7 +72,7 @@ interface BuildSessionOpts {
  *   (no example for the word, or fewer than 3 words in distractor pool)
  */
 export function buildSessionCards(opts: BuildSessionOpts): QuizCard[] {
-  const { settings, candidates, examplesByWordId, distractorPool, remainingSlots } = opts;
+  const { settings, candidates, examplesByDictId, distractorPool, remainingSlots } = opts;
   const now = opts.now ?? new Date();
 
   if (remainingSlots <= 0) return [];
@@ -83,7 +83,7 @@ export function buildSessionCards(opts: BuildSessionOpts): QuizCard[] {
   const cards: QuizCard[] = [];
   for (const word of picked) {
     const rolled = Math.random() * 100 < settings.exampleQuizRatio;
-    const examples = examplesByWordId.get(word.id) ?? [];
+    const examples = examplesByDictId.get(word.dictionaryEntryId) ?? [];
     const canUseExample =
       rolled && examples.length > 0 && distractorPool.length >= 3;
 

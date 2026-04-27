@@ -1,0 +1,19 @@
+{
+  "generatedAt": "2026-04-22T16:27:00.405Z",
+  "totals": {
+    "words_total": 7798,
+    "examples_total": 15596,
+    "dict_total": 24650
+  },
+  "orphans": {
+    "total": 5,
+    "normal": 5,
+    "garbage": 0,
+    "needs_review": 0
+  },
+  "garbageSamples": [],
+  "needsReviewSamples": [],
+  "emptyMeaningsCount": 0,
+  "examplesOrphanedCount": 0,
+  "userTermDupes": []
+}

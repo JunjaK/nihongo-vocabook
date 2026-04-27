@@ -27,6 +27,7 @@ vi.mock('@/lib/styles', () => ({
 
 const baseWord: WordWithProgress = {
   id: 'w1',
+  dictionaryEntryId: 'd1',
   term: '食べる',
   reading: 'たべる',
   meaning: 'to eat',

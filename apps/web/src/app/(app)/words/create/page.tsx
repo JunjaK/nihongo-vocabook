@@ -99,11 +99,33 @@ function CreateWordContent() {
     } catch (err) {
       if (err instanceof Error && err.message === 'DUPLICATE_WORD') {
         toast.error(t.words.duplicateWord);
+      } else if (err instanceof Error && err.message === 'LOGIN_REQUIRED') {
+        toast.error(t.auth.signIn);
+        router.push('/login');
       } else {
         throw err;
       }
     }
   };
+
+  if (!user) {
+    return (
+      <>
+        <Header title={t.words.addWord} showBack onBack={() => router.back()} />
+        <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-3 px-6 text-center">
+          <p className="text-sm text-muted-foreground">
+            {t.wordForm.loginRequiredTranslatedMeaning}
+          </p>
+          <Link
+            href="/login"
+            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
+          >
+            {t.auth.signIn}
+          </Link>
+        </div>
+      </>
+    );
+  }
 
   return (
     <>
@@ -113,16 +135,6 @@ function CreateWordContent() {
         onSubmit={handleSubmit}
         submitLabel={t.words.addWord}
         onDirtyChange={setIsDirty}
-        helperNotice={
-          !user ? (
-            <>
-              {t.wordForm.loginRequiredTranslatedMeaning}{' '}
-              <Link href="/login" className="underline underline-offset-2">
-                {t.auth.signIn}
-              </Link>
-            </>
-          ) : undefined
-        }
       />
       <ConfirmDialog
         open={showLeaveConfirm}
