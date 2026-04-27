@@ -7,9 +7,18 @@ ALTER TABLE quiz_settings
   ADD COLUMN IF NOT EXISTS example_quiz_ratio smallint NOT NULL DEFAULT 30;
 
 -- Backfill daily_goal from legacy session_size (best-effort) before we drop the column
-UPDATE quiz_settings
-  SET daily_goal = GREATEST(10, LEAST(100, COALESCE(session_size, 20)))
-  WHERE daily_goal = 20 AND session_size IS NOT NULL;
+-- Wrapped in DO so re-runs are no-ops once session_size has been dropped.
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name = 'quiz_settings' AND column_name = 'session_size'
+  ) THEN
+    EXECUTE 'UPDATE quiz_settings
+      SET daily_goal = GREATEST(10, LEAST(100, COALESCE(session_size, 20)))
+      WHERE daily_goal = 20 AND session_size IS NOT NULL';
+  END IF;
+END $$;
 
 ALTER TABLE quiz_settings
   DROP COLUMN IF EXISTS new_per_day,

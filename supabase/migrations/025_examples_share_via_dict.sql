@@ -81,7 +81,17 @@ WHERE a.dictionary_entry_id = b.dictionary_entry_id
   AND a.created_at > b.created_at;
 
 -- ==============================================================
--- C. Finalize — NOT NULL, drop old column, unique constraints
+-- C. Drop legacy RLS policies (they reference the old word_id column,
+--    which would otherwise block DROP COLUMN word_id below).
+-- ==============================================================
+
+DROP POLICY IF EXISTS "Users can read examples for own words"   ON word_examples;
+DROP POLICY IF EXISTS "Users can insert examples for own words" ON word_examples;
+DROP POLICY IF EXISTS "Users can update examples for own words" ON word_examples;
+DROP POLICY IF EXISTS "Users can delete examples for own words" ON word_examples;
+
+-- ==============================================================
+-- D. Finalize — NOT NULL, drop old column, unique constraints
 -- ==============================================================
 
 ALTER TABLE words
@@ -107,13 +117,8 @@ CREATE INDEX IF NOT EXISTS idx_words_dict
   ON words(dictionary_entry_id);
 
 -- ==============================================================
--- D. RLS flip on word_examples: shared resource (public read, auth write)
+-- E. RLS flip on word_examples: shared resource (public read, auth write)
 -- ==============================================================
-
-DROP POLICY IF EXISTS "Users can read examples for own words"   ON word_examples;
-DROP POLICY IF EXISTS "Users can insert examples for own words" ON word_examples;
-DROP POLICY IF EXISTS "Users can update examples for own words" ON word_examples;
-DROP POLICY IF EXISTS "Users can delete examples for own words" ON word_examples;
 
 CREATE POLICY "Anyone can read word examples"
   ON word_examples FOR SELECT
@@ -138,11 +143,12 @@ CREATE POLICY "Authenticated can delete word examples"
 -- E. Refresh v_words_active view to expose dictionary_entry_id
 -- ==============================================================
 
+-- Append dictionary_entry_id at the end so CREATE OR REPLACE doesn't change
+-- existing column positions (Postgres rejects column reorder/rename via REPLACE).
 CREATE OR REPLACE VIEW v_words_active WITH (security_invoker = true) AS
 SELECT
   w.id,
   w.user_id,
-  w.dictionary_entry_id,
   w.term,
   w.reading,
   w.meaning,
@@ -155,7 +161,8 @@ SELECT
   COALESCE(uws.mastered, false)       AS mastered,
   uws.mastered_at,
   COALESCE(uws.is_leech, false)       AS is_leech,
-  uws.leech_at
+  uws.leech_at,
+  w.dictionary_entry_id
 FROM words w
 LEFT JOIN user_word_state uws
   ON uws.word_id = w.id
