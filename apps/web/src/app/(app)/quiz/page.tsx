@@ -151,17 +151,63 @@ function QuizContent() {
     if (saved) {
       const reconstructed = await reconstructCards(saved.wordIds, repo, settings);
       const remainingCards = reconstructed.slice(saved.currentIndex);
-      if (remainingCards.length > 0) {
-        setCards(reconstructed);
+      if (remainingCards.length === 0) {
+        // All persisted cards done — fall through to fresh check
+        clearSession();
+      } else {
+        const topUpNeeded = Math.max(0, remaining - remainingCards.length);
+        if (topUpNeeded === 0) {
+          // Saved session has full daily quota left — restore as-is.
+          setCards(reconstructed);
+          setCurrentIndex(saved.currentIndex);
+          setCompleted(saved.completed);
+          setTotalSessionSize(saved.wordIds.length);
+          setSessionStats(saved.sessionStats);
+          setDailyComplete(false);
+          return;
+        }
+
+        // Saved session has spare capacity — top up with fresh new candidates.
+        const existingIds = new Set(saved.wordIds);
+        const [extraCandidates, allUserWords] = await Promise.all([
+          repo.study.getDueWords(topUpNeeded * 3),
+          repo.words.getAll(),
+        ]);
+        const newOnes = extraCandidates
+          .filter((w) => !existingIds.has(w.id))
+          .slice(0, topUpNeeded);
+
+        if (newOnes.length === 0) {
+          // No extra candidates to add — restore as-is.
+          setCards(reconstructed);
+          setCurrentIndex(saved.currentIndex);
+          setCompleted(saved.completed);
+          setTotalSessionSize(saved.wordIds.length);
+          setSessionStats(saved.sessionStats);
+          setDailyComplete(false);
+          return;
+        }
+
+        const examplesMap = await repo.words.getExamplesForDictionaryEntries(
+          newOnes.map((w) => w.dictionaryEntryId),
+        );
+        const extraCards = buildSessionCards({
+          settings,
+          candidates: newOnes,
+          examplesByDictId: examplesMap,
+          distractorPool: allUserWords,
+          remainingSlots: topUpNeeded,
+        });
+
+        const combined = [...reconstructed, ...extraCards];
+        setCards(combined);
         setCurrentIndex(saved.currentIndex);
         setCompleted(saved.completed);
-        setTotalSessionSize(saved.wordIds.length);
+        setTotalSessionSize(combined.length);
         setSessionStats(saved.sessionStats);
         setDailyComplete(false);
         return;
       }
-      // All persisted cards done — fall through to fresh check
-      clearSession();
     }
 
     if (remaining <= 0) {
