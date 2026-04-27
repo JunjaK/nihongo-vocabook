@@ -34,6 +34,7 @@ function toWord(w: JlptWord, i: number): Word {
   const now = new Date();
   return {
     id: `jlpt-sample-${i}`,
+    dictionaryEntryId: `jlpt-sample-dict-${i}`,
     term: w.term,
     reading: w.reading,
     meaning,

@@ -25,6 +25,7 @@ import { getLocalOcrMode } from '@/lib/ocr/settings';
 import { clearSession } from '@/lib/quiz/session-store';
 import { requestDueCountRefresh } from '@/lib/quiz/due-count-sync';
 import { fetchProfile } from '@/lib/profile/fetch';
+import { searchDictionary } from '@/lib/dictionary/jisho';
 import {
   settingsScroll,
   settingsSection,
@@ -103,11 +104,31 @@ export default function SettingsPage() {
           };
         });
 
+        let csvSkipped = 0;
         for (const word of words) {
-          await repo.words.create(word);
+          // Resolve dict entry via search API (handles local cache → Jisho → LLM → upsert).
+          const entries = await searchDictionary(word.term, locale).catch(() => []);
+          const match = entries.find((e) => {
+            const jp = e.japanese[0];
+            return (jp?.word ?? jp?.reading ?? '') === word.term
+              && (jp?.reading ?? '') === word.reading;
+          }) ?? entries[0];
+          if (!match?.id) {
+            csvSkipped++;
+            continue;
+          }
+          try {
+            await repo.words.create({ ...word, dictionaryEntryId: match.id });
+          } catch (err) {
+            if (err instanceof Error && err.message === 'DUPLICATE_WORD') continue;
+            throw err;
+          }
         }
         imported = true;
-        toast.success(t.settings.importSuccess(words.length));
+        toast.success(t.settings.importSuccess(words.length - csvSkipped));
+        if (csvSkipped > 0) {
+          toast.warning(`${csvSkipped} rows skipped (no dictionary match).`);
+        }
       } else {
         toast.error(t.settings.unsupportedFormat);
       }

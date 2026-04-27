@@ -7,15 +7,15 @@ You are a Japanese language expert generating natural example sentences for the 
 
 ## Task
 
-1. Fetch words that have no example sentences from the database
-2. Generate 2 natural example sentences per word
-3. Write results back to the `word_examples` table
+1. Fetch dictionary entries that have no example sentences from the database
+2. Generate 2 natural example sentences per entry
+3. Write results back to the `word_examples` table (keyed by `dictionary_entry_id`)
 
 ## Steps
 
-### Step 1: Fetch words without examples
+### Step 1: Fetch dictionary entries without examples
 
-Run a bun script to fetch words from the database. Use this exact DB connection pattern:
+Run a bun script to fetch entries from the database. Use this exact DB connection pattern:
 
 ```ts
 import postgres from 'postgres';
@@ -39,14 +39,14 @@ const sql = postgres({
 });
 ```
 
-Query to fetch words without examples:
+Query to fetch dictionary entries without examples:
 
 ```sql
-SELECT w.id, w.term, w.reading, w.meaning
-FROM words w
-LEFT JOIN word_examples we ON we.word_id = w.id
+SELECT d.id AS dictionary_entry_id, d.term, d.reading, d.meanings, d.meanings_ko
+FROM dictionary_entries d
+LEFT JOIN word_examples we ON we.dictionary_entry_id = d.id
 WHERE we.id IS NULL
-ORDER BY w.created_at DESC
+ORDER BY d.created_at DESC
 LIMIT $1
 ```
 
@@ -54,9 +54,9 @@ Write results to `/tmp/example-gen-batch.json`.
 
 ### Step 2: Generate example sentences
 
-Read `/tmp/example-gen-batch.json` and generate 2 example sentences per word.
+Read `/tmp/example-gen-batch.json` and generate 2 example sentences per dictionary entry.
 
-For each word, produce sentences following these rules:
+For each entry, produce sentences following these rules:
 
 - **sentence_ja**: A natural, everyday Japanese sentence using the target word. JLPT N5-N3 grammar preferred unless the word itself is advanced.
 - **sentence_reading**: Full hiragana reading of the sentence (furigana for all kanji).
@@ -65,11 +65,11 @@ For each word, produce sentences following these rules:
 - Keep sentences 10-25 characters long (concise, not overly complex).
 - Do NOT use the word only in its dictionary form — conjugate naturally.
 
-Example output format for one word:
+Example output format for one entry:
 
 ```json
 {
-  "word_id": "uuid-here",
+  "dictionary_entry_id": "uuid-here",
   "examples": [
     {
       "sentence_ja": "毎朝コーヒーを飲む。",
@@ -85,11 +85,11 @@ Example output format for one word:
 }
 ```
 
-Process in batches of 10 words (20 sentences). Write all results to `/tmp/example-gen-results.json` as a flat array:
+Process in batches of 10 entries (20 sentences). Write all results to `/tmp/example-gen-results.json` as a flat array:
 
 ```json
 [
-  {"word_id": "...", "sentence_ja": "...", "sentence_reading": "...", "sentence_meaning": "..."},
+  {"dictionary_entry_id": "...", "sentence_ja": "...", "sentence_reading": "...", "sentence_meaning": "..."},
   ...
 ]
 ```
@@ -99,11 +99,12 @@ Process in batches of 10 words (20 sentences). Write all results to `/tmp/exampl
 Write a bun script (save to `/tmp/write-examples.ts`) that reads `/tmp/example-gen-results.json` and inserts into the database:
 
 ```sql
-INSERT INTO word_examples (word_id, sentence_ja, sentence_reading, sentence_meaning, source)
+INSERT INTO word_examples (dictionary_entry_id, sentence_ja, sentence_reading, sentence_meaning, source)
 VALUES ($1, $2, $3, $4, 'claude')
+ON CONFLICT (dictionary_entry_id, sentence_ja) DO NOTHING
 ```
 
-Log the count of inserted examples and remaining words without examples.
+Log the count of inserted examples and remaining dictionary entries without examples.
 
 ## Arguments
 

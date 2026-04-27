@@ -12,6 +12,7 @@ import type { StudyProgress } from '@/types/word';
 function makeWord(overrides: Partial<WordWithProgress> = {}): WordWithProgress {
   return {
     id: 'w1',
+    dictionaryEntryId: 'd1',
     term: '食べる',
     reading: 'たべる',
     meaning: 'to eat',

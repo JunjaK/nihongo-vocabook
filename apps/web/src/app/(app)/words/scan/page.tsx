@@ -109,9 +109,16 @@ export default function ScanPage() {
 
   const handleBulkAdd = async (words: ExtractedWord[]) => {
     let count = 0;
+    let skipped = 0;
     for (const word of words) {
+      if (!word.dictionaryEntryId) {
+        // Skipped because dict resolution failed — dict-first rule blocks save.
+        skipped++;
+        continue;
+      }
       try {
         await repo.words.create({
+          dictionaryEntryId: word.dictionaryEntryId,
           term: word.term,
           reading: word.reading,
           meaning: word.meaning,
@@ -130,6 +137,9 @@ export default function ScanPage() {
     if (count > 0) invalidateListCache('words');
     setDone(count);
     toast.success(t.scan.wordsAdded(count));
+    if (skipped > 0) {
+      toast.warning(`${skipped} ${skipped === 1 ? 'word' : 'words'} skipped (no dictionary match).`);
+    }
   };
 
   const handleEditAndAdd = (words: ExtractedWord[]) => {
@@ -168,6 +178,25 @@ export default function ScanPage() {
     reset();
     router.push('/words');
   };
+
+  if (!user) {
+    return (
+      <>
+        <Header title={t.scan.title} showBack onBack={() => router.back()} />
+        <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-3 px-6 text-center">
+          <p className="text-sm text-muted-foreground">
+            {t.wordForm.loginRequiredTranslatedMeaning}
+          </p>
+          <Link
+            href="/login"
+            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
+          >
+            {t.auth.signIn}
+          </Link>
+        </div>
+      </>
+    );
+  }
 
   return (
     <>

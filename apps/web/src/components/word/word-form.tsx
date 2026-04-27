@@ -76,6 +76,9 @@ export function WordForm({
   const [englishRef, setEnglishRef] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [dictionarySearching, setDictionarySearching] = useState(false);
+  const [dictionaryEntryId, setDictionaryEntryId] = useState<string>(
+    initialValues?.dictionaryEntryId ?? '',
+  );
   const initialSnapshotRef = useRef<WordFormSnapshot>({
     term: initialValues?.term ?? '',
     reading: initialValues?.reading ?? '',
@@ -110,12 +113,14 @@ export function WordForm({
   }, [isDirty, onDirtyChange]);
 
   const handleDictionarySelect = (entry: {
+    dictionaryEntryId: string;
     term: string;
     reading: string;
     englishMeaning: string;
     koreanMeaning?: string;
     jlptLevel: number | null;
   }) => {
+    setDictionaryEntryId(entry.dictionaryEntryId);
     setTerm(entry.term);
     setReading(entry.reading);
     setEnglishRef(entry.englishMeaning);
@@ -151,7 +156,7 @@ export function WordForm({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!term.trim() || !reading.trim() || !meaning.trim()) return;
+    if (!term.trim() || !reading.trim() || !meaning.trim() || !dictionaryEntryId) return;
 
     setSubmitting(true);
     try {
@@ -159,6 +164,7 @@ export function WordForm({
         ? [...tags, tagInput.trim()].filter((v, i, arr) => arr.indexOf(v) === i)
         : tags;
       await onSubmit({
+        dictionaryEntryId,
         term: term.trim(),
         reading: reading.trim(),
         meaning: meaning.trim(),
@@ -172,7 +178,7 @@ export function WordForm({
   };
 
   const label = submitLabel ?? t.common.save;
-  const canSubmit = term.trim() && reading.trim() && meaning.trim();
+  const canSubmit = !!(term.trim() && reading.trim() && meaning.trim() && dictionaryEntryId);
 
   return (
     <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col">
@@ -192,7 +198,7 @@ export function WordForm({
           <Input
             id="term"
             value={term}
-            onChange={(e) => setTerm(e.target.value)}
+            readOnly
             placeholder="食べる"
             required
             data-testid="word-form-term"

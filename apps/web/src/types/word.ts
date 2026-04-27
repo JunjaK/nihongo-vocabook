@@ -1,5 +1,6 @@
 export interface Word {
   id: string;
+  dictionaryEntryId: string;
   term: string;
   reading: string;
   meaning: string;
@@ -19,7 +20,7 @@ export interface Word {
 
 export interface WordExample {
   id: string;
-  wordId: string;
+  dictionaryEntryId: string;
   sentenceJa: string;
   sentenceReading: string | null;
   sentenceMeaning: string | null;
@@ -28,6 +29,7 @@ export interface WordExample {
 }
 
 export interface CreateWordInput {
+  dictionaryEntryId: string;
   term: string;
   reading: string;
   meaning: string;
@@ -38,7 +40,8 @@ export interface CreateWordInput {
 }
 
 export interface UpdateWordInput {
-  term?: string;
+  /** Changing the linked dict entry effectively changes the canonical term. */
+  dictionaryEntryId?: string;
   reading?: string;
   meaning?: string;
   notes?: string | null;
@@ -111,6 +114,8 @@ export interface ExportData {
 export type ImportData = ExportData | ExportDataV2 | ExportDataV1;
 
 export interface DictionaryEntry {
+  /** UUID from the dictionary_entries table. Required for saving a word. */
+  id: string;
   slug: string;
   japanese: {
     word?: string;

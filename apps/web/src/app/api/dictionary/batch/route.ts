@@ -6,6 +6,7 @@ import { createLogger } from '@/lib/logger';
 const logger = createLogger('api/dictionary/batch');
 
 interface DictionaryRow {
+  id: string;
   term: string;
   reading: string;
   meanings: string[];
@@ -15,6 +16,7 @@ interface DictionaryRow {
 }
 
 interface JishoResult {
+  id?: string;
   slug: string;
   japanese: { word?: string; reading: string }[];
   senses: {
@@ -27,6 +29,7 @@ interface JishoResult {
 
 function mapRowToJisho(row: DictionaryRow): JishoResult {
   return {
+    id: row.id,
     slug: row.term,
     japanese: [{ word: row.term, reading: row.reading }],
     senses: [
@@ -82,7 +85,7 @@ export async function POST(request: NextRequest) {
   const termList = uniqueTerms.join(',');
   const { data: rows, error } = await supabase
     .from('dictionary_entries')
-    .select('term, reading, meanings, meanings_ko, parts_of_speech, jlpt_level')
+    .select('id, term, reading, meanings, meanings_ko, parts_of_speech, jlpt_level')
     .or(`term.in.(${termList}),reading.in.(${termList})`);
 
   if (error) {

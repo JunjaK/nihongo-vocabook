@@ -94,8 +94,7 @@ export default function WordDetailPage({
       repo.words.getById(id),
       repo.study.getProgress(id),
       orderedWordsPromise,
-      repo.words.getExamples(id),
-    ]).then(([w, p, orderedWords, ex]) => {
+    ]).then(async ([w, p, orderedWords]) => {
       const currentIndex = orderedWords.findIndex((item) => item.id === id);
       setPrevWordId(currentIndex > 0 ? orderedWords[currentIndex - 1]?.id ?? null : null);
       setNextWordId(
@@ -105,6 +104,10 @@ export default function WordDetailPage({
       );
       setWord(w);
       setProgress(p);
+      // Examples are keyed by dictionary_entry_id — fetch after we have the word.
+      const ex = w?.dictionaryEntryId
+        ? await repo.words.getExamples(w.dictionaryEntryId)
+        : [];
       setExamples(ex);
       setLoading(false);
     });

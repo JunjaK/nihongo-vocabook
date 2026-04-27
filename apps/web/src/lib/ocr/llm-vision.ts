@@ -5,6 +5,8 @@ export interface ExtractedWord {
   reading: string;
   meaning: string;
   jlptLevel: number | null;
+  /** Resolved dict entry id. null when resolution failed — such items are blocked from save. */
+  dictionaryEntryId?: string | null;
 }
 
 const LLM_FETCH_TIMEOUT_MS = 180_000;

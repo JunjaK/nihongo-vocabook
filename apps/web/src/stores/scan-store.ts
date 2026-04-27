@@ -278,7 +278,7 @@ function buildEnsembledWords(
 
 function toExtractedWord(raw: string, entries: DictionaryEntry[], locale: string): ExtractedWord {
   if (entries.length === 0) {
-    return { term: raw, reading: '', meaning: '', jlptLevel: null };
+    return { term: raw, reading: '', meaning: '', jlptLevel: null, dictionaryEntryId: null };
   }
 
   let best:
@@ -306,7 +306,7 @@ function toExtractedWord(raw: string, entries: DictionaryEntry[], locale: string
   }
 
   if (!best) {
-    return { term: raw, reading: '', meaning: '', jlptLevel: null };
+    return { term: raw, reading: '', meaning: '', jlptLevel: null, dictionaryEntryId: null };
   }
 
   const entry = best.entry;
@@ -319,6 +319,7 @@ function toExtractedWord(raw: string, entries: DictionaryEntry[], locale: string
     reading,
     meaning: getMeaning(entries, locale),
     jlptLevel: jlptMatch ? Number(jlptMatch[0]) : null,
+    dictionaryEntryId: entry.id || null,
   };
 }
 

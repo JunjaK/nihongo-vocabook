@@ -47,8 +47,10 @@ export interface WordRepository {
   setPriority(id: string, priority: number): Promise<void>;
   delete(id: string): Promise<void>;
   setMastered(id: string, mastered: boolean): Promise<Word>;
-  getExamples(wordId: string): Promise<WordExample[]>;
-  getExamplesForWords(wordIds: string[]): Promise<Map<string, WordExample[]>>;
+  getExamples(dictionaryEntryId: string): Promise<WordExample[]>;
+  getExamplesForDictionaryEntries(
+    dictionaryEntryIds: string[],
+  ): Promise<Map<string, WordExample[]>>;
 }
 
 export interface StudyRepository {
