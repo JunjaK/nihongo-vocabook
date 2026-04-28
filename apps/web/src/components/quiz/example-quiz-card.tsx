@@ -62,7 +62,7 @@ export function ExampleQuizCard({
   // For simplicity, use a stable shuffle at mount via useState.
   const orderedChoices = useStableShuffle(choices, card.example.id);
 
-  const masked = maskSentence(card.example.sentenceJa, correctTerm);
+  const masked = maskSentence(card.example.sentenceJa, card.maskTarget);
 
   function handleSelect(term: string) {
     if (phase !== 'choosing') return;
@@ -97,7 +97,7 @@ export function ExampleQuizCard({
         </div>
 
         <div className="text-center text-xl font-medium leading-relaxed md:text-2xl">
-          {renderMasked(masked, phase === 'revealed' ? correctTerm : null)}
+          {renderMasked(masked, phase === 'revealed' ? card.maskTarget : null)}
         </div>
 
         {phase === 'revealed' && (

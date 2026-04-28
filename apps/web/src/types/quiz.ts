@@ -21,6 +21,13 @@ export type QuizCard =
       word: WordWithProgress;
       example: WordExample;
       distractors: [Word, Word];
+      /**
+       * Exact substring of `example.sentenceJa` to mask as the blank.
+       * Equals `example.targetForm` when present (post-026 examples) or
+       * falls back to `word.term` (legacy examples that happen to contain
+       * the dictionary form verbatim).
+       */
+      maskTarget: string;
     };
 
 export interface DailyStats {
