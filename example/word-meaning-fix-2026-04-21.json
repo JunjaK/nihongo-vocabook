@@ -1,0 +1,4538 @@
+[
+  {
+    "id": "7277411f-635c-4094-8527-42e561d1967e",
+    "term": "居る",
+    "reading": "いる",
+    "oldMeaning": "(겸손) 있다, 존재하다",
+    "newMeaning": "국한, 제한",
+    "overlap": 0
+  },
+  {
+    "id": "fc9a1b50-0249-4a18-bddc-35a072d37ef4",
+    "term": "上着",
+    "reading": "うわぎ",
+    "oldMeaning": "외투, 재킷",
+    "newMeaning": "코트",
+    "overlap": 0
+  },
+  {
+    "id": "71f42189-b6de-4f7a-8865-7028e471cafe",
+    "term": "書く",
+    "reading": "かく",
+    "oldMeaning": "~개월",
+    "newMeaning": "쓰다",
+    "overlap": 0
+  },
+  {
+    "id": "c49ff559-3da4-43d8-9c7d-2a1262038b7d",
+    "term": "学生",
+    "reading": "がくせい",
+    "oldMeaning": "걸다, 매다",
+    "newMeaning": "학생",
+    "overlap": 0
+  },
+  {
+    "id": "16dc7748-e4ae-4421-9c52-8d7f94a7329a",
+    "term": "～か月",
+    "reading": "～かげつ",
+    "oldMeaning": "걸다, 전화 걸다, 앉다",
+    "newMeaning": "개월",
+    "overlap": 0
+  },
+  {
+    "id": "2a802f2a-50df-4290-8c80-f13d1a9ebbab",
+    "term": "掛ける",
+    "reading": "かける",
+    "oldMeaning": "우산, 양산",
+    "newMeaning": "쓰다, 걸다",
+    "overlap": 0
+  },
+  {
+    "id": "fe2254f7-966b-4921-ba78-3a420e87d5f1",
+    "term": "傘",
+    "reading": "かさ",
+    "oldMeaning": "바람",
+    "newMeaning": "우산, 양산",
+    "overlap": 0
+  },
+  {
+    "id": "36af5345-589f-404d-a2fd-57a54847ef1b",
+    "term": "貸す",
+    "reading": "かす",
+    "oldMeaning": "감기, 독감",
+    "newMeaning": "빌려주다, 대여하다",
+    "overlap": 0
+  },
+  {
+    "id": "cb472728-2247-45b9-a837-c86616607d8a",
+    "term": "風",
+    "reading": "かぜ",
+    "oldMeaning": "방법, 방식",
+    "newMeaning": "바람",
+    "overlap": 0
+  },
+  {
+    "id": "3412eac2-4166-45cc-9b10-a822e477fd02",
+    "term": "風邪",
+    "reading": "かぜ",
+    "oldMeaning": "가족",
+    "newMeaning": "감기",
+    "overlap": 0
+  },
+  {
+    "id": "83c21545-6fdc-40e6-85df-298cc51147cf",
+    "term": "方",
+    "reading": "かた",
+    "oldMeaning": "가타카나",
+    "newMeaning": "존댓말, 방법",
+    "overlap": 0
+  },
+  {
+    "id": "f5f8a21d-36a4-478d-9962-ca2db4d22752",
+    "term": "家族",
+    "reading": "かぞく",
+    "oldMeaning": "~월",
+    "newMeaning": "가족, 가족구성원",
+    "overlap": 0
+  },
+  {
+    "id": "f6e478a1-8d56-40ad-b27d-54f7da528ed6",
+    "term": "片仮名",
+    "reading": "かたかな",
+    "oldMeaning": "학교",
+    "newMeaning": "카타카나",
+    "overlap": 0
+  },
+  {
+    "id": "3a115eb6-dddb-444f-9df1-c14c3e0d6b61",
+    "term": "～月",
+    "reading": "～がつ",
+    "oldMeaning": "컵",
+    "newMeaning": "연도의 달",
+    "overlap": 0
+  },
+  {
+    "id": "3a09a0fd-1b7c-4bb5-9941-a8d70051f985",
+    "term": "学校",
+    "reading": "がっこう",
+    "oldMeaning": "가정, 집",
+    "newMeaning": "학교",
+    "overlap": 0
+  },
+  {
+    "id": "edd5a9ce-42f5-43fe-9d50-c6010e95cbf1",
+    "term": "カップ",
+    "reading": "カップ",
+    "oldMeaning": "모서리",
+    "newMeaning": "컵",
+    "overlap": 0
+  },
+  {
+    "id": "06a8ad63-82e2-40c5-bff5-30364fa8e5a6",
+    "term": "角",
+    "reading": "かど",
+    "oldMeaning": "꽃병",
+    "newMeaning": "모퉁이",
+    "overlap": 0
+  },
+  {
+    "id": "0cd3eb87-7d91-42fb-8b56-8530ca0129e1",
+    "term": "かばん",
+    "reading": "かばん",
+    "oldMeaning": "쓰다, 쓰다 (모자 등 머리에 착용하는 것)",
+    "newMeaning": "가방, 바구니",
+    "overlap": 0
+  },
+  {
+    "id": "6f418644-aedd-474b-878e-192bbc70358f",
+    "term": "花瓶",
+    "reading": "かびん",
+    "oldMeaning": "종이",
+    "newMeaning": "꽃병",
+    "overlap": 0
+  },
+  {
+    "id": "d2c9f043-97a3-4684-9a08-a15900db21cd",
+    "term": "かぶる",
+    "reading": "かぶる",
+    "oldMeaning": "카메라",
+    "newMeaning": "쓰다",
+    "overlap": 0
+  },
+  {
+    "id": "ca823630-106f-4555-bda9-fdeeb871bcd0",
+    "term": "紙",
+    "reading": "かみ",
+    "oldMeaning": "화요일",
+    "newMeaning": "종이",
+    "overlap": 0
+  },
+  {
+    "id": "8f7a6a73-5d81-4ea4-ae96-e447bb0c27dd",
+    "term": "カメラ",
+    "reading": "カメラ",
+    "oldMeaning": "매운, 맵다, 짜다",
+    "newMeaning": "카메라",
+    "overlap": 0
+  },
+  {
+    "id": "894ca7cf-d749-4d01-a86c-47f76e3bc51a",
+    "term": "辛い",
+    "reading": "からい",
+    "oldMeaning": "빨강",
+    "newMeaning": "맵다, 짜다",
+    "overlap": 0
+  },
+  {
+    "id": "658d6938-9327-4060-bc35-3a3d2c84b19e",
+    "term": "映画館",
+    "reading": "えいがかん",
+    "oldMeaning": "서쪽",
+    "newMeaning": "영화관, 극장",
+    "overlap": 0
+  },
+  {
+    "id": "edf05bd4-d6ed-488a-bed7-60fafbe85166",
+    "term": "西",
+    "reading": "にし",
+    "oldMeaning": "홍차",
+    "newMeaning": "서쪽",
+    "overlap": 0
+  },
+  {
+    "id": "5c0553d5-cbb2-4c6a-b947-4f6e25eeeb14",
+    "term": "にぎやか",
+    "reading": "にぎやか",
+    "oldMeaning": "줄 서다, 줄지어 서다",
+    "newMeaning": "번화한",
+    "overlap": 0
+  },
+  {
+    "id": "dc3420b2-53b3-4453-91cd-c6f6578fc796",
+    "term": "紅茶",
+    "reading": "こうちゃ",
+    "oldMeaning": "오일, 다섯째 날",
+    "newMeaning": "홍차",
+    "overlap": 0
+  },
+  {
+    "id": "88d1d7fc-49cd-4655-b9df-cdcee0a1c0ce",
+    "term": "並ぶ",
+    "reading": "ならぶ",
+    "oldMeaning": "일곱 개",
+    "newMeaning": "줄 서다",
+    "overlap": 0
+  },
+  {
+    "id": "ef02d2b8-1c1f-44e1-8a95-6d9d9fc03172",
+    "term": "五日",
+    "reading": "いつか",
+    "oldMeaning": "~개 (작은 물건 세는 단위)",
+    "newMeaning": "다섯째 날, 다섯 날",
+    "overlap": 0
+  },
+  {
+    "id": "f043cb37-6b07-4ee8-9085-6311643ab068",
+    "term": "七つ",
+    "reading": "ななつ",
+    "oldMeaning": "잃어버리다",
+    "newMeaning": "일곱 개",
+    "overlap": 0
+  },
+  {
+    "id": "c7e79d20-51b1-472f-b88f-4eed5e4166ee",
+    "term": "～個",
+    "reading": "～こ",
+    "oldMeaning": "길다, 긴",
+    "newMeaning": "작은 물건 개수",
+    "overlap": 0
+  },
+  {
+    "id": "882df421-b9a6-48f5-8531-3da48be379a6",
+    "term": "ない",
+    "reading": "ない",
+    "oldMeaning": "아침",
+    "newMeaning": "없다",
+    "overlap": 0
+  },
+  {
+    "id": "d8a06b48-8db3-48d5-aada-a88b6e7938d9",
+    "term": "結構",
+    "reading": "けっこう",
+    "oldMeaning": "토요일",
+    "newMeaning": "멋진, 충분히, 괜찮다",
+    "overlap": 0
+  },
+  {
+    "id": "cd974cb3-2857-482c-92dc-cb964ae56e4f",
+    "term": "朝",
+    "reading": "あさ",
+    "oldMeaning": "날다, 뛰다",
+    "newMeaning": "아침",
+    "overlap": 0
+  },
+  {
+    "id": "c71431c0-62e1-40f2-8eba-6e3542287c0c",
+    "term": "土曜日",
+    "reading": "どようび",
+    "oldMeaning": "이웃, 옆집",
+    "newMeaning": "토요일",
+    "overlap": 0
+  },
+  {
+    "id": "bac07730-65b4-442e-b99f-acf3265de59e",
+    "term": "飛ぶ",
+    "reading": "とぶ",
+    "oldMeaning": "차, 차량",
+    "newMeaning": "날다, 뛰다",
+    "overlap": 0
+  },
+  {
+    "id": "bf116767-c92b-4a30-add7-4c1c66d6b906",
+    "term": "隣",
+    "reading": "となり",
+    "oldMeaning": "도서관",
+    "newMeaning": "이웃, 옆집",
+    "overlap": 0
+  },
+  {
+    "id": "7c4d50af-21e3-4739-ad07-59d86ce2df8d",
+    "term": "車",
+    "reading": "くるま",
+    "oldMeaning": "하나",
+    "newMeaning": "차, 자동차",
+    "overlap": 0
+  },
+  {
+    "id": "7a06b07b-bb53-4c1a-a39d-c81fa75d154a",
+    "term": "図書館",
+    "reading": "としょかん",
+    "oldMeaning": "가끔",
+    "newMeaning": "도서관",
+    "overlap": 0
+  },
+  {
+    "id": "10a0120c-b7fc-4a76-bdab-7cef2ee72179",
+    "term": "時々",
+    "reading": "ときどき",
+    "oldMeaning": "감사합니다; 어떻게든; 아무리 노력해도",
+    "newMeaning": "가끔, 때때로",
+    "overlap": 0
+  },
+  {
+    "id": "ea324799-2d61-4372-9ae1-2d0ed4809d72",
+    "term": "下さい",
+    "reading": "ください",
+    "oldMeaning": "주세요 (공손한 요청 표현)",
+    "newMeaning": "부탁합니다",
+    "overlap": 0
+  },
+  {
+    "id": "b57750b2-b5b7-4d70-97e6-b56733cde4f9",
+    "term": "九",
+    "reading": "きゅう",
+    "oldMeaning": "구",
+    "newMeaning": "아홉",
+    "overlap": 0
+  },
+  {
+    "id": "e130a4b4-8618-4777-b572-c40c3c2e4d3c",
+    "term": "～だけ",
+    "reading": "～だけ",
+    "oldMeaning": "~만, ~뿐만 아니라",
+    "newMeaning": "오직",
+    "overlap": 0
+  },
+  {
+    "id": "aec7c499-9294-446b-b999-ce8de8497723",
+    "term": "午前",
+    "reading": "ごぜん",
+    "oldMeaning": "아침, A.M.",
+    "newMeaning": "오전",
+    "overlap": 0
+  },
+  {
+    "id": "a35c97c5-8a1a-453e-b926-6825524bb2a7",
+    "term": "～歳",
+    "reading": "～さい",
+    "oldMeaning": "~살",
+    "newMeaning": "나이",
+    "overlap": 0
+  },
+  {
+    "id": "d8dc3b93-ffe7-43fb-a43b-290ff954ba43",
+    "term": "三",
+    "reading": "さん",
+    "oldMeaning": "셋",
+    "newMeaning": "삼",
+    "overlap": 0
+  },
+  {
+    "id": "0ff53ca7-cbbc-4c2f-9843-0b323929757f",
+    "term": "四",
+    "reading": "し",
+    "oldMeaning": "넷",
+    "newMeaning": "네",
+    "overlap": 0
+  },
+  {
+    "id": "73b2815d-2552-40a5-847c-962fcb59e49b",
+    "term": "十",
+    "reading": "じゅう",
+    "oldMeaning": "열",
+    "newMeaning": "십",
+    "overlap": 0
+  },
+  {
+    "id": "07dc41e7-d2a0-4909-a908-74dc8b88c15e",
+    "term": "～中",
+    "reading": "～じゅう",
+    "oldMeaning": "~중",
+    "newMeaning": "동안",
+    "overlap": 0
+  },
+  {
+    "id": "7e5bda2a-c1c3-4dce-8cb8-47b498a6e308",
+    "term": "スカート",
+    "reading": "スカート",
+    "oldMeaning": "스커트",
+    "newMeaning": "치마",
+    "overlap": 0
+  },
+  {
+    "id": "a007a098-5339-435c-aad2-c0b7298c7d3f",
+    "term": "少ない",
+    "reading": "すくない",
+    "oldMeaning": "적다, 조금",
+    "newMeaning": "약간의",
+    "overlap": 0
+  },
+  {
+    "id": "cc3efae5-9ab1-485c-9f40-7b53e73df2b6",
+    "term": "すぐに",
+    "reading": "すぐに",
+    "oldMeaning": "곧, 즉시",
+    "newMeaning": "당장",
+    "overlap": 0
+  },
+  {
+    "id": "6df2101e-a6b1-4d99-b2c0-c491ed742c0a",
+    "term": "テーブル",
+    "reading": "テーブル",
+    "oldMeaning": "탁자",
+    "newMeaning": "테이블",
+    "overlap": 0
+  },
+  {
+    "id": "191706e6-1511-4194-8f99-27790a6d6902",
+    "term": "奥さん",
+    "reading": "おくさん",
+    "oldMeaning": "아내 (존칭)",
+    "newMeaning": "타인의 부인, 남의 부인",
+    "overlap": 0
+  },
+  {
+    "id": "f952d4fc-af07-480d-a84c-a965716484aa",
+    "term": "テスト",
+    "reading": "テスト",
+    "oldMeaning": "시험",
+    "newMeaning": "테스트",
+    "overlap": 0
+  },
+  {
+    "id": "011936ea-909e-4c87-a0e4-038e75a9d6d2",
+    "term": "台所",
+    "reading": "だいどころ",
+    "oldMeaning": "부엌",
+    "newMeaning": "주방",
+    "overlap": 0
+  },
+  {
+    "id": "f5ef2ade-96f3-4320-8b0a-a8d440e70cfb",
+    "term": "～など",
+    "reading": "～など",
+    "oldMeaning": "등, 기타 등등",
+    "newMeaning": "그 밖에",
+    "overlap": 0
+  },
+  {
+    "id": "9873f775-879e-4ae9-865e-dfe8b79e5f49",
+    "term": "はく",
+    "reading": "はく",
+    "oldMeaning": "상자",
+    "newMeaning": "입다",
+    "overlap": 0
+  },
+  {
+    "id": "f74e025a-6dc4-4527-8631-6b3be1f263a5",
+    "term": "八",
+    "reading": "はち",
+    "oldMeaning": "여덟",
+    "newMeaning": "팔",
+    "overlap": 0
+  },
+  {
+    "id": "2995ca76-f062-48c0-9f7c-5fd394d522a1",
+    "term": "太い",
+    "reading": "ふとい",
+    "oldMeaning": "굵다, 두껍다",
+    "newMeaning": "뚱뚱한",
+    "overlap": 0
+  },
+  {
+    "id": "c1a439fe-337c-4a0a-a3cf-8958625e6949",
+    "term": "外",
+    "reading": "ほか",
+    "oldMeaning": "다른, 나머지",
+    "newMeaning": "그 밖",
+    "overlap": 0
+  },
+  {
+    "id": "7f2021ed-729d-4c71-aa57-dbce56e17d48",
+    "term": "ボタン",
+    "reading": "ボタン",
+    "oldMeaning": "단추",
+    "newMeaning": "버튼",
+    "overlap": 0
+  },
+  {
+    "id": "0a92b8b6-a22a-4204-aba2-1c655024cc5c",
+    "term": "～本",
+    "reading": "～ほん",
+    "oldMeaning": "개수 단위 (길쭉한 것)",
+    "newMeaning": "자루",
+    "overlap": 0
+  },
+  {
+    "id": "5beac616-2fc1-4be3-a830-e63785e99f57",
+    "term": "六日",
+    "reading": "むいか",
+    "oldMeaning": "육일, 6일",
+    "newMeaning": "여섯 날",
+    "overlap": 0
+  },
+  {
+    "id": "0b6cc6bf-1d10-45e5-90fa-5b35a1920fba",
+    "term": "来年",
+    "reading": "らいねん",
+    "oldMeaning": "내년",
+    "newMeaning": "다음 해",
+    "overlap": 0
+  },
+  {
+    "id": "1654b7ce-1b1b-4e85-81e3-4ed6e4535ffa",
+    "term": "建て",
+    "reading": "～だて",
+    "oldMeaning": "~에 세워진, 별개의 집",
+    "newMeaning": "~층",
+    "overlap": 0
+  },
+  {
+    "id": "64490142-4c73-4ec9-b643-dadb0b232ad0",
+    "term": "パート (タイム)",
+    "reading": "パート (タイム)",
+    "oldMeaning": "파트타임, 아르바이트",
+    "newMeaning": "시간제 근무",
+    "overlap": 0
+  },
+  {
+    "id": "1300e532-7070-4c59-962d-36c0628d468e",
+    "term": "気",
+    "reading": "き",
+    "oldMeaning": "기운, 분위기",
+    "newMeaning": "정신",
+    "overlap": 0
+  },
+  {
+    "id": "8c8b6d6d-c65f-4635-bc33-4bccd575a323",
+    "term": "お宅",
+    "reading": "おたく",
+    "oldMeaning": "남의 집, 집 (공손한 표현)",
+    "newMeaning": "댁",
+    "overlap": 0
+  },
+  {
+    "id": "0a63b5b8-1c68-4737-8bd3-f33795df6eb2",
+    "term": "～ばかり",
+    "reading": "～ばかり",
+    "oldMeaning": "~만, ~뿐",
+    "newMeaning": "그저, 오직",
+    "overlap": 0
+  },
+  {
+    "id": "a436b466-859d-4933-a9dd-67d661125932",
+    "term": "テキスト",
+    "reading": "テキスト",
+    "oldMeaning": "교재, 교과서",
+    "newMeaning": "텍스트",
+    "overlap": 0
+  },
+  {
+    "id": "0b4b48bd-06f7-4882-838c-dce1fd2eed2c",
+    "term": "お嬢さん",
+    "reading": "おじょうさん",
+    "oldMeaning": "딸 (공손한 표현)",
+    "newMeaning": "따님",
+    "overlap": 0
+  },
+  {
+    "id": "5dd74415-f424-45a7-b72c-09d6c157fec3",
+    "term": "乗り物",
+    "reading": "のりもの",
+    "oldMeaning": "탈것",
+    "newMeaning": "차량",
+    "overlap": 0
+  },
+  {
+    "id": "9615f882-8dcf-44cb-8369-2dc88c905811",
+    "term": "湯",
+    "reading": "ゆ",
+    "oldMeaning": "뜨거운 물",
+    "newMeaning": "온수",
+    "overlap": 0
+  },
+  {
+    "id": "de822222-662d-48eb-8f1e-8160ecff5b02",
+    "term": "席",
+    "reading": "せき",
+    "oldMeaning": "좌석",
+    "newMeaning": "자리",
+    "overlap": 0
+  },
+  {
+    "id": "118caee2-54fd-461a-a042-ffa8b6fceaf0",
+    "term": "お子さん",
+    "reading": "おこさん",
+    "oldMeaning": "아이 (남의 아이 공손히 말함)",
+    "newMeaning": "자녀",
+    "overlap": 0
+  },
+  {
+    "id": "8347c161-c5f0-4a9b-aad4-be79392cf329",
+    "term": "承知",
+    "reading": "しょうちする",
+    "oldMeaning": "승낙하다, 승인하다",
+    "newMeaning": "동의",
+    "overlap": 0
+  },
+  {
+    "id": "b74b7c8a-c8c2-41dc-8145-2302681b6ca5",
+    "term": "寺",
+    "reading": "てら",
+    "oldMeaning": "사원",
+    "newMeaning": "절",
+    "overlap": 0
+  },
+  {
+    "id": "27c4c3a5-ab32-4dbc-9d92-00d7eaf7306a",
+    "term": "おいでになる",
+    "reading": "おいでになる",
+    "oldMeaning": "억",
+    "newMeaning": "계시다",
+    "overlap": 0
+  },
+  {
+    "id": "08bee11a-59aa-42cb-b39c-466e149253f5",
+    "term": "為",
+    "reading": "ため",
+    "oldMeaning": "(높임말) 계시다, 계시다",
+    "newMeaning": "이익, 장점, 위해",
+    "overlap": 0
+  },
+  {
+    "id": "05e7cdb3-d13f-44a4-972f-8fa89714ede6",
+    "term": "裏",
+    "reading": "うら",
+    "oldMeaning": "~의, ~을 위한",
+    "newMeaning": "뒷면, 뒤",
+    "overlap": 0
+  },
+  {
+    "id": "007ea0ba-270e-43d9-8c09-d32814aa366f",
+    "term": "習慣",
+    "reading": "しゅうかん",
+    "oldMeaning": "뒷면, 뒷면",
+    "newMeaning": "관습",
+    "overlap": 0
+  },
+  {
+    "id": "47cb41cd-7b93-4293-8859-26e54bf941ad",
+    "term": "是非",
+    "reading": "ぜひ",
+    "oldMeaning": "습관",
+    "newMeaning": "반드시, 필히",
+    "overlap": 0
+  },
+  {
+    "id": "e900cb2b-4e2c-41dd-b4d9-32d4b40271ce",
+    "term": "こう",
+    "reading": "こう",
+    "oldMeaning": "반드시, 꼭",
+    "newMeaning": "이렇게",
+    "overlap": 0
+  },
+  {
+    "id": "de514ab0-be2d-4f0b-8209-1220d2365cbd",
+    "term": "経済",
+    "reading": "けいざい",
+    "oldMeaning": "이와 같이, 이렇게",
+    "newMeaning": "경제, 재정, 경제학",
+    "overlap": 0
+  },
+  {
+    "id": "cf272395-431f-4c62-b7e1-c6b5b7e9f1ee",
+    "term": "下着",
+    "reading": "したぎ",
+    "oldMeaning": "경제, 재정, 경제학",
+    "newMeaning": "속옷",
+    "overlap": 0
+  },
+  {
+    "id": "0796a3e1-8893-4b04-9d30-7255663abb9b",
+    "term": "通り",
+    "reading": "とおり",
+    "oldMeaning": "속옷",
+    "newMeaning": "~거리, ~가",
+    "overlap": 0
+  },
+  {
+    "id": "7756db17-ee0c-4e2a-8561-ac8027be1ef8",
+    "term": "計画",
+    "reading": "けいかくする",
+    "oldMeaning": "~거리, ~가",
+    "newMeaning": "계획",
+    "overlap": 0
+  },
+  {
+    "id": "0d5d1b98-800b-4f49-89d1-f67597c85ead",
+    "term": "空く",
+    "reading": "あく",
+    "oldMeaning": "계획, 일정",
+    "newMeaning": "열다, 비다, 열리다",
+    "overlap": 0
+  },
+  {
+    "id": "88609c52-9383-45b5-9924-16c153cf5004",
+    "term": "特に",
+    "reading": "とくに",
+    "oldMeaning": "계속하다, 이어가다",
+    "newMeaning": "특히",
+    "overlap": 0
+  },
+  {
+    "id": "f75f7adc-7d45-473f-b0fc-f172f7aefa44",
+    "term": "しばらく",
+    "reading": "しばらく",
+    "oldMeaning": "특히, 특별히",
+    "newMeaning": "잠시",
+    "overlap": 0
+  },
+  {
+    "id": "57b797f0-a493-45bb-aaf4-7024893456db",
+    "term": "レジ",
+    "reading": "レジ",
+    "oldMeaning": "잠시, 잠깐",
+    "newMeaning": "계산대",
+    "overlap": 0
+  },
+  {
+    "id": "b918069f-7d3d-451b-9cdf-d706bfdc2015",
+    "term": "拝見",
+    "reading": "はいけんする",
+    "oldMeaning": "계산대, 계산기",
+    "newMeaning": "뵙다",
+    "overlap": 0
+  },
+  {
+    "id": "3ec0bf2e-2e9b-4871-91a7-844b668f42b6",
+    "term": "講堂",
+    "reading": "こうどう",
+    "oldMeaning": "괴롭히다, 괴롭다",
+    "newMeaning": "강당",
+    "overlap": 0
+  },
+  {
+    "id": "d19736e0-c057-472f-8e16-e45ef19670da",
+    "term": "びっくりする",
+    "reading": "びっくりする",
+    "oldMeaning": "샌들",
+    "newMeaning": "놀라다",
+    "overlap": 0
+  },
+  {
+    "id": "9f393990-d3e3-41b0-89f1-19538375eb42",
+    "term": "サンダル",
+    "reading": "サンダル",
+    "oldMeaning": "전등, 전구",
+    "newMeaning": "샌들",
+    "overlap": 0
+  },
+  {
+    "id": "4aa1803d-6661-4642-ba20-5c03b7aabb0c",
+    "term": "随分",
+    "reading": "ずいぶん",
+    "oldMeaning": "쉬운, 하기 쉬운",
+    "newMeaning": "매우, 꽤",
+    "overlap": 0
+  },
+  {
+    "id": "5cb59435-2006-4748-9a4e-29efd79228c0",
+    "term": "例えば",
+    "reading": "たとえば",
+    "oldMeaning": "매우, 상당히, 꽤",
+    "newMeaning": "예를 들어",
+    "overlap": 0
+  },
+  {
+    "id": "823c228e-c723-4125-9f0a-8b739b906878",
+    "term": "仕方",
+    "reading": "しかた",
+    "oldMeaning": "예를 들어, 예시로",
+    "newMeaning": "방법, 수단",
+    "overlap": 0
+  },
+  {
+    "id": "ffe2ca00-1ab2-4db9-b220-7622b48e6d6c",
+    "term": "ひどい",
+    "reading": "ひどい",
+    "oldMeaning": "방법, 수단",
+    "newMeaning": "끔찍한, 잔혹한, 부당한",
+    "overlap": 0
+  },
+  {
+    "id": "4438fc23-a68f-4600-b609-b9d6cd282632",
+    "term": "毛",
+    "reading": "け",
+    "oldMeaning": "심하다, 끔찍하다, 불공평하다, 잔인하다",
+    "newMeaning": "털",
+    "overlap": 0
+  },
+  {
+    "id": "6c58efa5-d1f5-4efc-9aeb-db0ee1e18f3d",
+    "term": "失敗",
+    "reading": "しっぱい",
+    "oldMeaning": "계속하다, 계속해서 하다",
+    "newMeaning": "실패",
+    "overlap": 0
+  },
+  {
+    "id": "cef52e21-cfd3-419b-bd78-febe22233c6f",
+    "term": "血",
+    "reading": "ち",
+    "oldMeaning": "실패, 실수",
+    "newMeaning": "피",
+    "overlap": 0
+  },
+  {
+    "id": "91ec2836-72b9-4264-9f2b-712128b50175",
+    "term": "不便",
+    "reading": "ふべん",
+    "oldMeaning": "피, 혈액",
+    "newMeaning": "불편",
+    "overlap": 0
+  },
+  {
+    "id": "94ee444d-5bfd-45ba-a4e7-a376027b7551",
+    "term": "歴史",
+    "reading": "れきし",
+    "oldMeaning": "불편, 불편함",
+    "newMeaning": "역사",
+    "overlap": 0
+  },
+  {
+    "id": "c3314456-8e01-4b88-bd9b-91509864b7cc",
+    "term": "周り",
+    "reading": "まわり",
+    "oldMeaning": "역사",
+    "newMeaning": "주변",
+    "overlap": 0
+  },
+  {
+    "id": "5b27248e-42d7-4d46-9cb0-35e46588ef77",
+    "term": "最近",
+    "reading": "さいきん",
+    "oldMeaning": "주변, 둘레",
+    "newMeaning": "최근, 요즘, 근래",
+    "overlap": 0
+  },
+  {
+    "id": "b4c024f4-d47d-41f2-b1ae-2edf33e8339b",
+    "term": "喉",
+    "reading": "のど",
+    "oldMeaning": "최근, 요즘, 근래",
+    "newMeaning": "목",
+    "overlap": 0
+  },
+  {
+    "id": "3495b03f-d5bc-4e46-8af5-cc48e20384d0",
+    "term": "～町",
+    "reading": "～ちょう",
+    "oldMeaning": "~시",
+    "newMeaning": "마을",
+    "overlap": 0
+  },
+  {
+    "id": "31907e80-1df9-430c-ba57-c681a58873f5",
+    "term": "都合",
+    "reading": "つごう",
+    "oldMeaning": "딸",
+    "newMeaning": "형편, 사정",
+    "overlap": 0
+  },
+  {
+    "id": "c3fd52be-a355-42b4-825a-182bee0a0b67",
+    "term": "娘",
+    "reading": "むすめ",
+    "oldMeaning": "에어컨, 냉방",
+    "newMeaning": "딸",
+    "overlap": 0
+  },
+  {
+    "id": "958dc69f-408c-4b30-bd7b-8c43bd4f73f6",
+    "term": "冷房",
+    "reading": "れいぼう",
+    "oldMeaning": "이사하다",
+    "newMeaning": "냉방",
+    "overlap": 0
+  },
+  {
+    "id": "f044822d-b47d-4653-b4a2-96b66d78005c",
+    "term": "引っ越す",
+    "reading": "ひっこす",
+    "oldMeaning": "관심",
+    "newMeaning": "이사하다",
+    "overlap": 0
+  },
+  {
+    "id": "91b70659-18fd-41b5-977c-a43c60e699f7",
+    "term": "興味",
+    "reading": "きょうみ",
+    "oldMeaning": "호수",
+    "newMeaning": "관심",
+    "overlap": 0
+  },
+  {
+    "id": "e7881d9d-d546-4e82-8770-03dffcce3336",
+    "term": "湖",
+    "reading": "みずうみ",
+    "oldMeaning": "춤",
+    "newMeaning": "호수",
+    "overlap": 0
+  },
+  {
+    "id": "29b1acea-fc92-466c-993e-3b497cf89431",
+    "term": "踊り",
+    "reading": "おどり",
+    "oldMeaning": "잔치, 대접",
+    "newMeaning": "춤, 무용",
+    "overlap": 0
+  },
+  {
+    "id": "11f12262-eb69-4841-80db-b07c42f9ff85",
+    "term": "ごちそう",
+    "reading": "ごちそう",
+    "oldMeaning": "교장, 교감",
+    "newMeaning": "대접",
+    "overlap": 0
+  },
+  {
+    "id": "e9cacebb-fe8e-4926-9ba1-eed16a24c6fd",
+    "term": "手袋",
+    "reading": "てぶくろ",
+    "oldMeaning": "공항",
+    "newMeaning": "장갑",
+    "overlap": 0
+  },
+  {
+    "id": "4f7296d9-18c7-4d59-a88c-dab0c0dae97c",
+    "term": "空港",
+    "reading": "くうこう",
+    "oldMeaning": "맛, 풍미",
+    "newMeaning": "공항",
+    "overlap": 0
+  },
+  {
+    "id": "8b392610-c071-4c96-960b-8d0249f97fae",
+    "term": "味",
+    "reading": "あじ",
+    "oldMeaning": "모두, 모두들",
+    "newMeaning": "맛",
+    "overlap": 0
+  },
+  {
+    "id": "e0ca7862-7a23-4afc-bc20-94df866913b0",
+    "term": "皆",
+    "reading": "みな",
+    "oldMeaning": "프로그램, 방송 프로그램",
+    "newMeaning": "모두",
+    "overlap": 0
+  },
+  {
+    "id": "c835ff50-a820-4877-8230-017af9c2fe3a",
+    "term": "番組",
+    "reading": "ばんぐみ",
+    "oldMeaning": "급행, 급행열차",
+    "newMeaning": "방송 프로그램",
+    "overlap": 0
+  },
+  {
+    "id": "804b5c5a-cc38-4ced-9b04-b563610f553a",
+    "term": "急行",
+    "reading": "きゅうこう",
+    "oldMeaning": "기뻐하다, 기쁘다",
+    "newMeaning": "급행",
+    "overlap": 0
+  },
+  {
+    "id": "709637a1-5ea9-401b-b18c-8ebe4968756f",
+    "term": "喜ぶ",
+    "reading": "よろこぶ",
+    "oldMeaning": "워드프로세서",
+    "newMeaning": "기뻐하다",
+    "overlap": 0
+  },
+  {
+    "id": "81a0e901-f2ff-42d2-acda-bb96163f2c0f",
+    "term": "ワープロ",
+    "reading": "ワープロ",
+    "oldMeaning": "수출",
+    "newMeaning": "워드프로세서",
+    "overlap": 0
+  },
+  {
+    "id": "960a6010-9e02-4e96-ac58-6494846862e5",
+    "term": "交通",
+    "reading": "こうつう",
+    "oldMeaning": "공기, 대기",
+    "newMeaning": "교통",
+    "overlap": 0
+  },
+  {
+    "id": "1559c509-2754-421a-b4b9-0b691de9f1a8",
+    "term": "会話",
+    "reading": "かいわ",
+    "oldMeaning": "알코올, 술",
+    "newMeaning": "대화",
+    "overlap": 0
+  },
+  {
+    "id": "c6cc5d2a-6781-4f81-ad11-4ee8ebea4905",
+    "term": "アルコール",
+    "reading": "アルコール",
+    "oldMeaning": "확인하다, 점검하다",
+    "newMeaning": "알코올",
+    "overlap": 0
+  },
+  {
+    "id": "7a676012-f967-42e0-9efb-8c95250443a8",
+    "term": "チェックする",
+    "reading": "チェックする",
+    "oldMeaning": "잔돈, 거스름돈",
+    "newMeaning": "확인하다",
+    "overlap": 0
+  },
+  {
+    "id": "762b3243-b15b-4ad9-bd18-d6d20403e42c",
+    "term": "おつり",
+    "reading": "おつり",
+    "oldMeaning": "오늘 밤, 오늘 저녁",
+    "newMeaning": "거스름돈",
+    "overlap": 0
+  },
+  {
+    "id": "e48027ec-472e-4ec5-8bda-5b2012cad2bd",
+    "term": "今夜",
+    "reading": "こんや",
+    "oldMeaning": "좋다, 괜찮다 (높임말)",
+    "newMeaning": "오늘 저녁, 오늘밤",
+    "overlap": 0
+  },
+  {
+    "id": "b0f54310-e607-46cd-ac61-d7d02264e9df",
+    "term": "泊まる",
+    "reading": "とまる",
+    "oldMeaning": "점원, 직원",
+    "newMeaning": "숙박하다",
+    "overlap": 0
+  },
+  {
+    "id": "fcb054e4-92ab-46c3-9eac-a1c0cdda9595",
+    "term": "店員",
+    "reading": "てんいん",
+    "oldMeaning": "보다 (높임말)",
+    "newMeaning": "점원",
+    "overlap": 0
+  },
+  {
+    "id": "4b6f38ef-579f-421e-9723-a60a8a252b52",
+    "term": "指",
+    "reading": "ゆび",
+    "oldMeaning": "성실하다, 진지하다",
+    "newMeaning": "손가락",
+    "overlap": 0
+  },
+  {
+    "id": "6cce97ad-3a8c-4873-af4d-72ad76bf2579",
+    "term": "真面目",
+    "reading": "まじめ",
+    "oldMeaning": "시험",
+    "newMeaning": "성실한, 진지한",
+    "overlap": 0
+  },
+  {
+    "id": "db1628d7-0573-40f8-bb91-4bf1ad2be19c",
+    "term": "試験",
+    "reading": "しけん",
+    "oldMeaning": "말하다 (높임말)",
+    "newMeaning": "시험",
+    "overlap": 0
+  },
+  {
+    "id": "297e81bd-db60-4cff-830b-bd21b547897f",
+    "term": "申す",
+    "reading": "もうす",
+    "oldMeaning": "사회, 사회적",
+    "newMeaning": "겸양의 말",
+    "overlap": 0
+  },
+  {
+    "id": "3e474d7d-6394-459d-a537-4e77ecd1962c",
+    "term": "社会",
+    "reading": "しゃかい",
+    "oldMeaning": "형태, 방식",
+    "newMeaning": "사회",
+    "overlap": 0
+  },
+  {
+    "id": "3fb4e205-a6ac-4632-9066-aa678f969626",
+    "term": "型",
+    "reading": "かた",
+    "oldMeaning": "벌다, 수입을 얻다",
+    "newMeaning": "형태, 모형, 양식",
+    "overlap": 0
+  },
+  {
+    "id": "7bb1c2ab-7123-4ea8-b8d4-175c8459ba7a",
+    "term": "稼ぐ",
+    "reading": "かせぐ",
+    "oldMeaning": "수, 숫자, 양",
+    "newMeaning": "벌다, 일하다",
+    "overlap": 0
+  },
+  {
+    "id": "3431d961-6b7a-4dab-96c7-8e1d51e1473d",
+    "term": "家事",
+    "reading": "かじ",
+    "oldMeaning": "과자, 과자류",
+    "newMeaning": "가사, 집안일",
+    "overlap": 0
+  },
+  {
+    "id": "76f8347e-ad1d-49fc-9f30-dac0e0f096c4",
+    "term": "菓子",
+    "reading": "かし",
+    "oldMeaning": "대출, 빌려줌",
+    "newMeaning": "과자",
+    "overlap": 0
+  },
+  {
+    "id": "cc81c33a-ff77-4dbe-9475-84891c1357b3",
+    "term": "貸し",
+    "reading": "かし",
+    "oldMeaning": "쌓다, 겹치다",
+    "newMeaning": "대출, 대여",
+    "overlap": 0
+  },
+  {
+    "id": "44bbdde6-0547-46e1-8dca-efefa1110b3a",
+    "term": "重なる",
+    "reading": "かさなる",
+    "oldMeaning": "가죽",
+    "newMeaning": "겹치다, 쌓이다",
+    "overlap": 0
+  },
+  {
+    "id": "0a642c03-f915-4e86-b112-8203c2eb6c65",
+    "term": "革",
+    "reading": "かわ",
+    "oldMeaning": "화재, 불",
+    "newMeaning": "가죽, 피혁",
+    "overlap": 0
+  },
+  {
+    "id": "655ab98e-570d-461b-ae29-b24abde11f46",
+    "term": "火災",
+    "reading": "かさい",
+    "oldMeaning": "둘러싸다, 에워싸다",
+    "newMeaning": "화재",
+    "overlap": 0
+  },
+  {
+    "id": "1468d5a5-37ce-4a14-8eff-0989e1e79056",
+    "term": "お前",
+    "reading": "おまえ",
+    "oldMeaning": "너 (반말), 높으신 분의 존재",
+    "newMeaning": "그대",
+    "overlap": 0
+  },
+  {
+    "id": "bc2d36a2-4388-4daa-b524-4f7008fda129",
+    "term": "沖",
+    "reading": "おき",
+    "oldMeaning": "맑은 바다, 대양",
+    "newMeaning": "외해",
+    "overlap": 0
+  },
+  {
+    "id": "37edcab9-a775-4b68-9a40-ea03e536dfc4",
+    "term": "いただきます",
+    "reading": "いただきます",
+    "oldMeaning": "밥 먹기 전 감사의 표현",
+    "newMeaning": "잘 먹겠습니다",
+    "overlap": 0.16666666666666666
+  },
+  {
+    "id": "d67d9657-59e7-4c7e-a136-bd04be2c47dd",
+    "term": "ありがとう",
+    "reading": "ありがとう",
+    "oldMeaning": "고마워",
+    "newMeaning": "감사합니다",
+    "overlap": 0
+  },
+  {
+    "id": "101b3d87-8708-4572-b3b8-9bd166cc3ae6",
+    "term": "すっぱい",
+    "reading": "すっぱい",
+    "oldMeaning": "시다, 신맛이 나다",
+    "newMeaning": "시큼한, 산성의",
+    "overlap": 0.16666666666666666
+  },
+  {
+    "id": "8a86049a-b821-48d7-a764-c802ab73fd7c",
+    "term": "審判",
+    "reading": "しんぱん",
+    "oldMeaning": "몸, 신체",
+    "newMeaning": "심판",
+    "overlap": 0
+  },
+  {
+    "id": "605e8fe5-ae0c-4385-9253-a86877f40fd5",
+    "term": "慎重",
+    "reading": "しんちょう",
+    "oldMeaning": "심장, 마음",
+    "newMeaning": "신중한",
+    "overlap": 0
+  },
+  {
+    "id": "35d66c7d-fba2-4f85-a546-e55ed89202e0",
+    "term": "意思",
+    "reading": "いし",
+    "oldMeaning": "친척, 친인척",
+    "newMeaning": "의도",
+    "overlap": 0
+  },
+  {
+    "id": "1931fd63-aa00-41e1-9052-293a3fc0fe6b",
+    "term": "身体",
+    "reading": "しんたい",
+    "oldMeaning": "인생, 삶",
+    "newMeaning": "신체, 몸",
+    "overlap": 0
+  },
+  {
+    "id": "ef9208be-2fa1-4814-a34f-fb52da5f3506",
+    "term": "心臓",
+    "reading": "しんぞう",
+    "oldMeaning": "믿다, 신뢰하다",
+    "newMeaning": "심장",
+    "overlap": 0
+  },
+  {
+    "id": "4d026c43-6843-4d37-b369-f4f6a6144918",
+    "term": "新鮮",
+    "reading": "しんせん",
+    "oldMeaning": "인종, 민족",
+    "newMeaning": "신선한",
+    "overlap": 0
+  },
+  {
+    "id": "8768ad47-1fa0-462d-9029-db6a5f576de1",
+    "term": "親戚",
+    "reading": "しんせき",
+    "oldMeaning": "이전, 과거",
+    "newMeaning": "친척",
+    "overlap": 0
+  },
+  {
+    "id": "37c1a6c3-686e-4ef7-ad57-1382e64a3ea7",
+    "term": "人生",
+    "reading": "じんせい",
+    "oldMeaning": "진찰, 검진",
+    "newMeaning": "인생",
+    "overlap": 0
+  },
+  {
+    "id": "600b4da8-9e7d-49b2-98ea-8a6c62823d7d",
+    "term": "信じる",
+    "reading": "しんじる",
+    "oldMeaning": "심각함, 엄중함",
+    "newMeaning": "믿다",
+    "overlap": 0
+  },
+  {
+    "id": "51b99e0b-a6fc-4a7b-a3ae-c06657283e8b",
+    "term": "以前",
+    "reading": "いぜん",
+    "oldMeaning": "장난, 장난감",
+    "newMeaning": "이전",
+    "overlap": 0
+  },
+  {
+    "id": "ec998c22-e7a2-4fc2-b893-61452502ffb0",
+    "term": "診察",
+    "reading": "しんさつ",
+    "oldMeaning": "신호, 교통 신호, 신호기",
+    "newMeaning": "진찰",
+    "overlap": 0
+  },
+  {
+    "id": "49bd5004-9778-461c-9ab2-4727d47b9d38",
+    "term": "深刻",
+    "reading": "しんこく",
+    "oldMeaning": "신앙, 종교적 믿음",
+    "newMeaning": "심각",
+    "overlap": 0
+  },
+  {
+    "id": "22b4f810-3c4d-4f38-84d1-b09aa7b49c6b",
+    "term": "人工",
+    "reading": "じんこう",
+    "oldMeaning": "진지함, 성실함",
+    "newMeaning": "인공의",
+    "overlap": 0
+  },
+  {
+    "id": "88c9532f-d128-4106-86f0-ff7bc59064ff",
+    "term": "信仰",
+    "reading": "しんこう",
+    "oldMeaning": "진학, 대학 진학",
+    "newMeaning": "신앙",
+    "overlap": 0
+  },
+  {
+    "id": "e28f40f3-bfde-411c-aec4-4217c5065ba1",
+    "term": "神経",
+    "reading": "しんけい",
+    "oldMeaning": "지인, 아는 사람",
+    "newMeaning": "신경, 민감함",
+    "overlap": 0
+  },
+  {
+    "id": "fb5dcd9e-9a23-44ee-b364-1f8d0c1c5d4b",
+    "term": "進学",
+    "reading": "しんがく",
+    "oldMeaning": "엉덩이, 엉덩이 부분",
+    "newMeaning": "진학, 상급학교 진학",
+    "overlap": 0
+  },
+  {
+    "id": "3a82fc05-6402-45aa-8af1-d50004ea5b0f",
+    "term": "城",
+    "reading": "しろ",
+    "oldMeaning": "알림, 통지",
+    "newMeaning": "성",
+    "overlap": 0
+  },
+  {
+    "id": "f6a6fd18-203a-4095-8118-6c61c2e030b0",
+    "term": "印",
+    "reading": "しるし",
+    "oldMeaning": "순간, 찰나",
+    "newMeaning": "표시, 기호, 증거",
+    "overlap": 0
+  },
+  {
+    "id": "c877b9e8-9c36-42ab-a669-4c72f09f2ebc",
+    "term": "知合い",
+    "reading": "しりあい",
+    "oldMeaning": "서류, 공식 문서",
+    "newMeaning": "지인",
+    "overlap": 0
+  },
+  {
+    "id": "6a6b347e-08b5-4eed-9f76-c2483aa4c802",
+    "term": "尻",
+    "reading": "しり",
+    "oldMeaning": "처리, 처리 과정",
+    "newMeaning": "엉덩이",
+    "overlap": 0
+  },
+  {
+    "id": "723af762-7b3b-459f-8670-61582858abde",
+    "term": "知らせ",
+    "reading": "しらせ",
+    "oldMeaning": "여배우",
+    "newMeaning": "통지",
+    "overlap": 0
+  },
+  {
+    "id": "14d03ec4-7a2e-4942-90e7-ed6dbb1675a9",
+    "term": "一瞬",
+    "reading": "いっしゅん",
+    "oldMeaning": "일치, 합의",
+    "newMeaning": "순간, 잠깐",
+    "overlap": 0
+  },
+  {
+    "id": "48d39415-d0bd-46ea-90a7-16a64c598ad9",
+    "term": "処理",
+    "reading": "しょり",
+    "oldMeaning": "서명, 사인",
+    "newMeaning": "처리, 가공, 처치",
+    "overlap": 0
+  },
+  {
+    "id": "9b961f68-5297-42b1-b8da-bf8f28a52747",
+    "term": "女優",
+    "reading": "じょゆう",
+    "oldMeaning": "점진적으로, 조금씩",
+    "newMeaning": "여배우",
+    "overlap": 0
+  },
+  {
+    "id": "9b5e8dc8-6f0f-492f-a2ca-fa651745819d",
+    "term": "一致",
+    "reading": "いっち",
+    "oldMeaning": "반면에, 한편",
+    "newMeaning": "일치, 합의",
+    "overlap": 0
+  },
+  {
+    "id": "af77d3b4-f955-4156-a2ec-7e7b2353a13c",
+    "term": "書物",
+    "reading": "しょもつ",
+    "oldMeaning": "조수, 조수역",
+    "newMeaning": "서적",
+    "overlap": 0
+  },
+  {
+    "id": "96d72268-4816-46d3-8e55-b2c8cecc174e",
+    "term": "署名",
+    "reading": "しょめい",
+    "oldMeaning": "여자, 소녀",
+    "newMeaning": "서명",
+    "overlap": 0
+  },
+  {
+    "id": "b79e968e-d7c0-4a3f-9abb-81028f6ff504",
+    "term": "徐々に",
+    "reading": "じょじょに",
+    "oldMeaning": "서재, 공부방",
+    "newMeaning": "점차",
+    "overlap": 0
+  },
+  {
+    "id": "e855df6d-9bbd-47f2-a6ad-6130a04ec6eb",
+    "term": "一方",
+    "reading": "いっぽう",
+    "oldMeaning": "식량, 식량품",
+    "newMeaning": "반면에",
+    "overlap": 0
+  },
+  {
+    "id": "dfe41a6f-fa8e-4130-83f0-a365896b3a8a",
+    "term": "助手",
+    "reading": "じょしゅ",
+    "oldMeaning": "음식, 식품",
+    "newMeaning": "조수",
+    "overlap": 0
+  },
+  {
+    "id": "18ba642c-8c7a-4f9b-81aa-b4fffe90a2d3",
+    "term": "女子",
+    "reading": "じょし",
+    "oldMeaning": "식욕, 식탐",
+    "newMeaning": "여자",
+    "overlap": 0
+  },
+  {
+    "id": "24154c12-3782-4e01-bb2e-d7f1d836f23b",
+    "term": "書斎",
+    "reading": "しょさい",
+    "oldMeaning": "음식, 식품",
+    "newMeaning": "서재",
+    "overlap": 0
+  },
+  {
+    "id": "20a725f4-ff7d-49c1-b924-97e7c88121da",
+    "term": "職",
+    "reading": "しょく",
+    "oldMeaning": "직, 직업",
+    "newMeaning": "고용",
+    "overlap": 0
+  },
+  {
+    "id": "2fb18776-053b-4790-a502-119949623505",
+    "term": "消費",
+    "reading": "しょうひ",
+    "oldMeaning": "상품, 상품품",
+    "newMeaning": "소비, 지출",
+    "overlap": 0
+  },
+  {
+    "id": "eb165dc2-7787-41b2-b271-cfa149692c01",
+    "term": "商売",
+    "reading": "しょうばい",
+    "oldMeaning": "소비, 소비량",
+    "newMeaning": "영업, 상업, 무역",
+    "overlap": 0
+  },
+  {
+    "id": "e828c42c-cd48-4e45-b9fc-9e46cb5a681e",
+    "term": "いわゆる",
+    "reading": "いわゆる",
+    "oldMeaning": "상업, 무역",
+    "newMeaning": "소위",
+    "overlap": 0
+  },
+  {
+    "id": "0bf3d6a0-17d1-40c2-b222-13ee487420f7",
+    "term": "承認",
+    "reading": "しょうにん",
+    "oldMeaning": "소년, 어린이",
+    "newMeaning": "인정",
+    "overlap": 0
+  },
+  {
+    "id": "d7f5a8ae-c50a-49b1-9df3-899a0fa7e1b6",
+    "term": "引退",
+    "reading": "いんたい",
+    "oldMeaning": "상인, 상인",
+    "newMeaning": "은퇴",
+    "overlap": 0
+  },
+  {
+    "id": "3acf259e-3f63-4a1f-8589-99756862aa0b",
+    "term": "衝突",
+    "reading": "しょうとつ",
+    "oldMeaning": "은퇴, 퇴직",
+    "newMeaning": "충돌",
+    "overlap": 0
+  },
+  {
+    "id": "d09118e3-658d-42fa-ad95-4fbac18b85f7",
+    "term": "上等",
+    "reading": "じょうとう",
+    "oldMeaning": "충돌, 충돌사고",
+    "newMeaning": "최상",
+    "overlap": 0
+  },
+  {
+    "id": "5436ff54-10e5-49ce-b821-30f2e5dedc7b",
+    "term": "冗談",
+    "reading": "じょうだん",
+    "oldMeaning": "상등, 최고급",
+    "newMeaning": "농담",
+    "overlap": 0
+  },
+  {
+    "id": "f1da7e87-9c82-4f68-956c-2beb8ec21100",
+    "term": "上",
+    "reading": "うわ",
+    "oldMeaning": "농담, 농담거리",
+    "newMeaning": "위쪽",
+    "overlap": 0
+  },
+  {
+    "id": "06a9d384-824c-4321-9c03-e158777c5a2e",
+    "term": "上達",
+    "reading": "じょうたつ",
+    "oldMeaning": "위, 윗부분, 표면",
+    "newMeaning": "향상",
+    "overlap": 0
+  },
+  {
+    "id": "8eee6f83-1470-4ea9-9fd1-8f59680bf5e0",
+    "term": "生じる",
+    "reading": "しょうじる",
+    "oldMeaning": "상태, 형편",
+    "newMeaning": "발생하다",
+    "overlap": 0
+  },
+  {
+    "id": "d3df3643-e4a0-481b-af40-a0ad83d1c9dd",
+    "term": "症状",
+    "reading": "しょうじょう",
+    "oldMeaning": "생기다, 발생하다, 일어나다",
+    "newMeaning": "증상",
+    "overlap": 0
+  },
+  {
+    "id": "f3e5848f-e8f4-4db4-86e9-fa30570f2f9b",
+    "term": "少々",
+    "reading": "しょうしょう",
+    "oldMeaning": "증상, 징후",
+    "newMeaning": "잠시",
+    "overlap": 0
+  },
+  {
+    "id": "62dcb315-3ae3-4b6a-b4c2-057fd4661e51",
+    "term": "少女",
+    "reading": "しょうじょ",
+    "oldMeaning": "약간, 잠시",
+    "newMeaning": "소녀",
+    "overlap": 0
+  },
+  {
+    "id": "3e5c51fe-1f5f-4f09-a9c6-6ef3793700bd",
+    "term": "常識",
+    "reading": "じょうしき",
+    "oldMeaning": "소녀, 어린 소녀",
+    "newMeaning": "상식",
+    "overlap": 0
+  },
+  {
+    "id": "0d29429a-f171-48ef-8f26-139693aef44a",
+    "term": "宇宙",
+    "reading": "うちゅう",
+    "oldMeaning": "상식, 통상적 지식",
+    "newMeaning": "우주, 공간",
+    "overlap": 0
+  },
+  {
+    "id": "ac8145c6-da02-4171-bc68-22f6f3b36f56",
+    "term": "しまった (かん)",
+    "reading": "しまった (かん)",
+    "oldMeaning": "젠장!",
+    "newMeaning": "제길",
+    "overlap": 0
+  },
+  {
+    "id": "baf123e9-82bf-493b-ab44-9b31f28e7f76",
+    "term": "思わず",
+    "reading": "おもわず",
+    "oldMeaning": "무심코, 자연스럽게",
+    "newMeaning": "무의식적으로",
+    "overlap": 0.16666666666666666
+  },
+  {
+    "id": "8ff5c029-3933-4c01-8b8e-62da23382908",
+    "term": "宣伝",
+    "reading": "せんでん",
+    "oldMeaning": "코끼리",
+    "newMeaning": "선전",
+    "overlap": 0
+  },
+  {
+    "id": "05930b00-fd30-4798-89d0-1a3586e2cc87",
+    "term": "センター",
+    "reading": "センター",
+    "oldMeaning": "선택, 고름",
+    "newMeaning": "중심",
+    "overlap": 0
+  },
+  {
+    "id": "9e2af1ef-ab4e-4586-9a3b-736fc6dd3450",
+    "term": "前進",
+    "reading": "ぜんしん",
+    "oldMeaning": "중심, 센터",
+    "newMeaning": "전진",
+    "overlap": 0
+  },
+  {
+    "id": "8d80101c-b00c-42e8-b59b-a12410c24533",
+    "term": "コンテスト",
+    "reading": "コンテスト",
+    "oldMeaning": "경연, 콘테스트",
+    "newMeaning": "대회",
+    "overlap": 0
+  },
+  {
+    "id": "393398e8-06d1-451a-bfe2-b43eda505077",
+    "term": "アップ",
+    "reading": "アップ",
+    "oldMeaning": "업",
+    "newMeaning": "위",
+    "overlap": 0
+  },
+  {
+    "id": "78933e66-b7f0-476d-803d-59a23e489823",
+    "term": "わざと",
+    "reading": "わざと",
+    "oldMeaning": "일부러, 일부러서",
+    "newMeaning": "고의로",
+    "overlap": 0
+  },
+  {
+    "id": "351b81da-60ec-4fca-9dd7-bb362d209eba",
+    "term": "冷静",
+    "reading": "れいせい",
+    "oldMeaning": "침착, 냉정",
+    "newMeaning": "차분함",
+    "overlap": 0
+  },
+  {
+    "id": "944a1d51-a446-446b-ae12-2c2e48e58c01",
+    "term": "より",
+    "reading": "より",
+    "oldMeaning": "더, 더하기",
+    "newMeaning": "꼬임, 겹",
+    "overlap": 0
+  },
+  {
+    "id": "bddb6bf1-f380-488c-baff-c08b84ef32cd",
+    "term": "要するに",
+    "reading": "ようするに",
+    "oldMeaning": "요컨대, 결국, 간단히 말해서",
+    "newMeaning": "한마디로",
+    "overlap": 0
+  },
+  {
+    "id": "69e4bd73-e1e6-407a-adc0-a046d372c117",
+    "term": "厄介",
+    "reading": "やっかい",
+    "oldMeaning": "곤란, 부담, 걱정",
+    "newMeaning": "번거로움, 성가심, 골칫거리",
+    "overlap": 0
+  },
+  {
+    "id": "a3723b91-b01b-4ace-92d7-00d89e660161",
+    "term": "夢中",
+    "reading": "むちゅう",
+    "oldMeaning": "열중하다, 미쳐 있다",
+    "newMeaning": "짝사랑, 빠져있음",
+    "overlap": 0.14285714285714285
+  },
+  {
+    "id": "c048f4b0-2dbe-4a7a-a47b-f1a85010856d",
+    "term": "素",
+    "reading": "もと",
+    "oldMeaning": "본질, 원래",
+    "newMeaning": "주된",
+    "overlap": 0
+  },
+  {
+    "id": "91859c38-a62e-465e-8683-67cb49214698",
+    "term": "盛り",
+    "reading": "さかり",
+    "oldMeaning": "절정, 한창",
+    "newMeaning": "서빙",
+    "overlap": 0
+  },
+  {
+    "id": "a8d4c125-cdcb-464d-aca4-ccfabffd189c",
+    "term": "ゴール",
+    "reading": "ゴール",
+    "oldMeaning": "골",
+    "newMeaning": "목표",
+    "overlap": 0
+  },
+  {
+    "id": "ff4d3995-8df7-4bb0-a9fe-8a63adaed049",
+    "term": "券",
+    "reading": "けん",
+    "oldMeaning": "티켓, 증서",
+    "newMeaning": "표",
+    "overlap": 0
+  },
+  {
+    "id": "747d45c7-afdd-47a5-b4cb-cf66cf8cc081",
+    "term": "悔しい",
+    "reading": "くやしい",
+    "oldMeaning": "아쉽다, 후회스럽다, 분하다",
+    "newMeaning": "창피한",
+    "overlap": 0
+  },
+  {
+    "id": "d03f6f00-28aa-47f9-b996-bb20d31b6b76",
+    "term": "局",
+    "reading": "きょく",
+    "oldMeaning": "국, 사무소, 방송국",
+    "newMeaning": "꼬리, 능선",
+    "overlap": 0
+  },
+  {
+    "id": "8c6a11d9-4719-43cb-8e66-baaeadfaed5d",
+    "term": "きちんと",
+    "reading": "きちんと",
+    "oldMeaning": "통신, 교신, 연락",
+    "newMeaning": "정확히, 제대로",
+    "overlap": 0
+  },
+  {
+    "id": "61719b7f-30aa-4296-a6a1-34b7c0af8ce7",
+    "term": "きつい",
+    "reading": "きつい",
+    "oldMeaning": "단단한, 꽉 끼는, 강렬한",
+    "newMeaning": "빡빡한, 긴박한, 힘든",
+    "overlap": 0.16666666666666666
+  },
+  {
+    "id": "48ec554b-2463-4ca1-a030-ecbb4a73ea48",
+    "term": "辛い",
+    "reading": "つらい",
+    "oldMeaning": "매운, 고통스러운",
+    "newMeaning": "괴롭다, 힘들다",
+    "overlap": 0
+  },
+  {
+    "id": "d4496bee-d4df-4f1d-aaa3-24db9a893fe4",
+    "term": "半ば",
+    "reading": "なかば",
+    "oldMeaning": "중간, 절반, 한창",
+    "newMeaning": "가운데",
+    "overlap": 0
+  },
+  {
+    "id": "fe38eef0-4737-437f-a0e5-c25a2474c3e7",
+    "term": "日",
+    "reading": "にち",
+    "oldMeaning": "일, 날짜",
+    "newMeaning": "하루",
+    "overlap": 0
+  },
+  {
+    "id": "27201d9b-93dd-46a6-91c8-f48d14ea4867",
+    "term": "パーセント",
+    "reading": "パーセント",
+    "oldMeaning": "퍼센트, %",
+    "newMeaning": "백분율",
+    "overlap": 0
+  },
+  {
+    "id": "3954b32d-e2d7-4412-bd09-45385f40b2d1",
+    "term": "ピクニック",
+    "reading": "ピクニック",
+    "oldMeaning": "피크닉",
+    "newMeaning": "소풍",
+    "overlap": 0
+  },
+  {
+    "id": "f9c3c5bd-2420-4b53-aa70-f47d3c9251d8",
+    "term": "広める",
+    "reading": "ひろめる",
+    "oldMeaning": "널리 퍼뜨리다, 확산시키다",
+    "newMeaning": "넓히다, 전파하다",
+    "overlap": 0.16666666666666666
+  },
+  {
+    "id": "26810471-15a3-4502-b728-aa712afff26d",
+    "term": "笛",
+    "reading": "ふえ",
+    "oldMeaning": "플루트, 휘파람",
+    "newMeaning": "피리",
+    "overlap": 0
+  },
+  {
+    "id": "dae27732-1dbb-4de2-936a-f5d3fe8e696e",
+    "term": "衆",
+    "reading": "しゅう",
+    "oldMeaning": "무리, 사람들",
+    "newMeaning": "민중",
+    "overlap": 0
+  },
+  {
+    "id": "ffba702a-3dba-4d58-9852-e11ff0aaceb9",
+    "term": "高まる",
+    "reading": "たかまる",
+    "oldMeaning": "오르다, 성장하다, 상승하다",
+    "newMeaning": "높아지다, 고조되다",
+    "overlap": 0.14285714285714285
+  },
+  {
+    "id": "873d6626-ed6e-47d1-a445-1efbec0205a9",
+    "term": "カバー",
+    "reading": "カバー",
+    "oldMeaning": "커버, 덮개",
+    "newMeaning": "표지",
+    "overlap": 0
+  },
+  {
+    "id": "6dc9e06d-fed9-4341-808c-0ffcfd68ca1c",
+    "term": "箇所",
+    "reading": "かしょ",
+    "oldMeaning": "부분, 지점, 부위",
+    "newMeaning": "곳",
+    "overlap": 0
+  },
+  {
+    "id": "b3e0f6aa-8f64-4856-ac1d-2781efa2e8f9",
+    "term": "おめでたい",
+    "reading": "おめでたい",
+    "oldMeaning": "행복한 일, 축하할 일",
+    "newMeaning": "경사스러운",
+    "overlap": 0
+  },
+  {
+    "id": "1ca3e37c-3d24-4ed9-af53-4b1e98cbcc67",
+    "term": "お出掛け",
+    "reading": "おでかけ",
+    "oldMeaning": "외출",
+    "newMeaning": "나들이",
+    "overlap": 0
+  },
+  {
+    "id": "8ab4b0e0-72d1-447e-be86-0fb8300de2e9",
+    "term": "叔父さん",
+    "reading": "おじさん",
+    "oldMeaning": "아저씨 (높임말) 삼촌",
+    "newMeaning": "숙부님",
+    "overlap": 0
+  },
+  {
+    "id": "91936a4d-c89c-4b78-8c0b-594d63bd1aec",
+    "term": "惜しい",
+    "reading": "おしい",
+    "oldMeaning": "아쉽다, 유감스럽다",
+    "newMeaning": "애석한, 아쉬운",
+    "overlap": 0.16666666666666666
+  },
+  {
+    "id": "e74cf139-900d-42ab-966c-817b80de1157",
+    "term": "叔父",
+    "reading": "おじ",
+    "oldMeaning": "삼촌 (어린 삼촌) ",
+    "newMeaning": "숙부",
+    "overlap": 0
+  },
+  {
+    "id": "77ff3f6c-3db3-42c3-85d6-ce9dda9effa0",
+    "term": "伯父",
+    "reading": "おじ",
+    "oldMeaning": "높임말) 삼촌 (나이 든 삼촌) ",
+    "newMeaning": "숙부",
+    "overlap": 0
+  },
+  {
+    "id": "b2d524f7-3e69-4f5d-a8e1-6903ff28a6c1",
+    "term": "売り切れ",
+    "reading": "うりきれ",
+    "oldMeaning": "품절",
+    "newMeaning": "매진",
+    "overlap": 0
+  },
+  {
+    "id": "7a903412-1c63-4c54-a6c6-98904210850b",
+    "term": "幾分",
+    "reading": "いくぶん",
+    "oldMeaning": "약간, 어느 정도",
+    "newMeaning": "다소",
+    "overlap": 0
+  },
+  {
+    "id": "ef4ea793-bb8b-43f5-afd2-ddd4efa11425",
+    "term": "安易",
+    "reading": "あんい",
+    "oldMeaning": "쉽게, 편하게",
+    "newMeaning": "손쉬운",
+    "overlap": 0
+  },
+  {
+    "id": "970e72b0-09c0-4502-b1e6-b60b8e4c1373",
+    "term": "送り仮名",
+    "reading": "おくりがな",
+    "oldMeaning": "받침 문자",
+    "newMeaning": "오쿠리가나 (히라가나 부분)",
+    "overlap": 0
+  },
+  {
+    "id": "0799e69f-fed3-4882-a020-7b06c0592159",
+    "term": "伯父さん",
+    "reading": "おじさん",
+    "oldMeaning": "삼촌, 중년 남성",
+    "newMeaning": "존댓말 아저씨",
+    "overlap": 0
+  },
+  {
+    "id": "2b4da61a-95d2-4014-83ca-b64a21d7dd1a",
+    "term": "お世話になりました",
+    "reading": "おせわになりました",
+    "oldMeaning": "신세를 졌습니다",
+    "newMeaning": "돌봐 주셔서",
+    "overlap": 0
+  },
+  {
+    "id": "9b632c6c-f7f7-4a2d-8025-ec3d0178ae01",
+    "term": "お手伝いさん",
+    "reading": "おてつだいさん",
+    "oldMeaning": "가정부, 가사 도우미",
+    "newMeaning": "메이드",
+    "overlap": 0
+  },
+  {
+    "id": "5a14c430-6fff-4b56-9981-1e0a6a14d214",
+    "term": "小母さん",
+    "reading": "おばさん",
+    "oldMeaning": "아줌마, 숙녀, 부인",
+    "newMeaning": "여성분",
+    "overlap": 0
+  },
+  {
+    "id": "9d1c6bab-b714-4e7f-b77d-84db783b3356",
+    "term": "～羽",
+    "reading": "～わ",
+    "oldMeaning": "새, 새끼, 새끼의 수를 세는 단위",
+    "newMeaning": "마리",
+    "overlap": 0
+  },
+  {
+    "id": "51c7e987-9cb7-4aca-aae6-3bfaffc5ef70",
+    "term": "～もち",
+    "reading": "～もち",
+    "oldMeaning": "~를 가진 사람",
+    "newMeaning": "소지자",
+    "overlap": 0
+  },
+  {
+    "id": "7eef5055-a57e-4877-9961-d52613827e1d",
+    "term": "～遍",
+    "reading": "～へん",
+    "oldMeaning": "~번, 횟수",
+    "newMeaning": "회",
+    "overlap": 0
+  },
+  {
+    "id": "0a4b1d21-1640-46f3-a13b-4a5377aa7bc2",
+    "term": "～病",
+    "reading": "～びょう",
+    "oldMeaning": "일종의 병",
+    "newMeaning": "질환",
+    "overlap": 0
+  },
+  {
+    "id": "3954bc64-6687-48a1-bff7-3e43505a38f7",
+    "term": "～内",
+    "reading": "～ない",
+    "oldMeaning": "~내부",
+    "newMeaning": "안에 ~",
+    "overlap": 0
+  },
+  {
+    "id": "cfbf42fe-6ee7-437e-907e-04d66cd1bf40",
+    "term": "～頭",
+    "reading": "～とう",
+    "oldMeaning": "~수 (동물의 셈)",
+    "newMeaning": "마리",
+    "overlap": 0
+  },
+  {
+    "id": "e3b19f50-43ac-451f-adca-b472f6a61bbc",
+    "term": "～丁目",
+    "reading": "～ちょうめ",
+    "oldMeaning": "~구역 (도시, 블록의 구역)",
+    "newMeaning": "동",
+    "overlap": 0
+  },
+  {
+    "id": "1e172933-e916-451b-b108-21225060bfaf",
+    "term": "～長",
+    "reading": "～ちょう",
+    "oldMeaning": "~장, 책임자",
+    "newMeaning": "리더",
+    "overlap": 0
+  },
+  {
+    "id": "0277f0c2-5532-42da-8818-c8d9f783f8ed",
+    "term": "～足",
+    "reading": "～そく",
+    "oldMeaning": "~족, 신발 수량",
+    "newMeaning": "켤레",
+    "overlap": 0
+  },
+  {
+    "id": "7315fa1b-7e3e-4256-a1f6-797b68484752",
+    "term": "～艘",
+    "reading": "～そう",
+    "oldMeaning": "~선, 배 수량",
+    "newMeaning": "척",
+    "overlap": 0
+  },
+  {
+    "id": "e4fad5f2-467a-46c1-ac8c-1620c64b2d85",
+    "term": "～船",
+    "reading": "～せん",
+    "oldMeaning": "~선, 배 수량",
+    "newMeaning": "척",
+    "overlap": 0
+  },
+  {
+    "id": "8f49a47d-0d21-42c7-828c-8b54bc065c68",
+    "term": "～産",
+    "reading": "～さん",
+    "oldMeaning": "~산, ~에서 만들어진",
+    "newMeaning": "제조된",
+    "overlap": 0
+  },
+  {
+    "id": "af43e084-f5e2-415a-bbb4-0a789e474d92",
+    "term": "～毎",
+    "reading": "～ごと",
+    "oldMeaning": "매 ~, 각각 ~",
+    "newMeaning": "마다",
+    "overlap": 0
+  },
+  {
+    "id": "9b3eda25-86e7-4431-b042-7a0b631fa317",
+    "term": "～国",
+    "reading": "～こく",
+    "oldMeaning": "~의 나라",
+    "newMeaning": "국가",
+    "overlap": 0
+  },
+  {
+    "id": "f0052e7b-e131-4a2b-8562-09f49b31bd4b",
+    "term": "～切れ",
+    "reading": "～きれ",
+    "oldMeaning": "~ 중 일부",
+    "newMeaning": "조각",
+    "overlap": 0
+  },
+  {
+    "id": "0c3532ff-f08f-4ed0-8c86-7e3b40856a6e",
+    "term": "～おしまい (おわり)",
+    "reading": "～おしまい (おわり)",
+    "oldMeaning": "~ 끝, 종료",
+    "newMeaning": "결국 ~",
+    "overlap": 0
+  },
+  {
+    "id": "bec64c1a-1c53-43c0-ad1d-4ada53e15a20",
+    "term": "〜(日本) 式",
+    "reading": "～(にほん) しき",
+    "oldMeaning": "~(일본식), 일본식",
+    "newMeaning": "관습",
+    "overlap": 0
+  },
+  {
+    "id": "c521cfde-d89c-43be-b072-4796b55656e1",
+    "term": "琴",
+    "reading": "きん",
+    "oldMeaning": "13현 일본 가야금",
+    "newMeaning": "십삼 현 거문고",
+    "overlap": 0.16666666666666666
+  },
+  {
+    "id": "cbfde6c3-631d-48d4-a609-388b04e209b3",
+    "term": "下旬",
+    "reading": "げじゅん",
+    "oldMeaning": "말기, 마지막 삼분기",
+    "newMeaning": "하순",
+    "overlap": 0
+  },
+  {
+    "id": "16fdc89b-eefc-4cf3-8205-d396d9f3c87f",
+    "term": "心当たり",
+    "reading": "こころあたり",
+    "oldMeaning": "심중에 떠오르다, 마음속에 떠오르다",
+    "newMeaning": "알고 있음, 관련 지식",
+    "overlap": 0.125
+  },
+  {
+    "id": "344164b6-fed4-4edd-a09d-57e9a8bf65a8",
+    "term": "再三",
+    "reading": "さいさん",
+    "oldMeaning": "반복해서, 계속해서",
+    "newMeaning": "거듭",
+    "overlap": 0
+  },
+  {
+    "id": "f7b174be-f68c-4ff2-b3b2-aad58d8b24bd",
+    "term": "作者",
+    "reading": "さくしゃ",
+    "oldMeaning": "속삭이다, 귓속말하다",
+    "newMeaning": "저자, 작가",
+    "overlap": 0
+  },
+  {
+    "id": "07fb2ebf-f256-4044-b8d9-3d2c1c175395",
+    "term": "削除",
+    "reading": "さくじょ",
+    "oldMeaning": "숟가락",
+    "newMeaning": "삭제",
+    "overlap": 0
+  },
+  {
+    "id": "1cee0c11-83ac-4f19-9f25-97d0eba83214",
+    "term": "作成",
+    "reading": "さくせい",
+    "oldMeaning": "다다미 방",
+    "newMeaning": "작성, 준비, 제작",
+    "overlap": 0
+  },
+  {
+    "id": "38cf8ae6-1efa-4a2b-b8e3-cd35d59cbcdd",
+    "term": "作製",
+    "reading": "さくせい",
+    "oldMeaning": "방해, 장애",
+    "newMeaning": "제조, 생산",
+    "overlap": 0
+  },
+  {
+    "id": "1c9e66c3-be2f-4d4a-bd76-846ba56cc8bf",
+    "term": "探る",
+    "reading": "さぐる",
+    "oldMeaning": "공제, 잔액",
+    "newMeaning": "찾다, 조사하다",
+    "overlap": 0
+  },
+  {
+    "id": "26e339f4-b6aa-4c4e-abc5-707514c17ecf",
+    "term": "囁く",
+    "reading": "ささやく",
+    "oldMeaning": "회, 생선회",
+    "newMeaning": "속삭이다, 중얼거리다",
+    "overlap": 0
+  },
+  {
+    "id": "804954f6-c86f-4f8b-a0ac-bd671f7b3df9",
+    "term": "匙",
+    "reading": "さじ",
+    "oldMeaning": "역시, 역시 기대대로",
+    "newMeaning": "숟가락",
+    "overlap": 0
+  },
+  {
+    "id": "ec86d6e3-14c2-4b1c-98ce-7ccb04edbfcf",
+    "term": "座敷",
+    "reading": "ざしき",
+    "oldMeaning": "촬영, 사진 찍기",
+    "newMeaning": "다다미 방",
+    "overlap": 0
+  },
+  {
+    "id": "25dc9fa9-cb35-4703-941f-c5b44132cff5",
+    "term": "差し支え",
+    "reading": "さしつかえ",
+    "oldMeaning": "잡음, 소음",
+    "newMeaning": "방해",
+    "overlap": 0
+  },
+  {
+    "id": "2c39d5a9-8b8e-473a-8b33-a03a96ecfb7b",
+    "term": "差し引き",
+    "reading": "さしひき",
+    "oldMeaning": "빨리, 재빨리",
+    "newMeaning": "차감",
+    "overlap": 0
+  },
+  {
+    "id": "a02c2c08-2469-4934-be78-8d94779be1fe",
+    "term": "しいんと (する)",
+    "reading": "しいんと (する)",
+    "oldMeaning": "조용하다, 고요하다, 조용히 하다",
+    "newMeaning": "죽음의 침묵",
+    "overlap": 0
+  },
+  {
+    "id": "f33c134c-f54f-4d4f-b1c5-7b7cb3d1d54e",
+    "term": "四角い",
+    "reading": "しかくい",
+    "oldMeaning": "사각형, 정사각형",
+    "newMeaning": "네모난",
+    "overlap": 0
+  },
+  {
+    "id": "581227b5-5bcc-4850-b236-a31a95ce3cc9",
+    "term": "習字",
+    "reading": "しゅうじ",
+    "oldMeaning": "서예",
+    "newMeaning": "필체",
+    "overlap": 0
+  },
+  {
+    "id": "3eeae58b-b0a9-4ae6-8a14-7825b04f7504",
+    "term": "汁",
+    "reading": "しる",
+    "oldMeaning": "즙, 국물, 수프",
+    "newMeaning": "주스",
+    "overlap": 0
+  },
+  {
+    "id": "80a063a1-8b71-45d9-98bc-16f38dc22a46",
+    "term": "隙間",
+    "reading": "すきま",
+    "oldMeaning": "틈새, 균열, 구멍",
+    "newMeaning": "틈, 간격, 벌어진 곳",
+    "overlap": 0.16666666666666666
+  },
+  {
+    "id": "ee598f8b-f1a8-47b4-9858-c1db207210b8",
+    "term": "スチュワーデス",
+    "reading": "スチュワーデス",
+    "oldMeaning": "스튜어디스",
+    "newMeaning": "승무원",
+    "overlap": 0
+  },
+  {
+    "id": "0f7c86f8-6b34-422d-a54d-e218f4f6436e",
+    "term": "ストッキング",
+    "reading": "ストッキング",
+    "oldMeaning": "양말",
+    "newMeaning": "스타킹",
+    "overlap": 0
+  },
+  {
+    "id": "d3d7657e-423d-4976-bacd-eb8f541daec1",
+    "term": "素直",
+    "reading": "すなお",
+    "oldMeaning": "순진함, 순종, 온순함",
+    "newMeaning": "얌전한",
+    "overlap": 0
+  },
+  {
+    "id": "a78e8a21-2081-42b9-9dd4-064b60da9353",
+    "term": "折角",
+    "reading": "せっかく",
+    "oldMeaning": "애써, 애써서, 애쓴 만큼",
+    "newMeaning": "정성들여, 수고로, 간절히",
+    "overlap": 0
+  },
+  {
+    "id": "cb062349-afe4-4584-bf5e-bcf1dc726610",
+    "term": "続々",
+    "reading": "ぞくぞく",
+    "oldMeaning": "계속해서, 차례차례",
+    "newMeaning": "잇따라",
+    "overlap": 0
+  },
+  {
+    "id": "5e914f65-f28f-4aa6-8df0-417e63fd4cb3",
+    "term": "存じる",
+    "reading": "ぞんじる",
+    "oldMeaning": "손익, 이익과 손해",
+    "newMeaning": "알다",
+    "overlap": 0
+  },
+  {
+    "id": "661c8a8c-ab34-45f5-8f2e-e920af92a1f1",
+    "term": "存ずる",
+    "reading": "ぞんずる",
+    "oldMeaning": "~번째",
+    "newMeaning": "알다",
+    "overlap": 0
+  },
+  {
+    "id": "4904bc4d-3133-421c-a698-4cb28f0e7fc3",
+    "term": "損得",
+    "reading": "そんとく",
+    "oldMeaning": "타이어, 타이어",
+    "newMeaning": "손익",
+    "overlap": 0
+  },
+  {
+    "id": "f8008bc2-9d3f-48b0-b159-5c1a8d17a918",
+    "term": "第～",
+    "reading": "だい～",
+    "oldMeaning": "제일, 우선, 1위",
+    "newMeaning": "번째",
+    "overlap": 0
+  },
+  {
+    "id": "61358697-6e87-4f23-be7d-db3d6d14294d",
+    "term": "タイア",
+    "reading": "タイア",
+    "oldMeaning": "대학원",
+    "newMeaning": "타이어",
+    "overlap": 0
+  },
+  {
+    "id": "ba671379-ff91-43b8-bea8-b6a95c7bd1c2",
+    "term": "だいいち (とりわけ)",
+    "reading": "だいいち (とりわけ)",
+    "oldMeaning": "목수",
+    "newMeaning": "제일, 우선, 가장",
+    "overlap": 0
+  },
+  {
+    "id": "df056c72-3b1e-4e88-a89e-67f93c5ec58e",
+    "term": "大学院",
+    "reading": "だいがくいん",
+    "oldMeaning": "체계, 조직",
+    "newMeaning": "대학원",
+    "overlap": 0
+  },
+  {
+    "id": "3fc5c7a7-504c-4cc5-9caf-9635e4df92f4",
+    "term": "大工",
+    "reading": "だいく",
+    "oldMeaning": "북, 타악기",
+    "newMeaning": "목수",
+    "overlap": 0
+  },
+  {
+    "id": "cf4e2b98-f6c7-4821-a34c-da0f500a00ac",
+    "term": "体系",
+    "reading": "たいけい",
+    "oldMeaning": "대책, 대응책",
+    "newMeaning": "체계, 체제",
+    "overlap": 0
+  },
+  {
+    "id": "0734d682-aa53-4b5b-b438-7a3457f80788",
+    "term": "太鼓",
+    "reading": "たいこ",
+    "oldMeaning": "그다지, 별로",
+    "newMeaning": "북",
+    "overlap": 0
+  },
+  {
+    "id": "f24a1bd3-69e7-47ad-aac1-4bbb0ee24392",
+    "term": "対策",
+    "reading": "たいさく",
+    "oldMeaning": "크기",
+    "newMeaning": "대책",
+    "overlap": 0
+  },
+  {
+    "id": "9a78d597-c816-447c-aaa9-e510b17d1224",
+    "term": "大して",
+    "reading": "たいして",
+    "oldMeaning": "체제, 조직, 구조",
+    "newMeaning": "그다지, 그리 많이, 그다지 많이",
+    "overlap": 0
+  },
+  {
+    "id": "62d813c0-6e68-4840-9518-91b32b728922",
+    "term": "大小",
+    "reading": "だいしょう",
+    "oldMeaning": "용적, 부피",
+    "newMeaning": "크기",
+    "overlap": 0
+  },
+  {
+    "id": "b6841eca-360d-4cdb-8115-8734e95b3c94",
+    "term": "体制",
+    "reading": "たいせい",
+    "oldMeaning": "매우, 크게",
+    "newMeaning": "체제, 시스템, 구조",
+    "overlap": 0
+  },
+  {
+    "id": "7e179753-1fa7-42f8-b9ad-1eb2b1b777d4",
+    "term": "体積",
+    "reading": "たいせき",
+    "oldMeaning": "체조, 운동",
+    "newMeaning": "용량, 부피",
+    "overlap": 0
+  },
+  {
+    "id": "02a40ba0-b32c-4578-a445-ad6d22ea3e91",
+    "term": "体操",
+    "reading": "たいそう",
+    "oldMeaning": "큰 나무",
+    "newMeaning": "체조, 신체운동",
+    "overlap": 0
+  },
+  {
+    "id": "aeaf9159-37ed-4f36-b846-a1eb3cb57553",
+    "term": "大分",
+    "reading": "だいぶん",
+    "oldMeaning": "대명사",
+    "newMeaning": "상당히, 매우, 많이",
+    "overlap": 0
+  },
+  {
+    "id": "fbb8f477-7567-4d44-8511-6b31c58f5178",
+    "term": "大木",
+    "reading": "たいぼく",
+    "oldMeaning": "다이아그램, 도표",
+    "newMeaning": "큰나무",
+    "overlap": 0
+  },
+  {
+    "id": "604ede48-a087-43a6-a960-7736c6113cdc",
+    "term": "代名詞",
+    "reading": "だいめいし",
+    "oldMeaning": "다이아몬드, 다이아몬드",
+    "newMeaning": "대명사",
+    "overlap": 0
+  },
+  {
+    "id": "1ce43777-e7ce-4bea-82a9-b0b7b3ca2fae",
+    "term": "ダイヤモンド",
+    "reading": "ダイヤモンド",
+    "oldMeaning": "대립, 대항, 반대",
+    "newMeaning": "다이아몬드",
+    "overlap": 0
+  },
+  {
+    "id": "8bcbea96-afc6-4939-85ca-3e5b777b2781",
+    "term": "ダイヤル",
+    "reading": "ダイヤル",
+    "oldMeaning": "모내기, 벼심기",
+    "newMeaning": "다이얼",
+    "overlap": 0
+  },
+  {
+    "id": "642556eb-8f62-453a-9ddd-5cb7ed4cad1e",
+    "term": "対立",
+    "reading": "たいりつ",
+    "oldMeaning": "끊임없이, 계속해서",
+    "newMeaning": "대립",
+    "overlap": 0
+  },
+  {
+    "id": "bd79f3a8-c0af-4a96-9ccd-825a0554202b",
+    "term": "田植え",
+    "reading": "たうえ",
+    "oldMeaning": "타원형",
+    "newMeaning": "모내기",
+    "overlap": 0
+  },
+  {
+    "id": "58b4cc73-d376-4dd3-8691-f2965c2dddbe",
+    "term": "絶えず",
+    "reading": "たえず",
+    "oldMeaning": "경작하다, 갈다",
+    "newMeaning": "끊임없이",
+    "overlap": 0
+  },
+  {
+    "id": "f60fe973-e1b4-451f-a6a6-0653a787f2f4",
+    "term": "楕円",
+    "reading": "だえん",
+    "oldMeaning": "폭포",
+    "newMeaning": "타원",
+    "overlap": 0
+  },
+  {
+    "id": "bb95aa26-4575-419d-ba4e-9876ddde75e4",
+    "term": "滝",
+    "reading": "たき",
+    "oldMeaning": "대나무",
+    "newMeaning": "폭포",
+    "overlap": 0
+  },
+  {
+    "id": "fc3c16d1-7209-4188-8b94-f045d5adf2af",
+    "term": "頼もしい",
+    "reading": "たのもしい",
+    "oldMeaning": "신뢰할 만한, 기대되는",
+    "newMeaning": "믿음직하다, 든든하다",
+    "overlap": 0
+  },
+  {
+    "id": "65e82d7e-4974-4270-8b65-15215dfeaf97",
+    "term": "長所",
+    "reading": "ちょうしょ",
+    "oldMeaning": "조각, 조각품, 조각술",
+    "newMeaning": "장점, 이점",
+    "overlap": 0
+  },
+  {
+    "id": "8ecfa1c7-b0a9-4961-96eb-07b7053b7d56",
+    "term": "直後",
+    "reading": "ちょくご",
+    "oldMeaning": "바로 뒤에, 즉시",
+    "newMeaning": "직후",
+    "overlap": 0
+  },
+  {
+    "id": "82029c7d-2ea0-430b-985a-11ee3650fcb5",
+    "term": "直径",
+    "reading": "ちょっけい",
+    "oldMeaning": "지름",
+    "newMeaning": "직경",
+    "overlap": 0
+  },
+  {
+    "id": "68ae27e3-ff81-4d47-859e-41a7c201f822",
+    "term": "斜め",
+    "reading": "ななめ",
+    "oldMeaning": "그것저것, 뭐",
+    "newMeaning": "대각의, 사선의",
+    "overlap": 0
+  },
+  {
+    "id": "78061c32-1fad-4683-85e9-47219a9d5aef",
+    "term": "なにしろ",
+    "reading": "なにしろ",
+    "oldMeaning": "제발, 부디",
+    "newMeaning": "어쨌든",
+    "overlap": 0
+  },
+  {
+    "id": "3e793694-d46d-4c7f-b1b0-d7524f262593",
+    "term": "何しろ",
+    "reading": "なにしろ",
+    "oldMeaning": "건방진, 뻔뻔한",
+    "newMeaning": "어쨌든, 아무튼",
+    "overlap": 0
+  },
+  {
+    "id": "9c37a7ec-9c99-4f95-a0b9-be78abf169be",
+    "term": "何々",
+    "reading": "なになに",
+    "oldMeaning": "건방진, 뻔뻔한, 건방진, 뻔뻔한, 대담한",
+    "newMeaning": "그런 것, 무엇?",
+    "overlap": 0
+  },
+  {
+    "id": "88ca5d4f-423a-4313-9e21-ce825da88b40",
+    "term": "生意気",
+    "reading": "なまいき",
+    "oldMeaning": "모방하다, 따라하다, 흉내내다",
+    "newMeaning": "건방진, 무례한",
+    "overlap": 0.16666666666666666
+  },
+  {
+    "id": "2d97a8b5-2489-49e7-bea6-0fae0a3ba59e",
+    "term": "生意気な",
+    "reading": "なまいきな",
+    "oldMeaning": "남극, 남극대륙",
+    "newMeaning": "건방진, 뻔뻔한",
+    "overlap": 0
+  },
+  {
+    "id": "362e9875-b085-497c-b33c-13aebc53715d",
+    "term": "倣う",
+    "reading": "ならう",
+    "oldMeaning": "미운, 혐오스러운, 끔찍한",
+    "newMeaning": "모방하다, 따르다, 흉내내다",
+    "overlap": 0
+  },
+  {
+    "id": "4dacf30c-5e2c-401a-96b0-e8558b2d2176",
+    "term": "南極",
+    "reading": "なんきょく",
+    "oldMeaning": "미워하다, 혐오하다",
+    "newMeaning": "남극",
+    "overlap": 0
+  },
+  {
+    "id": "6ad2e25b-3cd8-40b0-b2d1-5e863196107c",
+    "term": "なんとなく",
+    "reading": "なんとなく",
+    "oldMeaning": "혐오스러운, 미운",
+    "newMeaning": "왠지",
+    "overlap": 0
+  },
+  {
+    "id": "3f00fee0-8d47-42d8-919c-17765b6b9d58",
+    "term": "なんとも",
+    "reading": "なんとも",
+    "oldMeaning": "미소 짓다, 달콤하게 웃다",
+    "newMeaning": "전혀",
+    "overlap": 0
+  },
+  {
+    "id": "71c219c9-650f-4b11-b218-e2569305db1f",
+    "term": "何とも",
+    "reading": "なんとも",
+    "oldMeaning": "탁하다, 흐려지다",
+    "newMeaning": "정말로, 매우, 전혀 아니다",
+    "overlap": 0.16666666666666666
+  },
+  {
+    "id": "9fecf405-f29b-4d69-8d92-ba19bf831d85",
+    "term": "ナンバー",
+    "reading": "ナンバー",
+    "oldMeaning": "무지개",
+    "newMeaning": "숫자",
+    "overlap": 0
+  },
+  {
+    "id": "64bea37e-9178-4996-a33e-8a28ea7f0b7f",
+    "term": "南米",
+    "reading": "なんべい",
+    "oldMeaning": "날짜와 시간",
+    "newMeaning": "남아메리카",
+    "overlap": 0
+  },
+  {
+    "id": "de92fe12-eec5-47b9-9913-22825149b1b8",
+    "term": "南北",
+    "reading": "なんぼく",
+    "oldMeaning": "일용품, 일상 용품",
+    "newMeaning": "남북",
+    "overlap": 0
+  },
+  {
+    "id": "0a3c8197-e2d7-4f77-b570-61a336a5f5c7",
+    "term": "匂う",
+    "reading": "におう",
+    "oldMeaning": "일과, 일상",
+    "newMeaning": "냄새가 나다",
+    "overlap": 0
+  },
+  {
+    "id": "dfc52552-20db-4db8-86a7-258d0999eab1",
+    "term": "逃がす",
+    "reading": "にがす",
+    "oldMeaning": "일정, 스케줄",
+    "newMeaning": "놓아주다, 도망가게 하다",
+    "overlap": 0
+  },
+  {
+    "id": "81aa0f8b-5cda-48da-b444-1738c5c9b544",
+    "term": "憎い",
+    "reading": "にくい",
+    "oldMeaning": "무딘, 둔한, 느린, 멍청한",
+    "newMeaning": "미운, 밉다",
+    "overlap": 0
+  },
+  {
+    "id": "d0b85dec-747d-49b9-a09f-89fb0e2b869e",
+    "term": "憎らしい",
+    "reading": "にくらしい",
+    "oldMeaning": "아내, 부인",
+    "newMeaning": "혐오스러운, 증오스러운",
+    "overlap": 0
+  },
+  {
+    "id": "6b1cec6c-d507-47cc-a30a-cf0114bb339d",
+    "term": "濁る",
+    "reading": "にごる",
+    "oldMeaning": "갑자기, 돌연, 예상치 못하게",
+    "newMeaning": "흐려지다",
+    "overlap": 0
+  },
+  {
+    "id": "6591311e-5d87-4cec-b357-dd1985bf203c",
+    "term": "虹",
+    "reading": "にじ",
+    "oldMeaning": "바느질하다, 꿰매다",
+    "newMeaning": "무지개",
+    "overlap": 0
+  },
+  {
+    "id": "fa5aa925-c4a6-4589-8c12-c5d92b438aac",
+    "term": "日時",
+    "reading": "にちじ",
+    "oldMeaning": "나사, 나사못",
+    "newMeaning": "일시",
+    "overlap": 0
+  },
+  {
+    "id": "ddc6058e-915a-44c1-8c8e-73a7728158d8",
+    "term": "日用品",
+    "reading": "にちようひん",
+    "oldMeaning": "비틀다, 비틀기",
+    "newMeaning": "생필품",
+    "overlap": 0
+  },
+  {
+    "id": "6446db23-e199-4c43-98bf-4553824b392d",
+    "term": "日課",
+    "reading": "にっか",
+    "oldMeaning": "목걸이",
+    "newMeaning": "일과",
+    "overlap": 0
+  },
+  {
+    "id": "7943c59d-6497-454c-bdc7-3ea67062f486",
+    "term": "バイバイ",
+    "reading": "バイバイ",
+    "oldMeaning": "바이바이, 안녕",
+    "newMeaning": "잘 가",
+    "overlap": 0
+  },
+  {
+    "id": "a55966fa-8d56-4255-ad83-0af2591ddad9",
+    "term": "バック",
+    "reading": "バック",
+    "oldMeaning": "뒤, 배경",
+    "newMeaning": "등",
+    "overlap": 0
+  },
+  {
+    "id": "41452fe7-f073-4a61-8965-9b862afa9532",
+    "term": "一通り",
+    "reading": "ひととおり",
+    "oldMeaning": "대강, 간단히",
+    "newMeaning": "일반적으로",
+    "overlap": 0
+  },
+  {
+    "id": "1f632558-d1a2-4859-9a23-31e536e4d485",
+    "term": "皮肉",
+    "reading": "ひにく",
+    "oldMeaning": "빈정, 풍자",
+    "newMeaning": "냉소, 비꼼",
+    "overlap": 0
+  },
+  {
+    "id": "7c6458c4-814a-4c0f-8ef3-98ce3c67c59e",
+    "term": "無沙汰",
+    "reading": "ぶさた",
+    "oldMeaning": "무관심, 연락 두절",
+    "newMeaning": "소식 없음, 근황 무소통",
+    "overlap": 0.14285714285714285
+  },
+  {
+    "id": "ec94f787-2f48-4622-a06e-08df8c233a6e",
+    "term": "風呂敷",
+    "reading": "ふろしき",
+    "oldMeaning": "포장천, 포장천, 포장천",
+    "newMeaning": "보자기, 후로시키",
+    "overlap": 0
+  },
+  {
+    "id": "8c7623fa-e256-4fac-9779-8a2797397df5",
+    "term": "朗らか",
+    "reading": "ほがらか",
+    "oldMeaning": "맑다, 쾌활하다, 멜로디가 있다",
+    "newMeaning": "밝은, 명랑한",
+    "overlap": 0
+  },
+  {
+    "id": "18120e46-901b-4007-b975-23bdf33a6965",
+    "term": "朗らか(な)",
+    "reading": "ほがらか(な)",
+    "oldMeaning": "맑다, 쾌활하다, 맑은 (하늘, 낮 등)",
+    "newMeaning": "명랑한",
+    "overlap": 0
+  },
+  {
+    "id": "e16eef6f-f178-42ae-b0e1-d2a9b11db980",
+    "term": "真っ先",
+    "reading": "まっさき",
+    "oldMeaning": "가장 먼저, 맨 앞",
+    "newMeaning": "선두, 시초",
+    "overlap": 0
+  },
+  {
+    "id": "01676d2f-1b07-4665-a306-839e18b79d1c",
+    "term": "物置",
+    "reading": "ものおき",
+    "oldMeaning": "물건 보관함, 저장실",
+    "newMeaning": "창고",
+    "overlap": 0
+  },
+  {
+    "id": "836edbe1-9d7b-468c-b203-44f1672188fc",
+    "term": "やかましい",
+    "reading": "やかましい",
+    "oldMeaning": "까다롭다, 지나치게 비판적이다",
+    "newMeaning": "시끄럽다, 잔소리 많다",
+    "overlap": 0.125
+  },
+  {
+    "id": "ec7ec561-60a4-47f0-be72-f218e4f748ec",
+    "term": "やっぱり",
+    "reading": "やっぱり",
+    "oldMeaning": "역시, 역시 그렇다",
+    "newMeaning": "어쨌든, 결국",
+    "overlap": 0
+  },
+  {
+    "id": "ba7cfa1f-0bc8-446b-aed9-f226fb5f0fff",
+    "term": "ランニング",
+    "reading": "ランニング",
+    "oldMeaning": "달리기, 조깅; 민소매 운동복",
+    "newMeaning": "런닝, 탱크탑",
+    "overlap": 0
+  },
+  {
+    "id": "0517ed72-208b-4172-8964-f96b307c3a73",
+    "term": "快い",
+    "reading": "こころよい",
+    "oldMeaning": "쾌적한, 유쾌한",
+    "newMeaning": "기분 좋은",
+    "overlap": 0
+  },
+  {
+    "id": "595b1760-a613-4c61-94df-11267778a68e",
+    "term": "好ましい",
+    "reading": "このましい",
+    "oldMeaning": "좋은, 호감가는, 바람직한",
+    "newMeaning": "매력적",
+    "overlap": 0
+  },
+  {
+    "id": "b218747a-8a09-4d9f-b1de-6e93b8261bdc",
+    "term": "コメント",
+    "reading": "コメント",
+    "oldMeaning": "댓글, 논평",
+    "newMeaning": "의견",
+    "overlap": 0
+  },
+  {
+    "id": "fc54b59c-d47b-431f-bdcc-784375195cb9",
+    "term": "サイクル",
+    "reading": "サイクル",
+    "oldMeaning": "사이클, 순환",
+    "newMeaning": "주기",
+    "overlap": 0
+  },
+  {
+    "id": "e269b863-95b2-4a7a-9414-c55e77c47f5c",
+    "term": "参照",
+    "reading": "さんしょう",
+    "oldMeaning": "부두, 선착장",
+    "newMeaning": "참조, 참고, 상담",
+    "overlap": 0
+  },
+  {
+    "id": "4e43da35-e8c6-499a-9b26-7da7bbf2f190",
+    "term": "参上",
+    "reading": "さんじょう",
+    "oldMeaning": "찬양, 칭송, 찬미",
+    "newMeaning": "방문하다, 찾아오다",
+    "overlap": 0
+  },
+  {
+    "id": "bf2b1124-8ba6-4b99-ba0b-60fac8a4631b",
+    "term": "残高",
+    "reading": "ざんだか",
+    "oldMeaning": "산비탈, 산기슭",
+    "newMeaning": "잔액, 잔고, 잔여액",
+    "overlap": 0
+  },
+  {
+    "id": "12b21de4-f117-4184-9222-52a9baa9f5f3",
+    "term": "桟橋",
+    "reading": "さんばし",
+    "oldMeaning": "산물, 결과, 열매",
+    "newMeaning": "부두, 선착장",
+    "overlap": 0
+  },
+  {
+    "id": "933632a2-ceb3-4b82-8618-2bdac5640f6c",
+    "term": "賛美",
+    "reading": "さんび",
+    "oldMeaning": "산맥",
+    "newMeaning": "찬미, 찬양",
+    "overlap": 0
+  },
+  {
+    "id": "b348bff9-d4e8-40ce-bc87-c78aad6a3427",
+    "term": "山腹",
+    "reading": "さんぷく",
+    "oldMeaning": "완성, 마무리",
+    "newMeaning": "산기슭",
+    "overlap": 0
+  },
+  {
+    "id": "3ddb8bf2-52ca-449e-aec2-f9ef67a33234",
+    "term": "産婦人科",
+    "reading": "さんふじんか",
+    "oldMeaning": "마감, 끝내기",
+    "newMeaning": "산부인과",
+    "overlap": 0
+  },
+  {
+    "id": "0693a848-6842-4ddd-83c3-7e401166da3c",
+    "term": "産物",
+    "reading": "さんぶつ",
+    "oldMeaning": "완성하다, 끝내다",
+    "newMeaning": "산물, 결과, 과실",
+    "overlap": 0
+  },
+  {
+    "id": "0a9a756c-6b35-4ca6-9963-0c3927d56297",
+    "term": "山脈",
+    "reading": "さんみゃく",
+    "oldMeaning": "사육, 기르기",
+    "newMeaning": "산맥",
+    "overlap": 0
+  },
+  {
+    "id": "de6f5980-fbc5-465a-8995-cccbcaefd4a6",
+    "term": "仕上",
+    "reading": "しあげ",
+    "oldMeaning": "시트, 좌석, 시트지",
+    "newMeaning": "마무리",
+    "overlap": 0
+  },
+  {
+    "id": "c25f195c-4bf7-4a54-a402-8bfa3f82c43a",
+    "term": "仕上げる",
+    "reading": "しあげる",
+    "oldMeaning": "청바지",
+    "newMeaning": "마무리하다",
+    "overlap": 0
+  },
+  {
+    "id": "c25ac204-4ff4-4a19-8e42-2e9372140891",
+    "term": "飼育",
+    "reading": "しいく",
+    "oldMeaning": "구입하다, 비축하다",
+    "newMeaning": "사육, 기르기",
+    "overlap": 0
+  },
+  {
+    "id": "1c01a29e-1e7a-48b8-83e4-feb90605c280",
+    "term": "強いる",
+    "reading": "しいる",
+    "oldMeaning": "조수석",
+    "newMeaning": "강요하다, 강제하다, 억지로",
+    "overlap": 0
+  },
+  {
+    "id": "cd88aab1-3886-4123-a8c1-28d919ad792c",
+    "term": "歯科",
+    "reading": "しか",
+    "oldMeaning": "조수석",
+    "newMeaning": "치과",
+    "overlap": 0
+  },
+  {
+    "id": "0b431924-8c5a-499c-9fad-43b884fdbe09",
+    "term": "自我",
+    "reading": "じが",
+    "oldMeaning": "조수석",
+    "newMeaning": "자아",
+    "overlap": 0
+  },
+  {
+    "id": "3980f6cf-17aa-4a6e-beb5-ce666fb07f8b",
+    "term": "自覚",
+    "reading": "じかく",
+    "oldMeaning": "조수석",
+    "newMeaning": "자각",
+    "overlap": 0
+  },
+  {
+    "id": "61c80da0-aba5-4fbf-bd83-b72a22c1ea1f",
+    "term": "仕掛",
+    "reading": "しかけ",
+    "oldMeaning": "조수석",
+    "newMeaning": "장치, 계략, 기작",
+    "overlap": 0
+  },
+  {
+    "id": "b26b9928-43ea-437f-8f9f-5e4d9e129eeb",
+    "term": "仕掛ける",
+    "reading": "しかける",
+    "oldMeaning": "조수석",
+    "newMeaning": "놓다, 설치하다, 전쟁을 벌이다",
+    "overlap": 0
+  },
+  {
+    "id": "38edbe0b-3110-45f7-9dac-4d517af5ece2",
+    "term": "しかしながら",
+    "reading": "しかしながら",
+    "oldMeaning": "조수석",
+    "newMeaning": "그럼에도 불구하고",
+    "overlap": 0
+  },
+  {
+    "id": "329d289d-58d4-4ca5-92d1-8bbc6f48948f",
+    "term": "色彩",
+    "reading": "しきさい",
+    "oldMeaning": "조수석",
+    "newMeaning": "색채",
+    "overlap": 0
+  },
+  {
+    "id": "37e7c4ec-49e7-4aba-9e27-90119d3b8fbb",
+    "term": "式場",
+    "reading": "しきじょう",
+    "oldMeaning": "조수석",
+    "newMeaning": "예식장",
+    "overlap": 0
+  },
+  {
+    "id": "a94c0b5d-cad6-45c2-acaf-c9426db49477",
+    "term": "しきたり",
+    "reading": "しきたり",
+    "oldMeaning": "조수석",
+    "newMeaning": "관습",
+    "overlap": 0
+  },
+  {
+    "id": "a985d336-69e8-436c-9a77-3df5ba451827",
+    "term": "事業",
+    "reading": "じぎょう",
+    "oldMeaning": "조수석",
+    "newMeaning": "사업, 기업, 프로젝트",
+    "overlap": 0
+  },
+  {
+    "id": "61f6ad5d-7edb-4338-b1ec-889f3092ec5e",
+    "term": "軽蔑",
+    "reading": "けいべつ",
+    "oldMeaning": "조수석",
+    "newMeaning": "경멸, 멸시",
+    "overlap": 0
+  },
+  {
+    "id": "81dd44b8-94da-41cc-aa81-8ea67ba7de98",
+    "term": "扉",
+    "reading": "とびら",
+    "oldMeaning": "조수석",
+    "newMeaning": "문",
+    "overlap": 0
+  },
+  {
+    "id": "2643fb43-2177-44d2-b64a-36a6f0191abd",
+    "term": "経歴",
+    "reading": "けいれき",
+    "oldMeaning": "조수석",
+    "newMeaning": "경력, 이력",
+    "overlap": 0
+  },
+  {
+    "id": "451224fc-0208-4ba9-9be1-99576d68d917",
+    "term": "経路",
+    "reading": "けいろ",
+    "oldMeaning": "조수석",
+    "newMeaning": "경로, 노선, 길",
+    "overlap": 0
+  },
+  {
+    "id": "3d1a50a5-b346-4307-80e2-460b583d2e56",
+    "term": "けがらわしい",
+    "reading": "けがらわしい",
+    "oldMeaning": "조수석",
+    "newMeaning": "더럽다, 불공평한",
+    "overlap": 0
+  },
+  {
+    "id": "4221a6bf-ade3-4cc4-85ce-b929bb88429b",
+    "term": "劇団",
+    "reading": "げきだん",
+    "oldMeaning": "조수석",
+    "newMeaning": "극단",
+    "overlap": 0
+  },
+  {
+    "id": "5e0620e2-422c-4718-86c2-941297e29bdb",
+    "term": "激励",
+    "reading": "げきれい",
+    "oldMeaning": "조수석",
+    "newMeaning": "격려",
+    "overlap": 0
+  },
+  {
+    "id": "97045c82-d9da-45fd-a742-7642f8edb8ba",
+    "term": "元首",
+    "reading": "げんしゅ",
+    "oldMeaning": "국왕, 군주",
+    "newMeaning": "통치자",
+    "overlap": 0
+  },
+  {
+    "id": "36df8402-b7dc-4b50-bd7e-a3240f3b2e47",
+    "term": "どうやら",
+    "reading": "どうやら",
+    "oldMeaning": "어쩐지, 어떻게든",
+    "newMeaning": "그런 것 같다",
+    "overlap": 0
+  },
+  {
+    "id": "3b597542-b714-4ca2-a408-f9d439a08b14",
+    "term": "共働き",
+    "reading": "ともばたらき",
+    "oldMeaning": "부부 공동 소득",
+    "newMeaning": "맞벌이",
+    "overlap": 0
+  },
+  {
+    "id": "062b1f22-3fd9-423c-a9ed-15136f249e7f",
+    "term": "ドライクリーニング",
+    "reading": "ドライクリーニング",
+    "oldMeaning": "운전사, 드라이버, 십자드라이버",
+    "newMeaning": "건조 세탁",
+    "overlap": 0
+  },
+  {
+    "id": "0e2a3cfe-9bda-4bc9-a315-4d1871353753",
+    "term": "ドライブイン",
+    "reading": "ドライブイン",
+    "oldMeaning": "문제, 곤란, 사고",
+    "newMeaning": "드라이브인",
+    "overlap": 0
+  },
+  {
+    "id": "42e507c3-15a8-4ee7-9674-46f35b96071d",
+    "term": "トラブル",
+    "reading": "トラブル",
+    "oldMeaning": "트랜지스터",
+    "newMeaning": "문제, 곤란",
+    "overlap": 0
+  },
+  {
+    "id": "772df46b-068f-4b78-b584-91a7e58e383f",
+    "term": "トランジスター",
+    "reading": "トランジスター",
+    "oldMeaning": "일단, 우선, 당장",
+    "newMeaning": "트랜지스터",
+    "overlap": 0
+  },
+  {
+    "id": "c7014fde-daa8-4034-90ff-284c3c4e1664",
+    "term": "とりあえず",
+    "reading": "とりあえず",
+    "oldMeaning": "취급, 다루기, 관리",
+    "newMeaning": "일단",
+    "overlap": 0
+  },
+  {
+    "id": "0e2401fc-5c3a-41fb-ba6b-338d9d5f1a9e",
+    "term": "取り扱う",
+    "reading": "とりあつかう",
+    "oldMeaning": "신사, 신사문, 신사문",
+    "newMeaning": "다루다",
+    "overlap": 0
+  },
+  {
+    "id": "1fa3b4ba-7415-438a-8ca9-d626cf68582b",
+    "term": "ドリル",
+    "reading": "ドリル",
+    "oldMeaning": "드릴, 드릴 기구",
+    "newMeaning": "연습 문제",
+    "overlap": 0
+  },
+  {
+    "id": "4b6a4bbb-6252-4320-8575-2e2979650aac",
+    "term": "生臭い",
+    "reading": "なまぐさい",
+    "oldMeaning": "생선 냄새가 나다, 피 냄새가 나다, 생선이나 고기 냄새",
+    "newMeaning": "비린내",
+    "overlap": 0
+  },
+  {
+    "id": "3022a6ce-3f87-41a9-8990-a13d2913d74b",
+    "term": "なるたけ",
+    "reading": "なるたけ",
+    "oldMeaning": "최대한, 될 수 있으면",
+    "newMeaning": "되도록",
+    "overlap": 0
+  },
+  {
+    "id": "2f1bc133-163b-4c88-89aa-36634685de76",
+    "term": "～なんか",
+    "reading": "～なんか",
+    "oldMeaning": "~따위, ~같은 것",
+    "newMeaning": "적어도",
+    "overlap": 0
+  },
+  {
+    "id": "48f6bd90-1ee6-42af-a6e9-ee075034024e",
+    "term": "ナンセンス",
+    "reading": "ナンセンス",
+    "oldMeaning": "넌센스, 말도 안 되는 것",
+    "newMeaning": "무의미",
+    "overlap": 0
+  },
+  {
+    "id": "98b24e28-7157-41e4-a095-0e48055b0e22",
+    "term": "ニュー",
+    "reading": "ニュー",
+    "oldMeaning": "뉴",
+    "newMeaning": "새로운",
+    "overlap": 0
+  },
+  {
+    "id": "533ca190-fd44-44fd-b1eb-c46bae450dda",
+    "term": "バー",
+    "reading": "バー",
+    "oldMeaning": "바, 술집",
+    "newMeaning": "주점",
+    "overlap": 0
+  },
+  {
+    "id": "c0234604-41a0-413a-a150-d72d8033735c",
+    "term": "おおい (かん)",
+    "reading": "おおい (かん)",
+    "oldMeaning": "이봐",
+    "newMeaning": "야",
+    "overlap": 0
+  },
+  {
+    "id": "b4c664fb-d882-4c17-a568-c6e26d41634a",
+    "term": "おおげさ",
+    "reading": "おおげさ",
+    "oldMeaning": "개요, 요약",
+    "newMeaning": "거창한, 과장된",
+    "overlap": 0
+  },
+  {
+    "id": "e575554f-6b62-4293-94f9-5f3612c5b561",
+    "term": "大筋",
+    "reading": "おおすじ",
+    "oldMeaning": "하늘, 하늘",
+    "newMeaning": "개요",
+    "overlap": 0
+  },
+  {
+    "id": "412e0649-41f4-471e-9b15-bff65fa9efc5",
+    "term": "大空",
+    "reading": "おおぞら",
+    "oldMeaning": "자동, 오토매틱",
+    "newMeaning": "하늘",
+    "overlap": 0
+  },
+  {
+    "id": "76190ecd-6b28-43a7-966f-067bbd869fe0",
+    "term": "オートマチック",
+    "reading": "オートマチック",
+    "oldMeaning": "대폭, 대규모, 과감한",
+    "newMeaning": "자동의",
+    "overlap": 0
+  },
+  {
+    "id": "851c26bf-b0a6-4436-9baf-9e3623216eb2",
+    "term": "おおまかな",
+    "reading": "おおまかな",
+    "oldMeaning": "홍수",
+    "newMeaning": "거친, 대략적인",
+    "overlap": 0
+  },
+  {
+    "id": "fbfc1821-eb5b-4b75-999d-30e5658b7a98",
+    "term": "大水",
+    "reading": "おおみず",
+    "oldMeaning": "공공",
+    "newMeaning": "홍수",
+    "overlap": 0
+  },
+  {
+    "id": "6b6f7724-ae83-48cb-b73a-5e48710cf605",
+    "term": "公",
+    "reading": "おおやけ",
+    "oldMeaning": "범하다, 위반하다",
+    "newMeaning": "공공의, 공개",
+    "overlap": 0
+  },
+  {
+    "id": "de2bb405-40a2-4c42-81a3-f99584e1cb37",
+    "term": "臆病",
+    "reading": "おくびょう",
+    "oldMeaning": "늦추다, 지연시키다",
+    "newMeaning": "비겁함, 소심함",
+    "overlap": 0
+  },
+  {
+    "id": "849845e4-e70e-478a-8ce8-7267bf2dfbb0",
+    "term": "遅らす",
+    "reading": "おくらす",
+    "oldMeaning": "위엄 있는, 위엄 있는",
+    "newMeaning": "늦추다, 지연시키다",
+    "overlap": 0
+  },
+  {
+    "id": "395fa263-fc8e-457e-9381-dcf392604489",
+    "term": "厳か",
+    "reading": "おごそか",
+    "oldMeaning": "행동, 태도, 행위",
+    "newMeaning": "장엄한",
+    "overlap": 0
+  },
+  {
+    "id": "fd2cdd18-ecf5-4957-af26-7982a055967e",
+    "term": "行い",
+    "reading": "おこない",
+    "oldMeaning": "대접하다, 한턱내다",
+    "newMeaning": "행동",
+    "overlap": 0
+  },
+  {
+    "id": "3ea046c1-a67a-4efc-b29a-b6cab023a237",
+    "term": "お産",
+    "reading": "おさん",
+    "oldMeaning": "밀쳐내다, 밀고 나아가다",
+    "newMeaning": "출산",
+    "overlap": 0
+  },
+  {
+    "id": "6b824455-bef6-47c7-8765-b7aab23829cd",
+    "term": "押し切る",
+    "reading": "おしきる",
+    "oldMeaning": "수컷 (동물)",
+    "newMeaning": "고집하다",
+    "overlap": 0
+  },
+  {
+    "id": "d6e17af1-ef86-4b9a-a7ce-ebd916e765e1",
+    "term": "押し寄せる",
+    "reading": "おしよせる",
+    "oldMeaning": "최대한, 늦어도",
+    "newMeaning": "몰려오다, 밀려오다",
+    "overlap": 0
+  },
+  {
+    "id": "9e150215-b50b-4ee0-a4cb-53283aa6a6db",
+    "term": "雄",
+    "reading": "おす",
+    "oldMeaning": "두려움, 공포",
+    "newMeaning": "수컷",
+    "overlap": 0
+  },
+  {
+    "id": "6e013f56-0d2e-4817-a7c0-65c708da1215",
+    "term": "御世辞",
+    "reading": "おせじ",
+    "oldMeaning": "경외심, 감탄",
+    "newMeaning": "아첨, 칭찬",
+    "overlap": 0
+  },
+  {
+    "id": "0f7d044e-57e0-4b4f-9895-8ce74c937220",
+    "term": "落ち込む",
+    "reading": "おちこむ",
+    "oldMeaning": "침착, 냉정",
+    "newMeaning": "우울해지다",
+    "overlap": 0
+  },
+  {
+    "id": "a2cd186a-4bfb-48e3-afc3-9400423279a9",
+    "term": "落ち着き",
+    "reading": "おちつき",
+    "oldMeaning": "낙엽",
+    "newMeaning": "침착",
+    "overlap": 0
+  },
+  {
+    "id": "bdee99c8-3380-4b22-9a86-4857695006f6",
+    "term": "落葉",
+    "reading": "おちば",
+    "oldMeaning": "2등, 이등",
+    "newMeaning": "낙엽",
+    "overlap": 0
+  },
+  {
+    "id": "36a9b68d-265c-445d-a8e7-afa0e9eb6032",
+    "term": "乙",
+    "reading": "おつ",
+    "oldMeaning": "심부름",
+    "newMeaning": "2위",
+    "overlap": 0
+  },
+  {
+    "id": "7544b383-6619-4056-b3ca-f74ee77352bf",
+    "term": "おっかない",
+    "reading": "おっかない",
+    "oldMeaning": "포기하다, 포기하다",
+    "newMeaning": "무서운",
+    "overlap": 0
+  },
+  {
+    "id": "5cffa9e3-c62c-45a3-adf0-0afab4f84ec1",
+    "term": "お袋",
+    "reading": "おふくろ",
+    "oldMeaning": "어머니",
+    "newMeaning": "엄마",
+    "overlap": 0
+  },
+  {
+    "id": "40361193-9d22-4da7-95c4-b9ede4a71f62",
+    "term": "河川",
+    "reading": "かせん",
+    "oldMeaning": "강",
+    "newMeaning": "하천",
+    "overlap": 0
+  },
+  {
+    "id": "31d06c28-3dec-4b45-bdbf-edbff4901879",
+    "term": "且つ",
+    "reading": "かつ",
+    "oldMeaning": "그러나, 그리고",
+    "newMeaning": "또한",
+    "overlap": 0
+  },
+  {
+    "id": "a3b95734-be74-4965-937b-bdb567e01df8",
+    "term": "がっくり",
+    "reading": "がっくり",
+    "oldMeaning": "실망, 낙담",
+    "newMeaning": "가슴 아프다",
+    "overlap": 0
+  },
+  {
+    "id": "c2cb08a2-4798-400f-83e9-1ee6c8b00ee0",
+    "term": "がっちり",
+    "reading": "がっちり",
+    "oldMeaning": "단단히, 꽉",
+    "newMeaning": "튼튼하게",
+    "overlap": 0
+  },
+  {
+    "id": "6b2c5cb9-72bb-4772-a548-3487aa3be7f1",
+    "term": "カムバック",
+    "reading": "カムバック",
+    "oldMeaning": "컴백, 복귀",
+    "newMeaning": "재기",
+    "overlap": 0
+  },
+  {
+    "id": "7f742472-f012-4ed0-9589-1cfbcd9736d0",
+    "term": "気立て",
+    "reading": "きだて",
+    "oldMeaning": "기질, 성격, 성향",
+    "newMeaning": "다정함",
+    "overlap": 0
+  },
+  {
+    "id": "1effde73-d2a9-489b-9c91-efc462f74d66",
+    "term": "几帳面",
+    "reading": "きちょうめん",
+    "oldMeaning": "꼼꼼함, 규칙적, 성실함",
+    "newMeaning": "꼼꼼한, 시간엄수의, 차분한",
+    "overlap": 0.14285714285714285
+  },
+  {
+    "id": "f6a91188-e4ec-4635-96bd-8d23438f81a7",
+    "term": "教習",
+    "reading": "きょうしゅう",
+    "oldMeaning": "훈련, 지도",
+    "newMeaning": "연수",
+    "overlap": 0
+  },
+  {
+    "id": "f2f8bb18-47a6-455e-8a62-353f02d249bc",
+    "term": "居住",
+    "reading": "きょじゅう",
+    "oldMeaning": "거주, 살기",
+    "newMeaning": "국한, 제한",
+    "overlap": 0
+  },
+  {
+    "id": "509d6c8a-63cc-494d-98ad-980402e7f002",
+    "term": "～きり",
+    "reading": "～きり",
+    "oldMeaning": "~뿐, ~만",
+    "newMeaning": "단지",
+    "overlap": 0
+  },
+  {
+    "id": "d45d21b9-63ef-4cb5-a32f-f68b0768258d",
+    "term": "愚痴",
+    "reading": "ぐち",
+    "oldMeaning": "불평, 투덜거림",
+    "newMeaning": "푸념",
+    "overlap": 0
+  },
+  {
+    "id": "15365cde-3f1f-4d03-8f38-5b694c91f5d9",
+    "term": "ぐっと",
+    "reading": "ぐっと",
+    "oldMeaning": "확실히, 단단히, 더",
+    "newMeaning": "꽉",
+    "overlap": 0
+  },
+  {
+    "id": "89b07b3e-d7b1-4aa8-846b-b00e6b4d8b37",
+    "term": "敬具",
+    "reading": "けいぐ",
+    "oldMeaning": "경구, 성실히 (편지 끝에 사용)",
+    "newMeaning": "올림",
+    "overlap": 0
+  },
+  {
+    "id": "2618fff7-e39e-413a-a375-8e0637256515",
+    "term": "下心",
+    "reading": "したごころ",
+    "oldMeaning": "숨은 의도, 동기",
+    "newMeaning": "속내",
+    "overlap": 0
+  },
+  {
+    "id": "e18db2f0-361e-45c0-92e7-207e2264c7a2",
+    "term": "扱い",
+    "reading": "あつかい",
+    "oldMeaning": "대우, 처리",
+    "newMeaning": "취급",
+    "overlap": 0
+  },
+  {
+    "id": "b1c5aa34-5b38-4c60-bf6d-5bd4d68fbb8f",
+    "term": "～合せ",
+    "reading": "～あわせ",
+    "oldMeaning": "모두, 총합",
+    "newMeaning": "전부",
+    "overlap": 0
+  },
+  {
+    "id": "f5d5052c-afc0-4569-a33b-4ce53cab0911",
+    "term": "アンコール",
+    "reading": "アンコール",
+    "oldMeaning": "앵콜, 재청",
+    "newMeaning": "앙코르",
+    "overlap": 0
+  },
+  {
+    "id": "ff4c6225-3783-44b5-a9c3-e09b9292d929",
+    "term": "安静",
+    "reading": "あんせい",
+    "oldMeaning": "안정",
+    "newMeaning": "휴식",
+    "overlap": 0
+  },
+  {
+    "id": "25e3ba35-e6d0-4259-8590-5c94d540a3c3",
+    "term": "所在",
+    "reading": "しょざい",
+    "oldMeaning": "소재, 소재지",
+    "newMeaning": "행방",
+    "overlap": 0
+  },
+  {
+    "id": "08f19d4d-285b-4936-8711-441b9c94dd60",
+    "term": "人体",
+    "reading": "じんたい",
+    "oldMeaning": "빠르다, 신속하다",
+    "newMeaning": "인체",
+    "overlap": 0
+  },
+  {
+    "id": "b14ee483-2bee-4a34-ac6e-bc0bebc4d30b",
+    "term": "スト",
+    "reading": "スト",
+    "oldMeaning": "봄, 스프링",
+    "newMeaning": "파업",
+    "overlap": 0
+  },
+  {
+    "id": "42ab43ef-5e8d-489f-ac8b-7b630c5a5cee",
+    "term": "ストロー",
+    "reading": "ストロー",
+    "oldMeaning": "우주, 공간",
+    "newMeaning": "빨대",
+    "overlap": 0
+  },
+  {
+    "id": "b5b8c041-f416-4b5a-b345-ea0ac06e5f1c",
+    "term": "ストロボ",
+    "reading": "ストロボ",
+    "oldMeaning": "흠뻑 젖다, 흠뻑 적시다",
+    "newMeaning": "스트로보스코프",
+    "overlap": 0
+  },
+  {
+    "id": "5ca51f87-9c5a-40a6-ae41-2128b4617c44",
+    "term": "すばしこい",
+    "reading": "すばしこい",
+    "oldMeaning": "스포츠카",
+    "newMeaning": "재빠른",
+    "overlap": 0
+  },
+  {
+    "id": "0c6138fe-2be0-430e-8526-1def17e8657e",
+    "term": "素早い",
+    "reading": "すばやい",
+    "oldMeaning": "맑게 하다, 깨끗이 하다, 듣다",
+    "newMeaning": "빠른",
+    "overlap": 0
+  },
+  {
+    "id": "d3ffe817-33a4-40bb-bbbb-f793e5d3922c",
+    "term": "スプリング",
+    "reading": "スプリング",
+    "oldMeaning": "끝내다, 해결하다, 없이 하다",
+    "newMeaning": "스프링",
+    "overlap": 0
+  },
+  {
+    "id": "21068712-c588-430e-a810-57df44982f73",
+    "term": "スペース",
+    "reading": "スペース",
+    "oldMeaning": "신속한",
+    "newMeaning": "공간",
+    "overlap": 0
+  },
+  {
+    "id": "cd3f1b2a-cac8-4276-8f6a-0f6add369650",
+    "term": "ずぶぬれ",
+    "reading": "ずぶぬれ",
+    "oldMeaning": "슬랙스",
+    "newMeaning": "흠뻑 젖은, 완전히 젖은",
+    "overlap": 0
+  },
+  {
+    "id": "ce0e8dc4-31f2-4d3c-9713-a10cab306404",
+    "term": "スポーツカー",
+    "reading": "スポーツカー",
+    "oldMeaning": "줄지어, 일렬로",
+    "newMeaning": "스포츠카",
+    "overlap": 0
+  },
+  {
+    "id": "9c64c0d9-8848-4541-b135-1b451b703e7e",
+    "term": "澄ます",
+    "reading": "すます",
+    "oldMeaning": "질질 끌다, 코를 훌쩍이다",
+    "newMeaning": "맑게 하다, 명료하게 하다, 경청하다",
+    "overlap": 0.125
+  },
+  {
+    "id": "ebbd62fb-4185-4a19-bb0e-cc7c86aaa64a",
+    "term": "清ます",
+    "reading": "すます",
+    "oldMeaning": "차이, 간격",
+    "newMeaning": "맑게 하다, 정리하다, 경청하다",
+    "overlap": 0
+  },
+  {
+    "id": "495b888a-e49c-4eba-a4fa-4e95af89ad45",
+    "term": "済ます",
+    "reading": "すます",
+    "oldMeaning": "우연한 만남",
+    "newMeaning": "끝내다, 처리하다, 없이 지내다",
+    "overlap": 0
+  },
+  {
+    "id": "8b05ef8b-94c4-4dc0-801a-a21e2639f61b",
+    "term": "ずらっと",
+    "reading": "ずらっと",
+    "oldMeaning": "생육, 성장, 번식",
+    "newMeaning": "줄지어",
+    "overlap": 0
+  },
+  {
+    "id": "16cadc4c-2a5d-4c8e-8b7f-dc3d2d8eb193",
+    "term": "ずるずる",
+    "reading": "ずるずる",
+    "oldMeaning": "성장, 기르기",
+    "newMeaning": "질질",
+    "overlap": 0
+  },
+  {
+    "id": "0fbd5865-d5be-4846-ad7b-9daa316297d2",
+    "term": "ずれ",
+    "reading": "ずれ",
+    "oldMeaning": "성과, 결실",
+    "newMeaning": "차이, 간격",
+    "overlap": 0
+  },
+  {
+    "id": "4fcd3ffe-5e36-4e75-aa34-9fedf0d2a3e8",
+    "term": "すれちがい",
+    "reading": "すれちがい",
+    "oldMeaning": "정답, 올바른 답, 해결책",
+    "newMeaning": "우연한 만남",
+    "overlap": 0
+  },
+  {
+    "id": "7cd21446-93c4-4ae0-85e9-263b029a5603",
+    "term": "擦れる",
+    "reading": "すれる",
+    "oldMeaning": "정의, 공정, 의로움",
+    "newMeaning": "문지르다",
+    "overlap": 0
+  },
+  {
+    "id": "abe3af0b-f560-415b-b3b0-266a96caf569",
+    "term": "すんなり",
+    "reading": "すんなり",
+    "oldMeaning": "생계, 생계수단",
+    "newMeaning": "무난히, 날씬하다",
+    "overlap": 0
+  },
+  {
+    "id": "f4da662a-0a2e-4dc4-b32a-c94859b739cd",
+    "term": "生育",
+    "reading": "せいいく",
+    "oldMeaning": "정권, 정치권력",
+    "newMeaning": "발육",
+    "overlap": 0
+  },
+  {
+    "id": "efd6939f-791f-4c45-b7af-66a5feb7bc98",
+    "term": "成育",
+    "reading": "せいいく",
+    "oldMeaning": "별자리",
+    "newMeaning": "성장, 양육",
+    "overlap": 0
+  },
+  {
+    "id": "234df2c8-3632-4f6b-ba01-9e55c704f2eb",
+    "term": "成果",
+    "reading": "せいか",
+    "oldMeaning": "제재, 제재조치, 처벌",
+    "newMeaning": "성과, 결과",
+    "overlap": 0
+  },
+  {
+    "id": "f7dcebd9-8fd8-4b8a-9b50-134a3d583798",
+    "term": "正義",
+    "reading": "せいぎ",
+    "oldMeaning": "생사, 생명과 사망",
+    "newMeaning": "정의, 옳음, 의로움",
+    "overlap": 0
+  },
+  {
+    "id": "babd0f14-9d01-44d0-9735-6826d13e3feb",
+    "term": "生計",
+    "reading": "せいけい",
+    "oldMeaning": "정지, 정지 상태, 정지",
+    "newMeaning": "생계",
+    "overlap": 0
+  },
+  {
+    "id": "93029869-b46b-451a-9870-c83a935cfecd",
+    "term": "政権",
+    "reading": "せいけん",
+    "oldMeaning": "성실, 성의, 충실",
+    "newMeaning": "정권",
+    "overlap": 0
+  },
+  {
+    "id": "de1acba9-a5be-41a4-9084-b03b95494d6e",
+    "term": "星座",
+    "reading": "せいざ",
+    "oldMeaning": "성숙, 익음",
+    "newMeaning": "별자리",
+    "overlap": 0
+  },
+  {
+    "id": "32c468ec-d206-4905-9e82-11c80370399f",
+    "term": "制裁",
+    "reading": "せいさい",
+    "oldMeaning": "청춘, 젊음, 사춘기",
+    "newMeaning": "제재",
+    "overlap": 0
+  },
+  {
+    "id": "e2c96b2e-c420-474b-90d2-fe27f6b6f194",
+    "term": "政策",
+    "reading": "せいさく",
+    "oldMeaning": "순수, 순결, 청순",
+    "newMeaning": "정책",
+    "overlap": 0
+  },
+  {
+    "id": "45d511e3-5b35-448e-abc3-cbcdb86369ce",
+    "term": "生死",
+    "reading": "せいし",
+    "oldMeaning": "성경",
+    "newMeaning": "생사",
+    "overlap": 0
+  },
+  {
+    "id": "c58f071f-d842-4f3d-bf87-f0ac9a594d5e",
+    "term": "誠実",
+    "reading": "せいじつ",
+    "oldMeaning": "지배하다, 통제하다, 명령하다",
+    "newMeaning": "성실한, 정직한, 충실한",
+    "overlap": 0
+  },
+  {
+    "id": "a8897610-cf86-4e90-ad0d-71af107d58bd",
+    "term": "成熟",
+    "reading": "せいじゅく",
+    "oldMeaning": "질서 정연, 정연, 체계적",
+    "newMeaning": "성숙",
+    "overlap": 0
+  },
+  {
+    "id": "133c32fb-8d0b-47b2-80cf-a8e342ecdac9",
+    "term": "そこら",
+    "reading": "そこら",
+    "oldMeaning": "여기저기, 어딘가, 어디쯤",
+    "newMeaning": "곳곳에",
+    "overlap": 0
+  },
+  {
+    "id": "35d5104d-6cb3-4843-b3f8-5c285dee6d98",
+    "term": "外方",
+    "reading": "そっぽ",
+    "oldMeaning": "반대쪽 보기, 등지기",
+    "newMeaning": "외면하다",
+    "overlap": 0
+  },
+  {
+    "id": "0946ed3f-ab25-4db9-bbb8-b00b4121fc73",
+    "term": "そらす",
+    "reading": "そらす",
+    "oldMeaning": "구부리다, 휜다, 비틀다",
+    "newMeaning": "굽히다, 왜곡하다",
+    "overlap": 0.16666666666666666
+  },
+  {
+    "id": "6bc0065a-31fb-4526-91ec-a330277c1469",
+    "term": "短歌",
+    "reading": "たんか",
+    "oldMeaning": "31자 일본 시",
+    "newMeaning": "단가",
+    "overlap": 0
+  },
+  {
+    "id": "cc064883-3115-45ea-9024-9eaac44c262e",
+    "term": "着席",
+    "reading": "ちゃくせき",
+    "oldMeaning": "앉다, 자리",
+    "newMeaning": "착석",
+    "overlap": 0
+  },
+  {
+    "id": "b30b01a7-f809-4c79-b460-5879d6c9eefa",
+    "term": "茶の間",
+    "reading": "ちゃのま",
+    "oldMeaning": "일본식 거실",
+    "newMeaning": "다다미방",
+    "overlap": 0
+  },
+  {
+    "id": "7a2cfa0e-6add-4f1a-ab47-94bf04b8d98d",
+    "term": "ちらっと",
+    "reading": "ちらっと",
+    "oldMeaning": "흘끗 봄, 우연히 봄",
+    "newMeaning": "언뜻",
+    "overlap": 0
+  },
+  {
+    "id": "46ace3fe-d525-4960-a5d0-6286e08476d7",
+    "term": "痛切",
+    "reading": "つうせつ",
+    "oldMeaning": "날카로움, 깊은 감정",
+    "newMeaning": "간절한",
+    "overlap": 0
+  },
+  {
+    "id": "3444f7dd-b53a-40f0-98a8-0171e45cce6d",
+    "term": "手元",
+    "reading": "てもと",
+    "oldMeaning": "손에 쥔 돈, 소지품, 평소 기술",
+    "newMeaning": "현금",
+    "overlap": 0
+  },
+  {
+    "id": "4a56599f-ad46-4d25-a6d2-e0a3022830d1",
+    "term": "田園",
+    "reading": "でんえん",
+    "oldMeaning": "전원, 시골 지역",
+    "newMeaning": "농촌",
+    "overlap": 0
+  },
+  {
+    "id": "730d86b3-6b83-47d5-a9cb-4fd318c3c9df",
+    "term": "天下",
+    "reading": "てんか",
+    "oldMeaning": "전국, 온 나라",
+    "newMeaning": "세상, 천하",
+    "overlap": 0
+  },
+  {
+    "id": "82e3241e-cf29-426c-b239-7fbc0ece9c1d",
+    "term": "浪費",
+    "reading": "ろうひ",
+    "oldMeaning": "노력, 수고, 애씀",
+    "newMeaning": "낭비, 사치",
+    "overlap": 0
+  },
+  {
+    "id": "5b3d34d3-79f1-4b20-ac28-29c99fc16cc4",
+    "term": "労力",
+    "reading": "ろうりょく",
+    "oldMeaning": "케이블카, 곤돌라",
+    "newMeaning": "노력",
+    "overlap": 0
+  },
+  {
+    "id": "df1a2782-e159-4e80-80e4-8da530fd2b19",
+    "term": "ロープ",
+    "reading": "ロープ",
+    "oldMeaning": "괜찮은, 만족스러운, 적당한",
+    "newMeaning": "밧줄",
+    "overlap": 0
+  },
+  {
+    "id": "185e6c79-89ad-4fcc-be7c-3d8c63bfe60f",
+    "term": "ロマンチック",
+    "reading": "ロマンチック",
+    "oldMeaning": "논의, 토론",
+    "newMeaning": "낭만적",
+    "overlap": 0
+  },
+  {
+    "id": "bec26d5b-a35d-46a6-a919-a6cbbb224198",
+    "term": "論理",
+    "reading": "ろんり",
+    "oldMeaning": "행성",
+    "newMeaning": "논리",
+    "overlap": 0
+  },
+  {
+    "id": "4a3d4cd5-e0d2-46d5-ad59-0f1961a6b122",
+    "term": "惑星",
+    "reading": "わくせい",
+    "oldMeaning": "기술, 기법",
+    "newMeaning": "행성",
+    "overlap": 0
+  },
+  {
+    "id": "76494372-0df6-454b-9ff8-2fbc09d43c9e",
+    "term": "～割",
+    "reading": "～わり",
+    "oldMeaning": "~퍼센트, ~할 때",
+    "newMeaning": "백분율",
+    "overlap": 0
+  },
+  {
+    "id": "b861fafd-11b5-4263-8e31-0cd7656d26c7",
+    "term": "弾く",
+    "reading": "はじく",
+    "oldMeaning": "파자마",
+    "newMeaning": "치다",
+    "overlap": 0
+  },
+  {
+    "id": "a3edea2f-4cee-4cd1-b640-f34f5f3427aa",
+    "term": "パジャマ",
+    "reading": "パジャマ",
+    "oldMeaning": "수줍어하다, 부끄러워하다, 얼굴이 붉어지다",
+    "newMeaning": "잠옷",
+    "overlap": 0
+  },
+  {
+    "id": "ba88c038-bf93-4b48-b32e-587f35e3616a",
+    "term": "恥じる",
+    "reading": "はじる",
+    "oldMeaning": "다리놓기, 중개",
+    "newMeaning": "부끄럽다, 창피하다",
+    "overlap": 0.16666666666666666
+  },
+  {
+    "id": "a89e1054-bfb8-4560-a1af-9357be12de57",
+    "term": "失脚",
+    "reading": "しっきゃく",
+    "oldMeaning": "권좌를 잃다, 타도당하다, 몰락하다",
+    "newMeaning": "실각",
+    "overlap": 0
+  },
+  {
+    "id": "67b1641a-9d71-4227-870b-a3cb7186bcb1",
+    "term": "干し物",
+    "reading": "ほしもの",
+    "oldMeaning": "말린 빨래",
+    "newMeaning": "마른 옷, 건조한 세탁물",
+    "overlap": 0
+  },
+  {
+    "id": "19045168-a5dc-4ea8-b354-148c2e2b91f4",
+    "term": "ファイト",
+    "reading": "ファイト",
+    "oldMeaning": "파이팅, 힘내기",
+    "newMeaning": "싸움",
+    "overlap": 0
+  },
+  {
+    "id": "07177f30-399a-4b90-8eb7-b9eaa5e73f05",
+    "term": "封",
+    "reading": "ふう",
+    "oldMeaning": "봉인, 봉함",
+    "newMeaning": "도장",
+    "overlap": 0
+  },
+  {
+    "id": "125c4b11-4d3c-4f37-ac66-8857f4965bfe",
+    "term": "沸騰",
+    "reading": "ふっとう",
+    "oldMeaning": "끓음, 끓기, 끓다",
+    "newMeaning": "비등",
+    "overlap": 0
+  },
+  {
+    "id": "c890b690-c8d5-4a84-b1e1-d28f5caf6916",
+    "term": "平方",
+    "reading": "へいほう",
+    "oldMeaning": "제곱, 평방",
+    "newMeaning": "정사각, 정사각형",
+    "overlap": 0
+  },
+  {
+    "id": "d547183f-a590-4a7f-a6d7-480bc3df43b6",
+    "term": "辟易",
+    "reading": "へきえき",
+    "oldMeaning": "경악, 움찔, 위축, 겁먹음",
+    "newMeaning": "질색하다, 질리다",
+    "overlap": 0
+  },
+  {
+    "id": "50bd553a-e955-4df2-be0d-fd44c8719273",
+    "term": "ポーズ",
+    "reading": "ポーズ",
+    "oldMeaning": "포즈, 자세",
+    "newMeaning": "일시정지",
+    "overlap": 0
+  },
+  {
+    "id": "e3f05365-ee87-45f4-aeae-c29fc2dce6fd",
+    "term": "干し～",
+    "reading": "ほし～",
+    "oldMeaning": "말린 ~",
+    "newMeaning": "마른 ~",
+    "overlap": 0
+  },
+  {
+    "id": "268f38ba-1151-4583-afb4-87a0ef137cf1",
+    "term": "満月",
+    "reading": "まんげつ",
+    "oldMeaning": "보름달",
+    "newMeaning": "만월",
+    "overlap": 0
+  },
+  {
+    "id": "529c061c-3188-408f-8e34-eb11a8235b68",
+    "term": "無念",
+    "reading": "むねん",
+    "oldMeaning": "한, 후회",
+    "newMeaning": "유감",
+    "overlap": 0
+  },
+  {
+    "id": "7b1317d5-c405-4971-98c7-2bfd6713e567",
+    "term": "メディア",
+    "reading": "メディア",
+    "oldMeaning": "미디어",
+    "newMeaning": "매체",
+    "overlap": 0
+  },
+  {
+    "id": "f4ad9b6b-b64c-4bc2-8d0f-42e70352188d",
+    "term": "もはや",
+    "reading": "もはや",
+    "oldMeaning": "이제, 이미",
+    "newMeaning": "벌써",
+    "overlap": 0
+  },
+  {
+    "id": "d5a9f2a9-49aa-4758-b32b-a62ead42e07c",
+    "term": "役場",
+    "reading": "やくば",
+    "oldMeaning": "주민센터, 시청",
+    "newMeaning": "읍사무소",
+    "overlap": 0
+  },
+  {
+    "id": "94613a1f-e45c-4977-b835-d298ae4f486a",
+    "term": "～油",
+    "reading": "～ゆ",
+    "oldMeaning": "~유",
+    "newMeaning": "기름",
+    "overlap": 0
+  },
+  {
+    "id": "f328ec7c-e8bd-4100-819f-94a7585f93f6",
+    "term": "余興",
+    "reading": "よきょう",
+    "oldMeaning": "여흥, 오락",
+    "newMeaning": "부대 공연",
+    "overlap": 0
+  },
+  {
+    "id": "53c8fdb3-300b-48f7-a390-ce56f9551fef",
+    "term": "善し悪し",
+    "reading": "よしあし",
+    "oldMeaning": "선악, 장단점, 품질",
+    "newMeaning": "좋고 나쁨",
+    "overlap": 0
+  },
+  {
+    "id": "e1689884-8f45-47dd-8f4f-2e271ef3c930",
+    "term": "余所見",
+    "reading": "よそみ",
+    "oldMeaning": "외면, 흘겨봄",
+    "newMeaning": "시선 돌림",
+    "overlap": 0
+  },
+  {
+    "id": "29f7fd7a-2138-43fb-9c4e-98546920193a",
+    "term": "良識",
+    "reading": "りょうしき",
+    "oldMeaning": "선량, 분별력",
+    "newMeaning": "식견",
+    "overlap": 0
+  },
+  {
+    "id": "5e1fe799-5f7a-4c53-b5ba-5226d566b240",
+    "term": "レギュラー",
+    "reading": "レギュラー",
+    "oldMeaning": "레귤러, 정기적인",
+    "newMeaning": "일반",
+    "overlap": 0
+  },
+  {
+    "id": "3cd56954-b124-417f-884b-1c61c0a5563d",
+    "term": "レディー",
+    "reading": "レディー",
+    "oldMeaning": "레이디, 숙녀",
+    "newMeaning": "여자",
+    "overlap": 0
+  },
+  {
+    "id": "4014fc9b-8ce9-449c-94ab-6280711feacc",
+    "term": "バット",
+    "reading": "バット",
+    "oldMeaning": "방망이, 박쥐; 대량 저장 탱크",
+    "newMeaning": "배트",
+    "overlap": 0
+  },
+  {
+    "id": "7c402066-2d9e-49c3-82c8-68baa8f21318",
+    "term": "ひたすら",
+    "reading": "ひたすら",
+    "oldMeaning": "꾸준히, 열심히",
+    "newMeaning": "오로지",
+    "overlap": 0
+  },
+  {
+    "id": "d283b729-a6c1-4876-a8a1-645ed1d6fa42",
+    "term": "匹敵",
+    "reading": "ひってき",
+    "oldMeaning": "비교하다, 경쟁하다, 동등하다",
+    "newMeaning": "필적",
+    "overlap": 0
+  },
+  {
+    "id": "5d446f8b-9580-46b3-a03c-4ba60961aa91",
+    "term": "四日",
+    "reading": "よっか",
+    "oldMeaning": "4일, 4월 4일",
+    "newMeaning": "사흘",
+    "overlap": 0
+  },
+  {
+    "id": "888e3105-4433-4de0-9eb7-7cf030144f31",
+    "term": "随分",
+    "reading": "ずいぶん",
+    "oldMeaning": "대단히",
+    "newMeaning": "매우, 꽤",
+    "overlap": 0
+  },
+  {
+    "id": "3d2946ce-ca0a-43cd-b961-7f704c26e562",
+    "term": "もしかすると",
+    "reading": "もしかすると",
+    "oldMeaning": "혹시, 아마도, 우연히",
+    "newMeaning": "어쩌면",
+    "overlap": 0
+  },
+  {
+    "id": "9ff26b4b-a206-4e2d-a248-1444124d678d",
+    "term": "仕上がり",
+    "reading": "しあがり",
+    "oldMeaning": "강요하다, 주장하다",
+    "newMeaning": "완성",
+    "overlap": 0
+  },
+  {
+    "id": "d4e58ccb-d9df-42b5-8033-cb89a70f5316",
+    "term": "人格",
+    "reading": "じんかく",
+    "oldMeaning": "민첩하다, 영리하다, 빠르다",
+    "newMeaning": "인격, 성격",
+    "overlap": 0
+  },
+  {
+    "id": "b70370d8-e307-4128-b143-34d110918204",
+    "term": "ストライキ",
+    "reading": "ストライキ",
+    "oldMeaning": "단호하게, 솔직하게, 거리낌 없이",
+    "newMeaning": "파업",
+    "overlap": 0
+  },
+  {
+    "id": "2bd127d5-f32c-49ed-acbe-dd02535379c8",
+    "term": "すみやか",
+    "reading": "すみやか",
+    "oldMeaning": "문지르다, 마찰하다",
+    "newMeaning": "속히",
+    "overlap": 0
+  },
+  {
+    "id": "62eec770-5cda-4a18-909f-5a48d68bd543",
+    "term": "新着",
+    "reading": "しんちゃく",
+    "oldMeaning": "newly arrived, newly received",
+    "newMeaning": "신착, 새로 도착",
+    "overlap": 0
+  },
+  {
+    "id": "7ce23566-324f-4947-8c41-004a4f219b00",
+    "term": "静岡",
+    "reading": "しずおか",
+    "oldMeaning": "Shizuoka (city, prefecture)",
+    "newMeaning": "시즈오카 (도시, 현)",
+    "overlap": 0
+  },
+  {
+    "id": "337f1d94-22b5-4346-931c-b4614444c4eb",
+    "term": "富士",
+    "reading": "ふじ",
+    "oldMeaning": "Mount Fuji",
+    "newMeaning": "후지산",
+    "overlap": 0
+  },
+  {
+    "id": "9e84a870-4b8f-4c96-ae7d-7e66a67ecdc7",
+    "term": "界",
+    "reading": "かい",
+    "oldMeaning": "community, circles, world",
+    "newMeaning": "계, 세계, 업계",
+    "overlap": 0
+  },
+  {
+    "id": "839efa72-fbd2-4b0e-addd-01f855b19bae",
+    "term": "産",
+    "reading": "さん",
+    "oldMeaning": "(giving) birth, childbirth, delivery",
+    "newMeaning": "출산, 분만",
+    "overlap": 0
+  },
+  {
+    "id": "f98b5e34-4888-45ca-93fb-ba5c7ebfad73",
+    "term": "第",
+    "reading": "だい",
+    "oldMeaning": "prefix for forming ordinal numbers",
+    "newMeaning": "제~, 서수 접두사",
+    "overlap": 0
+  },
+  {
+    "id": "652f7c01-febb-4148-b1a5-9a839e8d7644",
+    "term": "回",
+    "reading": "かい",
+    "oldMeaning": "counter for occurrences",
+    "newMeaning": "회",
+    "overlap": 0
+  },
+  {
+    "id": "851b33b9-f9ad-4bbd-a369-ed408e9732b5",
+    "term": "絶景",
+    "reading": "ぜっけい",
+    "oldMeaning": "superb view, picturesque scenery",
+    "newMeaning": "절경, 멋진 경치",
+    "overlap": 0
+  },
+  {
+    "id": "f1523d55-4dd1-47bb-b455-c78c334c7262",
+    "term": "秀",
+    "reading": "しゅう",
+    "oldMeaning": "preeminence, supremacy, distinction",
+    "newMeaning": "수월함, 탁월함, 우수",
+    "overlap": 0
+  },
+  {
+    "id": "72761afa-4011-4033-b0b1-44e8f0ecb61c",
+    "term": "景",
+    "reading": "けい",
+    "oldMeaning": "vista, view, scene",
+    "newMeaning": "경치, 전망, 풍경",
+    "overlap": 0
+  },
+  {
+    "id": "775bbf49-64d7-4ccd-aea6-fd50f7d9bdb7",
+    "term": "遺産",
+    "reading": "いさん",
+    "oldMeaning": "inheritance, bequest, legacy",
+    "newMeaning": "유산, 상속",
+    "overlap": 0
+  },
+  {
+    "id": "70e1fc2c-c7ed-4245-861f-07dbc5d9cc8f",
+    "term": "コン",
+    "reading": "コン",
+    "oldMeaning": "Gong, Khong, Conn",
+    "newMeaning": "공, 쿵, 콘",
+    "overlap": 0
+  },
+  {
+    "id": "55d00020-a29e-4a03-a2e7-77af5af99dcd",
+    "term": "入",
+    "reading": "しお",
+    "oldMeaning": "counter for soakings (of fabric in a dye)",
+    "newMeaning": "염지 횟수",
+    "overlap": 0
+  },
+  {
+    "id": "3616fa89-7149-4b01-bbca-39dd80d76617",
+    "term": "展",
+    "reading": "てん",
+    "oldMeaning": "exhibition, exhibit",
+    "newMeaning": "전시",
+    "overlap": 0
+  },
+  {
+    "id": "381f63ed-bd26-4d28-a113-1530068bd00e",
+    "term": "開催",
+    "reading": "かいさい",
+    "oldMeaning": "holding a meeting, open an exhibition",
+    "newMeaning": "개최, 행사 개막",
+    "overlap": 0
+  },
+  {
+    "id": "98f19eda-de5d-483e-9889-e7b93c685fe3",
+    "term": "御朱印",
+    "reading": "ごしゅいん",
+    "oldMeaning": "goshuin, seal stamp given to worshippers and visitors to shrines and temples",
+    "newMeaning": "고슈인, 신사 절 도장",
+    "overlap": 0
+  },
+  {
+    "id": "02b04721-19e4-4cf4-8fb2-d11d3170c4ec",
+    "term": "御",
+    "reading": "ご",
+    "oldMeaning": "honorific/polite/humble prefix",
+    "newMeaning": "존경어 접두사, 경어 접두사",
+    "overlap": 0
+  },
+  {
+    "id": "f6594b0e-5c43-4cfa-bea0-082eb2523f1b",
+    "term": "挙",
+    "reading": "きょ",
+    "oldMeaning": "action, behavior, behaviour",
+    "newMeaning": "행동, 거동",
+    "overlap": 0
+  },
+  {
+    "id": "e08877d3-29a0-4002-bb5e-be9cf06b0c3d",
+    "term": "唾",
+    "reading": "つば",
+    "oldMeaning": "saliva, spit, spittle",
+    "newMeaning": "타액, 침, 가래",
+    "overlap": 0
+  },
+  {
+    "id": "a40e7e01-2050-4889-a8fc-cac252b041c0",
+    "term": "菜",
+    "reading": "な",
+    "oldMeaning": "greens, vegetables",
+    "newMeaning": "채소, 야채, 나물",
+    "overlap": 0
+  },
+  {
+    "id": "3d9ef128-8840-4e3c-9f41-0635e2b73ba3",
+    "term": "静",
+    "reading": "しず",
+    "oldMeaning": "quiet, calm, still",
+    "newMeaning": "조용한, 차분한",
+    "overlap": 0
+  },
+  {
+    "id": "ebd96f14-54ce-497e-9132-ad07c6f6f6f9",
+    "term": "早春",
+    "reading": "そうしゅん",
+    "oldMeaning": "early spring",
+    "newMeaning": "이른 봄, 초봄",
+    "overlap": 0
+  },
+  {
+    "id": "9a2b1af8-74fc-49d8-9bb4-06584468403d",
+    "term": "煤",
+    "reading": "すす",
+    "oldMeaning": "soot",
+    "newMeaning": "그을음, 재",
+    "overlap": 0
+  },
+  {
+    "id": "6475b346-4fcf-4993-bb07-3b721e28ddad",
+    "term": "ポット",
+    "reading": "ポット",
+    "oldMeaning": "pot (esp. teapot, coffee pot)",
+    "newMeaning": "주전자",
+    "overlap": 0
+  },
+  {
+    "id": "fc676e4e-6c3e-4353-a17b-1241a1327453",
+    "term": "雄",
+    "reading": "おす",
+    "oldMeaning": "male (animal)",
+    "newMeaning": "수컷",
+    "overlap": 0
+  },
+  {
+    "id": "20c4cd4e-b2c9-40e2-8b5a-1d9b9e596bc5",
+    "term": "緒",
+    "reading": "お",
+    "oldMeaning": "cord, strap, thong",
+    "newMeaning": "끈, 띠, 가죽끈",
+    "overlap": 0
+  },
+  {
+    "id": "92934d4b-dcd1-42d6-aebb-e4c493d75371",
+    "term": "駿河",
+    "reading": "するが",
+    "oldMeaning": "Suruga (former province located in the central and northern parts of present-day Shizuoka Prefecture)",
+    "newMeaning": "스루가 (구 지방명)",
+    "overlap": 0
+  },
+  {
+    "id": "de9cc589-ad82-4724-975a-57229dfa6e74",
+    "term": "解剖",
+    "reading": "かいぼう",
+    "oldMeaning": "dissection, autopsy",
+    "newMeaning": "해부",
+    "overlap": 0
+  },
+  {
+    "id": "36c8fe03-b9da-4869-adac-c9439e7475af",
+    "term": "路",
+    "reading": "じ",
+    "oldMeaning": "route, road",
+    "newMeaning": "경로, 도로",
+    "overlap": 0
+  },
+  {
+    "id": "c68d078a-a7e2-492f-bf26-8d6fce8a0b73",
+    "term": "巡る",
+    "reading": "めぐる",
+    "oldMeaning": "to go around",
+    "newMeaning": "돌다, 순회하다",
+    "overlap": 0
+  },
+  {
+    "id": "d439eeb5-2bdf-4c07-87f9-681b2e521650",
+    "term": "伊豆",
+    "reading": "いず",
+    "oldMeaning": "Izu (former province located on the Izu Peninsula in present-day Shizuoka Prefecture, and the Izu Islands)",
+    "newMeaning": "이즈 지방",
+    "overlap": 0
+  },
+  {
+    "id": "53fdb873-c2bd-445f-82e1-23fbe68abc67",
+    "term": "ラリ",
+    "reading": "ラリ",
+    "oldMeaning": "lari (currency of Georgia)",
+    "newMeaning": "조지아의 리라",
+    "overlap": 0
+  },
+  {
+    "id": "87f346ad-cd41-48e8-8e0a-0e71ef4347c6",
+    "term": "期",
+    "reading": "き",
+    "oldMeaning": "period, time",
+    "newMeaning": "기간, 시기",
+    "overlap": 0
+  },
+  {
+    "id": "91e5b785-a913-4c34-9c5a-87458a1474dc",
+    "term": "奇々怪界",
+    "reading": "ききかいかい",
+    "oldMeaning": "기기괴괴",
+    "newMeaning": "키키 카카이",
+    "overlap": 0
+  },
+  {
+    "id": "ee15a20a-232d-487b-a9b8-fb685714ad8f",
+    "term": "取り回し",
+    "reading": "とりまわし",
+    "oldMeaning": "처리, 다루기",
+    "newMeaning": "조작성",
+    "overlap": 0
+  },
+  {
+    "id": "90e606b6-3fad-4f1e-946e-791fce9f57b9",
+    "term": "目深にかぶる",
+    "reading": "まぶかにかぶる",
+    "oldMeaning": "깊이 눌러 씀",
+    "newMeaning": "눈을 가리다",
+    "overlap": 0
+  },
+  {
+    "id": "983a7d90-c97c-418f-9681-28befaa41dce",
+    "term": "億劫",
+    "reading": "おっくう",
+    "oldMeaning": "귀찮음, 불편함",
+    "newMeaning": "성가신",
+    "overlap": 0
+  },
+  {
+    "id": "a9494f65-dd94-4863-8b15-681e17187369",
+    "term": "静岡県",
+    "reading": "しずおかけん",
+    "oldMeaning": "Shizuoka Prefecture (Chūbu area)",
+    "newMeaning": "시즈오카현",
+    "overlap": 0
+  },
+  {
+    "id": "62cfd4e7-fc84-471d-b453-7d18fa9fa4ea",
+    "term": "咀嚼",
+    "reading": "そしゃく",
+    "oldMeaning": "음미함",
+    "newMeaning": "씹기, 저작",
+    "overlap": 0
+  }
+]

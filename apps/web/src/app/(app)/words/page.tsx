@@ -4,7 +4,7 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { BookOpen, Loader2, PhotoScan, Shuffle } from '@/components/ui/icons';
+import { BookOpen, Loader2, PhotoScan } from '@/components/ui/icons';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Header } from '@/components/layout/header';
 import { ListToolbar } from '@/components/layout/list-toolbar';
@@ -40,7 +40,6 @@ interface WordsCacheData {
 export default function WordsPage() {
   const router = useRouter();
   const repo = useRepository();
-  const user = useAuthStore((s) => s.user);
   const authLoading = useAuthStore((s) => s.loading);
   const scanStatus = useScanStore((s) => s.status);
   const { t } = useTranslation();
@@ -187,11 +186,6 @@ export default function WordsPage() {
                 )}
               </Button>
             </Link>
-            <Link href="/words/random-practice">
-              <Button variant="ghost" size="icon-sm" data-testid="words-random-practice-button" aria-label={t.quiz.randomPractice}>
-                <Shuffle className="size-5" />
-              </Button>
-            </Link>
           </div>
         }
       />
@@ -276,22 +270,16 @@ export default function WordsPage() {
         <div className="flex gap-3">
           {loading || totalCount === 0 ? (
             <Button variant="secondary" className="flex-1" disabled data-testid="words-start-quiz-button">
-              {t.words.startQuiz}
+              {t.quiz.randomPractice}
             </Button>
           ) : (
             <Button
               variant="secondary"
               className="flex-1"
-              onClick={() => {
-                if (!user) {
-                  window.alert(t.quiz.loginRequired);
-                  return;
-                }
-                router.push('/quiz?quickStart=1');
-              }}
+              onClick={() => router.push('/words/random-practice')}
               data-testid="words-start-quiz-button"
             >
-              {t.words.startQuiz}
+              {t.quiz.randomPractice}
             </Button>
           )}
           <Button

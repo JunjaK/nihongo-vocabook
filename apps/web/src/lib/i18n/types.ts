@@ -90,7 +90,6 @@ export interface Translations {
   words: {
     title: string;
     addWord: string;
-    startQuiz: string;
     editWord: string;
     searchPlaceholder: string;
     noWords: string;

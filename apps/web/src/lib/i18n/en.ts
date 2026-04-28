@@ -94,7 +94,6 @@ const en: Translations = {
   words: {
     title: 'Words',
     addWord: 'Add Word',
-    startQuiz: 'Start Quiz',
     editWord: 'Edit Word',
     searchPlaceholder: 'Search words...',
     noWords: 'No words found.',

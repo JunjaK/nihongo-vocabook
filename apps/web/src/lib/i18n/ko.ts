@@ -94,7 +94,6 @@ const ko: Translations = {
   words: {
     title: '단어',
     addWord: '단어 추가',
-    startQuiz: '퀴즈 시작',
     editWord: '단어 수정',
     searchPlaceholder: '단어 검색...',
     noWords: '검색 결과가 없습니다.',
