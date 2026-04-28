@@ -47,6 +47,7 @@ export function Flashcard({ word, onRate, onMaster, progress, isLoading = false,
               variant="outline"
               className="h-12 flex-1 rounded-lg border-destructive/40 text-sm font-medium text-destructive hover:bg-destructive/10"
               onClick={() => { onRate(0); onAdvance(); }}
+              disabled={!revealed}
               data-testid="flashcard-rate-0"
             >
               {t.quiz.again}
@@ -55,6 +56,7 @@ export function Flashcard({ word, onRate, onMaster, progress, isLoading = false,
               variant="secondary"
               className="h-12 flex-1 rounded-lg text-sm font-medium text-muted-foreground"
               onClick={() => { onRate(3); onAdvance(); }}
+              disabled={!revealed}
               data-testid="flashcard-rate-3"
             >
               {t.quiz.hard}
@@ -62,6 +64,7 @@ export function Flashcard({ word, onRate, onMaster, progress, isLoading = false,
             <Button
               className="h-12 flex-1 rounded-lg bg-primary text-sm font-semibold text-primary-foreground hover:bg-primary/90"
               onClick={() => { onRate(4); onAdvance(); }}
+              disabled={!revealed}
               data-testid="flashcard-rate-4"
             >
               {t.quiz.good}
@@ -69,6 +72,7 @@ export function Flashcard({ word, onRate, onMaster, progress, isLoading = false,
             <Button
               className="h-12 flex-1 rounded-lg bg-accent text-sm font-semibold text-primary hover:bg-accent/80 dark:text-accent-muted"
               onClick={() => { onRate(5); onAdvance(); }}
+              disabled={!revealed}
               data-testid="flashcard-rate-5"
             >
               {t.quiz.easy}
@@ -78,6 +82,7 @@ export function Flashcard({ word, onRate, onMaster, progress, isLoading = false,
             variant="outline"
             className="h-12 w-full rounded-lg text-sm"
             onClick={() => { onMaster(); onAdvance(); }}
+            disabled={!revealed}
             data-testid="flashcard-rate-master"
           >
             <Crown className="size-4" />
