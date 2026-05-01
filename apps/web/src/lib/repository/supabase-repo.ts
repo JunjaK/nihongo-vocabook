@@ -761,41 +761,42 @@ class SupabaseStudyRepository implements StudyRepository {
           progress: dbProgressToProgress(row as unknown as DbStudyProgress),
         };
       });
+    shuffleArray(reviewWords);
 
     const todayDone = (todayStats?.reviewCount ?? 0) + (todayStats?.masteredInSessionCount ?? 0);
     const remainingGoal = Math.max(0, settings.dailyGoal - todayDone);
     if (remainingGoal === 0) return [];
 
-    // Fetch new word candidates (no progress)
-    let newWordsQuery = this.supabase
-      .from('words')
-      .select('*, study_progress(id), user_word_state(*)')
-      .is('study_progress', null);
-
-    if (settings.jlptFilter !== null) {
-      newWordsQuery = newWordsQuery.eq('jlpt_level', settings.jlptFilter);
-    }
-
-    const { data: newWordsData, error: wordsError } = await newWordsQuery.limit(remainingGoal * 3);
+    // Fetch new word candidates via RPC — server-side ORDER BY random()
+    // avoids the alphabetical bias that plain .limit() would impose.
+    const { data: newWordsData, error: wordsError } = await this.supabase.rpc(
+      'get_random_new_words',
+      {
+        p_jlpt_filter: settings.jlptFilter,
+        p_priority_filter: settings.priorityFilter,
+        p_count: remainingGoal * 3,
+      },
+    );
     if (wordsError) throw wordsError;
 
-    const filteredNewRows = (newWordsData ?? [])
-      .filter((row: Record<string, unknown>) => {
-        const state = extractState(row);
-        if (state?.mastered) return false;
-        if (settings.priorityFilter !== null && (state?.priority ?? 2) !== settings.priorityFilter) return false;
-        return true;
-      });
-    shuffleArray(filteredNewRows);
-
-    const newWords: WordWithProgress[] = filteredNewRows
-      .map((row: Record<string, unknown>) => {
-        const state = extractState(row);
-        return {
-          ...dbWordToWord(row as unknown as DbWord, state, currentUserId),
-          progress: null,
-        };
-      });
+    const newWords: WordWithProgress[] = (newWordsData ?? []).map(
+      (row: Record<string, unknown>) => ({
+        ...dbWordToWord(
+          row as unknown as DbWord,
+          {
+            user_id: '',
+            word_id: row.id as string,
+            priority: (row.priority as number | null) ?? 2,
+            mastered: (row.mastered as boolean | null) ?? false,
+            mastered_at: (row.mastered_at as string | null) ?? null,
+            is_leech: (row.is_leech as boolean | null) ?? false,
+            leech_at: (row.leech_at as string | null) ?? null,
+          },
+          currentUserId,
+        ),
+        progress: null,
+      }),
+    );
 
     const candidates = [...reviewWords, ...newWords];
     const effectiveLimit = Math.min(limit, remainingGoal);
@@ -845,10 +846,27 @@ class SupabaseStudyRepository implements StudyRepository {
       cardState: toFiniteNumber(reviewed.cardState, 0),
     };
 
-    if (existing) {
-      const { error } = await this.supabase
-        .from('study_progress')
-        .update({
+    const progressWrite = existing
+      ? this.supabase
+          .from('study_progress')
+          .update({
+            next_review: updated.nextReview.toISOString(),
+            interval_days: updated.intervalDays,
+            ease_factor: updated.easeFactor,
+            review_count: updated.reviewCount,
+            last_reviewed_at: updated.lastReviewedAt?.toISOString() ?? null,
+            stability: updated.stability,
+            difficulty: updated.difficulty,
+            elapsed_days: updated.elapsedDays,
+            scheduled_days: updated.scheduledDays,
+            learning_steps: updated.learningSteps,
+            lapses: updated.lapses,
+            card_state: updated.cardState,
+          })
+          .eq('id', existing.id)
+      : this.supabase.from('study_progress').insert({
+          user_id: userId,
+          word_id: wordId,
           next_review: updated.nextReview.toISOString(),
           interval_days: updated.intervalDays,
           ease_factor: updated.easeFactor,
@@ -861,43 +879,25 @@ class SupabaseStudyRepository implements StudyRepository {
           learning_steps: updated.learningSteps,
           lapses: updated.lapses,
           card_state: updated.cardState,
-        })
-        .eq('id', existing.id);
-      if (error) throw error;
-    } else {
-      const { error } = await this.supabase.from('study_progress').insert({
-        user_id: userId,
-        word_id: wordId,
-        next_review: updated.nextReview.toISOString(),
-        interval_days: updated.intervalDays,
-        ease_factor: updated.easeFactor,
-        review_count: updated.reviewCount,
-        last_reviewed_at: updated.lastReviewedAt?.toISOString() ?? null,
-        stability: updated.stability,
-        difficulty: updated.difficulty,
-        elapsed_days: updated.elapsedDays,
-        scheduled_days: updated.scheduledDays,
-        learning_steps: updated.learningSteps,
-        lapses: updated.lapses,
-        card_state: updated.cardState,
-      });
-      if (error) throw error;
-    }
+        });
 
-    // Track daily stats
     const today = getLocalDateString();
-    await this.incrementDailyStats(today, wasNew, quality);
+    const dailyStatsWrite = this.incrementDailyStats(today, wasNew, quality);
+
+    const [progressRes] = await Promise.all([progressWrite, dailyStatsWrite]);
+    if (progressRes.error) throw progressRes.error;
 
     // Upgrade priority to high when rated "Again" — now in user_word_state
     if (quality === 0) {
-      await this.supabase
+      const priorityWrite = this.supabase
         .from('user_word_state')
         .update({ priority: 1 })
         .eq('user_id', userId)
         .eq('word_id', wordId)
         .gt('priority', 1);
-      // Check leech threshold
-      await this.checkAndMarkLeech(wordId);
+      // Check leech threshold using the just-computed progress (no extra SELECT)
+      const leechCheck = this.checkAndMarkLeech(wordId, { lapses: updated.lapses, userId });
+      await Promise.all([priorityWrite, leechCheck]);
     }
     this._cache.delete('due_count');
   }
@@ -1070,13 +1070,26 @@ class SupabaseStudyRepository implements StudyRepository {
     this._cache.delete(`daily_stats:${date}`);
   }
 
-  async checkAndMarkLeech(wordId: string): Promise<boolean> {
+  async checkAndMarkLeech(
+    wordId: string,
+    hint?: { lapses: number; userId: string },
+  ): Promise<boolean> {
     const settings = await this.getQuizSettings();
-    const progress = await this.getProgress(wordId);
-    if (!progress || progress.lapses < settings.leechThreshold) return false;
 
-    const { data: userData } = await this.supabase.auth.getUser();
-    const userId = userData.user!.id;
+    let lapses: number;
+    let userId: string;
+    if (hint) {
+      lapses = hint.lapses;
+      userId = hint.userId;
+    } else {
+      const progress = await this.getProgress(wordId);
+      if (!progress) return false;
+      lapses = progress.lapses;
+      const { data: userData } = await this.supabase.auth.getUser();
+      userId = userData.user!.id;
+    }
+
+    if (lapses < settings.leechThreshold) return false;
 
     const { error } = await this.supabase
       .from('user_word_state')

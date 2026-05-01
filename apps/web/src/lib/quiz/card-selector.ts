@@ -94,7 +94,7 @@ export function buildSessionCards(opts: BuildSessionOpts): QuizCard[] {
         continue;
       }
     }
-    cards.push({ kind: 'word', word });
+    cards.push({ kind: 'word', word, examples });
   }
 
   return shuffle(cards);

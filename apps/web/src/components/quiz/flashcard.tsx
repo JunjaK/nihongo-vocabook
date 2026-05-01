@@ -4,11 +4,12 @@ import { Button } from '@/components/ui/button';
 import { Crown } from '@/components/ui/icons';
 import { useTranslation } from '@/lib/i18n';
 import { BaseFlashcard } from './base-flashcard';
-import type { WordWithProgress } from '@/types/word';
+import type { WordExample, WordWithProgress } from '@/types/word';
 import type { CardDirection } from '@/types/quiz';
 
 interface FlashcardProps {
   word?: WordWithProgress;
+  examples?: WordExample[];
   onRate: (quality: number) => void;
   onMaster: () => void;
   progress: { current: number; total: number };
@@ -16,12 +17,13 @@ interface FlashcardProps {
   cardDirection?: CardDirection;
 }
 
-export function Flashcard({ word, onRate, onMaster, progress, isLoading = false, cardDirection }: FlashcardProps) {
+export function Flashcard({ word, examples, onRate, onMaster, progress, isLoading = false, cardDirection }: FlashcardProps) {
   const { t } = useTranslation();
 
   return (
     <BaseFlashcard
       word={word}
+      examples={examples}
       progress={progress}
       isLoading={isLoading}
       cardDirection={cardDirection}
@@ -40,14 +42,13 @@ export function Flashcard({ word, onRate, onMaster, progress, isLoading = false,
           </Button>
         </>
       )}
-      renderActions={({ onAdvance, revealed }) => (
+      renderActions={({ onAdvance }) => (
         <>
           <div className="flex gap-2" data-testid="flashcard-rating">
             <Button
               variant="outline"
               className="h-12 flex-1 rounded-lg border-destructive/40 text-sm font-medium text-destructive hover:bg-destructive/10"
               onClick={() => { onRate(0); onAdvance(); }}
-              disabled={!revealed}
               data-testid="flashcard-rate-0"
             >
               {t.quiz.again}
@@ -56,7 +57,6 @@ export function Flashcard({ word, onRate, onMaster, progress, isLoading = false,
               variant="secondary"
               className="h-12 flex-1 rounded-lg text-sm font-medium text-muted-foreground"
               onClick={() => { onRate(3); onAdvance(); }}
-              disabled={!revealed}
               data-testid="flashcard-rate-3"
             >
               {t.quiz.hard}
@@ -64,7 +64,6 @@ export function Flashcard({ word, onRate, onMaster, progress, isLoading = false,
             <Button
               className="h-12 flex-1 rounded-lg bg-primary text-sm font-semibold text-primary-foreground hover:bg-primary/90"
               onClick={() => { onRate(4); onAdvance(); }}
-              disabled={!revealed}
               data-testid="flashcard-rate-4"
             >
               {t.quiz.good}
@@ -72,7 +71,6 @@ export function Flashcard({ word, onRate, onMaster, progress, isLoading = false,
             <Button
               className="h-12 flex-1 rounded-lg bg-accent text-sm font-semibold text-primary hover:bg-accent/80 dark:text-accent-muted"
               onClick={() => { onRate(5); onAdvance(); }}
-              disabled={!revealed}
               data-testid="flashcard-rate-5"
             >
               {t.quiz.easy}
@@ -82,7 +80,6 @@ export function Flashcard({ word, onRate, onMaster, progress, isLoading = false,
             variant="outline"
             className="h-12 w-full rounded-lg text-sm"
             onClick={() => { onMaster(); onAdvance(); }}
-            disabled={!revealed}
             data-testid="flashcard-rate-master"
           >
             <Crown className="size-4" />

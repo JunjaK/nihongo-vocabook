@@ -26,6 +26,7 @@ build/
 coverage/
 playwright-report/
 test-results/
+apps/web/e2e/.auth/
 
 # misc
 .DS_Store

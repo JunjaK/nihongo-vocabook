@@ -10,14 +10,10 @@ import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
-import { ChevronRight, ArrowRightLeft, ExternalLink, Trophy, SlidersHorizontal, BarChart3, Trash2, AlertTriangle, LogOut } from '@/components/ui/icons';
+import { ChevronRight, ExternalLink, Trophy, SlidersHorizontal, BarChart3, Trash2, AlertTriangle, LogOut } from '@/components/ui/icons';
 import { useAuthStore } from '@/stores/auth-store';
 import { useRepository } from '@/lib/repository/provider';
 import { createClient } from '@/lib/supabase/client';
-import {
-  getLocalWordCount,
-  migrateToSupabase,
-} from '@/lib/migration/migrate-to-supabase';
 import { useTranslation, type Locale } from '@/lib/i18n';
 import { useBottomNavLock } from '@/hooks/use-bottom-nav-lock';
 import { invalidateListCache } from '@/lib/list-cache';
@@ -42,16 +38,13 @@ export default function SettingsPage() {
   const { t, locale, setLocale } = useTranslation();
   const { theme, setTheme } = useTheme();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [migrating, setMigrating] = useState(false);
   const [importing, setImporting] = useState(false);
-  const [migrateCount, setMigrateCount] = useState(0);
-  const [showMigrateConfirm, setShowMigrateConfirm] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [resetting, setResetting] = useState(false);
   const [ocrModeLabel, setOcrModeLabel] = useState('');
   const [profileNickname, setProfileNickname] = useState<string | null>(null);
   const [profileLoading, setProfileLoading] = useState(true);
-  useBottomNavLock(migrating || importing);
+  useBottomNavLock(importing);
 
   useEffect(() => {
     const mode = getLocalOcrMode();
@@ -140,32 +133,6 @@ export default function SettingsPage() {
       }
       if (fileInputRef.current) fileInputRef.current.value = '';
       setImporting(false);
-    }
-  };
-
-  const handleMigrateRequest = async () => {
-    const count = await getLocalWordCount();
-    if (count === 0) {
-      toast.info(t.settings.noLocalData);
-      return;
-    }
-    setMigrateCount(count);
-    setShowMigrateConfirm(true);
-  };
-
-  const handleMigrateConfirm = async () => {
-    setShowMigrateConfirm(false);
-    setMigrating(true);
-    try {
-      const supabase = createClient();
-      const result = await migrateToSupabase(supabase);
-      toast.success(
-        t.settings.migrationSuccess(result.wordCount, result.progressCount),
-      );
-    } catch {
-      toast.error(t.settings.migrationFailed);
-    } finally {
-      setMigrating(false);
     }
   };
 
@@ -390,46 +357,31 @@ export default function SettingsPage() {
 
         <div className="h-px bg-border" />
 
-        {/* Data Migration */}
-        <section className={settingsSection}>
-          <h2 className={settingsHeading}>{t.settings.migration}</h2>
-          {user && (
-            <p className="text-caption leading-relaxed text-muted-foreground">
-              {t.settings.migrationDesc}
-            </p>
-          )}
-          <div className="flex flex-wrap gap-2">
-            {user && (
+        {/* Import — auth-only, since guests have no persistent storage to import into */}
+        {user && (
+          <section className={settingsSection}>
+            <h2 className={settingsHeading}>{t.settings.migration}</h2>
+            <div className="flex flex-wrap gap-2">
               <Button
                 variant="outline"
                 size="sm"
                 className="!h-9 rounded-md"
-                onClick={handleMigrateRequest}
-                disabled={migrating || importing}
-                data-testid="settings-migrate-button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={importing}
+                data-testid="settings-import-button"
               >
-                {migrating ? t.settings.migrating : t.settings.migrateLocalData}
+                {t.settings.import}
               </Button>
-            )}
-            <Button
-              variant="outline"
-              size="sm"
-              className="!h-9 rounded-md"
-              onClick={() => fileInputRef.current?.click()}
-              disabled={importing || migrating}
-              data-testid="settings-import-button"
-            >
-              {t.settings.import}
-            </Button>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept=".json,.csv"
-              onChange={handleImport}
-              className="hidden"
-            />
-          </div>
-        </section>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".json,.csv"
+                onChange={handleImport}
+                className="hidden"
+              />
+            </div>
+          </section>
+        )}
 
         {/* Logout */}
         {user && (
@@ -495,16 +447,6 @@ export default function SettingsPage() {
           <span>© 2026 NiVoca. All rights reserved.</span>
         </div>
       </div>
-
-      <ConfirmDialog
-        open={showMigrateConfirm}
-        icon={<ArrowRightLeft />}
-        title={t.settings.migration}
-        description={t.auth.migrationPrompt(migrateCount)}
-        confirmLabel={t.settings.migrateLocalData}
-        onConfirm={handleMigrateConfirm}
-        onCancel={() => setShowMigrateConfirm(false)}
-      />
 
       <ConfirmDialog
         open={showResetConfirm}

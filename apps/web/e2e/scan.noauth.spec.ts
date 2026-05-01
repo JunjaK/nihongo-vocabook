@@ -1,6 +1,8 @@
 import { test, expect } from '@playwright/test';
+import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const FIXTURE = path.resolve(__dirname, 'fixtures/large-sign.jpg');
 const HEIC_FIXTURE = path.resolve(__dirname, 'fixtures/heic-sample.heic');
 

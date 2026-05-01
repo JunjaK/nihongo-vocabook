@@ -60,9 +60,6 @@ export interface Translations {
     minPassword: string;
     passwordRule: string;
     accountCreated: string;
-    migrationPrompt: (count: number) => string;
-    migrationSuccess: (count: number) => string;
-    migrationFailed: string;
     studyPurpose: string;
     purposeCertification: string;
     purposeStudy: string;
@@ -203,6 +200,7 @@ export interface Translations {
     randomPractice: string;
     randomPracticeDesc: string;
     exampleQuiz: string;
+    showExamples: string;
   };
   settings: {
     title: string;
@@ -216,12 +214,6 @@ export interface Translations {
     themeDark: string;
     themeSystem: string;
     migration: string;
-    migrationDesc: string;
-    migrateLocalData: string;
-    migrating: string;
-    noLocalData: string;
-    migrationSuccess: (words: number, progress: number) => string;
-    migrationFailed: string;
     importExport: string;
     exportJSON: string;
     exportCSV: string;
