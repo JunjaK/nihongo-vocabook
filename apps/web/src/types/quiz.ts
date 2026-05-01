@@ -15,7 +15,7 @@ export interface QuizSettings {
 }
 
 export type QuizCard =
-  | { kind: 'word'; word: WordWithProgress }
+  | { kind: 'word'; word: WordWithProgress; examples: WordExample[] }
   | {
       kind: 'example';
       word: WordWithProgress;

@@ -84,6 +84,11 @@ export function selectPracticeWords(
 
 /**
  * Score, sort descending, and slice candidates.
+ *
+ * Adds a small random jitter (0.85–1.15x) so words tied on
+ * priority/JLPT/overdueness don't always resolve to the same insertion-order
+ * picks across sessions. Priority/overdue spread (typically 1.4–3x) still
+ * dominates the jitter, so urgent cards stay first.
  */
 export function selectDueWords(
   candidates: WordWithProgress[],
@@ -92,7 +97,7 @@ export function selectDueWords(
 ): WordWithProgress[] {
   const scored = candidates.map((w) => ({
     word: w,
-    score: calcQuizScore(w, userJlpt),
+    score: calcQuizScore(w, userJlpt) * (0.85 + Math.random() * 0.3),
   }));
   scored.sort((a, b) => b.score - a.score);
   const selected = scored.slice(0, limit).map((s) => s.word);

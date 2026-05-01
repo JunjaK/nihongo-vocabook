@@ -62,11 +62,6 @@ const en: Translations = {
     minPassword: 'Min 8 characters',
     passwordRule: 'At least 8 characters with letters and numbers',
     accountCreated: 'Account created! Please check your email to verify.',
-    migrationPrompt: (count: number) =>
-      `Migrate ${count} locally saved word${count !== 1 ? 's' : ''} to your account?`,
-    migrationSuccess: (count: number) =>
-      `${count} word${count !== 1 ? 's' : ''} migrated to your account!`,
-    migrationFailed: 'Migration failed. You can retry from Settings.',
     studyPurpose: 'Study purpose',
     purposeCertification: 'Certification',
     purposeStudy: 'Casual study',
@@ -210,6 +205,7 @@ const en: Translations = {
     randomPractice: 'Random practice',
     randomPracticeDesc: 'Freestyle practice — no FSRS impact.',
     exampleQuiz: 'Example quiz',
+    showExamples: 'Show examples',
   },
   settings: {
     title: 'Settings',
@@ -222,14 +218,7 @@ const en: Translations = {
     themeLight: 'Light',
     themeDark: 'Dark',
     themeSystem: 'System',
-    migration: 'Data Migration',
-    migrationDesc: 'Migrate locally saved words to your account.',
-    migrateLocalData: 'Migrate Local Data',
-    migrating: 'Migrating...',
-    noLocalData: 'No local data to migrate.',
-    migrationSuccess: (words: number, progress: number) =>
-      `Migrated ${words} words and ${progress} progress records.`,
-    migrationFailed: 'Migration failed. Please try again.',
+    migration: 'Import',
     importExport: 'Import / Export',
     exportJSON: 'Export JSON',
     exportCSV: 'Export CSV',

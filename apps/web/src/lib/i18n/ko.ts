@@ -62,11 +62,6 @@ const ko: Translations = {
     minPassword: '최소 8자',
     passwordRule: '영문자와 숫자를 포함하여 8자 이상',
     accountCreated: '계정이 생성되었습니다! 이메일을 확인해주세요.',
-    migrationPrompt: (count: number) =>
-      `기존에 저장된 단어 ${count}개를 계정에 옮기시겠습니까?`,
-    migrationSuccess: (count: number) =>
-      `${count}개의 단어가 계정으로 이전되었습니다!`,
-    migrationFailed: '이전 실패. 설정에서 다시 시도해주세요.',
     studyPurpose: '학습 목적',
     purposeCertification: '자격증 취득',
     purposeStudy: '단순 학습',
@@ -210,6 +205,7 @@ const ko: Translations = {
     randomPractice: '랜덤 연습',
     randomPracticeDesc: '자유 연습 — 학습 진도에 영향 없음',
     exampleQuiz: '예문 퀴즈',
+    showExamples: '예문 보기',
   },
   settings: {
     title: '설정',
@@ -222,14 +218,7 @@ const ko: Translations = {
     themeLight: '라이트',
     themeDark: '다크',
     themeSystem: '시스템',
-    migration: '데이터 이전',
-    migrationDesc: '로컬에 저장된 단어를 계정으로 이전합니다.',
-    migrateLocalData: '로컬 데이터 이전',
-    migrating: '이전 중...',
-    noLocalData: '이전할 로컬 데이터가 없습니다.',
-    migrationSuccess: (words: number, progress: number) =>
-      `${words}개 단어와 ${progress}개 학습 기록이 이전되었습니다.`,
-    migrationFailed: '이전 실패. 다시 시도해주세요.',
+    migration: '가져오기',
     importExport: '가져오기 / 내보내기',
     exportJSON: 'JSON 내보내기',
     exportCSV: 'CSV 내보내기',

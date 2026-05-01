@@ -98,7 +98,11 @@ function CreateWordContent() {
       router.push('/words');
     } catch (err) {
       if (err instanceof Error && err.message === 'DUPLICATE_WORD') {
+        // Word already in user's list — toast informs, but still land on /words
+        // so the user reaches the same intended end state.
         toast.error(t.words.duplicateWord);
+        invalidateListCache('words');
+        router.push('/words');
       } else if (err instanceof Error && err.message === 'LOGIN_REQUIRED') {
         toast.error(t.auth.signIn);
         router.push('/login');

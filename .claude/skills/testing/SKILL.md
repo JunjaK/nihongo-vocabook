@@ -222,10 +222,14 @@ test.describe('Feature name (context)', () => {
 await expect(page.getByTestId('flashcard')).toBeVisible({ timeout: 10000 });
 ```
 
-**Form interaction:**
+**Form interaction (word create):**
+The `word-form-term` and `word-form-reading` fields are `readOnly` — they are populated only by selecting a dictionary search result, which also sets the hidden `dictionaryEntryId` that gates submit. Pattern:
 ```ts
-await page.getByTestId('word-form-term').fill('食べる');
-await page.getByTestId('word-form-reading').fill('たべる');
+await page.goto('/words/create');
+await page.getByTestId('word-search-input').fill('食べる');
+await page.getByTestId('word-search-button').click();
+await page.getByTestId('word-search-result-0').click();
+// term / reading / meaning are now auto-filled. Customize meaning if needed:
 await page.getByTestId('word-form-meaning').fill('먹다');
 await page.getByTestId('word-form-submit').click();
 await page.waitForURL('/words');
@@ -242,16 +246,23 @@ await expect(page.getByText('食べる')).toBeVisible();
 Guest mode uses IndexedDB — no auth setup needed. Data is created through the UI in test setup steps.
 
 **Authenticated test setup (Supabase):**
-For `*.spec.ts` tests requiring auth, use the dedicated test account (`e2e@testc.om` / `test123!`):
+For `*.spec.ts` tests requiring auth, import from `./fixtures/auth` instead of `@playwright/test`. A worker-scoped fixture handles login once per worker (5-account pool: `e2e1@test.com` ~ `e2e5@test.com`) and caches `storageState` under `e2e/.auth/`. To rotate credentials, delete `e2e/.auth/`.
+
 ```ts
-test.beforeEach(async ({ page }) => {
-  await page.goto('/login');
-  await page.getByTestId('login-email-input').fill('e2e@testc.om');
-  await page.getByTestId('login-password-input').fill('test123!');
-  await page.getByTestId('login-submit').click();
-  await page.waitForURL('/words');
+import { test, expect } from './fixtures/auth';
+
+test.describe('Words (Supabase)', () => {
+  test('something requiring auth', async ({ page, workerAccountEmail }) => {
+    await page.goto('/words');
+    // Already logged in as `workerAccountEmail` (e.g. e2e1@test.com).
+  });
 });
 ```
+
+Notes:
+- `playwright.config.ts` caps `workers: 5` to match the account pool size.
+- Specs sharing an account run in the same worker — Playwright serializes them — so single-account state collisions are bounded to that file's tests.
+- Use unique markers (timestamps, parallelIndex) when creating data, since accounts accumulate test garbage across runs.
 
 ### Selector Priority
 

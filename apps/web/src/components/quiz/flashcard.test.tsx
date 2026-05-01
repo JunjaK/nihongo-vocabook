@@ -23,6 +23,15 @@ vi.mock('@/lib/i18n', () => ({
 
 vi.mock('@/lib/styles', () => ({
   bottomSep: 'border-t',
+  sectionLabel: 'text-overline',
+}));
+
+vi.mock('@/lib/utils', () => ({
+  cn: (...args: Array<string | false | null | undefined>) => args.filter(Boolean).join(' '),
+}));
+
+vi.mock('@/components/kanji/kanji-text', () => ({
+  KanjiText: ({ text }: { text: string }) => <span>{text}</span>,
 }));
 
 const baseWord: WordWithProgress = {
@@ -304,7 +313,7 @@ describe('Flashcard', () => {
     expect(screen.getByTestId('flashcard-rating')).toBeInTheDocument();
   });
 
-  it('rating buttons are disabled before reveal', () => {
+  it('rating buttons are enabled even before reveal', () => {
     render(
       <Flashcard
         word={baseWord}
@@ -314,14 +323,14 @@ describe('Flashcard', () => {
       />,
     );
 
-    expect(screen.getByTestId('flashcard-rate-0')).toBeDisabled();
-    expect(screen.getByTestId('flashcard-rate-3')).toBeDisabled();
-    expect(screen.getByTestId('flashcard-rate-4')).toBeDisabled();
-    expect(screen.getByTestId('flashcard-rate-5')).toBeDisabled();
-    expect(screen.getByTestId('flashcard-rate-master')).toBeDisabled();
+    expect(screen.getByTestId('flashcard-rate-0')).toBeEnabled();
+    expect(screen.getByTestId('flashcard-rate-3')).toBeEnabled();
+    expect(screen.getByTestId('flashcard-rate-4')).toBeEnabled();
+    expect(screen.getByTestId('flashcard-rate-5')).toBeEnabled();
+    expect(screen.getByTestId('flashcard-rate-master')).toBeEnabled();
   });
 
-  it('rating buttons are enabled after reveal', () => {
+  it('rating buttons remain enabled after reveal', () => {
     render(
       <Flashcard
         word={baseWord}

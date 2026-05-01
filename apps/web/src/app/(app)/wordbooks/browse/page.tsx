@@ -96,12 +96,12 @@ export default function BrowseSharedPage() {
       <Header title={t.wordbooks.findShared} showBack />
 
       <Tabs defaultValue="user" className="flex min-h-0 flex-1 flex-col gap-0">
-        <div className="shrink-0 px-3 pt-2">
-          <TabsList className="!h-[52px] w-full gap-1 rounded-[10px] bg-secondary p-2 dark:bg-border">
-            <TabsTrigger value="user" className="h-full flex-1 rounded-lg text-[13px] font-medium data-[state=active]:shadow-sm dark:data-[state=active]:!bg-secondary" data-testid="browse-tab-user">
+        <div className="shrink-0 px-5 pt-2 pb-2">
+          <TabsList className="!h-11 w-full gap-0.5 rounded-md bg-secondary p-1 dark:bg-border">
+            <TabsTrigger value="user" className="h-full flex-1 rounded-sm text-[13px] font-medium data-[state=active]:shadow-sm dark:data-[state=active]:!bg-secondary" data-testid="browse-tab-user">
               {t.wordbooks.tabUserWordbooks}
             </TabsTrigger>
-            <TabsTrigger value="system" className="h-full flex-1 rounded-lg text-[13px] font-medium data-[state=active]:shadow-sm dark:data-[state=active]:!bg-secondary" data-testid="browse-tab-system">
+            <TabsTrigger value="system" className="h-full flex-1 rounded-sm text-[13px] font-medium data-[state=active]:shadow-sm dark:data-[state=active]:!bg-secondary" data-testid="browse-tab-system">
               {t.wordbooks.tabSystemWordbooks}
             </TabsTrigger>
           </TabsList>

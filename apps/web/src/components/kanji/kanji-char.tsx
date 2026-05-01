@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useState, type MouseEvent } from 'react';
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useMediaQuery } from '@/hooks/use-media-query';
@@ -82,11 +82,19 @@ export function KanjiChar({ char }: KanjiCharProps) {
     />
   );
 
+  const stopAndLoad = useCallback(
+    (e: MouseEvent) => {
+      e.stopPropagation();
+      triggerLoad();
+    },
+    [triggerLoad],
+  );
+
   if (isFinePointer) {
     return (
       <HoverCard openDelay={200} onOpenChange={handleOpenChange}>
         <HoverCardTrigger asChild>
-          <span className={triggerClasses} onClick={triggerLoad}>
+          <span className={triggerClasses} onClick={stopAndLoad}>
             {char}
           </span>
         </HoverCardTrigger>
@@ -100,7 +108,7 @@ export function KanjiChar({ char }: KanjiCharProps) {
   return (
     <Popover onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
-        <span className={triggerClasses}>{char}</span>
+        <span className={triggerClasses} onClick={(e) => e.stopPropagation()}>{char}</span>
       </PopoverTrigger>
       <PopoverContent className="w-72" align="start">
         {content}

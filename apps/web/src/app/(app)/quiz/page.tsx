@@ -104,7 +104,7 @@ async function reconstructCards(
         continue;
       }
     }
-    cards.push({ kind: 'word', word });
+    cards.push({ kind: 'word', word, examples });
   }
   return cards;
 }
@@ -295,22 +295,20 @@ function QuizContent() {
     requestDueCountRefresh();
   };
 
-  const advanceToNext = async () => {
+  const advanceToNext = () => {
     if (currentIndex + 1 < cards.length) {
       setCurrentIndex((i) => i + 1);
     } else {
-      await endSession();
+      void endSession();
     }
   };
 
   /**
-   * Apply rating to the current word's FSRS state + session stats.
-   * Shared by word-card ratings and example-card answers.
+   * Apply rating to local session state immediately, then fire DB write
+   * in the background. Errors are toasted but do not block UI advance.
    */
-  const recordCardRating = async (card: QuizCard, quality: number) => {
+  const recordCardRating = (card: QuizCard, quality: number) => {
     const wasNew = isNewCard(card.word.progress);
-    await repo.study.recordReview(card.word.id, quality);
-
     const isAgain = quality === 0;
     setSessionStats((prev) => ({
       ...prev,
@@ -323,67 +321,71 @@ function QuizContent() {
       goodCount: prev.goodCount + (quality === 4 ? 1 : 0),
       easyCount: prev.easyCount + (quality === 5 ? 1 : 0),
     }));
-    requestDueCountRefresh();
     setCompleted((c) => c + 1);
+
+    repo.study
+      .recordReview(card.word.id, quality)
+      .then(() => requestDueCountRefresh())
+      .catch((error) => {
+        console.error('Failed to record review', error);
+        toast.error(t.common.error);
+      });
   };
 
-  const handleWordRate = async (quality: number) => {
+  const handleWordRate = (quality: number) => {
     if (isProcessingRef.current) return;
+    const current = cards[currentIndex];
+    if (!current) return;
     isProcessingRef.current = true;
-    try {
-      const current = cards[currentIndex];
-      if (!current) return;
-      await recordCardRating(current, quality);
-      await advanceToNext();
-    } catch (error) {
-      console.error('Failed to record review', error);
-    } finally {
+    recordCardRating(current, quality);
+    advanceToNext();
+    // Brief debounce to prevent double-tap registering on the next card
+    setTimeout(() => {
       isProcessingRef.current = false;
-    }
+    }, 150);
   };
 
   const handleExampleAnswer = (correct: boolean) => {
     // Only records stats; advance is triggered by the card after reveal
     if (isProcessingRef.current) return;
-    isProcessingRef.current = true;
     const current = cards[currentIndex];
-    if (!current) {
+    if (!current) return;
+    isProcessingRef.current = true;
+    recordCardRating(current, correct ? 4 : 0);
+    setTimeout(() => {
       isProcessingRef.current = false;
-      return;
-    }
-    recordCardRating(current, correct ? 4 : 0)
-      .catch((error) => console.error('Failed to record review', error))
-      .finally(() => {
-        isProcessingRef.current = false;
-      });
+    }, 150);
   };
 
-  const handleMaster = async () => {
+  const handleMaster = () => {
     if (isProcessingRef.current) return;
+    const current = cards[currentIndex];
+    if (!current) return;
     isProcessingRef.current = true;
-    try {
-      const current = cards[currentIndex];
-      if (!current) return;
-      await markWordMastered(repo, current.word.id);
-      setSessionStats((prev) => ({ ...prev, masteredCount: prev.masteredCount + 1 }));
-      await repo.study.incrementMasteredStats(getLocalDateString());
 
-      // Remove card from array
-      const remaining = cards.filter((_, i) => i !== currentIndex);
-      setCompleted((c) => c + 1);
+    setSessionStats((prev) => ({ ...prev, masteredCount: prev.masteredCount + 1 }));
+    setCompleted((c) => c + 1);
 
-      if (remaining.length === 0 || currentIndex >= remaining.length) {
-        setCards(remaining);
-        await endSession();
-        return;
-      }
-      setCards(remaining);
-    } catch (error) {
-      console.error('Failed to mark word as mastered', error);
-      toast.error(t.common.error);
-    } finally {
-      isProcessingRef.current = false;
+    const remaining = cards.filter((_, i) => i !== currentIndex);
+    const isLast = remaining.length === 0 || currentIndex >= remaining.length;
+    setCards(remaining);
+
+    Promise.all([
+      markWordMastered(repo, current.word.id),
+      repo.study.incrementMasteredStats(getLocalDateString()),
+    ])
+      .then(() => requestDueCountRefresh())
+      .catch((error) => {
+        console.error('Failed to mark word as mastered', error);
+        toast.error(t.common.error);
+      });
+
+    if (isLast) {
+      void endSession();
     }
+    setTimeout(() => {
+      isProcessingRef.current = false;
+    }, 150);
   };
 
   const handleContinueStudying = () => {
@@ -543,6 +545,7 @@ function QuizContent() {
         <Flashcard
           key={current?.word.id ?? 'word-loading'}
           word={current?.word}
+          examples={current?.kind === 'word' ? current.examples : undefined}
           onRate={handleWordRate}
           onMaster={handleMaster}
           progress={{ current: completed + 1, total: totalSessionSize }}

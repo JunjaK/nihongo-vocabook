@@ -1,14 +1,19 @@
 'use client';
 
-import { useState, type ReactNode } from 'react';
+import { useEffect, useState, type KeyboardEvent, type MouseEvent, type ReactNode } from 'react';
+import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { BookOpen } from '@/components/ui/icons';
+import { KanjiText } from '@/components/kanji/kanji-text';
 import { useTranslation } from '@/lib/i18n';
-import { bottomSep } from '@/lib/styles';
-import type { Word } from '@/types/word';
+import { bottomSep, sectionLabel } from '@/lib/styles';
+import { cn } from '@/lib/utils';
+import type { Word, WordExample } from '@/types/word';
 import type { CardDirection } from '@/types/quiz';
 
 interface BaseFlashcardProps {
   word?: Word;
+  examples?: WordExample[];
   progress: { current: number; total: number };
   isLoading?: boolean;
   cardDirection?: CardDirection;
@@ -27,8 +32,55 @@ function useResolvedDirection(direction: CardDirection): 'term_first' | 'meaning
   return direction === 'random' ? resolved : direction;
 }
 
+function ExampleRow({ example }: { example: WordExample }) {
+  const [revealed, setRevealed] = useState(false);
+  const toggle = (e: MouseEvent | KeyboardEvent) => {
+    e.stopPropagation();
+    setRevealed((v) => !v);
+  };
+  return (
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={toggle}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          toggle(e);
+        }
+      }}
+      className="flex cursor-pointer flex-col gap-1 rounded-lg bg-secondary p-3 text-left"
+    >
+      <div className="text-body font-medium">
+        <KanjiText text={example.sentenceJa} />
+      </div>
+      {example.sentenceReading && (
+        <div
+          className={cn(
+            'text-reading text-text-secondary transition-[opacity,filter] duration-300 ease-out',
+            revealed ? 'opacity-100 blur-0' : 'opacity-60 blur-[3px] select-none',
+          )}
+        >
+          {example.sentenceReading}
+        </div>
+      )}
+      {example.sentenceMeaning && (
+        <div
+          className={cn(
+            'text-caption text-primary dark:text-accent-muted transition-[opacity,filter] duration-300 ease-out',
+            revealed ? 'opacity-100 blur-0' : 'opacity-60 blur-[3px] select-none',
+          )}
+        >
+          {example.sentenceMeaning}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function BaseFlashcard({
   word,
+  examples,
   progress,
   isLoading = false,
   cardDirection = 'term_first',
@@ -38,7 +90,12 @@ export function BaseFlashcard({
 }: BaseFlashcardProps) {
   const { t } = useTranslation();
   const [revealed, setRevealed] = useState(false);
+  const [examplesShown, setExamplesShown] = useState(false);
   const dir = useResolvedDirection(cardDirection);
+
+  useEffect(() => {
+    if (!revealed) setExamplesShown(false);
+  }, [revealed]);
 
   const pct = progress.total > 0 ? (progress.current / progress.total) * 100 : 0;
 
@@ -80,14 +137,14 @@ export function BaseFlashcard({
 
       {/* Tap zone */}
       <div
-        className="animate-card-enter relative min-h-0 flex-1 cursor-pointer overflow-y-auto px-4 text-center"
+        className="animate-card-enter min-h-0 flex-1 cursor-pointer overflow-y-auto px-4"
         onClick={() => setRevealed((v) => !v)}
         data-testid={testId}
       >
-        {/* Front text — fixed at 35% from top */}
-        <div className="absolute inset-x-0 top-[35%] flex flex-col items-center gap-3">
+        <div className="flex min-h-full flex-col items-center justify-center gap-3 py-8 text-center">
+          {/* Front text */}
           <div className={isTermFirst ? 'text-display font-medium leading-tight' : 'text-2xl font-medium md:text-3xl'}>
-            {frontText}
+            {isTermFirst ? <KanjiText text={frontText} /> : frontText}
           </div>
 
           {/* Reading — shown when revealed */}
@@ -104,7 +161,7 @@ export function BaseFlashcard({
                 ? 'animate-reveal-up text-subtitle font-semibold text-primary dark:text-accent-muted'
                 : 'animate-reveal-up text-3xl font-bold text-primary dark:text-accent-muted md:text-4xl'
               }>
-                {backPrimary}
+                {isTermFirst ? backPrimary : <KanjiText text={backPrimary} />}
               </div>
               {word.notes && (
                 <div
@@ -112,6 +169,36 @@ export function BaseFlashcard({
                   style={{ animationDelay: '100ms' }}
                 >
                   {word.notes}
+                </div>
+              )}
+
+              {examples && examples.length > 0 && (
+                <div
+                  className="animate-reveal-up mt-4 flex w-full max-w-md flex-col gap-2"
+                  style={{ animationDelay: '200ms' }}
+                >
+                  {examplesShown ? (
+                    <>
+                      <div className={cn(sectionLabel, 'text-left')}>{t.wordDetail.examples}</div>
+                      {examples.map((ex) => (
+                        <ExampleRow key={ex.id} example={ex} />
+                      ))}
+                    </>
+                  ) : (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="self-center"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setExamplesShown(true);
+                      }}
+                      data-testid="flashcard-show-examples"
+                    >
+                      <BookOpen className="size-4" />
+                      {t.quiz.showExamples}
+                    </Button>
+                  )}
                 </div>
               )}
             </>
