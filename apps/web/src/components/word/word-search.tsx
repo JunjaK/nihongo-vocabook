@@ -27,6 +27,7 @@ export function WordSearch({ onSelect, onLoadingChange }: WordSearchProps) {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<DictionaryEntry[]>([]);
   const [loading, setLoading] = useState(false);
+  const [searchedQuery, setSearchedQuery] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
   useBottomNavLock(loading);
 
@@ -49,8 +50,10 @@ export function WordSearch({ onSelect, onLoadingChange }: WordSearchProps) {
       const kanaQuery = toKana(trimmed);
       const data = await searchDictionary(kanaQuery || trimmed, locale);
       setResults(data.slice(0, 10));
+      setSearchedQuery(trimmed);
     } catch {
       setResults([]);
+      setSearchedQuery(trimmed);
     } finally {
       setLoading(false);
       onLoadingChange?.(false);
@@ -85,6 +88,7 @@ export function WordSearch({ onSelect, onLoadingChange }: WordSearchProps) {
 
     setResults([]);
     setQuery('');
+    setSearchedQuery('');
   };
 
   const getMeaningDisplay = (sense: DictionaryEntry['senses'][0]) => {
@@ -107,21 +111,24 @@ export function WordSearch({ onSelect, onLoadingChange }: WordSearchProps) {
         <Input
           ref={inputRef}
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          onChange={(e) => {
+            setQuery(e.target.value);
+            if (searchedQuery) setSearchedQuery('');
+          }}
           onKeyDown={handleKeyDown}
           placeholder={t.wordForm.searchPlaceholder}
           data-testid="word-search-input"
         />
         <Button
+          type="button"
           onClick={handleSearch}
           disabled={loading || !query.trim()}
+          aria-label={t.common.search}
+          className="min-w-[88px]"
           data-testid="word-search-button"
         >
           {loading ? (
-            <span className="inline-flex items-center gap-2">
-              <Loader2 className="size-4 animate-spin" />
-              {t.common.search}
-            </span>
+            <Loader2 className="size-4 animate-spin" />
           ) : t.common.search}
         </Button>
       </div>
@@ -134,6 +141,7 @@ export function WordSearch({ onSelect, onLoadingChange }: WordSearchProps) {
             return (
               <button
                 key={`${entry.slug}-${i}`}
+                type="button"
                 onClick={() => handleSelect(entry)}
                 className="flex w-full items-start gap-3 border-b p-3 text-left last:border-b-0 hover:bg-accent"
                 data-testid={`word-search-result-${i}`}
@@ -167,6 +175,15 @@ export function WordSearch({ onSelect, onLoadingChange }: WordSearchProps) {
               </button>
             );
           })}
+        </div>
+      )}
+
+      {!loading && searchedQuery && results.length === 0 && (
+        <div
+          className="rounded-lg border border-dashed p-4 text-center text-sm text-muted-foreground"
+          data-testid="word-search-no-results"
+        >
+          {t.wordForm.searchNoResults}
         </div>
       )}
     </div>

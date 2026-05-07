@@ -106,6 +106,7 @@ export interface Translations {
   wordForm: {
     dictionarySearch: string;
     searchPlaceholder: string;
+    searchNoResults: string;
     term: string;
     reading: string;
     meaning: string;

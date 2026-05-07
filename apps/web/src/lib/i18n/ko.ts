@@ -108,6 +108,7 @@ const ko: Translations = {
   wordForm: {
     dictionarySearch: '사전 검색',
     searchPlaceholder: '사전 검색 (로마자 → 가나)',
+    searchNoResults: '사전에서 결과를 찾을 수 없습니다.',
     term: '단어 (일본어)',
     reading: '읽기 (히라가나)',
     meaning: '뜻 (한국어)',

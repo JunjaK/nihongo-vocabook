@@ -108,6 +108,7 @@ const en: Translations = {
   wordForm: {
     dictionarySearch: 'Dictionary Search',
     searchPlaceholder: 'Search dictionary (romaji → kana)',
+    searchNoResults: 'No dictionary results found.',
     term: 'Term (Japanese)',
     reading: 'Reading (Hiragana)',
     meaning: 'Meaning (Korean)',

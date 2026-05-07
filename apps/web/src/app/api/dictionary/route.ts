@@ -30,8 +30,28 @@ interface DictionaryRow {
 }
 
 const SEARCH_RESULT_LIMIT = 10;
+const HIRAGANA_KATAKANA_OFFSET = 0x60;
 const logger = createLogger('api/dictionary');
 const isAnonymousRateLimited = createAnonymousRateLimiter();
+
+function toKatakana(s: string): string {
+  return s.replace(/[ぁ-ゖ]/g, (c) =>
+    String.fromCharCode(c.charCodeAt(0) + HIRAGANA_KATAKANA_OFFSET),
+  );
+}
+
+function toHiragana(s: string): string {
+  return s.replace(/[ァ-ヶ]/g, (c) =>
+    String.fromCharCode(c.charCodeAt(0) - HIRAGANA_KATAKANA_OFFSET),
+  );
+}
+
+function buildKanaVariants(query: string): string[] {
+  const variants = new Set<string>([query]);
+  variants.add(toKatakana(query));
+  variants.add(toHiragana(query));
+  return Array.from(variants);
+}
 
 function mapRowToJisho(row: DictionaryRow): JishoResult {
   return {
@@ -188,11 +208,16 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  // 1. Try local DB first (search both term and reading)
+  // 1. Try local DB first — match both term and reading, including hiragana ↔
+  //    katakana variants so e.g. "こーひー" still finds an entry stored as "コーヒー".
+  const variants = buildKanaVariants(query);
+  const orFilter = variants
+    .flatMap((v) => [`term.eq.${v}`, `reading.eq.${v}`])
+    .join(',');
   const { data: rows } = await supabase
     .from('dictionary_entries')
     .select('id, term, reading, meanings, meanings_ko, parts_of_speech, jlpt_level')
-    .or(`term.eq.${query},reading.eq.${query}`)
+    .or(orFilter)
     .limit(SEARCH_RESULT_LIMIT);
 
   if (rows && rows.length > 0) {
