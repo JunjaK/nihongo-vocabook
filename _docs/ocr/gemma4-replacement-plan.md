@@ -1,6 +1,6 @@
 # Replace Cloud OCR LLM with On-device Gemma 4
 
-> Status: Planning
+> Status: In Progress (web shipped, iOS deferred, benchmark pending)
 
 ## Goal
 
@@ -153,7 +153,7 @@ Output: `_docs/ocr/gemma4-benchmark-2026-05.md` with raw numbers.
 
 ## Checklist
 
-### Phase 1 — Benchmark (gate)
+### Phase 1 — Benchmark (gate) — DEFERRED (user will run later)
 - [ ] Collect 20–30 scan image samples
 - [ ] Build minimal benchmark harness (Node script or one-off page)
 - [ ] Run gpt-5-nano baseline, record outputs
@@ -161,41 +161,62 @@ Output: `_docs/ocr/gemma4-benchmark-2026-05.md` with raw numbers.
 - [ ] Score and document results
 - [ ] Go/no-go decision recorded in this doc
 
-### Phase 2 — Shared AI layer
-- [ ] `apps/web/src/lib/ai/types.ts` — adapter interface
-- [ ] `apps/web/src/lib/ai/model-manager.ts` — download state, dismissed flag,
+### Phase 2 — Shared AI layer — DONE
+- [x] `apps/web/src/lib/ai/types.ts` — adapter interface
+- [x] `apps/web/src/lib/ai/model-manager.ts` — download state, dismissed flag,
       storage checks
-- [ ] i18n keys for download modal + settings panel (ko, en)
+- [x] i18n keys for download modal + settings panel (ko, en)
 
-### Phase 3 — Web (E2B via transformers.js)
-- [ ] Add `@huggingface/transformers` dep
-- [ ] `apps/web/src/lib/ai/gemma-web.ts` adapter
-- [ ] Hook into `extract.ts` (replace `mode === 'llm'` branch)
-- [ ] Download modal component (`components/scan/model-download-modal.tsx`)
-- [ ] Settings page section: model state + download/update/delete buttons
-- [ ] Remove API-key form, related routes, related settings code
+### Phase 3 — Web (E2B via transformers.js) — DONE
+- [x] Add `@huggingface/transformers` dep (v4.1+ required for Gemma 4)
+- [x] `apps/web/src/lib/ai/gemma-web.ts` adapter
+- [x] Hook into scan-store (replace cloud LLM branch, keep Tesseract fallback)
+- [x] Download modal component (`components/ai/model-download-modal.tsx`)
+- [x] Settings page section: model state + download/update/delete buttons
+- [x] Remove API-key form, related routes, related settings code
+- [x] Auto-close modal + toast on successful install
 
-### Phase 4 — DB cleanup
-- [ ] Migration: drop `llm_provider`, `encrypted_api_key` columns
-- [ ] Remove `/api/ocr/vision`, `/api/settings/ocr`
-- [ ] Verify no remaining references to `LlmProvider` / `decrypt`(OCR path)
+### Phase 4 — DB cleanup — DONE
+- [x] Migration `027_drop_ocr_llm_settings.sql`: drop `llm_provider`, `encrypted_api_key`
+- [x] Remove `/api/ocr/vision`, `/api/settings/ocr`
+- [x] Verify no remaining references to `LlmProvider` / `decrypt`(OCR path)
+- [x] Update privacy policy: remove user-API-key sections, add on-device note
 
-### Phase 5 — iOS native (E2B via litert-lm)
+### Phase 5 — iOS native (E2B via litert-lm) — DEFERRED
+> Apple Developer enrollment not yet done; iOS-native path postponed.
+> Bridge message types are pre-wired so future implementation needs only
+> the native side.
 - [ ] Add `react-native-litert-lm` to `apps/mobile`
 - [ ] Native download manager (resumable, Wi-Fi gate, free-space check)
-- [ ] Extend bridge types (web side + mobile side)
+- [x] Extend bridge types (web side + mobile side)
 - [ ] Native inference handler for `AI_INFER_VISION`
 - [ ] Test on iPhone 15 Pro+ device
 - [ ] Verify memory under sustained scanning
 
 ### Phase 6 — Polish
-- [ ] Storage `persist()` request after first install
+- [x] Storage `persist()` request after first install
 - [ ] Telemetry: scan source (gemma | tesseract), latency, term count
 - [ ] Re-run benchmark on shipped build for regression check
 
 ## Implementation Notes
 
-(Filled during execution.)
+- **transformers.js version**: initial guess `^3.7.5` was wrong — v3 does not
+  include Gemma 4 model classes. Bumped to `^4.1.0` (installs v4.2.0) which
+  ships `Gemma4ForConditionalGeneration`, `Gemma4Processor`,
+  `Gemma4ImageProcessor`, `Gemma4AudioFeatureExtractor`.
+- **Processor call signature** is `_call(text, images = null, audio = null, options = {})`.
+  Initial code passed options as the audio arg — fixed to pass `null` for audio.
+  Verified against `tests/models/gemma4/test_processor_gemma4.js` in the
+  transformers.js GitHub repo.
+- **Token slicing**: use `inputs.input_ids.dims.at(-1)` rather than `dims[1]`
+  for robustness across tensor shapes (matches `tests/models/idefics3/`).
+- **Pipeline API doesn't support image-text-to-text** as of v4.2.0 — must use
+  `AutoProcessor` + `AutoModelForImageTextToText` directly (which routes to
+  the Gemma4 classes via MODEL_CLASS_MAPPINGS).
+- **Dismissed flag** stored in device-local `localStorage`, not synced. Model
+  itself is device-local (browser cache), so per-device dismiss state matches.
+- **Tesseract retained** as fallback when model not installed or user dismissed —
+  produces text-only words (no reading/meaning until dictionary lookup).
 
 ## User Feedback
 

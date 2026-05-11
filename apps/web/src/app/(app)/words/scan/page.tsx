@@ -80,6 +80,13 @@ export default function ScanPage() {
   }, [modelStatusState.state]);
 
   useEffect(() => {
+    if (modelStatusState.state !== 'installed' || !modelPromptOpen) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setModelPromptOpen(false);
+    toast.success(t.aiModel.downloadComplete);
+  }, [modelStatusState.state, modelPromptOpen, t.aiModel.downloadComplete]);
+
+  useEffect(() => {
     if (!user) return;
     fetchProfile()
       .then((p) => setUserJlptLevel(p.jlptLevel))
@@ -164,9 +171,6 @@ export default function ScanPage() {
   };
 
   const handleModelPromptOpenChange = (open: boolean) => {
-    if (!open && modelStatusState.state === 'installed') {
-      toast.success(t.aiModel.downloadComplete);
-    }
     setModelPromptOpen(open);
   };
 
