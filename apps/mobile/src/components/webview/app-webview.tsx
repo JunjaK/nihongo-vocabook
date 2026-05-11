@@ -142,6 +142,23 @@ export function AppWebView() {
 
         case 'REQUEST_CAMERA': {
           const source = message.options?.source ?? 'camera';
+
+          // expo-image-picker requires an explicit permission request — it
+          // does NOT auto-prompt from launch*Async. On a fresh install both
+          // statuses start at "undetermined"; the request call triggers the
+          // iOS native dialog (using `NSCamera/PhotoLibraryUsageDescription`
+          // already declared in `app.json:ios.infoPlist`). A denial surfaces
+          // back to the web with `CAMERA_CANCELLED` so the scan-store can
+          // exit its loading state instead of hanging on the JS error.
+          const permission =
+            source === 'camera'
+              ? await ImagePicker.requestCameraPermissionsAsync()
+              : await ImagePicker.requestMediaLibraryPermissionsAsync();
+          if (!permission.granted) {
+            sendToWeb({ type: 'CAMERA_CANCELLED' });
+            break;
+          }
+
           const pickerOptions: ImagePicker.ImagePickerOptions = {
             mediaTypes: ['images'],
             quality: 0.85,
