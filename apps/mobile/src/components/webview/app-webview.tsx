@@ -5,8 +5,8 @@ import * as Notifications from 'expo-notifications';
 import * as Haptics from 'expo-haptics';
 import * as SecureStore from 'expo-secure-store';
 import * as ImagePicker from 'expo-image-picker';
-import NivocaAi from '../../../modules/nivoca-ai';
 import { getDeviceEligibility } from '../../lib/ai/device-eligibility';
+import { runNativeInference } from '../../lib/ai/inference';
 import { modelManager, type ModelStatus } from '../../lib/ai/model-manager';
 import type {
   WebToNativeMessage,
@@ -205,21 +205,19 @@ export function AppWebView() {
           break;
 
         case 'AI_INFER_VISION': {
-          // Phase D plug — the native module's `infer()` is still the
-          // not_implemented placeholder, so we surface a structured error
-          // back to the web so it can fall back to whatever path is wired
-          // (currently: nothing — inference simply isn't available yet on
-          // the native iOS path).
+          // runNativeInference owns: base64 → cache file → LiteRT-LM call →
+          // JSON parse → term filter → AiExtractedWord[]. We just route the
+          // result back through the bridge and forward errors verbatim.
           try {
-            // Decode base64 image to a temp file and call native inference.
-            // For Phase C we only forward the rejection so the bridge round
-            // trip is exercised end-to-end.
-            const tmpPath = `${require('expo-file-system/legacy').cacheDirectory}ai-infer-${message.requestId}.jpg`;
-            const result = await NivocaAi.infer(message.imageBase64, tmpPath);
+            const words = await runNativeInference(
+              message.imageBase64,
+              message.locale,
+              message.requestId,
+            );
             sendToWeb({
               type: 'AI_INFER_VISION_RESULT',
               requestId: message.requestId,
-              words: JSON.parse(result),
+              words,
             });
           } catch (err) {
             sendToWeb({

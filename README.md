@@ -43,6 +43,14 @@ bun run build
 bun test
 ```
 
+## Mobile (Expo iOS) setup
+
+Cloning the repo is **not enough** to run the native iOS build. Two
+artefacts live outside Git: the vendored `LiteRTLM.xcframework` and the
+Gemma 4 E2B model file. See
+[`_docs/mobile-setup.md`](_docs/mobile-setup.md) for the fetch + install
+steps. Web (`bun run dev`) does not need either.
+
 ## License
 
 [MIT](LICENSE)

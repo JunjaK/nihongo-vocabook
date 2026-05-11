@@ -12,10 +12,13 @@ node_modules/
 .next/
 out/
 
-# expo
+# expo — pin the ignore to the prebuild output directory under apps/mobile/,
+# NOT every `ios/` or `android/` directory in the tree, otherwise local Expo
+# native modules at `apps/mobile/modules/*/ios/` and their Kotlin siblings
+# get wiped from the source tree.
 .expo/
-ios/
-android/
+/apps/mobile/ios/
+/apps/mobile/android/
 *.jks
 *.keystore
 
@@ -68,3 +71,14 @@ supabase/.temp/
 
 # seed data (bulk fixture files, not checked in)
 apps/web/scripts/data/
+
+# Vendored LiteRT-LM XCFramework (~205 MB total, with two 82 MB static
+# binaries that exceed GitHub's 50 MB warning threshold). Each developer
+# fetches it locally from the hung-yueh/react-native-litert-lm v0.3.6
+# release before running `bunx expo run:ios`. The README inside the
+# directory is intentionally tracked so newcomers know what's missing.
+/apps/mobile/modules/nivoca-ai/ios/Frameworks/*
+!/apps/mobile/modules/nivoca-ai/ios/Frameworks/README.md
+
+# Claude Code scheduled-task lock (per-session runtime artefact)
+.claude/scheduled_tasks.lock
