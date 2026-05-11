@@ -31,7 +31,7 @@ export default function HomeScreen() {
     // a real `Device.modelId`. Removed once the bridge wires this through
     // `AI_MODEL_STATUS_RESULT.deviceSupported` in Phase C.
     // eslint-disable-next-line no-console
-    console.log('[nivoca-ai] eligibility', getDeviceEligibility());
+    console.log('[nivoca-ai] eligibility', JSON.stringify(getDeviceEligibility()));
   }, []);
 
   return (

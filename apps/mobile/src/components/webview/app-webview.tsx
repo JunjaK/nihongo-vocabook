@@ -5,6 +5,9 @@ import * as Notifications from 'expo-notifications';
 import * as Haptics from 'expo-haptics';
 import * as SecureStore from 'expo-secure-store';
 import * as ImagePicker from 'expo-image-picker';
+import NivocaAi from '../../../modules/nivoca-ai';
+import { getDeviceEligibility } from '../../lib/ai/device-eligibility';
+import { modelManager, type ModelStatus } from '../../lib/ai/model-manager';
 import type {
   WebToNativeMessage,
   NativeToWebMessage,
@@ -40,6 +43,58 @@ export function AppWebView() {
     webViewRef.current?.injectJavaScript(js);
   }, []);
 
+  // --- AI model status → bridge message ---
+  // Builds the `AI_MODEL_STATUS_RESULT` payload from the live model-manager
+  // state, enriched with device-eligibility so the web UI can disable the
+  // download button on unsupported hardware without making a separate query.
+  const buildStatusMessage = useCallback(
+    (status: ModelStatus): NativeToWebMessage => {
+      const eligibility = getDeviceEligibility();
+      return {
+        type: 'AI_MODEL_STATUS_RESULT',
+        state: status.state,
+        progress: status.progress,
+        loadedBytes: status.loadedBytes,
+        totalBytes: status.totalBytes,
+        message: status.message,
+        deviceSupported: eligibility.supported,
+        modelName: eligibility.modelName ?? undefined,
+      };
+    },
+    [],
+  );
+
+  // --- Subscribe to model-manager events and forward to web ---
+  // Status transitions become AI_MODEL_STATUS_RESULT. Progress ticks during
+  // downloading additionally fire AI_MODEL_DOWNLOAD_PROGRESS for UI components
+  // that only care about progress. Terminal states emit COMPLETE / FAILED.
+  useEffect(() => {
+    void modelManager.ensureBooted();
+    let prevState = modelManager.getStatus().state;
+    return modelManager.subscribe((status) => {
+      sendToWeb(buildStatusMessage(status));
+      if (status.state === 'downloading' && status.progress !== undefined) {
+        sendToWeb({
+          type: 'AI_MODEL_DOWNLOAD_PROGRESS',
+          progress: status.progress,
+          loadedBytes: status.loadedBytes,
+          totalBytes: status.totalBytes,
+        });
+      }
+      if (prevState !== status.state) {
+        if (status.state === 'installed') {
+          sendToWeb({ type: 'AI_MODEL_DOWNLOAD_COMPLETE' });
+        } else if (status.state === 'error') {
+          sendToWeb({
+            type: 'AI_MODEL_DOWNLOAD_FAILED',
+            message: status.message ?? 'download_failed',
+          });
+        }
+        prevState = status.state;
+      }
+    });
+  }, [buildStatusMessage, sendToWeb]);
+
   // --- Handle message FROM web ---
   const handleMessage = useCallback(
     async (event: WebViewMessageEvent) => {
@@ -60,6 +115,12 @@ export function AppWebView() {
           if (savedToken) {
             sendToWeb({ type: 'RESTORE_AUTH', refreshToken: savedToken });
           }
+
+          // Unsolicited AI model status — gives the web settings page an
+          // initial value to render without having to wait for its own
+          // AI_MODEL_STATUS round-trip.
+          await modelManager.ensureBooted();
+          sendToWeb(buildStatusMessage(modelManager.getStatus()));
           break;
         }
 
@@ -107,6 +168,68 @@ export function AppWebView() {
         case 'SET_BADGE_COUNT':
           await Notifications.setBadgeCountAsync(message.count);
           break;
+
+        case 'AI_MODEL_STATUS': {
+          // Web asked for current status — reply on demand. The unsolicited
+          // version still fires from READY, but the web side can re-ask any
+          // time it remounts /settings/ocr.
+          await modelManager.ensureBooted();
+          sendToWeb(buildStatusMessage(modelManager.getStatus()));
+          break;
+        }
+
+        case 'AI_MODEL_DOWNLOAD_START': {
+          // Single source of truth for device eligibility — refuse to start
+          // even if the web client mistakenly enabled the button.
+          const eligibility = getDeviceEligibility();
+          if (!eligibility.supported) {
+            sendToWeb({
+              type: 'AI_MODEL_DOWNLOAD_FAILED',
+              message: 'unsupported_device',
+            });
+            break;
+          }
+          // Fire-and-forget — progress flows via the model-manager listener
+          // wired in the effect above. Errors land on the same listener as
+          // state === 'error' and we map them to AI_MODEL_DOWNLOAD_FAILED.
+          void modelManager.startDownload();
+          break;
+        }
+
+        case 'AI_MODEL_DOWNLOAD_CANCEL':
+          await modelManager.cancelDownload();
+          break;
+
+        case 'AI_MODEL_DELETE':
+          await modelManager.deleteModel();
+          break;
+
+        case 'AI_INFER_VISION': {
+          // Phase D plug — the native module's `infer()` is still the
+          // not_implemented placeholder, so we surface a structured error
+          // back to the web so it can fall back to whatever path is wired
+          // (currently: nothing — inference simply isn't available yet on
+          // the native iOS path).
+          try {
+            // Decode base64 image to a temp file and call native inference.
+            // For Phase C we only forward the rejection so the bridge round
+            // trip is exercised end-to-end.
+            const tmpPath = `${require('expo-file-system/legacy').cacheDirectory}ai-infer-${message.requestId}.jpg`;
+            const result = await NivocaAi.infer(message.imageBase64, tmpPath);
+            sendToWeb({
+              type: 'AI_INFER_VISION_RESULT',
+              requestId: message.requestId,
+              words: JSON.parse(result),
+            });
+          } catch (err) {
+            sendToWeb({
+              type: 'AI_INFER_VISION_FAILED',
+              requestId: message.requestId,
+              message: err instanceof Error ? err.message : 'infer_failed',
+            });
+          }
+          break;
+        }
 
         // Future: SHARE, OPEN_EXTERNAL_URL
       }

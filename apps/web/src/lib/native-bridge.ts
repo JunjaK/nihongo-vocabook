@@ -41,8 +41,17 @@ type NativeToWebMessage =
   | { type: 'APP_INFO'; version: string; platform: 'ios' | 'android'; bridgeVersion: number }
   | { type: 'DEEP_LINK'; path: string }
   | { type: 'APP_STATE_CHANGE'; state: 'active' | 'background' | 'inactive' }
-  | { type: 'AI_MODEL_STATUS_RESULT'; state: AiModelState; progress?: number; message?: string }
-  | { type: 'AI_MODEL_DOWNLOAD_PROGRESS'; progress: number }
+  | {
+      type: 'AI_MODEL_STATUS_RESULT';
+      state: AiModelState;
+      progress?: number;
+      loadedBytes?: number;
+      totalBytes?: number;
+      message?: string;
+      deviceSupported?: boolean;
+      modelName?: string;
+    }
+  | { type: 'AI_MODEL_DOWNLOAD_PROGRESS'; progress: number; loadedBytes?: number; totalBytes?: number }
   | { type: 'AI_MODEL_DOWNLOAD_COMPLETE' }
   | { type: 'AI_MODEL_DOWNLOAD_FAILED'; message: string }
   | { type: 'AI_INFER_VISION_RESULT'; requestId: string; words: AiExtractedWord[] }

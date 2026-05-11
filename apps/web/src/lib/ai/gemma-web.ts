@@ -3,6 +3,13 @@
 import { normalizeExtractedTerm, shouldRejectExtractedTerm } from '@/lib/ocr/term-filter';
 import { createLogger } from '@/lib/logger';
 import type { ExtractedWord } from '@/lib/ocr/llm-vision';
+import { isNativeApp } from '../native-bridge';
+import {
+  extractViaBridge,
+  isBridgeReady as isNativeBridgeReady,
+  nativeIneligibilityKey,
+  triggerNativeDownload,
+} from './native-bridge-adapter';
 import {
   getModelStatus,
   setModelStatus,
@@ -284,6 +291,14 @@ interface NavigatorWithGPU extends Navigator {
 export async function checkDownloadEligibility(): Promise<string | null> {
   if (typeof window === 'undefined') return null;
 
+  // Native iOS path takes over the eligibility decision — the native side
+  // has the authoritative `Device.modelId` whitelist. While the bridge is
+  // still initializing we conservatively claim eligibility (UI will reflect
+  // the real answer as soon as AI_MODEL_STATUS_RESULT arrives).
+  if (isNativeApp()) {
+    return nativeIneligibilityKey();
+  }
+
   const ua = navigator.userAgent;
   const isIOSWebKit = /iPad|iPhone|iPod/.test(ua) ||
     (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
@@ -306,6 +321,19 @@ export async function checkDownloadEligibility(): Promise<string | null> {
 }
 
 export async function ensureGemmaReady(): Promise<void> {
+  // Native iOS: the bridge owns the lifecycle. We translate "ensure ready"
+  // into "kick off the download and let the model-manager listener flip the
+  // state to installed". scan-store treats `isGemmaReady` as the truth.
+  if (isNativeApp()) {
+    const ineligibility = nativeIneligibilityKey();
+    if (ineligibility) {
+      setModelStatus({ state: 'error', message: ineligibility });
+      throw new Error(ineligibility);
+    }
+    triggerNativeDownload();
+    return;
+  }
+
   if (!modelPromise) {
     const ineligibility = await checkDownloadEligibility();
     if (ineligibility) {
@@ -329,6 +357,10 @@ export async function ensureGemmaReady(): Promise<void> {
 }
 
 export function isGemmaReady(): boolean {
+  // Native iOS — model-manager state is sinked from native via the bridge
+  // adapter, so the answer is the same shape. `isNativeBridgeReady` simply
+  // confirms we've heard back from native at least once.
+  if (isNativeApp() && !isNativeBridgeReady()) return false;
   return getModelStatus().state === 'installed';
 }
 
@@ -379,6 +411,12 @@ export async function extractWithGemma(
   signal?: AbortSignal,
 ): Promise<ExtractedWord[]> {
   if (signal?.aborted) throw signal.reason ?? new DOMException('Aborted', 'AbortError');
+
+  // Native iOS — round-trip through the Expo bridge to the LiteRT-LM runtime.
+  // The returned shape is identical (`ExtractedWord[]`) so callers don't care.
+  if (isNativeApp()) {
+    return extractViaBridge(imageDataUrl, locale, signal);
+  }
 
   await ensureGemmaReady();
   if (!modelPromise) throw new Error('Gemma model not initialized');

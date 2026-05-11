@@ -50,12 +50,24 @@ export type NativeToWebMessage =
   | {
       type: 'AI_MODEL_STATUS_RESULT';
       state: AiModelState;
+      /** 0..1, only present while state === 'downloading'. */
       progress?: number;
+      /** Bytes streamed so far — drives the human "1.2 / 2.5 GB" label. */
+      loadedBytes?: number;
+      /** Reported by `URLSession`; may be undefined for chunked encodings. */
+      totalBytes?: number;
+      /** Localized error or structured key (e.g. "unsupported_device"). */
       message?: string;
+      /** Result of the native device-eligibility whitelist (A15+ iPhone / M1+ iPad). */
+      deviceSupported?: boolean;
+      /** Marketing-style device name from `expo-device` (e.g. "iPhone 15 Pro"). */
+      modelName?: string;
     }
   | {
       type: 'AI_MODEL_DOWNLOAD_PROGRESS';
       progress: number;
+      loadedBytes?: number;
+      totalBytes?: number;
     }
   | {
       type: 'AI_MODEL_DOWNLOAD_COMPLETE';
