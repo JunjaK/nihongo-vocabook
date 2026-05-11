@@ -186,10 +186,9 @@ export async function extractWithGemma(
 
   const promptText = processor.apply_chat_template(messages, {
     add_generation_prompt: true,
-    tokenize: false,
   });
 
-  const inputs = await processor(promptText, image, undefined, { add_special_tokens: false });
+  const inputs = await processor(promptText, image, null, { add_special_tokens: false });
   if (signal?.aborted) throw signal.reason ?? new DOMException('Aborted', 'AbortError');
 
   const started = performance.now();
@@ -201,7 +200,7 @@ export async function extractWithGemma(
 
   if (signal?.aborted) throw signal.reason ?? new DOMException('Aborted', 'AbortError');
 
-  const inputLength = inputs.input_ids.dims[1];
+  const inputLength = inputs.input_ids.dims.at(-1) ?? 0;
   const newTokens = generated.slice(null, [inputLength, null]);
   const decoded = processor.batch_decode(newTokens, { skip_special_tokens: true });
   const text = decoded[0] ?? '';
