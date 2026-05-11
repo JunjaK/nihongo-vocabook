@@ -215,6 +215,7 @@ export interface Translations {
     themeDark: string;
     themeSystem: string;
     migration: string;
+    downloadTemplate: string;
     importExport: string;
     exportJSON: string;
     exportCSV: string;

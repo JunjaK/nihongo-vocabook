@@ -17,7 +17,6 @@ import { createClient } from '@/lib/supabase/client';
 import { useTranslation, type Locale } from '@/lib/i18n';
 import { useBottomNavLock } from '@/hooks/use-bottom-nav-lock';
 import { invalidateListCache } from '@/lib/list-cache';
-import { getModelStatus, subscribeModelStatus } from '@/lib/ai/model-manager';
 import { clearSession } from '@/lib/quiz/session-store';
 import { requestDueCountRefresh } from '@/lib/quiz/due-count-sync';
 import { fetchProfile } from '@/lib/profile/fetch';
@@ -29,7 +28,6 @@ import {
   settingsNavLink,
   settingsRow,
 } from '@/lib/styles';
-import type { ImportData } from '@/types/word';
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -41,19 +39,9 @@ export default function SettingsPage() {
   const [importing, setImporting] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [resetting, setResetting] = useState(false);
-  const [aiModelStatus, setAiModelStatus] = useState(getModelStatus());
   const [profileNickname, setProfileNickname] = useState<string | null>(null);
   const [profileLoading, setProfileLoading] = useState(true);
   useBottomNavLock(importing);
-
-  useEffect(() => subscribeModelStatus(setAiModelStatus), []);
-
-  const aiModelLabel =
-    aiModelStatus.state === 'installed'
-      ? t.aiModel.statusInstalled
-      : aiModelStatus.state === 'downloading'
-        ? `${t.aiModel.statusDownloading} ${Math.round(aiModelStatus.progress * 100)}%`
-        : t.aiModel.statusNotInstalled;
 
   useEffect(() => {
     if (!user) {
@@ -70,62 +58,53 @@ export default function SettingsPage() {
   const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    if (!file.name.toLowerCase().endsWith('.csv')) {
+      toast.error(t.settings.unsupportedFormat);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      return;
+    }
 
     setImporting(true);
     let imported = false;
     try {
       const text = await file.text();
+      const lines = text.trim().split('\n');
+      const words = lines.slice(1).map((line) => {
+        const cols = parseCSVLine(line);
+        return {
+          term: cols[0] ?? '',
+          reading: cols[1] ?? '',
+          meaning: cols[2] ?? '',
+          tags: cols[3] ? cols[3].split(';').filter(Boolean) : [],
+          jlptLevel: cols[4] ? Number(cols[4]) : null,
+          notes: cols[5] || null,
+        };
+      });
 
-      if (file.name.endsWith('.json')) {
-        const data: ImportData = JSON.parse(text);
-        if (data.version !== 1 && data.version !== 2) {
-          toast.error(t.settings.unsupportedVersion);
-          return;
+      let csvSkipped = 0;
+      for (const word of words) {
+        // Resolve dict entry via search API (handles local cache → Jisho → LLM → upsert).
+        const entries = await searchDictionary(word.term, locale).catch(() => []);
+        const match = entries.find((e) => {
+          const jp = e.japanese[0];
+          return (jp?.word ?? jp?.reading ?? '') === word.term
+            && (jp?.reading ?? '') === word.reading;
+        }) ?? entries[0];
+        if (!match?.id) {
+          csvSkipped++;
+          continue;
         }
-        await repo.importAll(data);
-        imported = true;
-        toast.success(t.settings.importSuccess(data.words.length));
-      } else if (file.name.endsWith('.csv')) {
-        const lines = text.trim().split('\n');
-        const words = lines.slice(1).map((line) => {
-          const cols = parseCSVLine(line);
-          return {
-            term: cols[0] ?? '',
-            reading: cols[1] ?? '',
-            meaning: cols[2] ?? '',
-            tags: cols[3] ? cols[3].split(';').filter(Boolean) : [],
-            jlptLevel: cols[4] ? Number(cols[4]) : null,
-            notes: cols[5] || null,
-          };
-        });
-
-        let csvSkipped = 0;
-        for (const word of words) {
-          // Resolve dict entry via search API (handles local cache → Jisho → LLM → upsert).
-          const entries = await searchDictionary(word.term, locale).catch(() => []);
-          const match = entries.find((e) => {
-            const jp = e.japanese[0];
-            return (jp?.word ?? jp?.reading ?? '') === word.term
-              && (jp?.reading ?? '') === word.reading;
-          }) ?? entries[0];
-          if (!match?.id) {
-            csvSkipped++;
-            continue;
-          }
-          try {
-            await repo.words.create({ ...word, dictionaryEntryId: match.id });
-          } catch (err) {
-            if (err instanceof Error && err.message === 'DUPLICATE_WORD') continue;
-            throw err;
-          }
+        try {
+          await repo.words.create({ ...word, dictionaryEntryId: match.id });
+        } catch (err) {
+          if (err instanceof Error && err.message === 'DUPLICATE_WORD') continue;
+          throw err;
         }
-        imported = true;
-        toast.success(t.settings.importSuccess(words.length - csvSkipped));
-        if (csvSkipped > 0) {
-          toast.warning(`${csvSkipped} rows skipped (no dictionary match).`);
-        }
-      } else {
-        toast.error(t.settings.unsupportedFormat);
+      }
+      imported = true;
+      toast.success(t.settings.importSuccess(words.length - csvSkipped));
+      if (csvSkipped > 0) {
+        toast.warning(`${csvSkipped} rows skipped (no dictionary match).`);
       }
     } catch {
       toast.error(t.settings.importError);
@@ -136,6 +115,23 @@ export default function SettingsPage() {
       if (fileInputRef.current) fileInputRef.current.value = '';
       setImporting(false);
     }
+  };
+
+  const handleDownloadTemplate = () => {
+    // Column order must stay in sync with the CSV branch of handleImport.
+    const csv = [
+      'term,reading,meaning,tags,jlpt_level,notes',
+      '食べる,たべる,먹다,동사;일상,5,예시 메모',
+    ].join('\n') + '\n';
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'nivoca-words-template.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   };
 
   const handleLogout = async () => {
@@ -336,13 +332,12 @@ export default function SettingsPage() {
 
         <div className="h-px bg-border" />
 
-        {/* OCR / AI */}
+        {/* AI model — heading on top, button on its own row below to match the
+            other settings sections (Import, Reset, etc.). The detail page owns
+            status/progress UI so we don't duplicate "사용 가능 / 다운로드 중 NN%". */}
         <section className={settingsSection}>
-          <h2 className={settingsHeading}>
-            {t.settings.ocrTitle}
-          </h2>
-          <div className="flex items-center justify-between">
-            <div className="text-sm">{aiModelLabel}</div>
+          <h2 className={settingsHeading}>{t.settings.ocrTitle}</h2>
+          <div className="flex flex-wrap gap-2">
             <Link href="/settings/ocr">
               <Button variant="outline" size="sm" className="!h-9 rounded-md" data-testid="settings-ai-model-link">
                 {t.settings.goToSettings}
@@ -362,6 +357,14 @@ export default function SettingsPage() {
                 variant="outline"
                 size="sm"
                 className="!h-9 rounded-md"
+                onClick={handleDownloadTemplate}
+                data-testid="settings-download-template-button"
+              >
+                {t.settings.downloadTemplate}
+              </Button>
+              <Button
+                size="sm"
+                className="!h-9 rounded-md"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={importing}
                 data-testid="settings-import-button"
@@ -371,7 +374,7 @@ export default function SettingsPage() {
               <input
                 ref={fileInputRef}
                 type="file"
-                accept=".json,.csv"
+                accept=".csv,text/csv"
                 onChange={handleImport}
                 className="hidden"
               />

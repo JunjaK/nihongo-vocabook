@@ -13,9 +13,12 @@
  * Safe to Ctrl-C and re-run; partial files are detected via `stat` size mismatch.
  */
 
+import { createWriteStream } from 'node:fs';
 import { mkdir, stat } from 'node:fs/promises';
 import { homedir } from 'node:os';
 import { dirname, join } from 'node:path';
+import { Readable } from 'node:stream';
+import { pipeline } from 'node:stream/promises';
 
 const MODEL_ID = 'onnx-community/gemma-4-E2B-it-ONNX';
 const REVISION = 'main';
@@ -46,16 +49,21 @@ async function listFiles(): Promise<HubFile[]> {
   return (await res.json()) as HubFile[];
 }
 
+// `.onnx_data` files are sometimes sharded into `.onnx_data_1`, `.onnx_data_2`, …
+// for large variants. Catch both forms so the filter actually excludes them.
+const ONNX_DATA_RE = /\.onnx_data(_\d+)?$/;
+
 function isNeeded(file: HubFile): boolean {
   // All non-ONNX metadata stays (configs, tokenizer, processor, chat template)
-  const isOnnxArtifact =
-    file.path.endsWith('.onnx') || file.path.endsWith('.onnx_data');
+  const isOnnxArtifact = file.path.endsWith('.onnx') || ONNX_DATA_RE.test(file.path);
   if (!isOnnxArtifact) {
     // Skip git/markdown metadata
     if (file.path === '.gitattributes' || file.path === 'README.md') return false;
     return true;
   }
-  // Only the dtype variant we use at runtime
+  // Only the dtype variant we use at runtime. The token is checked with
+  // surrounding underscore/dot anchors so `_q4f16.` doesn't accidentally match
+  // a substring of another tag.
   return file.path.includes(`_${DTYPE_TAG}.`);
 }
 
@@ -78,14 +86,29 @@ async function downloadFile(file: HubFile, idx: number, total: number): Promise<
 
   await mkdir(dirname(localPath), { recursive: true });
   const url = `https://huggingface.co/${MODEL_ID}/resolve/${REVISION}/${file.path}`;
-  console.log(`[${idx}/${total}] ↓ ${file.path} (${formatBytes(file.size)})`);
+  const start = performance.now();
+  process.stdout.write(`[${idx}/${total}] ↓ ${file.path} (${formatBytes(file.size)}) … `);
 
-  const res = await fetch(url);
+  const res = await fetch(url, { redirect: 'follow' });
   if (!res.ok) throw new Error(`Failed to fetch ${file.path}: HTTP ${res.status}`);
   if (!res.body) throw new Error(`No response body for ${file.path}`);
 
-  // Bun.write accepts a Response and streams body to disk — no full buffering.
-  await Bun.write(localPath, res);
+  // Stream through Node's pipeline so we never buffer the whole body in memory
+  // (1.5GB ONNX shards would OOM otherwise) and so errors actually surface.
+  await pipeline(
+    Readable.fromWeb(res.body as import('node:stream/web').ReadableStream),
+    createWriteStream(localPath),
+  );
+
+  const written = (await stat(localPath)).size;
+  if (file.size > 0 && written !== file.size) {
+    throw new Error(
+      `Size mismatch for ${file.path}: expected ${file.size}, wrote ${written}`,
+    );
+  }
+
+  const elapsed = (performance.now() - start) / 1000;
+  console.log(`done in ${elapsed.toFixed(1)}s`);
 }
 
 async function main(): Promise<void> {
