@@ -1,159 +1,135 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { Header } from '@/components/layout/header';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { useAuthStore } from '@/stores/auth-store';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { useTranslation } from '@/lib/i18n';
-import { bottomBar, bottomSep } from '@/lib/styles';
 import {
-  getLocalOcrMode,
-  setLocalOcrMode,
-  fetchOcrSettings,
-  saveOcrSettings,
-  type OcrMode,
-  type LlmProvider,
-} from '@/lib/ocr/settings';
+  deleteModel,
+  getModelStatus,
+  setDownloadPromptDismissed,
+  subscribeModelStatus,
+} from '@/lib/ai/model-manager';
+import { ensureGemmaReady } from '@/lib/ai/gemma-web';
 
-const PROVIDERS: { value: LlmProvider; label: string }[] = [
-  { value: 'openai', label: 'OpenAI' },
-  { value: 'anthropic', label: 'Anthropic' },
-  { value: 'gemini', label: 'Gemini' },
-];
-
-export default function OcrSettingsPage() {
+export default function AiModelSettingsPage() {
   const { t } = useTranslation();
-  const user = useAuthStore((s) => s.user);
-  const [mode, setMode] = useState<OcrMode>('ocr');
-  const [provider, setProvider] = useState<LlmProvider>('openai');
-  const [apiKey, setApiKey] = useState('');
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+  const [status, setStatus] = useState(getModelStatus());
+  const [deleting, setDeleting] = useState(false);
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
 
-  useEffect(() => {
-    setMode(getLocalOcrMode());
+  useEffect(() => subscribeModelStatus(setStatus), []);
 
-    if (!user) {
-      setLoading(false);
-      return;
-    }
+  const handleDownload = () => {
+    setDownloadPromptDismissed(false);
+    ensureGemmaReady().catch((err: unknown) => {
+      const message = err instanceof Error ? err.message : t.aiModel.downloadFailed;
+      toast.error(message);
+    });
+  };
 
-    fetchOcrSettings()
-      .then((settings) => {
-        setProvider(settings.llmProvider);
-        setApiKey(settings.apiKey);
-      })
-      .catch(() => {
-        // Use defaults on error
-      })
-      .finally(() => setLoading(false));
-  }, [user]);
-
-  const handleSave = async () => {
-    setSaving(true);
+  const handleDelete = async () => {
+    setDeleting(true);
     try {
-      setLocalOcrMode(mode);
-      if ((mode === 'llm' || mode === 'hybrid') && user) {
-        await saveOcrSettings({ llmProvider: provider, apiKey: apiKey || undefined });
-      }
-      toast.success(t.profile.saved);
-    } catch {
-      toast.error('Failed to save settings');
+      await deleteModel();
+      toast.success(t.aiModel.deleteSuccess);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : t.aiModel.downloadFailed;
+      toast.error(message);
     } finally {
-      setSaving(false);
+      setDeleting(false);
+      setConfirmDeleteOpen(false);
     }
   };
 
+  const statusLabel =
+    status.state === 'installed'
+      ? t.aiModel.statusInstalled
+      : status.state === 'downloading'
+        ? `${t.aiModel.statusDownloading} ${Math.round(status.progress * 100)}%`
+        : status.state === 'error'
+          ? t.aiModel.downloadFailed
+          : t.aiModel.statusNotInstalled;
+
   return (
     <>
-      <Header title={t.settings.ocrSettings} showBack />
-      <div className="flex min-h-0 flex-1 flex-col">
-        <div className="animate-page flex-1 space-y-6 overflow-y-auto px-5 pt-3">
-          {/* Mode selector */}
-          <section className="space-y-2">
-            <h2 className="text-sm font-medium text-muted-foreground">
-              {t.settings.ocrMode}
-            </h2>
-            <div className="flex gap-2">
-              {([
-                { value: 'ocr' as const, label: t.settings.ocrFree },
-                { value: 'llm' as const, label: t.settings.llmVision },
-                { value: 'hybrid' as const, label: t.settings.llmHybrid },
-              ]).map((opt) => (
-                <Button
-                  key={opt.value}
-                  variant={mode === opt.value ? 'default' : 'outline'}
-                  size="sm"
-                  className={cn('!h-9 rounded-md', mode !== opt.value && 'text-muted-foreground')}
-                  onClick={() => setMode(opt.value)}
-                  data-testid={`ocr-mode-${opt.value}`}
-                >
-                  {opt.label}
-                </Button>
-              ))}
+      <Header title={t.settings.aiModelPage} showBack />
+      <div className="animate-page flex-1 space-y-6 overflow-y-auto px-5 pt-3">
+        <section className="space-y-2">
+          <h2 className="text-sm font-medium text-muted-foreground">{t.aiModel.title}</h2>
+          <p className="text-sm text-muted-foreground">{t.aiModel.description}</p>
+        </section>
+
+        <Separator />
+
+        <section className="space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="text-sm font-medium">{t.aiModel.status}</div>
+            <div
+              className="text-sm tabular-nums text-muted-foreground"
+              data-testid="ai-model-status"
+            >
+              {statusLabel}
             </div>
-          </section>
+          </div>
 
-          {(mode === 'llm' || mode === 'hybrid') && user && !loading && (
-            <>
-              <Separator />
-
-              {/* Provider selector */}
-              <section className="space-y-2">
-                <h2 className="text-sm font-medium text-muted-foreground">
-                  {t.settings.llmProvider}
-                </h2>
-                <div className="flex gap-2">
-                  {PROVIDERS.map((opt) => (
-                    <Button
-                      key={opt.value}
-                      variant={provider === opt.value ? 'default' : 'outline'}
-                      size="sm"
-                      className={cn('!h-9 rounded-md', provider !== opt.value && 'text-muted-foreground')}
-                      onClick={() => setProvider(opt.value)}
-                      data-testid={`ocr-provider-${opt.value}`}
-                    >
-                      {opt.label}
-                    </Button>
-                  ))}
-                </div>
-              </section>
-
-              <Separator />
-
-              {/* API key */}
-              <section className="space-y-2">
-                <Label htmlFor="api-key">{t.settings.apiKey}</Label>
-                <Input
-                  id="api-key"
-                  type="password"
-                  value={apiKey}
-                  onChange={(e) => setApiKey(e.target.value)}
-                  placeholder={t.settings.apiKeyPlaceholder}
-                  data-testid="ocr-api-key-input"
-                />
-              </section>
-            </>
+          {status.state === 'downloading' && (
+            <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+              <div
+                className="h-full rounded-full bg-primary transition-all duration-300 ease-out"
+                style={{ width: `${Math.round(status.progress * 100)}%` }}
+              />
+            </div>
           )}
-        </div>
 
-        <div className={bottomBar}>
-          <div className={bottomSep} />
-          <Button
-            className="w-full"
-            onClick={handleSave}
-            disabled={saving}
-            data-testid="ocr-save-button"
-          >
-            {saving ? t.common.saving : t.common.save}
-          </Button>
-        </div>
+          <div className="flex items-center justify-between text-xs text-muted-foreground">
+            <span>{t.aiModel.approxSize}</span>
+            <span>{t.aiModel.wifiRecommended}</span>
+          </div>
+        </section>
+
+        <Separator />
+
+        <section className="space-y-2">
+          {status.state !== 'installed' && (
+            <Button
+              className="w-full"
+              onClick={handleDownload}
+              disabled={status.state === 'downloading'}
+              data-testid="ai-model-download-button"
+            >
+              {t.aiModel.download}
+            </Button>
+          )}
+          {status.state === 'installed' && (
+            <Button
+              className="w-full"
+              variant="outline"
+              onClick={() => setConfirmDeleteOpen(true)}
+              disabled={deleting}
+              data-testid="ai-model-delete-button"
+            >
+              {t.aiModel.delete}
+            </Button>
+          )}
+        </section>
+
+        <p className="pt-2 text-center text-xs text-muted-foreground">{t.aiModel.poweredBy}</p>
       </div>
+
+      <ConfirmDialog
+        open={confirmDeleteOpen}
+        title={t.aiModel.delete}
+        description={t.aiModel.deleteConfirm}
+        confirmLabel={t.aiModel.delete}
+        cancelLabel={t.aiModel.cancel}
+        destructive
+        onConfirm={handleDelete}
+        onCancel={() => setConfirmDeleteOpen(false)}
+      />
     </>
   );
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useSyncExternalStore } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { Camera } from '@/components/ui/icons';
@@ -19,6 +19,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { ModelDownloadModal } from '@/components/ai/model-download-modal';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { bottomBar, bottomSep } from '@/lib/styles';
 import { useRepository } from '@/lib/repository/provider';
@@ -27,7 +28,12 @@ import { invalidateListCache } from '@/lib/list-cache';
 import { useAuthStore } from '@/stores/auth-store';
 import { useScanStore } from '@/stores/scan-store';
 import { useBottomNavLock } from '@/hooks/use-bottom-nav-lock';
-import { getLocalOcrMode, fetchOcrSettings } from '@/lib/ocr/settings';
+import {
+  getModelStatus,
+  isDownloadPromptDismissed,
+  subscribeModelStatus,
+} from '@/lib/ai/model-manager';
+import { ensureGemmaReady } from '@/lib/ai/gemma-web';
 import { fetchProfile } from '@/lib/profile/fetch';
 import type { ExtractedWord } from '@/lib/ocr/llm-vision';
 import Link from 'next/link';
@@ -39,7 +45,6 @@ export default function ScanPage() {
   const user = useAuthStore((s) => s.user);
   const imageCaptureRef = useRef<ImageCaptureHandle>(null);
 
-  // Scan store state
   const status = useScanStore((s) => s.status);
   const capturedImages = useScanStore((s) => s.capturedImages);
   const enrichedWords = useScanStore((s) => s.enrichedWords);
@@ -49,36 +54,30 @@ export default function ScanPage() {
   const setDone = useScanStore((s) => s.setDone);
   const reset = useScanStore((s) => s.reset);
 
-  // User JLPT level for filtering
   const [userJlptLevel, setUserJlptLevel] = useState<number | null>(null);
-  // Terms already in user's word list
   const [existingTerms, setExistingTerms] = useState<Set<string>>(new Set());
-
-  // Guard: LLM mode needs API key configured on server
-  const mode = getLocalOcrMode();
-  const [needsApiKey, setNeedsApiKey] = useState(false);
-  const [guardLoading, setGuardLoading] = useState(mode === 'llm' || mode === 'hybrid');
   const [leaveConfirmOpen, setLeaveConfirmOpen] = useState(false);
+  const [modelPromptOpen, setModelPromptOpen] = useState(false);
+  const autoPromptCheckedRef = useRef(false);
+
+  const modelStatusState = useSyncExternalStore(
+    subscribeModelStatus,
+    getModelStatus,
+    () => ({ state: 'not_installed' as const }),
+  );
 
   const isExtracting = status === 'extracting';
   const isEnriching = status === 'enriching';
   useBottomNavLock(isExtracting || isEnriching);
 
   useEffect(() => {
-    if ((mode !== 'llm' && mode !== 'hybrid') || !user) {
-      setGuardLoading(false);
-      return;
+    if (autoPromptCheckedRef.current) return;
+    autoPromptCheckedRef.current = true;
+    if (modelStatusState.state === 'not_installed' && !isDownloadPromptDismissed()) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setModelPromptOpen(true);
     }
-
-    fetchOcrSettings()
-      .then((settings) => {
-        setNeedsApiKey(!settings.hasApiKey);
-      })
-      .catch(() => {
-        setNeedsApiKey(true);
-      })
-      .finally(() => setGuardLoading(false));
-  }, [mode, user]);
+  }, [modelStatusState.state]);
 
   useEffect(() => {
     if (!user) return;
@@ -87,7 +86,6 @@ export default function ScanPage() {
       .catch(() => {});
   }, [user]);
 
-  // Check existing terms when preview starts
   useEffect(() => {
     if (status !== 'preview' || enrichedWords.length === 0) return;
     repo.words
@@ -103,7 +101,7 @@ export default function ScanPage() {
       });
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Extraction failed';
-      toast.error(message === 'API_KEY_REQUIRED' ? t.scan.apiKeyRequired : message);
+      toast.error(message);
     }
   };
 
@@ -112,7 +110,6 @@ export default function ScanPage() {
     let skipped = 0;
     for (const word of words) {
       if (!word.dictionaryEntryId) {
-        // Skipped because dict resolution failed — dict-first rule blocks save.
         skipped++;
         continue;
       }
@@ -159,7 +156,20 @@ export default function ScanPage() {
     router.push('/words');
   };
 
-  // Derive the visual step from store status
+  const handleStartModelDownload = () => {
+    ensureGemmaReady().catch((err: unknown) => {
+      const message = err instanceof Error ? err.message : t.aiModel.downloadFailed;
+      toast.error(message);
+    });
+  };
+
+  const handleModelPromptOpenChange = (open: boolean) => {
+    if (!open && modelStatusState.state === 'installed') {
+      toast.success(t.aiModel.downloadComplete);
+    }
+    setModelPromptOpen(open);
+  };
+
   const isInProgress = isExtracting || isEnriching;
   const step = status === 'idle' ? 'capture' : status;
   const isPreviewStep = step === 'preview';
@@ -206,7 +216,7 @@ export default function ScanPage() {
         onBack={handleHeaderBack}
         allowBackWhenLocked={isPreviewStep}
         actions={
-          step === 'capture' && !guardLoading && !needsApiKey ? (
+          step === 'capture' ? (
             <Button
               variant="ghost"
               size="icon-sm"
@@ -219,22 +229,8 @@ export default function ScanPage() {
         }
       />
 
-      {guardLoading ? (
-        <div className="animate-page p-4 text-center text-sm text-muted-foreground">
-          {t.common.loading}
-        </div>
-      ) : needsApiKey && step === 'capture' ? (
-        <div className="animate-page space-y-4 p-4 text-center">
-          <div className="py-8 text-sm text-muted-foreground">
-            {t.settings.configureRequired}
-          </div>
-          <Link href="/settings/ocr">
-            <Button variant="outline">{t.settings.goToSettings}</Button>
-          </Link>
-        </div>
-      ) : isInProgress ? (
+      {isInProgress ? (
         <div className="relative flex min-h-0 flex-1 flex-col">
-          {/* Reuse image grid layout */}
           <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-5 py-3">
             {capturedImages.length > 0 && (
               <div className="grid grid-cols-2 gap-2">
@@ -251,7 +247,6 @@ export default function ScanPage() {
               </div>
             )}
           </div>
-          {/* Overlay spinner */}
           <div className="absolute inset-0 z-10 flex flex-col bg-background/60 backdrop-blur-[1px]">
             <div className="flex flex-1 flex-col items-center justify-center gap-4 px-6">
               <LoadingSpinner className="size-8" />
@@ -309,6 +304,12 @@ export default function ScanPage() {
       ) : step === 'done' ? (
         <ScanComplete addedCount={addedCount} onAddMore={handleReset} />
       ) : null}
+
+      <ModelDownloadModal
+        open={modelPromptOpen}
+        onOpenChange={handleModelPromptOpenChange}
+        onConfirmDownload={handleStartModelDownload}
+      />
 
       <AlertDialog open={leaveConfirmOpen} onOpenChange={setLeaveConfirmOpen}>
         <AlertDialogContent size="sm">

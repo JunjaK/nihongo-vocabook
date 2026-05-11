@@ -1,16 +1,17 @@
 'use client';
 
 import { create } from 'zustand';
-import { extractWordsFromImage } from '@/lib/ocr/extract';
-import { getLocalOcrMode } from '@/lib/ocr/settings';
+import { extractWithTesseract } from '@/lib/ocr/tesseract';
+import { extractWithGemma } from '@/lib/ai/gemma-web';
+import { isGemmaReady } from '@/lib/ai/gemma-web';
 import { searchDictionary, searchDictionaryBatch } from '@/lib/dictionary/jisho';
 import type { ExtractedWord } from '@/lib/ocr/llm-vision';
 import type { DictionaryEntry } from '@/types/word';
 
-const KANJI_CHAR_REGEX = /[\u4E00-\u9FFF\u3400-\u4DBF]/;
-const SINGLE_KANJI_REGEX = /^[\u4E00-\u9FFF\u3400-\u4DBF]$/;
-const KATAKANA_ONLY_REGEX = /^[\u30A0-\u30FF]+$/;
-const HIRAGANA_ONLY_REGEX = /^[\u3040-\u309F]+$/;
+const KANJI_CHAR_REGEX = /[一-鿿㐀-䶿]/;
+const SINGLE_KANJI_REGEX = /^[一-鿿㐀-䶿]$/;
+const KATAKANA_ONLY_REGEX = /^[゠-ヿ]+$/;
+const HIRAGANA_ONLY_REGEX = /^[぀-ゟ]+$/;
 
 function buildNormalizedLookupForms(raw: string): string[] {
   const normalized = raw.normalize('NFKC');
@@ -134,7 +135,6 @@ function scorePartsOfSpeechPenalty(entry: DictionaryEntry): number {
 }
 
 function scorePreviewWord(word: ExtractedWord, existingTerms: Set<string>, sourceBoost = 0): number {
-  // Existing words always sink to the bottom
   if (existingTerms.has(word.term)) return -1000;
   let score = sourceBoost;
   if (word.meaning) score += 8;
@@ -166,7 +166,6 @@ function shouldSuppressAsFragment(
     if (candidate.length <= term.length) continue;
     if (!candidate.includes(term)) continue;
 
-    // Single-kanji or very short kana fragments are usually OCR split artifacts.
     if (term.length === 1) return true;
     if ((KATAKANA_ONLY_REGEX.test(term) || HIRAGANA_ONLY_REGEX.test(term)) && term.length <= 3) {
       return true;
@@ -185,10 +184,6 @@ function buildTermFrequencyMap(terms: string[]): Map<string, number> {
   return freq;
 }
 
-function isShortKatakana(term: string): boolean {
-  return KATAKANA_ONLY_REGEX.test(term) && term.length <= 3;
-}
-
 function shouldKeepOcrTerm(term: string, ocrFrequency: Map<string, number>): boolean {
   if (!KATAKANA_ONLY_REGEX.test(term)) return true;
 
@@ -203,7 +198,6 @@ function passesPreviewHeuristic(word: ExtractedWord, existingTerms: Set<string>)
   const term = word.term;
   const isExisting = existingTerms.has(term);
 
-  // Katakana fragments are often OCR noise; keep only with stronger lexical signals.
   if (KATAKANA_ONLY_REGEX.test(term) && term.length <= 4) {
     if (isExisting) return true;
     if (!word.meaning || !word.reading) return false;
@@ -211,23 +205,12 @@ function passesPreviewHeuristic(word: ExtractedWord, existingTerms: Set<string>)
     return word.jlptLevel !== null;
   }
 
-  // Single kanji is allowed only conditionally.
   if (SINGLE_KANJI_REGEX.test(term)) {
     if (isExisting) return true;
     return Boolean(word.meaning) && Boolean(word.reading);
   }
 
   return true;
-}
-
-function mergeWords(primary: ExtractedWord, secondary: ExtractedWord): ExtractedWord {
-  return {
-    term: primary.term,
-    reading: primary.reading || secondary.reading,
-    meaning:
-      primary.meaning.length >= secondary.meaning.length ? primary.meaning : secondary.meaning,
-    jlptLevel: primary.jlptLevel ?? secondary.jlptLevel,
-  };
 }
 
 function rerankWords(words: ExtractedWord[], existingTerms: Set<string>, sourceBoost = 0): ExtractedWord[] {
@@ -244,40 +227,16 @@ function rerankWords(words: ExtractedWord[], existingTerms: Set<string>, sourceB
     );
 }
 
-function buildEnsembledWords(
-  ocrWords: ExtractedWord[],
-  llmWords: ExtractedWord[],
-  existingTerms: Set<string>,
-): ExtractedWord[] {
-  const ocrMap = new Map(ocrWords.map((word) => [word.term, word]));
-  const llmMap = new Map(llmWords.map((word) => [word.term, word]));
-
-  const both: ExtractedWord[] = [];
-  const ocrOnly: ExtractedWord[] = [];
-  const llmOnly: ExtractedWord[] = [];
-
-  for (const [term, ocrWord] of ocrMap) {
-    const llmWord = llmMap.get(term);
-    if (llmWord) {
-      both.push(mergeWords(ocrWord, llmWord));
-    } else {
-      ocrOnly.push(ocrWord);
-    }
-  }
-
-  for (const [term, llmWord] of llmMap) {
-    if (!ocrMap.has(term)) llmOnly.push(llmWord);
-  }
-
-  return [
-    ...rerankWords(both, existingTerms, 8),
-    ...rerankWords(ocrOnly, existingTerms, 4),
-    ...rerankWords(llmOnly, existingTerms, 2),
-  ];
-}
-
-function toExtractedWord(raw: string, entries: DictionaryEntry[], locale: string): ExtractedWord {
+function toExtractedWord(
+  raw: string,
+  entries: DictionaryEntry[],
+  locale: string,
+  hint?: ExtractedWord,
+): ExtractedWord {
   if (entries.length === 0) {
+    if (hint) {
+      return { ...hint, term: raw, dictionaryEntryId: null };
+    }
     return { term: raw, reading: '', meaning: '', jlptLevel: null, dictionaryEntryId: null };
   }
 
@@ -306,6 +265,9 @@ function toExtractedWord(raw: string, entries: DictionaryEntry[], locale: string
   }
 
   if (!best) {
+    if (hint) {
+      return { ...hint, term: raw, dictionaryEntryId: null };
+    }
     return { term: raw, reading: '', meaning: '', jlptLevel: null, dictionaryEntryId: null };
   }
 
@@ -351,40 +313,23 @@ export const useScanStore = create<ScanState>((set, get) => ({
     });
 
     try {
-      const currentMode = getLocalOcrMode();
-      const allOcrWords: string[] = [];
-      const allLlmWords: ExtractedWord[] = [];
-      const runLlm = currentMode === 'llm' || currentMode === 'hybrid';
-      const runOcr = currentMode === 'ocr' || currentMode === 'hybrid';
+      const useGemma = isGemmaReady();
+      const collectedTerms: string[] = [];
+      const hints = new Map<string, ExtractedWord>();
 
       for (const imageDataUrl of imageDataUrls) {
         if (get().cancelId !== id) return;
 
-        if (runLlm) {
-          const llmResult = await extractWordsFromImage(
-            imageDataUrl,
-            'llm',
-            undefined,
-            locale,
-            controller.signal,
-          );
-          if (llmResult.mode === 'llm') {
-            allLlmWords.push(...llmResult.words);
+        if (useGemma) {
+          const words = await extractWithGemma(imageDataUrl, locale, controller.signal);
+          for (const w of words) {
+            collectedTerms.push(w.term);
+            if (!hints.has(w.term)) hints.set(w.term, w);
           }
-        }
-
-        if (runOcr) {
+        } else {
           try {
-            const ocrResult = await extractWordsFromImage(
-              imageDataUrl,
-              'ocr',
-              undefined,
-              locale,
-              controller.signal,
-            );
-            if (ocrResult.mode === 'ocr') {
-              allOcrWords.push(...ocrResult.words);
-            }
+            const words = await extractWithTesseract(imageDataUrl, undefined, controller.signal);
+            collectedTerms.push(...words);
           } catch {
             if (controller.signal.aborted) return;
           }
@@ -393,84 +338,75 @@ export const useScanStore = create<ScanState>((set, get) => ({
 
       if (get().cancelId !== id) return;
 
-      const uniqueLlmWords = dedupExtractedWords(allLlmWords);
-      const ocrFrequency = buildTermFrequencyMap(allOcrWords);
-      const uniqueOcrWords = allOcrWords.filter(
-        (word, index) => word && allOcrWords.indexOf(word) === index,
-      );
-      const filteredOcrWords = uniqueOcrWords.filter((word) => shouldKeepOcrTerm(word, ocrFrequency));
-      const termsToCheck = [
-        ...filteredOcrWords,
-        ...uniqueLlmWords.map((word) => word.term),
-      ];
+      const ocrFrequency = buildTermFrequencyMap(collectedTerms);
+      const uniqueTerms = [...new Set(collectedTerms)];
+      const filteredTerms = useGemma
+        ? uniqueTerms
+        : uniqueTerms.filter((word) => shouldKeepOcrTerm(word, ocrFrequency));
       const existingTerms = options?.resolveExistingTerms
-        ? await options.resolveExistingTerms(termsToCheck)
+        ? await options.resolveExistingTerms(filteredTerms)
         : new Set<string>();
 
-      if (allOcrWords.length > 0) {
-        const lookupTargets = filteredOcrWords.filter((word) => !existingTerms.has(word));
-        const resultMap = new Map<string, ExtractedWord>();
-        for (const term of existingTerms) {
-          resultMap.set(term, { term, reading: '', meaning: '', jlptLevel: null });
-        }
+      if (filteredTerms.length === 0) {
+        set({ status: 'preview', enrichedWords: [] });
+        return;
+      }
 
-        // Enrich OCR words with dictionary lookups
-        if (lookupTargets.length > 0) {
-          set({ status: 'enriching', enrichProgress: { current: 0, total: lookupTargets.length } });
+      const lookupTargets = filteredTerms.filter((word) => !existingTerms.has(word));
+      const resultMap = new Map<string, ExtractedWord>();
+      for (const term of existingTerms) {
+        resultMap.set(term, hints.get(term) ?? { term, reading: '', meaning: '', jlptLevel: null });
+      }
 
-          // 1. Batch lookup from DB
-          const batchResult = await searchDictionaryBatch(lookupTargets, locale, {
-            signal: controller.signal,
-          });
-          if (get().cancelId !== id) return;
+      if (lookupTargets.length > 0) {
+        set({ status: 'enriching', enrichProgress: { current: 0, total: lookupTargets.length } });
 
-          for (const [term, entries] of batchResult.found) {
-            resultMap.set(term, toExtractedWord(term, entries, locale));
-          }
-
-          const batchFoundCount = batchResult.found.size;
-          set({ enrichProgress: { current: batchFoundCount, total: lookupTargets.length } });
-
-          // 2. Sequential Jisho lookups for misses
-          for (let i = 0; i < batchResult.missing.length; i++) {
-            if (get().cancelId !== id) return;
-
-            const raw = batchResult.missing[i];
-            if (i > 0) await new Promise((r) => setTimeout(r, 200));
-
-            try {
-              const entries = await searchDictionary(raw, locale, {
-                signal: controller.signal,
-              });
-              resultMap.set(raw, toExtractedWord(raw, entries, locale));
-            } catch {
-              if (controller.signal.aborted) return;
-              resultMap.set(raw, { term: raw, reading: '', meaning: '', jlptLevel: null });
-            }
-            set({
-              enrichProgress: { current: batchFoundCount + i + 1, total: lookupTargets.length },
-            });
-          }
-        }
-
+        const batchResult = await searchDictionaryBatch(lookupTargets, locale, {
+          signal: controller.signal,
+        });
         if (get().cancelId !== id) return;
 
-        const ocrResults = filteredOcrWords.map(
-          (raw) => resultMap.get(raw) ?? { term: raw, reading: '', meaning: '', jlptLevel: null },
-        );
+        for (const [term, entries] of batchResult.found) {
+          resultMap.set(term, toExtractedWord(term, entries, locale, hints.get(term)));
+        }
 
-        const finalResults = uniqueLlmWords.length > 0
-          ? buildEnsembledWords(ocrResults, uniqueLlmWords, existingTerms)
-          : rerankWords(ocrResults, existingTerms, 4);
+        const batchFoundCount = batchResult.found.size;
+        set({ enrichProgress: { current: batchFoundCount, total: lookupTargets.length } });
 
-        set({ status: 'preview', enrichedWords: finalResults });
-      } else {
-        set({ status: 'preview', enrichedWords: rerankWords(uniqueLlmWords, existingTerms, 2) });
+        for (let i = 0; i < batchResult.missing.length; i++) {
+          if (get().cancelId !== id) return;
+
+          const raw = batchResult.missing[i];
+          if (i > 0) await new Promise((r) => setTimeout(r, 200));
+
+          try {
+            const entries = await searchDictionary(raw, locale, {
+              signal: controller.signal,
+            });
+            resultMap.set(raw, toExtractedWord(raw, entries, locale, hints.get(raw)));
+          } catch {
+            if (controller.signal.aborted) return;
+            resultMap.set(raw, hints.get(raw) ?? { term: raw, reading: '', meaning: '', jlptLevel: null });
+          }
+          set({
+            enrichProgress: { current: batchFoundCount + i + 1, total: lookupTargets.length },
+          });
+        }
       }
+
+      if (get().cancelId !== id) return;
+
+      const results = filteredTerms.map(
+        (raw) => resultMap.get(raw) ?? hints.get(raw) ?? { term: raw, reading: '', meaning: '', jlptLevel: null },
+      );
+
+      set({
+        status: 'preview',
+        enrichedWords: rerankWords(results, existingTerms, useGemma ? 6 : 4),
+      });
     } catch (err) {
       if (get().cancelId !== id || isAbortError(err)) return;
 
-      // Only reset to idle if this extraction wasn't cancelled
       if (get().cancelId === id) {
         set({ status: 'idle', activeController: null });
       }

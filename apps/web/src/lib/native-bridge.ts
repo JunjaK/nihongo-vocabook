@@ -18,7 +18,21 @@ type WebToNativeMessage =
   | { type: 'HAPTIC_FEEDBACK'; style: 'light' | 'medium' | 'heavy' }
   | { type: 'SET_BADGE_COUNT'; count: number }
   | { type: 'OPEN_EXTERNAL_URL'; url: string }
-  | { type: 'SHARE'; text: string; url?: string };
+  | { type: 'SHARE'; text: string; url?: string }
+  | { type: 'AI_MODEL_STATUS' }
+  | { type: 'AI_MODEL_DOWNLOAD_START' }
+  | { type: 'AI_MODEL_DOWNLOAD_CANCEL' }
+  | { type: 'AI_MODEL_DELETE' }
+  | { type: 'AI_INFER_VISION'; requestId: string; imageBase64: string; locale: string };
+
+interface AiExtractedWord {
+  term: string;
+  reading: string;
+  meaning: string;
+  jlptLevel: number | null;
+}
+
+type AiModelState = 'not_installed' | 'downloading' | 'installed' | 'error';
 
 type NativeToWebMessage =
   | { type: 'RESTORE_AUTH'; refreshToken: string }
@@ -26,7 +40,13 @@ type NativeToWebMessage =
   | { type: 'CAMERA_CANCELLED' }
   | { type: 'APP_INFO'; version: string; platform: 'ios' | 'android'; bridgeVersion: number }
   | { type: 'DEEP_LINK'; path: string }
-  | { type: 'APP_STATE_CHANGE'; state: 'active' | 'background' | 'inactive' };
+  | { type: 'APP_STATE_CHANGE'; state: 'active' | 'background' | 'inactive' }
+  | { type: 'AI_MODEL_STATUS_RESULT'; state: AiModelState; progress?: number; message?: string }
+  | { type: 'AI_MODEL_DOWNLOAD_PROGRESS'; progress: number }
+  | { type: 'AI_MODEL_DOWNLOAD_COMPLETE' }
+  | { type: 'AI_MODEL_DOWNLOAD_FAILED'; message: string }
+  | { type: 'AI_INFER_VISION_RESULT'; requestId: string; words: AiExtractedWord[] }
+  | { type: 'AI_INFER_VISION_FAILED'; requestId: string; message: string };
 
 // ---------------------------------------------------------------------------
 // Global type augmentation

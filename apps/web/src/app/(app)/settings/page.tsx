@@ -17,7 +17,7 @@ import { createClient } from '@/lib/supabase/client';
 import { useTranslation, type Locale } from '@/lib/i18n';
 import { useBottomNavLock } from '@/hooks/use-bottom-nav-lock';
 import { invalidateListCache } from '@/lib/list-cache';
-import { getLocalOcrMode } from '@/lib/ocr/settings';
+import { getModelStatus, subscribeModelStatus } from '@/lib/ai/model-manager';
 import { clearSession } from '@/lib/quiz/session-store';
 import { requestDueCountRefresh } from '@/lib/quiz/due-count-sync';
 import { fetchProfile } from '@/lib/profile/fetch';
@@ -41,17 +41,19 @@ export default function SettingsPage() {
   const [importing, setImporting] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [resetting, setResetting] = useState(false);
-  const [ocrModeLabel, setOcrModeLabel] = useState('');
+  const [aiModelStatus, setAiModelStatus] = useState(getModelStatus());
   const [profileNickname, setProfileNickname] = useState<string | null>(null);
   const [profileLoading, setProfileLoading] = useState(true);
   useBottomNavLock(importing);
 
-  useEffect(() => {
-    const mode = getLocalOcrMode();
-    setOcrModeLabel(
-      mode === 'llm' ? t.settings.llmVision : mode === 'hybrid' ? t.settings.llmHybrid : t.settings.ocrFree,
-    );
-  }, [t]);
+  useEffect(() => subscribeModelStatus(setAiModelStatus), []);
+
+  const aiModelLabel =
+    aiModelStatus.state === 'installed'
+      ? t.aiModel.statusInstalled
+      : aiModelStatus.state === 'downloading'
+        ? `${t.aiModel.statusDownloading} ${Math.round(aiModelStatus.progress * 100)}%`
+        : t.aiModel.statusNotInstalled;
 
   useEffect(() => {
     if (!user) {
@@ -339,20 +341,14 @@ export default function SettingsPage() {
           <h2 className={settingsHeading}>
             {t.settings.ocrTitle}
           </h2>
-          {user ? (
-            <div className="flex items-center justify-between">
-              <div className="text-sm">{ocrModeLabel}</div>
-              <Link href="/settings/ocr">
-                <Button variant="outline" size="sm" className="!h-9 rounded-md" data-testid="settings-ocr-link">
-                  {t.settings.goToSettings}
-                </Button>
-              </Link>
-            </div>
-          ) : (
-            <div className="text-sm text-muted-foreground">
-              {t.settings.loginRequiredOcr}
-            </div>
-          )}
+          <div className="flex items-center justify-between">
+            <div className="text-sm">{aiModelLabel}</div>
+            <Link href="/settings/ocr">
+              <Button variant="outline" size="sm" className="!h-9 rounded-md" data-testid="settings-ai-model-link">
+                {t.settings.goToSettings}
+              </Button>
+            </Link>
+          </div>
         </section>
 
         <div className="h-px bg-border" />
