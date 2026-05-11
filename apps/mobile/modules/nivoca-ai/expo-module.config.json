@@ -1,0 +1,9 @@
+{
+  "platforms": ["apple", "android", "web"],
+  "apple": {
+    "modules": ["NivocaAiModule"]
+  },
+  "android": {
+    "modules": ["expo.modules.nivocaai.NivocaAiModule"]
+  }
+}

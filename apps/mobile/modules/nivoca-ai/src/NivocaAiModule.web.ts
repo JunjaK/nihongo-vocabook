@@ -1,0 +1,32 @@
+import { registerWebModule, NativeModule } from 'expo';
+
+import type { ModelStatusPayload, NivocaAiModuleEvents } from './NivocaAi.types';
+
+/**
+ * Web stub for the NivocaAi native module. The Expo web bundle still needs to
+ * import this symbol because the package is dual-platform, but the web app
+ * uses its own transformers.js pipeline — nothing here should ever be called
+ * on web. Methods reject loudly so accidental usage surfaces immediately.
+ */
+class NivocaAiModule extends NativeModule<NivocaAiModuleEvents> {
+  ping(): string {
+    return 'nivoca-ai:web:stub';
+  }
+  async startDownload(_modelUrl: string, _fileName: string): Promise<void> {
+    throw new Error('NivocaAi is iOS-only — startDownload is unsupported on web');
+  }
+  async cancelDownload(): Promise<void> {
+    throw new Error('NivocaAi is iOS-only — cancelDownload is unsupported on web');
+  }
+  async deleteModel(): Promise<void> {
+    throw new Error('NivocaAi is iOS-only — deleteModel is unsupported on web');
+  }
+  async getStatus(): Promise<ModelStatusPayload> {
+    return { state: 'not_installed' };
+  }
+  async infer(_prompt: string, _imagePath: string): Promise<string> {
+    throw new Error('NivocaAi is iOS-only — infer is unsupported on web');
+  }
+}
+
+export default registerWebModule(NivocaAiModule, 'NivocaAiModule');
