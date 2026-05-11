@@ -71,11 +71,7 @@ function PrivacyKo() {
         <li>프로필 사진(이미지 URL 또는 파일)</li>
         <li>JLPT 레벨 정보 (예: N1~N5)</li>
       </ul>
-      <p><strong>2) 선택 수집 항목</strong></p>
-      <ul>
-        <li>LLM API Key (예: OpenAI API Key 등)</li>
-      </ul>
-      <p><strong>3) 서비스 이용 과정에서 자동으로 수집될 수 있는 정보</strong></p>
+      <p><strong>2) 서비스 이용 과정에서 자동으로 수집될 수 있는 정보</strong></p>
       <ul>
         <li>접속 일시, 접속 IP, 서비스 이용 기록, 기기 정보(브라우저 종류, OS 등), 쿠키 정보</li>
       </ul>
@@ -97,12 +93,7 @@ function PrivacyKo() {
         <li>목적: JLPT 레벨에 따른 단어·콘텐츠 추천, 학습 기록 및 통계 제공, 프로필 정보를 통한 개인화된 화면 구성</li>
         <li>처리 근거: 정보주체의 동의</li>
       </ul>
-      <h3>3. LLM API Key(선택 항목)의 이용 목적</h3>
-      <ul>
-        <li>목적: 이용자가 직접 제공한 LLM API Key를 사용하여 단어 예문 생성, 번역, 설명 등 개인 맞춤형 LLM 기능 제공</li>
-        <li>처리 근거: 정보주체의 동의</li>
-      </ul>
-      <h3>4. 고객 문의 처리 및 서비스 품질 개선</h3>
+      <h3>3. 고객 문의 처리 및 서비스 품질 개선</h3>
       <ul>
         <li>목적: 문의·불만 처리, 오류·버그 확인, 서비스 이용 패턴 분석 및 기능 개선</li>
         <li>처리 근거: 정보주체의 동의 및 정당한 이익 범위 내 처리</li>
@@ -115,8 +106,7 @@ function PrivacyKo() {
       <h2>제3조 (개인정보의 보유 및 이용 기간)</h2>
       <h3>1. 기본 보유 기간</h3>
       <ul>
-        <li>회원 탈퇴 시까지: 이메일 주소, 닉네임, 프로필 사진, JLPT 레벨 정보, 선택적으로 제공된 LLM API Key, 서비스 이용 기록 등</li>
-        <li>회원이 LLM API Key를 삭제하는 경우: 해당 Key는 즉시 파기되며, 관련 기능은 더 이상 제공되지 않습니다.</li>
+        <li>회원 탈퇴 시까지: 이메일 주소, 닉네임, 프로필 사진, JLPT 레벨 정보, 서비스 이용 기록 등</li>
       </ul>
       <h3>2. 관련 법령에 따른 예외 보유</h3>
       <p>서비스는 다음 각 호의 법령에서 정한 일정 기간 동안 관계 법령의 규정에 따라 개인정보를 보관할 수 있습니다.</p>
@@ -141,10 +131,10 @@ function PrivacyKo() {
       </ul>
       <h3>3. LLM 서비스 제공자에 대한 정보 전송 및 국외 이전</h3>
       <ul>
-        <li>서비스는 LLM 기능 제공을 위하여 이용자가 입력한 텍스트(단어, 문장, 예문, 번역 요청 내용 등)와, 필요한 경우 선택적으로 제공된 LLM API Key를 LLM 서비스 제공자에게 전송할 수 있습니다.</li>
+        <li>서비스는 예문 생성·번역·한자 설명 등 일부 LLM 기능 제공을 위하여 이용자가 입력한 텍스트(단어, 문장, 예문, 번역 요청 내용 등)를 LLM 서비스 제공자에게 전송할 수 있습니다.</li>
         <li>LLM 서비스 제공자의 서버 위치가 국외(예: 미국 등)에 있을 수 있으며, 이 경우 해당 정보가 국외로 이전될 수 있습니다.</li>
         <li>국외 이전의 대상, 이전국가, 이전 일시 및 방법, 보유·이용 기간 등은 실제 사용하는 LLM 서비스 제공자(예: OpenAI, Anthropic, Google 등)의 정책에 따르며, 서비스는 이용 약관 및 공지사항 등을 통해 가능한 범위 내에서 이를 안내합니다.</li>
-        <li>이용자는 LLM 기능 사용을 선택하지 않을 수 있으며, LLM 기능을 사용하지 않는 경우 해당 데이터는 LLM 서비스 제공자에게 전송되지 않습니다.</li>
+        <li>이미지 기반 단어 추출(OCR/AI)은 이용자 기기 내에서 AI 모델(Gemma 4)이 직접 수행하며, 이미지는 외부 LLM 서비스 제공자에게 전송되지 않습니다.</li>
       </ul>
 
       <h2>제5조 (개인정보 처리의 위탁)</h2>
@@ -162,7 +152,6 @@ function PrivacyKo() {
       <ol>
         <li>이용자는 언제든지 서비스 내 &quot;설정&quot; 메뉴를 통하여 자신의 개인정보를 조회·수정·삭제할 수 있습니다.</li>
         <li>이용자는 회원 탈퇴 기능을 통하여 개인정보의 수집·이용에 대한 동의를 철회할 수 있습니다. 이 경우 법령에서 정한 바에 따라 보관이 필요한 정보는 별도로 분리하여 보관 후, 보존 기간 종료 시 지체 없이 파기합니다.</li>
-        <li>LLM API Key는 이용자가 직접 등록·수정·삭제할 수 있으며, 삭제 시 이후부터는 해당 Key를 활용한 LLM 기능이 제공되지 않습니다.</li>
         <li>이용자는 이메일(haring157@naver.com)을 통하여 개인정보 열람, 정정·삭제, 처리정지, 동의철회를 요청할 수 있으며, 서비스는 관련 법령이 정한 기한 내에 이에 대해 조치하고 그 결과를 통지합니다.</li>
         <li>이용자는 자신의 개인정보를 최신의 상태로 정확하게 입력·관리할 책임이 있으며, 타인의 정보를 도용하는 등 부정한 행위를 해서는 안 됩니다.</li>
       </ol>
@@ -176,16 +165,7 @@ function PrivacyKo() {
         <li>종이 문서: 분쇄 또는 소각</li>
       </ul>
 
-      <h2>제8조 (LLM API Key에 관한 특별 조항)</h2>
-      <ol>
-        <li>LLM API Key는 선택 항목으로, 이용자가 LLM 기능(번역, 예문 생성, 설명 생성 등)을 사용하기 위해 직접 입력하는 경우에만 수집·저장됩니다.</li>
-        <li>LLM API Key는 암호화된 형태로 저장되며, 서비스는 해당 Key를 이용자의 계정과 연동된 LLM 요청 처리 목적에 한하여 사용합니다.</li>
-        <li>서비스는 이용자가 제공한 LLM API Key를 다른 이용자의 요청 처리, 서비스 자체의 과금 절감 또는 이익을 위한 별도 목적, 서비스 외부의 다른 시스템 연동 등에 사용하지 않습니다.</li>
-        <li>이용자는 언제든지 &quot;설정&quot; 화면에서 LLM API Key를 수정 또는 삭제할 수 있으며, 삭제 시 해당 Key를 이용한 기능은 즉시 중단됩니다.</li>
-        <li>이용자가 자신의 LLM API Key를 설정하는 경우, 해당 Key 사용에 따른 LLM 서비스 이용료 및 과금 책임은 이용자와 LLM 제공자 간 약관에 따르며, 서비스는 그 비용을 대신 부담하지 않습니다.</li>
-      </ol>
-
-      <h2>제9조 (개인정보의 안전성 확보 조치)</h2>
+      <h2>제8조 (개인정보의 안전성 확보 조치)</h2>
       <p>서비스는 이용자의 개인정보를 안전하게 보호하기 위하여 다음과 같은 안전성 확보 조치를 취하고 있습니다.</p>
       <h3>1. 관리적 조치</h3>
       <ul>
@@ -194,7 +174,7 @@ function PrivacyKo() {
       </ul>
       <h3>2. 기술적 조치</h3>
       <ul>
-        <li>개인정보 및 LLM API Key의 암호화 저장</li>
+        <li>개인정보의 암호화 저장</li>
         <li>서비스 서버 및 DB에 대한 접근 통제, 접근 로그 보관</li>
         <li>보안 프로그램 설치 및 주기적인 취약점 점검 및 업데이트</li>
       </ul>
@@ -203,7 +183,7 @@ function PrivacyKo() {
         <li>서버 및 네트워크 설비에 대한 물리적 접근 통제(클라우드 제공자의 물리적 보안 정책 준수)</li>
       </ul>
 
-      <h2>제10조 (개인정보 보호책임자)</h2>
+      <h2>제9조 (개인정보 보호책임자)</h2>
       <ul>
         <li>개인정보 보호책임자: 윤준현</li>
         <li>소속: 서비스 운영자 (개인 개발)</li>
@@ -215,12 +195,12 @@ function PrivacyKo() {
         처리하겠습니다.
       </p>
 
-      <h2>제11조 (개인정보 처리방침의 변경)</h2>
+      <h2>제10조 (개인정보 처리방침의 변경)</h2>
       <ol>
         <li>본 개인정보 처리방침의 내용 추가, 삭제 및 수정이 있는 경우, 변경 사항의 시행 7일 전부터 서비스 내 공지사항을 통해 공지합니다.</li>
         <li>다만, 이용자 권리의 중요한 변경이 있는 경우에는 최소 30일 전에 공지하며, 필요한 경우 별도의 동의를 다시 받을 수 있습니다.</li>
       </ol>
-      <p className="mt-8 text-muted-foreground">이 개인정보 처리방침은 2026년 2월 24일부터 적용됩니다.</p>
+      <p className="mt-8 text-muted-foreground">이 개인정보 처리방침은 2026년 5월 11일부터 적용됩니다.</p>
     </>
   );
 }
@@ -244,11 +224,7 @@ function PrivacyEn() {
         <li>Profile picture (image URL or file)</li>
         <li>JLPT level information (e.g., N1–N5)</li>
       </ul>
-      <p><strong>2) Optional items</strong></p>
-      <ul>
-        <li>LLM API Key (e.g., OpenAI API Key)</li>
-      </ul>
-      <p><strong>3) Information automatically collected during service usage</strong></p>
+      <p><strong>2) Information automatically collected during service usage</strong></p>
       <ul>
         <li>Access time, IP address, service usage records, device information (browser type, OS), cookies</li>
       </ul>
@@ -269,12 +245,7 @@ function PrivacyEn() {
         <li>Purpose: Word/content recommendations by JLPT level, study records and statistics, personalized interface through profile information</li>
         <li>Legal basis: User consent</li>
       </ul>
-      <h3>3. LLM API Key (Optional) Usage</h3>
-      <ul>
-        <li>Purpose: Providing personalized LLM features (example sentences, translation, explanations) using the user&apos;s own API Key</li>
-        <li>Legal basis: User consent</li>
-      </ul>
-      <h3>4. Customer Support and Service Improvement</h3>
+      <h3>3. Customer Support and Service Improvement</h3>
       <ul>
         <li>Purpose: Inquiry/complaint handling, bug fixes, usage pattern analysis and feature improvement</li>
         <li>Legal basis: User consent and legitimate interest</li>
@@ -283,8 +254,7 @@ function PrivacyEn() {
       <h2>Article 3 (Retention and Usage Period)</h2>
       <h3>1. Default Retention Period</h3>
       <ul>
-        <li>Until account deletion: Email, nickname, profile picture, JLPT level, optional LLM API Key, service usage records</li>
-        <li>When user deletes LLM API Key: The Key is immediately destroyed and related features are no longer provided</li>
+        <li>Until account deletion: Email, nickname, profile picture, JLPT level, service usage records</li>
       </ul>
       <h3>2. Exceptions under Applicable Laws</h3>
       <ul>
@@ -304,10 +274,10 @@ function PrivacyEn() {
       </ul>
       <h3>3. Information Transfer to LLM Service Providers</h3>
       <ul>
-        <li>The Service may transmit user-entered text (words, sentences, translation requests) and, if necessary, the LLM API Key to LLM service providers for LLM functionality.</li>
+        <li>The Service may transmit user-entered text (words, sentences, translation requests) to LLM service providers for features such as example sentence generation, translation, and kanji explanations.</li>
         <li>LLM service provider servers may be located overseas (e.g., United States), in which case information may be transferred internationally.</li>
         <li>Details of international transfers follow the policies of the LLM service providers (e.g., OpenAI, Anthropic, Google).</li>
-        <li>Users may choose not to use LLM features, in which case no data is transmitted to LLM providers.</li>
+        <li>Image-based vocabulary extraction (OCR/AI) runs entirely on the user&apos;s device via the on-device AI model (Gemma 4); images are never transmitted to external LLM providers.</li>
       </ul>
 
       <h2>Article 5 (Outsourcing of Processing)</h2>
@@ -321,7 +291,6 @@ function PrivacyEn() {
       <ol>
         <li>Users may view, modify, or delete their personal information through the &quot;Settings&quot; menu at any time.</li>
         <li>Users may withdraw consent by deleting their account. Information required by law will be separately stored and destroyed after the retention period.</li>
-        <li>Users may register, modify, or delete their LLM API Key at any time.</li>
         <li>Users may request access, correction, deletion, suspension, or consent withdrawal via email (haring157@naver.com).</li>
         <li>Users are responsible for maintaining accurate personal information and must not misuse others&apos; information.</li>
       </ol>
@@ -335,16 +304,7 @@ function PrivacyEn() {
         <li>Paper documents: Shredded or incinerated</li>
       </ul>
 
-      <h2>Article 8 (Special Provisions for LLM API Keys)</h2>
-      <ol>
-        <li>LLM API Keys are optional and collected only when the user voluntarily enters them for LLM features.</li>
-        <li>LLM API Keys are stored in encrypted form and used solely for processing LLM requests linked to the user&apos;s account.</li>
-        <li>The Service does not use user-provided LLM API Keys for other users&apos; requests, cost reduction for the Service itself, or external system integration.</li>
-        <li>Users may modify or delete their LLM API Key in &quot;Settings&quot; at any time.</li>
-        <li>When users configure their own LLM API Key, usage fees are governed by the agreement between the user and the LLM provider. The Service does not bear these costs.</li>
-      </ol>
-
-      <h2>Article 9 (Security Measures)</h2>
+      <h2>Article 8 (Security Measures)</h2>
       <h3>1. Administrative Measures</h3>
       <ul>
         <li>Establishment and implementation of internal management plan for personal information protection</li>
@@ -352,7 +312,7 @@ function PrivacyEn() {
       </ul>
       <h3>2. Technical Measures</h3>
       <ul>
-        <li>Encryption of personal information and LLM API Keys</li>
+        <li>Encryption of personal information</li>
         <li>Access control and log retention for servers and databases</li>
         <li>Security software and periodic vulnerability assessments</li>
       </ul>
@@ -361,7 +321,7 @@ function PrivacyEn() {
         <li>Physical access control for servers and network equipment (compliance with cloud provider security policies)</li>
       </ul>
 
-      <h2>Article 10 (Privacy Officer)</h2>
+      <h2>Article 9 (Privacy Officer)</h2>
       <ul>
         <li>Privacy Officer: Junhyeon Yoon</li>
         <li>Role: Service Operator (Independent Developer)</li>
@@ -373,12 +333,12 @@ function PrivacyEn() {
         without delay.
       </p>
 
-      <h2>Article 11 (Changes to Privacy Policy)</h2>
+      <h2>Article 10 (Changes to Privacy Policy)</h2>
       <ol>
         <li>Changes to this Privacy Policy will be announced through in-service notices at least 7 days before taking effect.</li>
         <li>For significant changes affecting user rights, at least 30 days&apos; prior notice will be given, and additional consent may be requested if necessary.</li>
       </ol>
-      <p className="mt-8 text-muted-foreground">This Privacy Policy is effective from February 24, 2026.</p>
+      <p className="mt-8 text-muted-foreground">This Privacy Policy is effective from May 11, 2026.</p>
     </>
   );
 }

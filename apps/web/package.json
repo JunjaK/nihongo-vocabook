@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@base-ui/react": "^1.2.0",
-    "@huggingface/transformers": "^3.7.5",
+    "@huggingface/transformers": "^4.1.0",
     "@fontsource/noto-sans-kr": "^5.2.9",
     "@fontsource/pretendard": "^5.2.5",
     "@fontsource/zen-kaku-gothic-new": "^5.2.7",

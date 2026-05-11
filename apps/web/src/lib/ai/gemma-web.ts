@@ -20,27 +20,32 @@ interface ProgressEvent {
   total?: number;
 }
 
-interface LoadedModel {
-  processor: ProcessorLike;
-  model: ModelLike;
-  RawImage: RawImageCtor;
-}
+type ProcessorLike = {
+  apply_chat_template: (messages: unknown, options?: unknown) => string;
+  batch_decode: (batch: unknown, options?: unknown) => string[];
+} & ((text: string, images?: unknown, audio?: unknown, options?: unknown) => Promise<{
+  input_ids: { dims: number[] };
+  [key: string]: unknown;
+}>);
 
-interface ProcessorLike {
-  apply_chat_template(messages: unknown, options: Record<string, unknown>): string;
-  batch_decode(ids: unknown, options: { skip_special_tokens: boolean }): string[];
-  (text: string, image: unknown, options?: Record<string, unknown>): Promise<{
-    input_ids: { dims: number[] };
-    [key: string]: unknown;
-  }>;
-}
+type GenerateInputs = {
+  max_new_tokens?: number;
+  do_sample?: boolean;
+  [key: string]: unknown;
+};
 
 interface ModelLike {
-  generate(inputs: Record<string, unknown>): Promise<{ slice(...args: unknown[]): unknown }>;
+  generate(inputs: GenerateInputs): Promise<{ slice: (...args: unknown[]) => unknown }>;
 }
 
 interface RawImageCtor {
   read(input: string): Promise<unknown>;
+}
+
+interface LoadedModel {
+  processor: ProcessorLike;
+  model: ModelLike;
+  RawImage: RawImageCtor;
 }
 
 let modelPromise: Promise<LoadedModel> | null = null;
@@ -184,7 +189,7 @@ export async function extractWithGemma(
     tokenize: false,
   });
 
-  const inputs = await processor(promptText, image, { add_special_tokens: false });
+  const inputs = await processor(promptText, image, undefined, { add_special_tokens: false });
   if (signal?.aborted) throw signal.reason ?? new DOMException('Aborted', 'AbortError');
 
   const started = performance.now();
@@ -197,10 +202,7 @@ export async function extractWithGemma(
   if (signal?.aborted) throw signal.reason ?? new DOMException('Aborted', 'AbortError');
 
   const inputLength = inputs.input_ids.dims[1];
-  const newTokens = (generated as { slice: (...a: unknown[]) => unknown }).slice(
-    null,
-    [inputLength, null],
-  );
+  const newTokens = generated.slice(null, [inputLength, null]);
   const decoded = processor.batch_decode(newTokens, { skip_special_tokens: true });
   const text = decoded[0] ?? '';
 
