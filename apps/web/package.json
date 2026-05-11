@@ -10,7 +10,8 @@
     "lint": "eslint",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "download:gemma": "bun scripts/download-gemma.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.2.0",

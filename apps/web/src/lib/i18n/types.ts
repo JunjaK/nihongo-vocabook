@@ -384,7 +384,12 @@ export interface Translations {
     approxSize: string;
     wifiRecommended: string;
     download: string;
+    retry: string;
     cancel: string;
+    cancelDownload: string;
+    hide: string;
+    etaPrefix: string;
+    downloadInProgressDescription: string;
     delete: string;
     deleteConfirm: string;
     deleteSuccess: string;

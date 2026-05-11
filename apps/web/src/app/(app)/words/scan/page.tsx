@@ -71,10 +71,18 @@ export default function ScanPage() {
   useBottomNavLock(isExtracting || isEnriching);
 
   useEffect(() => {
+    // Auto-open the modal when (a) the user lands here without the model and
+    // hasn't already dismissed the prompt, OR (b) a download/error is live —
+    // so navigating back to /words/scan during download always shows progress.
+    if (modelStatusState.state === 'downloading' || modelStatusState.state === 'error') {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setModelPromptOpen(true);
+      autoPromptCheckedRef.current = true;
+      return;
+    }
     if (autoPromptCheckedRef.current) return;
     autoPromptCheckedRef.current = true;
     if (modelStatusState.state === 'not_installed' && !isDownloadPromptDismissed()) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setModelPromptOpen(true);
     }
   }, [modelStatusState.state]);

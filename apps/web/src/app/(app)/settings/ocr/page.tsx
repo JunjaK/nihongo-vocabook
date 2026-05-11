@@ -15,6 +15,25 @@ import {
 } from '@/lib/ai/model-manager';
 import { ensureGemmaReady } from '@/lib/ai/gemma-web';
 
+function formatGB(bytes: number): string {
+  return (bytes / 1024 / 1024 / 1024).toFixed(2);
+}
+
+function formatSpeed(bps: number): string {
+  if (bps >= 1024 * 1024) return `${(bps / 1024 / 1024).toFixed(1)} MB/s`;
+  if (bps >= 1024) return `${(bps / 1024).toFixed(0)} KB/s`;
+  return `${Math.round(bps)} B/s`;
+}
+
+function formatEta(seconds: number): string {
+  if (seconds < 60) return `${seconds}s`;
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  if (m < 60) return `${m}m ${s}s`;
+  const h = Math.floor(m / 60);
+  return `${h}h ${m % 60}m`;
+}
+
 export default function AiModelSettingsPage() {
   const { t } = useTranslation();
   const [status, setStatus] = useState(getModelStatus());
@@ -54,6 +73,21 @@ export default function AiModelSettingsPage() {
           ? t.aiModel.downloadFailed
           : t.aiModel.statusNotInstalled;
 
+  const downloadBytesLabel =
+    status.state === 'downloading' && status.totalBytes
+      ? `${formatGB(status.loadedBytes ?? 0)} / ${formatGB(status.totalBytes)} GB`
+      : null;
+  const downloadSpeedLabel =
+    status.state === 'downloading' && status.speedBps
+      ? formatSpeed(status.speedBps)
+      : null;
+  const downloadEtaLabel =
+    status.state === 'downloading' &&
+    typeof status.etaSeconds === 'number' &&
+    status.etaSeconds > 0
+      ? `${t.aiModel.etaPrefix}${formatEta(status.etaSeconds)}`
+      : null;
+
   return (
     <>
       <Header title={t.settings.aiModelPage} showBack />
@@ -77,12 +111,22 @@ export default function AiModelSettingsPage() {
           </div>
 
           {status.state === 'downloading' && (
-            <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
-              <div
-                className="h-full rounded-full bg-primary transition-all duration-300 ease-out"
-                style={{ width: `${Math.round(status.progress * 100)}%` }}
-              />
-            </div>
+            <>
+              <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+                <div
+                  className="h-full rounded-full bg-primary transition-all duration-300 ease-out"
+                  style={{ width: `${Math.round(status.progress * 100)}%` }}
+                />
+              </div>
+              {(downloadBytesLabel || downloadSpeedLabel || downloadEtaLabel) && (
+                <div className="flex items-center justify-between text-xs tabular-nums text-muted-foreground">
+                  <span>{downloadBytesLabel ?? ''}</span>
+                  <span>
+                    {[downloadSpeedLabel, downloadEtaLabel].filter(Boolean).join(' · ')}
+                  </span>
+                </div>
+              )}
+            </>
           )}
 
           <div className="flex items-center justify-between text-xs text-muted-foreground">
@@ -101,10 +145,12 @@ export default function AiModelSettingsPage() {
               disabled={status.state === 'downloading'}
               data-testid="ai-model-download-button"
             >
-              {t.aiModel.download}
+              {status.state === 'error' ? t.aiModel.retry : t.aiModel.download}
             </Button>
           )}
-          {status.state === 'installed' && (
+          {(status.state === 'installed' ||
+            status.state === 'downloading' ||
+            status.state === 'error') && (
             <Button
               className="w-full"
               variant="outline"
@@ -112,7 +158,9 @@ export default function AiModelSettingsPage() {
               disabled={deleting}
               data-testid="ai-model-delete-button"
             >
-              {t.aiModel.delete}
+              {status.state === 'downloading'
+                ? t.aiModel.cancelDownload
+                : t.aiModel.delete}
             </Button>
           )}
         </section>

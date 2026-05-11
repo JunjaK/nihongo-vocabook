@@ -58,5 +58,13 @@ next-env.d.ts
 .playwright-mcp
 supabase/.temp/
 
+# AI model cache — transformers.js writes to .cache/ when running in Node
+# mode (e.g. server-side tests). Browser Gemma weights live in Cache Storage
+# under `nivoca-gemma-cache` (per-origin), with an additional out-of-repo
+# mirror at `~/develop/ai/` served by the dev-only `/models/[...path]` route.
+# Neither path is inside the repo, so no extra entries needed — kept here in
+# case anyone accidentally puts a `.cache/` next to the source tree.
+.cache/
+
 # seed data (bulk fixture files, not checked in)
 apps/web/scripts/data/

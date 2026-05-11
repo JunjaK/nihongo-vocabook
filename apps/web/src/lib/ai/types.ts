@@ -2,7 +2,14 @@ import type { ExtractedWord } from '@/lib/ocr/llm-vision';
 
 export type ModelStatus =
   | { state: 'not_installed' }
-  | { state: 'downloading'; progress: number }
+  | {
+      state: 'downloading';
+      progress: number;
+      loadedBytes?: number;
+      totalBytes?: number;
+      speedBps?: number;
+      etaSeconds?: number;
+    }
   | { state: 'installed' }
   | { state: 'error'; message: string };
 

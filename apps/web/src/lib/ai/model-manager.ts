@@ -63,9 +63,16 @@ export async function deleteModel(): Promise<void> {
   if (typeof window === 'undefined') return;
   if ('caches' in window) {
     const names = await caches.keys();
+    // Match both our project-specific key (`env.cacheKey` set in gemma-web)
+    // and the upstream default — the latter covers caches left over from
+    // earlier builds before we renamed.
     await Promise.all(
       names
-        .filter((name) => name.startsWith('transformers-cache'))
+        .filter(
+          (name) =>
+            name.startsWith('nivoca-gemma-cache') ||
+            name.startsWith('transformers-cache'),
+        )
         .map((name) => caches.delete(name)),
     );
   }

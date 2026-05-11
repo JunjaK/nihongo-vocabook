@@ -7,14 +7,26 @@ import {
   getModelStatus,
   setModelStatus,
   requestStoragePersist,
+  subscribeModelStatus,
 } from './model-manager';
 
 const MODEL_ID = 'onnx-community/gemma-4-E2B-it-ONNX';
 const MAX_NEW_TOKENS = 1024;
+// Gemma 4 E2B with q4f16 weights + processor/tokenizer is ≈3.17 GB. We use a
+// slight overestimate as the progress denominator so the bar can't hit 100%
+// from small files completing before the big weight files even report a total.
+const ESTIMATED_MODEL_BYTES = 3.2 * 1024 * 1024 * 1024;
+const STATUS_THROTTLE_MS = 1000;
+const SPEED_WINDOW_MS = 5000;
+// Project-specific cache key — clearer than the default `transformers-cache`
+// when inspecting browser Storage (DevTools → Application → Cache Storage).
+const CACHE_KEY = 'nivoca-gemma-cache';
 const logger = createLogger('ai:gemma-web');
 
 interface ProgressEvent {
   status: string;
+  file?: string;
+  name?: string;
   progress?: number;
   loaded?: number;
   total?: number;
@@ -49,6 +61,24 @@ interface LoadedModel {
 }
 
 let modelPromise: Promise<LoadedModel> | null = null;
+// Monotonically increasing per-load token. Cancellation bumps it so any
+// progress event or terminal-state setter from a now-canceled load is ignored.
+let activeLoadId = 0;
+// Live AbortController bound to the current load — `env.fetch` is wired to
+// this signal so cancellation actually stops the in-flight network requests
+// instead of letting them complete and re-fill the cache.
+let currentAbort: AbortController | null = null;
+
+if (typeof window !== 'undefined') {
+  subscribeModelStatus((status) => {
+    if (status.state === 'not_installed') {
+      currentAbort?.abort(new DOMException('Canceled by user', 'AbortError'));
+      currentAbort = null;
+      modelPromise = null;
+      activeLoadId += 1;
+    }
+  });
+}
 
 function buildPrompt(locale: string): string {
   const meaningLang = locale === 'ko' ? 'Korean' : 'English';
@@ -72,39 +102,171 @@ function buildPrompt(locale: string): string {
   ].join('\n');
 }
 
-async function loadModel(): Promise<LoadedModel> {
+async function loadModel(loadId: number): Promise<LoadedModel> {
   setModelStatus({ state: 'downloading', progress: 0 });
   const mod = await import('@huggingface/transformers');
 
-  const onProgress = (event: ProgressEvent) => {
-    if (event.status === 'progress' && typeof event.progress === 'number') {
-      setModelStatus({ state: 'downloading', progress: Math.min(1, event.progress / 100) });
+  // Use a project-specific cache key so the model's storage is identifiable
+  // in DevTools and doesn't collide with other transformers.js apps that
+  // might run on the same origin.
+  mod.env.cacheKey = CACHE_KEY;
+
+  // Dev mode: prefer files served from /public/models/ (populated by
+  // `bun run download:gemma`). transformers.js still falls back to HuggingFace
+  // when a file is missing locally (`hub.js:300` — 404 on local triggers the
+  // remote path as long as `allowRemoteModels` stays true). That makes the
+  // local mirror an opt-in cache — if the dev didn't run the download script,
+  // behavior is unchanged; if they did, every dev-server restart and every
+  // browser-cache wipe re-fetches in milliseconds from localhost.
+  if (process.env.NODE_ENV === 'development') {
+    mod.env.allowLocalModels = true;
+    mod.env.localModelPath = '/models/';
+  }
+
+  // Hook into transformers.js's fetch indirection so we can actually abort
+  // in-flight downloads on cancel. `env.fetch` is the single entry point used
+  // by `hub.js → getFile()`; replacing it injects our AbortSignal into every
+  // model file request, and the original is restored in `finally`.
+  const controller = new AbortController();
+  currentAbort = controller;
+  const originalFetch = mod.env.fetch;
+  mod.env.fetch = ((input: string | URL, init?: RequestInit) =>
+    originalFetch(input, { ...(init ?? {}), signal: controller.signal })) as typeof mod.env.fetch;
+
+  // Per-file byte tracking. We aggregate bytes across files but compute
+  // displayed progress against an ESTIMATED total — that way small files
+  // completing before big files appear can't pin the bar at 100%, and the bar
+  // grows monotonically up to ~99% before the terminal "installed" state.
+  const fileBytes = new Map<string, { loaded: number; total: number }>();
+  const samples: Array<{ t: number; loaded: number }> = [];
+
+  // Status updates are throttled to ≤1 Hz so we're not re-rendering the modal
+  // dozens of times per second (each transformers.js progress event used to
+  // emit). The trailing-edge timer guarantees the latest sample lands.
+  let lastEmit = 0;
+  let pendingTimer: ReturnType<typeof setTimeout> | null = null;
+  let pending: { loaded: number; reportedTotal: number } | null = null;
+
+  const clearPendingTimer = () => {
+    if (pendingTimer !== null) {
+      clearTimeout(pendingTimer);
+      pendingTimer = null;
     }
   };
 
-  const processor = (await mod.AutoProcessor.from_pretrained(MODEL_ID, {
-    progress_callback: onProgress,
-  })) as unknown as ProcessorLike;
+  const emit = () => {
+    clearPendingTimer();
+    if (!pending) return;
+    if (loadId !== activeLoadId) return;
 
-  const model = (await mod.AutoModelForImageTextToText.from_pretrained(MODEL_ID, {
-    dtype: 'q4f16',
-    device: 'webgpu',
-    progress_callback: onProgress,
-  })) as unknown as ModelLike;
+    const { loaded, reportedTotal } = pending;
+    pending = null;
 
-  setModelStatus({ state: 'installed' });
-  void requestStoragePersist();
-  return {
-    processor,
-    model,
-    RawImage: mod.RawImage as unknown as RawImageCtor,
+    const denom = Math.max(reportedTotal, ESTIMATED_MODEL_BYTES);
+    const progress = Math.min(0.99, loaded / denom);
+
+    const now = performance.now();
+    const first = samples[0];
+    const elapsed = first ? now - first.t : 0;
+    const speedBps =
+      first && elapsed > 500
+        ? ((loaded - first.loaded) * 1000) / elapsed
+        : undefined;
+    const remaining = Math.max(0, denom - loaded);
+    const etaSeconds =
+      speedBps && speedBps > 0 ? Math.round(remaining / speedBps) : undefined;
+
+    setModelStatus({
+      state: 'downloading',
+      progress,
+      loadedBytes: loaded,
+      totalBytes: reportedTotal,
+      speedBps,
+      etaSeconds,
+    });
+    lastEmit = now;
   };
+
+  const scheduleEmit = (loaded: number, reportedTotal: number) => {
+    pending = { loaded, reportedTotal };
+    const now = performance.now();
+    const delta = now - lastEmit;
+    if (delta >= STATUS_THROTTLE_MS) {
+      emit();
+    } else if (pendingTimer === null) {
+      pendingTimer = setTimeout(emit, STATUS_THROTTLE_MS - delta);
+    }
+  };
+
+  const onProgress = (event: ProgressEvent) => {
+    if (loadId !== activeLoadId) return;
+    const key = event.file ?? event.name;
+    if (!key) return;
+
+    if (event.status === 'progress' && typeof event.total === 'number') {
+      fileBytes.set(key, { loaded: event.loaded ?? 0, total: event.total });
+    } else if (event.status === 'done') {
+      const prev = fileBytes.get(key);
+      if (prev) fileBytes.set(key, { loaded: prev.total, total: prev.total });
+    } else {
+      return;
+    }
+
+    let loaded = 0;
+    let reportedTotal = 0;
+    for (const v of fileBytes.values()) {
+      loaded += v.loaded;
+      reportedTotal += v.total;
+    }
+    if (reportedTotal <= 0) return;
+
+    // Keep the rolling speed window updated even when we throttle the visible
+    // status — otherwise speed estimates would be sampled too coarsely.
+    const now = performance.now();
+    samples.push({ t: now, loaded });
+    while (samples.length > 1 && now - samples[0].t > SPEED_WINDOW_MS) {
+      samples.shift();
+    }
+
+    scheduleEmit(loaded, reportedTotal);
+  };
+
+  try {
+    const processor = (await mod.AutoProcessor.from_pretrained(MODEL_ID, {
+      progress_callback: onProgress,
+    })) as unknown as ProcessorLike;
+    if (loadId !== activeLoadId) throw new Error('canceled');
+
+    const model = (await mod.AutoModelForImageTextToText.from_pretrained(MODEL_ID, {
+      dtype: 'q4f16',
+      device: 'webgpu',
+      progress_callback: onProgress,
+    })) as unknown as ModelLike;
+    if (loadId !== activeLoadId) throw new Error('canceled');
+
+    clearPendingTimer();
+    setModelStatus({ state: 'installed' });
+    void requestStoragePersist();
+    return {
+      processor,
+      model,
+      RawImage: mod.RawImage as unknown as RawImageCtor,
+    };
+  } finally {
+    clearPendingTimer();
+    mod.env.fetch = originalFetch;
+    if (currentAbort === controller) currentAbort = null;
+  }
 }
 
 export async function ensureGemmaReady(): Promise<void> {
   if (!modelPromise) {
-    modelPromise = loadModel().catch((err: unknown) => {
+    const loadId = ++activeLoadId;
+    modelPromise = loadModel(loadId).catch((err: unknown) => {
       modelPromise = null;
+      // If this load was canceled, swallow — the cancel path already updated
+      // status to not_installed and we must not stomp it back to 'error'.
+      if (loadId !== activeLoadId) throw err;
       const message = err instanceof Error ? err.message : 'Model load failed';
       setModelStatus({ state: 'error', message });
       throw err;
