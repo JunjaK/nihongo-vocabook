@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { useTranslation } from '@/lib/i18n';
+import { isNativeApp } from '@/lib/native-bridge';
 import {
   deleteModel,
   getModelStatus,
@@ -108,12 +109,24 @@ export default function AiModelSettingsPage() {
       ? `${t.aiModel.etaPrefix}${formatEta(status.etaSeconds)}`
       : null;
 
+  // Pick the model-specific copy based on runtime — native iOS path ships
+  // Gemma 4 (2.5GB), web path ships Qwen3.5 (1.5GB). All other strings stay
+  // model-neutral so they don't need a swap.
+  const native = isNativeApp();
+  const modelTitle = native ? t.aiModel.nativeTitle : t.aiModel.title;
+  const modelApproxSize = native
+    ? t.aiModel.nativeApproxSize
+    : t.aiModel.approxSize;
+  const modelPoweredBy = native
+    ? t.aiModel.nativePoweredBy
+    : t.aiModel.poweredBy;
+
   return (
     <>
       <Header title={t.settings.aiModelPage} showBack />
       <div className="animate-page flex-1 space-y-6 overflow-y-auto px-5 pt-3">
         <section className="space-y-2">
-          <h2 className="text-sm font-medium text-muted-foreground">{t.aiModel.title}</h2>
+          <h2 className="text-sm font-medium text-muted-foreground">{modelTitle}</h2>
           <p className="text-sm text-muted-foreground">{t.aiModel.description}</p>
         </section>
 
@@ -150,7 +163,7 @@ export default function AiModelSettingsPage() {
           )}
 
           <div className="flex items-center justify-between text-xs text-muted-foreground">
-            <span>{t.aiModel.approxSize}</span>
+            <span>{modelApproxSize}</span>
             <span>{t.aiModel.wifiRecommended}</span>
           </div>
 
@@ -204,7 +217,7 @@ export default function AiModelSettingsPage() {
           )}
         </section>
 
-        <p className="pt-2 text-center text-xs text-muted-foreground">{t.aiModel.poweredBy}</p>
+        <p className="pt-2 text-center text-xs text-muted-foreground">{modelPoweredBy}</p>
       </div>
 
       <ConfirmDialog

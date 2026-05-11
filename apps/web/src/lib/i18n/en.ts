@@ -382,12 +382,14 @@ const en: Translations = {
   },
   aiModel: {
     title: 'AI Model (Qwen3.5)',
+    nativeTitle: 'AI Model (Gemma 4 E2B)',
     description: 'The on-device AI model significantly improves Japanese extraction accuracy. The model is stored on your device, runs fully offline, and never sends images externally.',
     status: 'Status',
     statusNotInstalled: 'Not installed',
     statusInstalled: 'Ready',
     statusDownloading: 'Downloading',
     approxSize: '~1.5GB',
+    nativeApproxSize: '~2.5GB',
     wifiRecommended: 'Wi-Fi is recommended for the initial download.',
     download: 'Download model',
     retry: 'Retry',
@@ -408,6 +410,7 @@ const en: Translations = {
     promptDownload: 'Download',
     promptDismiss: 'Later',
     poweredBy: 'Powered by Qwen3.5 (Alibaba)',
+    nativePoweredBy: 'Powered by Gemma 4 (Google)',
   },
   profile: {
     title: 'Edit Profile',

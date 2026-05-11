@@ -377,12 +377,15 @@ export interface Translations {
   };
   aiModel: {
     title: string;
+    /** Native iOS path uses Gemma 4 (LiteRT-LM), web path uses Qwen3.5. */
+    nativeTitle: string;
     description: string;
     status: string;
     statusNotInstalled: string;
     statusInstalled: string;
     statusDownloading: string;
     approxSize: string;
+    nativeApproxSize: string;
     wifiRecommended: string;
     download: string;
     retry: string;
@@ -403,6 +406,7 @@ export interface Translations {
     promptDownload: string;
     promptDismiss: string;
     poweredBy: string;
+    nativePoweredBy: string;
   };
   profile: {
     title: string;

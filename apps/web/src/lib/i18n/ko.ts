@@ -382,12 +382,14 @@ const ko: Translations = {
   },
   aiModel: {
     title: 'AI 모델 (Qwen3.5)',
+    nativeTitle: 'AI 모델 (Gemma 4 E2B)',
     description: '온디바이스 AI 모델을 사용하면 일본어 추출 정확도가 크게 향상됩니다. 모델 파일은 기기에 저장되어 오프라인으로 동작하며 이미지가 외부로 전송되지 않습니다.',
     status: '상태',
     statusNotInstalled: '미설치',
     statusInstalled: '사용 가능',
     statusDownloading: '다운로드 중',
     approxSize: '약 1.5GB',
+    nativeApproxSize: '약 2.5GB',
     wifiRecommended: 'Wi-Fi 환경에서 다운로드를 권장합니다.',
     download: '모델 다운로드',
     retry: '다시 시도',
@@ -408,6 +410,7 @@ const ko: Translations = {
     promptDownload: '다운로드',
     promptDismiss: '나중에',
     poweredBy: 'Powered by Qwen3.5 (Alibaba)',
+    nativePoweredBy: 'Powered by Gemma 4 (Google)',
   },
   profile: {
     title: '프로필 수정',
