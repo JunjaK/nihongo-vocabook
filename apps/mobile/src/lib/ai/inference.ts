@@ -104,18 +104,57 @@ export async function writeBase64ToCache(
   return file.uri;
 }
 
+/** Swift's `URL(fileURLWithPath:)` treats the whole input as a literal
+ * filesystem path, so passing `file:///var/mobile/...` makes it try to read
+ * a non-existent path that starts with `file:`. Strip the scheme before
+ * crossing the bridge.
+ */
+function toNativePath(uri: string): string {
+  return uri.replace(/^file:\/\//, '');
+}
+
 export async function runNativeInference(
   imageBase64: string,
   locale: string,
   requestId: string,
 ): Promise<AiExtractedWord[]> {
-  const tmpPath = await writeBase64ToCache(imageBase64, requestId);
+  const t0 = Date.now();
+  console.log(
+    `[nivoca-ai] runNativeInference start req=${requestId} locale=${locale} base64.len=${imageBase64.length}`,
+  );
+  const tmpUri = await writeBase64ToCache(imageBase64, requestId);
+  const tmpPath = toNativePath(tmpUri);
+  console.log(
+    `[nivoca-ai] cache-file written: ${tmpUri} → swift path: ${tmpPath} (+${Date.now() - t0}ms)`,
+  );
   try {
-    const raw = await NivocaAi.infer(buildPrompt(locale), tmpPath);
-    return parseJsonArray(raw);
+    const prompt = buildPrompt(locale);
+    console.log(
+      `[nivoca-ai] calling NivocaAi.infer prompt.len=${prompt.length}`,
+    );
+    const t1 = Date.now();
+    const raw = await NivocaAi.infer(prompt, tmpPath);
+    console.log(
+      `[nivoca-ai] NivocaAi.infer returned in ${Date.now() - t1}ms raw.len=${raw.length}`,
+    );
+    const words = parseJsonArray(raw);
+    console.log(`[nivoca-ai] parsed ${words.length} words`);
+    return words;
+  } catch (err) {
+    // Surface the Swift error code/message in the JS log before bubbling up.
+    // The bridge runs Swift `LocalizedError.errorDescription` through to
+    // `err.message`, so the actual `code: message` string from
+    // `NivocaAiError` is preserved here (instead of the cryptic Cocoa
+    // `(unknown context).NivocaAiError error N.` placeholder).
+    console.error(
+      `[nivoca-ai] inference failed: ${err instanceof Error ? err.message : String(err)}`,
+    );
+    throw err;
   } finally {
     try {
-      const file = new File(tmpPath);
+      // Cleanup uses the original `file://` URI form — `new File()` and
+      // `Paths` operate on URIs, not bare paths.
+      const file = new File(tmpUri);
       if (file.exists) file.delete();
     } catch {
       // best-effort cleanup

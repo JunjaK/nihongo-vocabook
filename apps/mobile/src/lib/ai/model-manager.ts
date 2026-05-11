@@ -94,23 +94,32 @@ class ModelManager {
   }
 
   private async boot(): Promise<void> {
+    // The file on disk is the source of truth for "installed" — SecureStore
+    // meta is only a hint. Dev builds via `bunx expo run:ios` can re-sign
+    // the app with a slightly different keychain access group between runs,
+    // which makes our `nivoca-ai-meta` entry look gone even though the
+    // ~2.5 GB model file is still sitting in Documents/. Trusting meta alone
+    // forced the user to re-download every rebuild, so we check disk first
+    // and re-write the meta on recovery.
     try {
-      const metaRaw = await SecureStore.getItemAsync(META_KEY);
-      if (!metaRaw) return;
-      const meta = JSON.parse(metaRaw) as PersistedMeta;
-      if (!meta.installed) return;
-
-      // Verify the file still exists — iOS can evict from Documents/ under
-      // storage pressure even though we set NSURLIsExcludedFromBackupKey.
-      const info = await getInfoAsync(meta.path);
+      const info = await getInfoAsync(this.modelPath);
       if (info.exists) {
+        // File present — mark installed regardless of SecureStore state.
+        // Refresh the meta entry so the next boot sees it on the happy path
+        // (and so `deleteModel()` has something to clear).
+        const meta: PersistedMeta = { installed: true, path: this.modelPath };
+        await SecureStore.setItemAsync(META_KEY, JSON.stringify(meta)).catch(
+          () => undefined,
+        );
         this.setStatus({ state: 'installed' });
-      } else {
-        await SecureStore.deleteItemAsync(META_KEY);
-        // stay 'not_installed'
+        return;
       }
+      // File missing — clear any stale meta + resume blob so we don't try
+      // to resume a download whose partial file iOS already evicted.
+      await SecureStore.deleteItemAsync(META_KEY).catch(() => undefined);
+      await SecureStore.deleteItemAsync(RESUME_KEY).catch(() => undefined);
     } catch {
-      // Bad meta — treat as not installed, clear stale entries.
+      // I/O error — best effort cleanup, stay in `not_installed`.
       await SecureStore.deleteItemAsync(META_KEY).catch(() => undefined);
       await SecureStore.deleteItemAsync(RESUME_KEY).catch(() => undefined);
     }
