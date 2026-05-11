@@ -10,17 +10,20 @@ import {
   subscribeModelStatus,
 } from './model-manager';
 
-const MODEL_ID = 'onnx-community/gemma-4-E2B-it-ONNX';
+// Qwen3.5-2B is the unified vision-language Qwen with MoE + Gated Delta Net;
+// the q4f16 ONNX export is ≈1.51 GB total with a 1.04 GB largest shard, which
+// is roughly half the size and largest-file of Gemma 4 E2B and gives mobile
+// Safari's Cache Storage a much better shot at landing the download intact.
+// Same `AutoModelForImageTextToText` API as before — drop-in swap.
+const MODEL_ID = 'onnx-community/Qwen3.5-2B-ONNX-OPT';
 const MAX_NEW_TOKENS = 1024;
-// Gemma 4 E2B with q4f16 weights + processor/tokenizer is ≈3.17 GB. We use a
-// slight overestimate as the progress denominator so the bar can't hit 100%
-// from small files completing before the big weight files even report a total.
-const ESTIMATED_MODEL_BYTES = 3.2 * 1024 * 1024 * 1024;
+// q4f16: decoder (1.04 GB) + embed_tokens (0.28 GB) + vision_encoder (0.19 GB)
+// + tokenizer/configs ≈ 1.6 GB. Overestimate slightly so progress can't hit
+// 100% from small files completing before big shards register their total.
+const ESTIMATED_MODEL_BYTES = 1.6 * 1024 * 1024 * 1024;
 const STATUS_THROTTLE_MS = 1000;
 const SPEED_WINDOW_MS = 5000;
-// Project-specific cache key — clearer than the default `transformers-cache`
-// when inspecting browser Storage (DevTools → Application → Cache Storage).
-const CACHE_KEY = 'nivoca-gemma-cache';
+const CACHE_KEY = 'nivoca-ai-cache';
 const logger = createLogger('ai:gemma-web');
 
 interface ProgressEvent {

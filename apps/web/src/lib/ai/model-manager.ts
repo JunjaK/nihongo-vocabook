@@ -2,8 +2,8 @@
 
 import type { ModelStatus, ModelStatusListener } from './types';
 
-const INSTALLED_KEY = 'gemma4-model-installed';
-const DISMISSED_KEY = 'gemma4-download-prompt-dismissed';
+const INSTALLED_KEY = 'nivoca-ai-model-installed';
+const DISMISSED_KEY = 'nivoca-ai-download-prompt-dismissed';
 
 let currentStatus: ModelStatus = { state: 'not_installed' };
 const listeners = new Set<ModelStatusListener>();
@@ -63,16 +63,9 @@ export async function deleteModel(): Promise<void> {
   if (typeof window === 'undefined') return;
   if ('caches' in window) {
     const names = await caches.keys();
-    // Match both our project-specific key (`env.cacheKey` set in gemma-web)
-    // and the upstream default — the latter covers caches left over from
-    // earlier builds before we renamed.
     await Promise.all(
       names
-        .filter(
-          (name) =>
-            name.startsWith('nivoca-gemma-cache') ||
-            name.startsWith('transformers-cache'),
-        )
+        .filter((name) => name.startsWith('nivoca-ai-cache'))
         .map((name) => caches.delete(name)),
     );
   }

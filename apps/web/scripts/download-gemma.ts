@@ -20,9 +20,11 @@ import { dirname, join } from 'node:path';
 import { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 
-const MODEL_ID = 'onnx-community/gemma-4-E2B-it-ONNX';
+// Must match MODEL_ID in src/lib/ai/gemma-web.ts (web/desktop path).
+// iOS native uses a different model (Gemma 4) outside this script.
+const MODEL_ID = 'onnx-community/Qwen3.5-2B-ONNX-OPT';
 const REVISION = 'main';
-const DTYPE_TAG = 'q4f16'; // must match `dtype` in src/lib/ai/gemma-web.ts
+const DTYPE_TAG = 'q4f16';
 
 const MODEL_BASE = process.env.GEMMA_LOCAL_DIR ?? join(homedir(), 'develop', 'ai');
 const TARGET_DIR = join(MODEL_BASE, MODEL_ID);
