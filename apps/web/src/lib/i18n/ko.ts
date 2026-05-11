@@ -401,6 +401,8 @@ const ko: Translations = {
     deleteSuccess: '모델이 삭제되었습니다.',
     downloadComplete: 'AI 모델이 준비되었습니다.',
     downloadFailed: '모델 다운로드에 실패했습니다.',
+    unsupportedIOS: 'iPhone/iPad 에서는 모델 메모리 한계로 동작이 불안정합니다. 데스크톱 브라우저 (Chrome/Edge) 에서 다운로드해주세요. iOS 전용 빌드는 별도 준비 중입니다.',
+    unsupportedWebGPU: '이 브라우저는 WebGPU 를 지원하지 않습니다. 최신 Chrome 또는 Edge 데스크톱 버전에서 다시 시도해주세요.',
     promptTitle: 'AI 모델로 정확도 향상',
     promptDescription: 'AI 모델을 다운로드하면 일본어 추출 정확도가 크게 향상됩니다. 「Wi-Fi 권장」, 「약 1.5GB」.',
     promptDownload: '다운로드',

@@ -13,7 +13,7 @@ import {
   setDownloadPromptDismissed,
   subscribeModelStatus,
 } from '@/lib/ai/model-manager';
-import { ensureGemmaReady } from '@/lib/ai/gemma-web';
+import { checkDownloadEligibility, ensureGemmaReady } from '@/lib/ai/gemma-web';
 
 function formatGB(bytes: number): string {
   return (bytes / 1024 / 1024 / 1024).toFixed(2);
@@ -39,14 +39,34 @@ export default function AiModelSettingsPage() {
   const [status, setStatus] = useState(getModelStatus());
   const [deleting, setDeleting] = useState(false);
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
+  const [ineligibility, setIneligibility] = useState<string | null>(null);
 
   useEffect(() => subscribeModelStatus(setStatus), []);
+
+  // One-time environment check so we can disable the download button up front
+  // on iOS / non-WebGPU browsers instead of letting the user start a 1.5 GB
+  // download that's going to fail at model-load time.
+  useEffect(() => {
+    let canceled = false;
+    void checkDownloadEligibility().then((result) => {
+      if (!canceled) setIneligibility(result);
+    });
+    return () => {
+      canceled = true;
+    };
+  }, []);
+
+  const localizeAiError = (message: string): string => {
+    return message in t.aiModel
+      ? (t.aiModel as Record<string, string>)[message]
+      : message;
+  };
 
   const handleDownload = () => {
     setDownloadPromptDismissed(false);
     ensureGemmaReady().catch((err: unknown) => {
-      const message = err instanceof Error ? err.message : t.aiModel.downloadFailed;
-      toast.error(message);
+      const raw = err instanceof Error ? err.message : t.aiModel.downloadFailed;
+      toast.error(localizeAiError(raw));
     });
   };
 
@@ -133,6 +153,23 @@ export default function AiModelSettingsPage() {
             <span>{t.aiModel.approxSize}</span>
             <span>{t.aiModel.wifiRecommended}</span>
           </div>
+
+          {status.state === 'error' && (
+            <p
+              className="rounded-md bg-destructive/10 px-3 py-2 text-xs leading-relaxed text-destructive"
+              data-testid="ai-model-error-notice"
+            >
+              {localizeAiError(status.message)}
+            </p>
+          )}
+          {status.state !== 'error' && ineligibility && (
+            <p
+              className="rounded-md bg-muted px-3 py-2 text-xs leading-relaxed text-muted-foreground"
+              data-testid="ai-model-eligibility-notice"
+            >
+              {localizeAiError(ineligibility)}
+            </p>
+          )}
         </section>
 
         <Separator />
@@ -142,7 +179,9 @@ export default function AiModelSettingsPage() {
             <Button
               className="w-full"
               onClick={handleDownload}
-              disabled={status.state === 'downloading'}
+              disabled={
+                status.state === 'downloading' || ineligibility !== null
+              }
               data-testid="ai-model-download-button"
             >
               {status.state === 'error' ? t.aiModel.retry : t.aiModel.download}

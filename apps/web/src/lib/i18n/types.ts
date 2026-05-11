@@ -396,6 +396,8 @@ export interface Translations {
     deleteSuccess: string;
     downloadComplete: string;
     downloadFailed: string;
+    unsupportedIOS: string;
+    unsupportedWebGPU: string;
     promptTitle: string;
     promptDescription: string;
     promptDownload: string;

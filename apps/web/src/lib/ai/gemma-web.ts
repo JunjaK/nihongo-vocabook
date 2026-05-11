@@ -262,8 +262,58 @@ async function loadModel(loadId: number): Promise<LoadedModel> {
   }
 }
 
+interface NavigatorWithGPU extends Navigator {
+  gpu?: { requestAdapter: () => Promise<unknown | null> };
+}
+
+/**
+ * Preflight gate before downloading the model. Two checks:
+ *
+ * 1. WebGPU must be available — onnxruntime-web's webgpu backend needs a real
+ *    GPUAdapter or it throws `webgpuInit is not a function` deep inside the
+ *    minified runtime (the exact error a user just hit on iOS Safari).
+ * 2. iOS Safari (any iPhone / iPad WebKit) is hard-blocked even when WebGPU
+ *    is technically present — the 1.5 GB ONNX model exceeds the per-tab
+ *    memory cap during weight upload, so the OS reclaims the page near 90 %
+ *    and the user sees a white refresh loop. Better to refuse upfront with
+ *    a clear message than waste their bandwidth.
+ *
+ * Returns a translation key path the UI can render via t.aiModel.<key>.
+ * `null` = clear to proceed.
+ */
+export async function checkDownloadEligibility(): Promise<string | null> {
+  if (typeof window === 'undefined') return null;
+
+  const ua = navigator.userAgent;
+  const isIOSWebKit = /iPad|iPhone|iPod/.test(ua) ||
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  if (isIOSWebKit) {
+    return 'unsupportedIOS';
+  }
+
+  const nav = navigator as NavigatorWithGPU;
+  if (!nav.gpu) {
+    return 'unsupportedWebGPU';
+  }
+  try {
+    const adapter = await nav.gpu.requestAdapter();
+    if (!adapter) return 'unsupportedWebGPU';
+  } catch {
+    return 'unsupportedWebGPU';
+  }
+
+  return null;
+}
+
 export async function ensureGemmaReady(): Promise<void> {
   if (!modelPromise) {
+    const ineligibility = await checkDownloadEligibility();
+    if (ineligibility) {
+      // Surface as an error state with a structured key so the UI can show a
+      // localized, actionable message instead of a stack trace.
+      setModelStatus({ state: 'error', message: ineligibility });
+      throw new Error(ineligibility);
+    }
     const loadId = ++activeLoadId;
     modelPromise = loadModel(loadId).catch((err: unknown) => {
       modelPromise = null;

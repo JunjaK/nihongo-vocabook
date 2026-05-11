@@ -401,6 +401,8 @@ const en: Translations = {
     deleteSuccess: 'Model deleted.',
     downloadComplete: 'AI model is ready.',
     downloadFailed: 'Model download failed.',
+    unsupportedIOS: 'iPhone/iPad cannot reliably run this model due to per-tab memory limits. Please download on a desktop browser (Chrome/Edge). A dedicated iOS build is in progress.',
+    unsupportedWebGPU: 'This browser does not support WebGPU. Please retry on the latest desktop Chrome or Edge.',
     promptTitle: 'Boost accuracy with AI model',
     promptDescription: 'Download the AI model to significantly improve Japanese extraction accuracy. Wi-Fi recommended, ~1.5GB.',
     promptDownload: 'Download',

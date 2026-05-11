@@ -95,14 +95,20 @@ export function ModelDownloadModal({
   };
 
   // Title/description shift to reflect the live state so users always know
-  // what the modal is asking of them.
+  // what the modal is asking of them. When the error message is one of the
+  // structured eligibility keys, render the localized human copy instead of
+  // the raw key (and use a softer, non-failure title for those cases).
+  const structuredError =
+    status.state === 'error' && status.message in t.aiModel
+      ? (t.aiModel as Record<string, string>)[status.message]
+      : null;
   const title = isError
-    ? t.aiModel.downloadFailed
+    ? (structuredError ? t.aiModel.promptTitle : t.aiModel.downloadFailed)
     : isDownloading
       ? t.aiModel.statusDownloading
       : t.aiModel.promptTitle;
   const description = isError
-    ? status.message
+    ? (structuredError ?? status.message)
     : isDownloading
       ? t.aiModel.downloadInProgressDescription
       : t.aiModel.promptDescription;
