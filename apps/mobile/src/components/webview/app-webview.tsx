@@ -53,6 +53,7 @@ export function AppWebView() {
       return {
         type: 'AI_MODEL_STATUS_RESULT',
         state: status.state,
+        variantId: status.variantId,
         progress: status.progress,
         loadedBytes: status.loadedBytes,
         totalBytes: status.totalBytes,
@@ -195,6 +196,14 @@ export function AppWebView() {
           break;
         }
 
+        case 'AI_MODEL_SET_VARIANT':
+          // Persist the user's variant preference. Does NOT start a download
+          // — that's a separate explicit action. The model-manager re-emits
+          // status after this, so the web UI's "active variant" indicator
+          // updates immediately.
+          await modelManager.setSelectedVariant(message.variantId);
+          break;
+
         case 'AI_MODEL_DOWNLOAD_START': {
           // Single source of truth for device eligibility — refuse to start
           // even if the web client mistakenly enabled the button.
@@ -209,7 +218,10 @@ export function AppWebView() {
           // Fire-and-forget — progress flows via the model-manager listener
           // wired in the effect above. Errors land on the same listener as
           // state === 'error' and we map them to AI_MODEL_DOWNLOAD_FAILED.
-          void modelManager.startDownload();
+          // `variantId` is optional: when absent, model-manager uses the
+          // currently-selected variant (driven by AI_MODEL_SET_VARIANT or
+          // boot-time default).
+          void modelManager.startDownload(message.variantId);
           break;
         }
 

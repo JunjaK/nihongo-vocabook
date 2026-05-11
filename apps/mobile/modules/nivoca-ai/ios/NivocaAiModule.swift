@@ -29,10 +29,12 @@ private let logger = Logger(subsystem: "win.jun-devlog.nivoca", category: "nivoc
  * this is the only multimodal path Google's iOS build supports.
  */
 public class NivocaAiModule: Module {
-  /// Resolves to the on-disk model path the TS `model-manager` wrote to.
-  /// Keep in sync with `apps/mobile/src/lib/ai/model-manager.ts`'s MODEL_PATH.
-  private static let modelFilename = "gemma-4-E2B-it.litertlm"
+  /// Directory under `Documents/` that `model-manager.ts` writes to. The
+  /// filename is variant-dependent (gemma-4-E2B-it / gemma-4-E4B-it), so
+  /// we scan for any `.litertlm` file rather than hard-code one name —
+  /// single-variant-at-a-time policy is enforced on the TS side.
   private static let modelSubdir = "ai-models"
+  private static let modelExtension = "litertlm"
 
   private var engine: OpaquePointer? = nil
   private var sessionConfig: OpaquePointer? = nil
@@ -76,23 +78,34 @@ public class NivocaAiModule: Module {
     guard let docs else {
       throw NivocaAiError("no_docs_dir", "Documents directory unavailable")
     }
-    let path = docs
-      .appendingPathComponent(Self.modelSubdir)
-      .appendingPathComponent(Self.modelFilename)
-      .path
+    let dir = docs.appendingPathComponent(Self.modelSubdir)
+    // Find the first `.litertlm` file in the model directory. The TS
+    // model-manager guarantees only one variant is present at a time, so
+    // any match is the intended model.
+    let contents = (try? FileManager.default.contentsOfDirectory(
+      at: dir,
+      includingPropertiesForKeys: [.fileSizeKey],
+      options: [.skipsHiddenFiles]
+    )) ?? []
+    let candidates = contents.filter { $0.pathExtension == Self.modelExtension }
+    guard let modelUrl = candidates.first else {
+      logger.error("resolveModelPath: no .litertlm file under \(dir.path, privacy: .public) — \(contents.count) entries total")
+      throw NivocaAiError(
+        "model_missing",
+        "No model file found in \(dir.path) — open Settings → OCR and download a Gemma variant"
+      )
+    }
+    let path = modelUrl.path
     var fileSize: Int64 = -1
     if let attrs = try? FileManager.default.attributesOfItem(atPath: path),
        let n = attrs[.size] as? NSNumber {
       fileSize = n.int64Value
     }
-    let exists = FileManager.default.fileExists(atPath: path)
     // Bump to .error level so it shows in the user's `오류 only` log view.
-    // Expected: size around 2,656,521,376 bytes (~2.47 GB). Anything
-    // dramatically smaller is a truncated download.
-    logger.error("resolveModelPath: path=\(path, privacy: .public) exists=\(exists) size=\(fileSize)")
-    guard exists else {
-      throw NivocaAiError("model_missing", "Model file not found at \(path) — open Settings → OCR and re-download Gemma 4")
-    }
+    // Expected sizes: E2B ≈ 2,588,147,712 bytes (2.41 GB). E4B ≈
+    // 3,659,530,240 bytes (3.41 GB). Anything dramatically smaller is a
+    // truncated download.
+    logger.error("resolveModelPath: filename=\(modelUrl.lastPathComponent, privacy: .public) size=\(fileSize)")
     return path
   }
 

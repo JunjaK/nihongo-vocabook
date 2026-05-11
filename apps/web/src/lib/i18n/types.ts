@@ -407,6 +407,23 @@ export interface Translations {
     promptDismiss: string;
     poweredBy: string;
     nativePoweredBy: string;
+    /** Runtime-gate blocking copy (mobile browser / PWA). */
+    mobileBrowserBlocked: string;
+    pwaBlocked: string;
+    /** Native iOS variant selector. */
+    variantSectionTitle: string;
+    variantSelectActive: string;
+    variantActive: string;
+    variantSwitchConfirm: string;
+    variantE2bName: string;
+    variantE2bDevice: string;
+    variantE2bQuality: string;
+    variantE4bName: string;
+    variantE4bDevice: string;
+    variantE4bQuality: string;
+    variantMinRam: (n: number) => string;
+    variantDownloadSize: (gb: string) => string;
+    variantRequiresPaidDev: string;
   };
   profile: {
     title: string;

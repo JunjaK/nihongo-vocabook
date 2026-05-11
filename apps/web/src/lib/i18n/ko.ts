@@ -411,6 +411,25 @@ const ko: Translations = {
     promptDismiss: '나중에',
     poweredBy: 'Powered by Qwen3.5 (Alibaba)',
     nativePoweredBy: 'Powered by Gemma 4 (Google)',
+    mobileBrowserBlocked:
+      '모바일 브라우저에서는 AI 추출이 지원되지 않습니다. iOS 앱을 설치하거나 데스크톱 브라우저 (Chrome/Edge/Safari) 에서 이용해주세요.',
+    pwaBlocked:
+      '홈 화면 추가된 웹앱에서는 AI 추출이 지원되지 않습니다. iOS 네이티브 앱을 설치하거나 데스크톱 브라우저에서 이용해주세요.',
+    variantSectionTitle: '모델 선택',
+    variantSelectActive: '이 모델 사용',
+    variantActive: '현재 사용 중',
+    variantSwitchConfirm:
+      '다른 모델로 전환하면 기존 다운로드 파일이 삭제됩니다. 계속하시겠습니까?',
+    variantE2bName: 'Gemma 4 E2B (표준)',
+    variantE2bDevice: '권장: iPhone 13 이상',
+    variantE2bQuality: '균형잡힌 품질·속도',
+    variantE4bName: 'Gemma 4 E4B (고품질)',
+    variantE4bDevice: '권장: iPhone 15 Pro 이상',
+    variantE4bQuality: '더 정확한 추출 (벡터 2배)',
+    variantMinRam: (n) => `최소 RAM ${n}GB`,
+    variantDownloadSize: (gb) => `다운로드 ${gb}GB`,
+    variantRequiresPaidDev:
+      '유료 Apple Developer 계정 필요 (2GB+ 모델 entitlement)',
   },
   profile: {
     title: '프로필 수정',

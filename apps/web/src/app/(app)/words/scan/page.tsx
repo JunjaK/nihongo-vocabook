@@ -34,6 +34,7 @@ import {
   subscribeModelStatus,
 } from '@/lib/ai/model-manager';
 import { ensureGemmaReady } from '@/lib/ai/gemma-web';
+import { getAiBlockedKey } from '@/lib/ai/runtime-gate';
 import { fetchProfile } from '@/lib/profile/fetch';
 import type { ExtractedWord } from '@/lib/ocr/llm-vision';
 import Link from 'next/link';
@@ -58,7 +59,16 @@ export default function ScanPage() {
   const [existingTerms, setExistingTerms] = useState<Set<string>>(new Set());
   const [leaveConfirmOpen, setLeaveConfirmOpen] = useState(false);
   const [modelPromptOpen, setModelPromptOpen] = useState(false);
+  const [blockedKey, setBlockedKey] = useState<string | null>(null);
   const autoPromptCheckedRef = useRef(false);
+
+  // Runtime-gate check after mount (window-based detection isn't SSR-safe).
+  // Mobile-browser + PWA can't run AI inference, so we render an explanation
+  // instead of the camera UI to avoid letting the user start a flow that
+  // can't complete.
+  useEffect(() => {
+    setBlockedKey(getAiBlockedKey());
+  }, []);
 
   const modelStatusState = useSyncExternalStore(
     subscribeModelStatus,
@@ -215,6 +225,23 @@ export default function ScanPage() {
           >
             {t.auth.signIn}
           </Link>
+        </div>
+      </>
+    );
+  }
+
+  // Mobile browser / PWA — block before the camera UI so the user doesn't
+  // capture an image only to find inference can't run.
+  if (blockedKey) {
+    const table = t.aiModel as unknown as Record<string, string | undefined>;
+    const blockedMessage = table[blockedKey] ?? blockedKey;
+    return (
+      <>
+        <Header title={t.scan.title} showBack onBack={() => router.back()} />
+        <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-3 px-6 text-center">
+          <p className="max-w-md text-sm leading-relaxed text-muted-foreground">
+            {blockedMessage}
+          </p>
         </div>
       </>
     );

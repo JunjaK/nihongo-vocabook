@@ -98,10 +98,13 @@ export function ModelDownloadModal({
   // what the modal is asking of them. When the error message is one of the
   // structured eligibility keys, render the localized human copy instead of
   // the raw key (and use a softer, non-failure title for those cases).
-  const structuredError =
-    status.state === 'error' && status.message in t.aiModel
-      ? (t.aiModel as Record<string, string>)[status.message]
-      : null;
+  const structuredError = (() => {
+    if (status.state !== 'error') return null;
+    // i18n table has function-valued entries; pick out only string ones.
+    const table = t.aiModel as unknown as Record<string, string | undefined>;
+    const localized = table[status.message];
+    return typeof localized === 'string' ? localized : null;
+  })();
   const title = isError
     ? (structuredError ? t.aiModel.promptTitle : t.aiModel.downloadFailed)
     : isDownloading

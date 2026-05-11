@@ -11,6 +11,8 @@
 // Types (mirrored from apps/mobile/src/types/bridge.ts)
 // ---------------------------------------------------------------------------
 
+export type AiModelVariantId = 'gemma-4-e2b' | 'gemma-4-e4b';
+
 type WebToNativeMessage =
   | { type: 'READY'; bridgeVersion: number }
   | { type: 'AUTH_TOKEN'; refreshToken: string }
@@ -20,7 +22,8 @@ type WebToNativeMessage =
   | { type: 'OPEN_EXTERNAL_URL'; url: string }
   | { type: 'SHARE'; text: string; url?: string }
   | { type: 'AI_MODEL_STATUS' }
-  | { type: 'AI_MODEL_DOWNLOAD_START' }
+  | { type: 'AI_MODEL_SET_VARIANT'; variantId: AiModelVariantId }
+  | { type: 'AI_MODEL_DOWNLOAD_START'; variantId?: AiModelVariantId }
   | { type: 'AI_MODEL_DOWNLOAD_CANCEL' }
   | { type: 'AI_MODEL_DELETE' }
   | { type: 'AI_INFER_VISION'; requestId: string; imageBase64: string; locale: string };
@@ -44,6 +47,7 @@ type NativeToWebMessage =
   | {
       type: 'AI_MODEL_STATUS_RESULT';
       state: AiModelState;
+      variantId: AiModelVariantId;
       progress?: number;
       loadedBytes?: number;
       totalBytes?: number;

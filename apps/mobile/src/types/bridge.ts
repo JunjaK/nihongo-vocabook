@@ -1,3 +1,6 @@
+/** The two LiteRT-LM variants we support — see `model-manager.ts`. */
+export type AiModelVariantId = 'gemma-4-e2b' | 'gemma-4-e4b';
+
 /** Messages sent from Web (WebView) to Native (Expo) */
 export type WebToNativeMessage =
   | { type: 'READY'; bridgeVersion: number }
@@ -8,7 +11,8 @@ export type WebToNativeMessage =
   | { type: 'OPEN_EXTERNAL_URL'; url: string }
   | { type: 'SHARE'; text: string; url?: string }
   | { type: 'AI_MODEL_STATUS' }
-  | { type: 'AI_MODEL_DOWNLOAD_START' }
+  | { type: 'AI_MODEL_SET_VARIANT'; variantId: AiModelVariantId }
+  | { type: 'AI_MODEL_DOWNLOAD_START'; variantId?: AiModelVariantId }
   | { type: 'AI_MODEL_DOWNLOAD_CANCEL' }
   | { type: 'AI_MODEL_DELETE' }
   | {
@@ -50,6 +54,8 @@ export type NativeToWebMessage =
   | {
       type: 'AI_MODEL_STATUS_RESULT';
       state: AiModelState;
+      /** Which variant the status refers to. Always set. */
+      variantId: AiModelVariantId;
       /** 0..1, only present while state === 'downloading'. */
       progress?: number;
       /** Bytes streamed so far — drives the human "1.2 / 2.5 GB" label. */

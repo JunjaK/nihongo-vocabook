@@ -6,8 +6,9 @@ import { Header } from '@/components/layout/header';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import { cn } from '@/lib/utils';
 import { useTranslation } from '@/lib/i18n';
-import { isNativeApp } from '@/lib/native-bridge';
+import { isNativeApp, type AiModelVariantId } from '@/lib/native-bridge';
 import {
   deleteModel,
   getModelStatus,
@@ -15,6 +16,28 @@ import {
   subscribeModelStatus,
 } from '@/lib/ai/model-manager';
 import { checkDownloadEligibility, ensureGemmaReady } from '@/lib/ai/gemma-web';
+import {
+  getNativeSelectedVariant,
+  setNativeSelectedVariant,
+  subscribeNativeVariant,
+  triggerNativeDownload,
+} from '@/lib/ai/native-bridge-adapter';
+import { getAiBlockedKey } from '@/lib/ai/runtime-gate';
+
+/**
+ * Hard-coded mirror of `apps/mobile/src/lib/ai/model-manager.ts` MODEL_VARIANTS.
+ * Kept in sync by hand because the mobile package isn't imported into web.
+ */
+interface VariantSpec {
+  id: AiModelVariantId;
+  sizeGb: string;
+  minRamGB: number;
+}
+
+const NATIVE_VARIANTS: VariantSpec[] = [
+  { id: 'gemma-4-e2b', sizeGb: '2.41', minRamGB: 4 },
+  { id: 'gemma-4-e4b', sizeGb: '3.41', minRamGB: 6 },
+];
 
 function formatGB(bytes: number): string {
   return (bytes / 1024 / 1024 / 1024).toFixed(2);
@@ -40,14 +63,30 @@ export default function AiModelSettingsPage() {
   const [status, setStatus] = useState(getModelStatus());
   const [deleting, setDeleting] = useState(false);
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
+  const [confirmSwitchVariant, setConfirmSwitchVariant] =
+    useState<AiModelVariantId | null>(null);
   const [ineligibility, setIneligibility] = useState<string | null>(null);
+  const [nativeVariant, setNativeVariant] = useState<AiModelVariantId | undefined>(
+    getNativeSelectedVariant(),
+  );
+  const [blockedKey, setBlockedKey] = useState<string | null>(null);
+
+  const native = isNativeApp();
 
   useEffect(() => subscribeModelStatus(setStatus), []);
-
-  // One-time environment check so we can disable the download button up front
-  // on iOS / non-WebGPU browsers instead of letting the user start a 1.5 GB
-  // download that's going to fail at model-load time.
   useEffect(() => {
+    if (!native) return;
+    return subscribeNativeVariant(setNativeVariant);
+  }, [native]);
+
+  // Compute the runtime gate after mount so SSR doesn't disagree with the
+  // first client render (window-based detection isn't safe at SSR time).
+  useEffect(() => {
+    setBlockedKey(getAiBlockedKey());
+  }, []);
+
+  useEffect(() => {
+    if (blockedKey) return; // Don't even probe eligibility if we're blocked.
     let canceled = false;
     void checkDownloadEligibility().then((result) => {
       if (!canceled) setIneligibility(result);
@@ -55,20 +94,47 @@ export default function AiModelSettingsPage() {
     return () => {
       canceled = true;
     };
-  }, []);
+  }, [blockedKey]);
 
   const localizeAiError = (message: string): string => {
-    return message in t.aiModel
-      ? (t.aiModel as Record<string, string>)[message]
-      : message;
+    // i18n table has a few function-valued entries (parametric labels) that
+    // can't be the target of a string-key lookup; cast through unknown to
+    // keep TypeScript honest while still picking up flat string keys for
+    // error codes like `unsupportedIOS`, `pwaBlocked`, etc.
+    const table = t.aiModel as unknown as Record<string, string | undefined>;
+    const localized = table[message];
+    return typeof localized === 'string' ? localized : message;
   };
 
-  const handleDownload = () => {
+  const handleDownload = (variantId?: AiModelVariantId) => {
     setDownloadPromptDismissed(false);
+    if (native && variantId) {
+      triggerNativeDownload(variantId);
+      return;
+    }
     ensureGemmaReady().catch((err: unknown) => {
       const raw = err instanceof Error ? err.message : t.aiModel.downloadFailed;
       toast.error(localizeAiError(raw));
     });
+  };
+
+  const handleSelectVariant = (variantId: AiModelVariantId) => {
+    if (!native) return;
+    if (status.state === 'installed' && nativeVariant !== variantId) {
+      setConfirmSwitchVariant(variantId);
+      return;
+    }
+    setNativeSelectedVariant(variantId);
+    handleDownload(variantId);
+  };
+
+  const confirmSwitchAndDownload = () => {
+    if (!confirmSwitchVariant) return;
+    const target = confirmSwitchVariant;
+    setConfirmSwitchVariant(null);
+    setNativeSelectedVariant(target);
+    // model-manager handles purging the old file before starting the new one.
+    triggerNativeDownload(target);
   };
 
   const handleDelete = async () => {
@@ -84,6 +150,21 @@ export default function AiModelSettingsPage() {
       setConfirmDeleteOpen(false);
     }
   };
+
+  // Runtime-gate blocking screen — no download / inference machinery is
+  // exposed when AI isn't allowed in the current runtime mode.
+  if (blockedKey) {
+    return (
+      <>
+        <Header title={t.settings.aiModelPage} showBack />
+        <div className="flex flex-1 flex-col items-center justify-center px-6 text-center">
+          <p className="max-w-md text-sm leading-relaxed text-muted-foreground">
+            {localizeAiError(blockedKey)}
+          </p>
+        </div>
+      </>
+    );
+  }
 
   const statusLabel =
     status.state === 'installed'
@@ -109,30 +190,20 @@ export default function AiModelSettingsPage() {
       ? `${t.aiModel.etaPrefix}${formatEta(status.etaSeconds)}`
       : null;
 
-  // Pick the model-specific copy based on runtime — native iOS path ships
-  // Gemma 4 (2.5GB), web path ships Qwen3.5 (1.5GB). All other strings stay
-  // model-neutral so they don't need a swap.
-  const native = isNativeApp();
-  const modelTitle = native ? t.aiModel.nativeTitle : t.aiModel.title;
-  const modelApproxSize = native
-    ? t.aiModel.nativeApproxSize
-    : t.aiModel.approxSize;
-  const modelPoweredBy = native
-    ? t.aiModel.nativePoweredBy
-    : t.aiModel.poweredBy;
-
   return (
     <>
       <Header title={t.settings.aiModelPage} showBack />
-      <div className="animate-page flex-1 space-y-6 overflow-y-auto px-5 pt-3">
+      <div className="animate-page flex-1 space-y-6 overflow-y-auto px-5 pt-3 pb-6">
         <section className="space-y-2">
-          <h2 className="text-sm font-medium text-muted-foreground">{modelTitle}</h2>
+          <h2 className="text-sm font-medium text-muted-foreground">
+            {native ? t.aiModel.nativeTitle : t.aiModel.title}
+          </h2>
           <p className="text-sm text-muted-foreground">{t.aiModel.description}</p>
         </section>
 
         <Separator />
 
-        <section className="space-y-3">
+        <section className="space-y-3" data-testid="ai-model-status-section">
           <div className="flex items-center justify-between">
             <div className="text-sm font-medium">{t.aiModel.status}</div>
             <div
@@ -162,11 +233,6 @@ export default function AiModelSettingsPage() {
             </>
           )}
 
-          <div className="flex items-center justify-between text-xs text-muted-foreground">
-            <span>{modelApproxSize}</span>
-            <span>{t.aiModel.wifiRecommended}</span>
-          </div>
-
           {status.state === 'error' && (
             <p
               className="rounded-md bg-destructive/10 px-3 py-2 text-xs leading-relaxed text-destructive"
@@ -185,24 +251,125 @@ export default function AiModelSettingsPage() {
           )}
         </section>
 
-        <Separator />
+        {native ? (
+          // ─── Native iOS: variant selector ─────────────────────────────────
+          <section className="space-y-3" data-testid="ai-model-variants-section">
+            <h3 className="text-sm font-medium">
+              {t.aiModel.variantSectionTitle}
+            </h3>
+            <div className="space-y-3">
+              {NATIVE_VARIANTS.map((spec) => {
+                const isActive = nativeVariant === spec.id;
+                const isInstalledHere =
+                  status.state === 'installed' && nativeVariant === spec.id;
+                const isDownloadingHere =
+                  status.state === 'downloading' && nativeVariant === spec.id;
+                const labels =
+                  spec.id === 'gemma-4-e2b'
+                    ? {
+                        name: t.aiModel.variantE2bName,
+                        device: t.aiModel.variantE2bDevice,
+                        quality: t.aiModel.variantE2bQuality,
+                      }
+                    : {
+                        name: t.aiModel.variantE4bName,
+                        device: t.aiModel.variantE4bDevice,
+                        quality: t.aiModel.variantE4bQuality,
+                      };
+                return (
+                  <div
+                    key={spec.id}
+                    role="radio"
+                    aria-checked={isActive}
+                    tabIndex={0}
+                    onClick={() => handleSelectVariant(spec.id)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        handleSelectVariant(spec.id);
+                      }
+                    }}
+                    className={cn(
+                      'cursor-pointer rounded-lg border p-4 transition-colors',
+                      isActive
+                        ? 'border-primary bg-primary/5'
+                        : 'border-border hover:bg-muted/50',
+                    )}
+                    data-testid={`ai-variant-card-${spec.id}`}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0 flex-1 space-y-1">
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm font-medium">{labels.name}</p>
+                          {isInstalledHere && (
+                            <span className="rounded bg-primary/10 px-1.5 py-0.5 text-xs text-primary">
+                              {t.aiModel.variantActive}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          {labels.device}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {labels.quality}
+                        </p>
+                        <div className="flex flex-wrap gap-x-3 gap-y-1 pt-1 text-xs text-muted-foreground">
+                          <span>
+                            {t.aiModel.variantDownloadSize(spec.sizeGb)}
+                          </span>
+                          <span>{t.aiModel.variantMinRam(spec.minRamGB)}</span>
+                        </div>
+                      </div>
+                    </div>
+                    {!isInstalledHere && !isDownloadingHere && (
+                      <Button
+                        className="mt-3 w-full"
+                        variant={isActive ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleSelectVariant(spec.id);
+                        }}
+                        disabled={
+                          status.state === 'downloading' || ineligibility !== null
+                        }
+                        data-testid={`ai-variant-download-${spec.id}`}
+                      >
+                        {t.aiModel.download}
+                      </Button>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {t.aiModel.variantRequiresPaidDev}
+            </p>
+          </section>
+        ) : (
+          // ─── Desktop: single Qwen3.5 model, original UX ────────────────────
+          <section className="space-y-2">
+            <div className="flex items-center justify-between text-xs text-muted-foreground">
+              <span>{t.aiModel.approxSize}</span>
+              <span>{t.aiModel.wifiRecommended}</span>
+            </div>
+            {status.state !== 'installed' && (
+              <Button
+                className="w-full"
+                onClick={() => handleDownload()}
+                disabled={status.state === 'downloading' || ineligibility !== null}
+                data-testid="ai-model-download-button"
+              >
+                {status.state === 'error' ? t.aiModel.retry : t.aiModel.download}
+              </Button>
+            )}
+          </section>
+        )}
 
-        <section className="space-y-2">
-          {status.state !== 'installed' && (
-            <Button
-              className="w-full"
-              onClick={handleDownload}
-              disabled={
-                status.state === 'downloading' || ineligibility !== null
-              }
-              data-testid="ai-model-download-button"
-            >
-              {status.state === 'error' ? t.aiModel.retry : t.aiModel.download}
-            </Button>
-          )}
-          {(status.state === 'installed' ||
-            status.state === 'downloading' ||
-            status.state === 'error') && (
+        {(status.state === 'installed' ||
+          status.state === 'downloading' ||
+          status.state === 'error') && (
+          <section>
             <Button
               className="w-full"
               variant="outline"
@@ -214,10 +381,12 @@ export default function AiModelSettingsPage() {
                 ? t.aiModel.cancelDownload
                 : t.aiModel.delete}
             </Button>
-          )}
-        </section>
+          </section>
+        )}
 
-        <p className="pt-2 text-center text-xs text-muted-foreground">{modelPoweredBy}</p>
+        <p className="pt-2 text-center text-xs text-muted-foreground">
+          {native ? t.aiModel.nativePoweredBy : t.aiModel.poweredBy}
+        </p>
       </div>
 
       <ConfirmDialog
@@ -229,6 +398,17 @@ export default function AiModelSettingsPage() {
         destructive
         onConfirm={handleDelete}
         onCancel={() => setConfirmDeleteOpen(false)}
+      />
+
+      <ConfirmDialog
+        open={confirmSwitchVariant !== null}
+        title={t.aiModel.variantSectionTitle}
+        description={t.aiModel.variantSwitchConfirm}
+        confirmLabel={t.aiModel.download}
+        cancelLabel={t.aiModel.cancel}
+        destructive
+        onConfirm={confirmSwitchAndDownload}
+        onCancel={() => setConfirmSwitchVariant(null)}
       />
     </>
   );

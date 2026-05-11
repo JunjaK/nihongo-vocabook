@@ -411,6 +411,25 @@ const en: Translations = {
     promptDismiss: 'Later',
     poweredBy: 'Powered by Qwen3.5 (Alibaba)',
     nativePoweredBy: 'Powered by Gemma 4 (Google)',
+    mobileBrowserBlocked:
+      'AI extraction is not supported in mobile browsers. Please install the iOS app or use a desktop browser (Chrome / Edge / Safari).',
+    pwaBlocked:
+      'AI extraction is not supported in home-screen web apps. Please install the iOS native app or use a desktop browser.',
+    variantSectionTitle: 'Choose a model',
+    variantSelectActive: 'Use this model',
+    variantActive: 'Currently active',
+    variantSwitchConfirm:
+      'Switching models will delete the existing downloaded file. Continue?',
+    variantE2bName: 'Gemma 4 E2B (Standard)',
+    variantE2bDevice: 'Recommended: iPhone 13 or later',
+    variantE2bQuality: 'Balanced quality and speed',
+    variantE4bName: 'Gemma 4 E4B (Higher quality)',
+    variantE4bDevice: 'Recommended: iPhone 15 Pro or later',
+    variantE4bQuality: 'More accurate extraction (2× vector dim)',
+    variantMinRam: (n) => `Min RAM ${n} GB`,
+    variantDownloadSize: (gb) => `Download ${gb} GB`,
+    variantRequiresPaidDev:
+      'Paid Apple Developer account required (entitlement for 2 GB+ models)',
   },
   profile: {
     title: 'Edit Profile',

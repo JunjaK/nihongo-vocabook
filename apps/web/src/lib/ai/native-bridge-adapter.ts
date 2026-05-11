@@ -7,6 +7,7 @@ import {
   isNativeApp,
   onNativeMessage,
   sendToNative,
+  type AiModelVariantId,
   type NativeToWebMessage,
 } from '../native-bridge';
 import { setModelStatus } from './model-manager';
@@ -43,10 +44,20 @@ const pending = new Map<string, PendingInference>();
 let lastDeviceSupported: boolean | undefined;
 /** Mirrors the latest `AI_MODEL_STATUS_RESULT.modelName` for diagnostic copy. */
 let lastModelName: string | undefined;
+/** Which native variant the most recent STATUS refers to. Drives the
+ *  "selected card" highlight on the settings page. */
+let lastVariantId: AiModelVariantId | undefined;
 /** Set to `true` once the first AI_MODEL_STATUS_RESULT has arrived. */
 let bridgeInitialized = false;
 
 let subscriptionInstalled = false;
+
+type VariantListener = (variantId: AiModelVariantId | undefined) => void;
+const variantListeners = new Set<VariantListener>();
+
+function emitVariant(): void {
+  for (const listener of variantListeners) listener(lastVariantId);
+}
 
 /**
  * Install the global `nativeMessage` listener exactly once. Safe to call from
@@ -74,7 +85,10 @@ function handleNativeMessage(message: NativeToWebMessage): void {
       bridgeInitialized = true;
       lastDeviceSupported = message.deviceSupported;
       lastModelName = message.modelName;
+      const prevVariant = lastVariantId;
+      lastVariantId = message.variantId;
       setModelStatus(toWebModelStatus(message));
+      if (prevVariant !== lastVariantId) emitVariant();
       break;
     }
     case 'AI_MODEL_DOWNLOAD_PROGRESS': {
@@ -173,9 +187,9 @@ export function nativeModelName(): string | undefined {
   return lastModelName;
 }
 
-export function triggerNativeDownload(): void {
+export function triggerNativeDownload(variantId?: AiModelVariantId): void {
   ensureSubscription();
-  sendToNative({ type: 'AI_MODEL_DOWNLOAD_START' });
+  sendToNative({ type: 'AI_MODEL_DOWNLOAD_START', variantId });
 }
 
 export function cancelNativeDownload(): void {
@@ -184,6 +198,28 @@ export function cancelNativeDownload(): void {
 
 export function deleteNativeModel(): void {
   sendToNative({ type: 'AI_MODEL_DELETE' });
+}
+
+/**
+ * Tell native to update its variant *preference* without starting a download.
+ * The native side persists the choice and re-emits status; the web UI
+ * highlights the corresponding card.
+ */
+export function setNativeSelectedVariant(variantId: AiModelVariantId): void {
+  ensureSubscription();
+  sendToNative({ type: 'AI_MODEL_SET_VARIANT', variantId });
+}
+
+export function getNativeSelectedVariant(): AiModelVariantId | undefined {
+  return lastVariantId;
+}
+
+export function subscribeNativeVariant(listener: VariantListener): () => void {
+  variantListeners.add(listener);
+  listener(lastVariantId);
+  return () => {
+    variantListeners.delete(listener);
+  };
 }
 
 /**
