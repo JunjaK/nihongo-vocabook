@@ -1,0 +1,4 @@
+framework module LiteRTLM {
+  header "litert_lm_engine.h"
+  export *
+}

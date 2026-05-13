@@ -1,0 +1,4 @@
+# LiteRT-LM vendored static archives — patched v0.11.0 build, ~80 MB each.
+# Kept in Git LFS so EAS Build (cloud) can fetch them without exceeding
+# GitHub's 100 MB single-file limit and without bloating the repo.
+apps/mobile/modules/nivoca-ai/ios/Frameworks/LiteRTLM.xcframework/**/LiteRTLM filter=lfs diff=lfs merge=lfs -text

@@ -72,13 +72,11 @@ supabase/.temp/
 # seed data (bulk fixture files, not checked in)
 apps/web/scripts/data/
 
-# Vendored LiteRT-LM XCFramework (~205 MB total, with two 82 MB static
-# binaries that exceed GitHub's 50 MB warning threshold). Each developer
-# fetches it locally from the hung-yueh/react-native-litert-lm v0.3.6
-# release before running `bunx expo run:ios`. The README inside the
-# directory is intentionally tracked so newcomers know what's missing.
-/apps/mobile/modules/nivoca-ai/ios/Frameworks/*
-!/apps/mobile/modules/nivoca-ai/ios/Frameworks/README.md
+# Vendored LiteRT-LM XCFramework. The two ~80 MB static archives inside
+# (ios-arm64 + ios-arm64-simulator) live in Git LFS so EAS Build (cloud)
+# can fetch them without exceeding GitHub's 100 MB single-file limit.
+# See .gitattributes for the LFS filter and _docs/blog-gemma4-ios-litert-journey.md
+# for context on the patched v0.11.0 build.
 
 # Claude Code scheduled-task lock (per-session runtime artefact)
 .claude/scheduled_tasks.lock
