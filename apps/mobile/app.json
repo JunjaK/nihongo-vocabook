@@ -20,8 +20,7 @@
         "NSPhotoLibraryUsageDescription": "Used to select images with Japanese text",
         "ITSAppUsesNonExemptEncryption": false,
         "UIBackgroundModes": [
-          "fetch",
-          "processing"
+          "fetch"
         ]
       },
       "entitlements": {

@@ -1,194 +1,172 @@
 # Daily Dictionary Enrichment Routine
 
-> Status: Planning
+> Status: In Progress (manual 7 done 2026-05-13; routine scripts ready; schedule registration remaining)
 
 ## Spec
 
 ### Goal
-A daily Claude scheduled agent that backfills two kinds of missing data in `dictionary_entries`:
-1. Missing example sentences (2 per entry)
-2. Missing `kanjis` / `kanji_readings` rows for kanji characters that appear in dict entry terms but were not in the original kanjidic2 seed (e.g. `溺`, `蜻`, `蜥`)
+Daily Claude scheduled agent that keeps user-facing dictionary data complete:
+- **Priority A** — generate examples for **user-linked** dict entries that have none (when user adds a new word)
+- **Priority B** — when Priority A is empty, opportunistically fill jisho-orphan entries (search cache that user touched but didn't save) so re-visits show examples
 
-### Why now
-- Jisho fallback path adds new dict entries with kanji that may not exist in the seeded `kanjis` table → `KanjiChar` hover returns 404 → user sees no kanji info
-- Manual `/generate-examples` slash command requires the laptop awake; daily automation removes that friction
+### ⚠️ Authoring rule (firm)
+
+**Claude (the agent driving this routine) authors example sentences AND any kanji data directly — by writing them itself or by dispatching sub-agents via the Task tool. No external LLM API (Anthropic API, OpenAI API, etc.) is ever called from this routine.**
+
+Why: keeps the routine purely under Claude Code orchestration; no separate API keys to manage, bill, rotate; consistent voice/style with the manual backfills already in DB; sub-agents can be parallelized when the candidate set is large.
+
+Scripts in this routine handle **only** DB I/O and mail transport — never LLM calls.
 
 ### Non-goals
-- No new `dictionary_entry ↔ kanji` join table — render-time char scan stays as-is
-- No on-the-fly backfill at write time (separate concern)
-- No re-translation of already-filled fields
-- No retroactive guess of `frequency` when unknown
+- ❌ No JMDict seed example backfill (16,006 orphan jmdict entries → skip permanently)
+- ❌ No kanji backfill in the daily routine (the 2 missing hyōgaiji 蝲, 蠊 were already manually inserted; future ones will be rare and handled ad-hoc by the agent, also without external LLM API)
+- ❌ No frequency, no kanji metadata work
+- ❌ No retroactive re-translation of populated fields
+- ❌ **No fetch-to-anthropic.com or fetch-to-openai.com in any routine script — ever.** If a future change tempts you to add it, add a sub-agent dispatch instead.
+
+### Phase 0 findings (2026-05-13)
+
+Backlog query against production showed reality is very different from initial assumption:
+
+| Metric | Value |
+|---|---|
+| `dictionary_entries` total | 24,671 |
+| `word_examples` total | 15,608 (after manual 14 rows) |
+| `kanjis` total | 10,386 (incl. 蝲, 蠊 manually inserted) |
+| Missing kanji in any dict term | **0** ✓ |
+| User-linked dict entries needing examples | **0** ✓ (was 7, now done) |
+| jisho-orphan dict entries needing examples | 547 |
+| jmdict-orphan dict entries needing examples | 16,006 (intentional, skip) |
+
+Source × user-linked × has-examples cube (post-manual-backfill):
+
+| source | ul_w_ex | ul_no_ex | orph_w_ex | orph_no_ex |
+|---|---:|---:|---:|---:|
+| jlpt-seed | 7,676 | 0 | 0 | 358 |
+| jisho | 50 | 0 | 0 | 547 |
+| jmdict | 29 | 0 | 0 | 16,006 |
+| migrated | 5 | 0 | 0 | 0 |
 
 ### Decisions
 
-**Field strategy for new kanji rows**:
+**Priority order each run**:
+1. Priority A — `user-linked AND no examples` (LIMIT 100, newest first)
+2. Priority B — `jisho orphan AND no examples` (LIMIT 100 − count(A), oldest first)
 
-| Field | Source | Fallback |
-|---|---|---|
-| `character` | dict entry term scan | required |
-| `stroke_count` | `scripts/data/kanji-strokes.json` (Unihan/kanjivg) | `null` |
-| `jlpt_level` | `scripts/data/jlpt-kanji.json` | `null` (jōyō-gai / hyōgaiji) |
-| `grade` | `scripts/data/kyoiku-jouyou-kanji.json` (1–6 / 8 / 9 per kanjidic2 spec) | `null` |
-| `frequency` | fixed `null` | — |
-| `on_readings` | Opus 4.7, **N=3 multi-sample agreement** | skip kanji if all 3 disagree |
-| `kun_readings` | same | same |
-| `meanings` (EN, per reading) | Opus 4.7 | 1–3 short glosses |
-| `meanings_ko` (per reading) | Opus 4.7 | same |
+Total cap per run: **100 dict entries = 200 example sentences**.
 
-**Why multi-sample over self-reported confidence**: LLM self-confidence is poorly calibrated, especially for hyōgaiji which appear rarely in training data. 3-sample agreement (with non-zero temperature) catches hallucinations where the model is *confidently wrong*. A reading is accepted only if it appears in ≥2 of 3 samples. Meanings for a surviving reading: take the list that appears in ≥2 samples; if none, take the shortest of the 3 (most conservative).
+**Why exclude jlpt-seed and jmdict orphans from fallback**: they're not user-touched — nobody hovers them — generating examples is pure waste. Only `jisho` orphans (single-source proof a human searched the word) are worth filling.
 
-**Why `frequency` stays null**: outside the seed corpus we'd be guessing. Better the hover card hide the field than show a wrong rank.
+**Frequency**: daily, cron `0 4 * * *` UTC (= KST 13:00).
 
-**Email transport**: Resend with sender `onboarding@resend.dev` (no DNS setup), recipient `haring157@gmail.com`.
+**Authoring**: Claude agent. Two modes — pick per run based on candidate count:
+- **Direct (≤ ~30 entries)**: main agent writes all sentences itself
+- **Sub-agents (> ~30 entries)**: dispatch via `Task` tool, chunk by 20 entries per sub-agent, run in parallel; main agent aggregates results
 
-**Schedule**: `0 4 * * *` UTC (= KST 13:00). Mid-afternoon KST so retries aren't fighting peak usage; email arrives during the day.
+**Email**: Resend `onboarding@resend.dev` → `haring157@gmail.com`. Subject pattern: `[VocaBook] Daily examples ✓ +N entries` / `✗ failed`.
 
-**Caps per run**:
-- 100 dict entries for example generation
-- 100 distinct kanji for `kanjis` insertion
-- 15-minute wall clock
+**Termination conditions**:
+- Wall clock > 20 min → finalize partial summary, mark `partial: true`
+- Both priorities yield 0 candidates → suppress mail (already handled in `insert-examples.ts`)
 
-If backlog exceeds caps, **oldest-first** by `dictionary_entries.created_at` (DESC for examples — recent words user just added matter most; ASC for kanji — historical hyōgaiji that have been broken longest deserve attention first). Final ordering choice TBD in Phase 2.
-
-### Pre-flight backlog check
-
-Before scheduling, run once and record numbers in this doc:
-
-```sql
-WITH missing AS (
-  SELECT DISTINCT m.c[1] AS ch
-  FROM dictionary_entries d,
-       regexp_matches(d.term, '[一-鿿㐀-䶿]', 'g') m(c)
-  WHERE NOT EXISTS (SELECT 1 FROM kanjis k WHERE k.character = m.c[1])
-)
-SELECT
-  (SELECT count(*) FROM missing) AS missing_kanji_unique,
-  (SELECT count(*) FROM dictionary_entries d
-     LEFT JOIN word_examples we ON we.dictionary_entry_id = d.id
-     WHERE we.id IS NULL) AS dict_without_examples;
-```
-
-If `missing_kanji_unique > 500` → do a one-shot batch first; otherwise routine handles it in a few days.
-
-Verify `溺` specifically is in the missing set (the canonical example).
+**Run history**:
+- 2026-05-13 (manual): 14 example rows inserted for サイネージ, 城跡, 滑子, 祠, 味気ない, 珈琲, 鯛 (`source='claude-manual'`). User-linked backlog cleared.
 
 ---
 
-## Checklist
+## Pre-flight (DONE)
 
-### Phase 0 — Pre-flight (manual)
-- [ ] Run backlog query above; record numbers here
-- [ ] Confirm `溺` missing (sanity)
-- [ ] Resend signup → `RESEND_API_KEY`
-- [ ] Test mail: `curl -X POST https://api.resend.com/emails ...` to `haring157@gmail.com`
-- [ ] Decide one-shot vs routine path based on backlog size
+- [x] Phase 0 backlog diagnostic ran and recorded above
+- [x] DB backup taken to `~/Downloads/nihongo-vocabook-backup-2026-05-13/` (JSON-Lines per table, 24 MB, 16 tables, 105,711 rows)
+- [x] Missing kanji 蝲, 蠊 manually inserted to `kanjis` + `kanji_readings`
+- [x] Missing-example 7 user-linked entries manually backfilled (14 example rows)
+- [x] Routine scripts written (DB-only)
 
-### Phase 1 — Static data files
-- [ ] `apps/web/scripts/data/jlpt-kanji.json` — `{ "N5":[…80], "N4":[…170], "N3":[…370], "N2":[…380], "N1":[…1230] }` (tanos.co.uk vetted)
-- [ ] `apps/web/scripts/data/kyoiku-jouyou-kanji.json` — `{ "1":[…80], "2":[…160], …, "6":[…], "8":[…], "9":[…] }` (MEXT 学年別配当表 + 常用漢字表 + 人名用漢字)
-- [ ] `apps/web/scripts/data/kanji-strokes.json` — `{ "溺":13, … }` (Unihan kTotalStrokes or kanjivg)
-- [ ] Each JSON has a `_meta` block with source URL + license + retrieval date
-- [ ] Sanity unit test: files parse, list lengths within ±10% of expected
+## Open work
 
-### Phase 2 — Routine script (`apps/web/scripts/routines/daily-dict-enrich.ts`)
-- [ ] DB conn from `NEXT_PRIVATE_SUPABASE_DB_LINK_SESSION` env (NOT `.env.local`)
-- [ ] Load 3 static JSONs once
-- [ ] Query candidates with caps applied
-- [ ] Missing-kanji loop: 3 parallel Opus 4.7 calls (`anthropic-sdk-typescript`, `temperature: 0.5`), agreement filter, INSERT kanjis + kanji_readings (idempotent)
-- [ ] Missing-examples loop: 1 Opus 4.7 call per entry (no multi-sample, lower stakes), INSERT word_examples (`ON CONFLICT DO NOTHING`)
-- [ ] Aggregate stats object
-- [ ] Resend email POST (success or failure variant)
-- [ ] Exit 0 / 1
+- [ ] **Resend account** — sign up, get `RESEND_API_KEY`, smoke-test mail delivery
+- [ ] **Schedule registration** — user runs `/schedule create` in Claude Desktop (see [`daily-dict-enrichment-schedule.md`](./daily-dict-enrichment-schedule.md))
+- [ ] **First run verification** — manual trigger, verify mail arrives and DB rows insert correctly
+- [ ] **Separate fix** — `/api/dictionary/route.ts:289` server-to-server fetch loses session cookies → `/api/examples/generate` returns 401 → no examples ever auto-generated on word save (see [`dictionary-example-gen-auth-bug.md`](./dictionary-example-gen-auth-bug.md))
 
-### Phase 3 — Schedule registration
-- [ ] `/schedule create` cron `0 4 * * *`
-- [ ] Inject env: `NEXT_PRIVATE_SUPABASE_DB_LINK_SESSION`, `ANTHROPIC_API_KEY`, `RESEND_API_KEY`
-- [ ] Routine prompt: "Run `bun apps/web/scripts/routines/daily-dict-enrich.ts`, then send the stdout JSON summary back."
-- [ ] First run: manual trigger; verify mail received
+## Architecture
 
-### Phase 4 — Verify
-- [ ] After 3 daily cycles, spot-check 3 newly-inserted kanji on the live app — hover card renders
-- [ ] Anthropic dashboard: cost within expectation (~$0.05–0.15/day)
-- [ ] Email arrives within 1 min of schedule fire
-- [ ] No UNIQUE constraint violations in logs
-
-### Phase 5 — Optional follow-ups (out of scope for v1)
-- [ ] Backfill `meanings_ko` for existing `kanji_readings` where empty (currently covered by `/api/kanji` fire-and-forget)
-- [ ] If disagreement rate <1% over 30 days, drop to N=1 sampling
-
----
-
-## Routine script outline
-
-```ts
-// apps/web/scripts/routines/daily-dict-enrich.ts
-//
-// 1. Connect via NEXT_PRIVATE_SUPABASE_DB_LINK_SESSION
-// 2. Load jlpt-kanji.json, kyoiku-jouyou-kanji.json, kanji-strokes.json
-// 3. Find missing kanji (LIMIT 100), entries w/o examples (LIMIT 100)
-// 4. Per missing kanji:
-//    - static lookup jlpt/grade/strokes
-//    - 3× Opus 4.7 (temp 0.5) for readings + meanings, in parallel
-//    - agreeReadings(samples) — keep readings appearing in ≥2/3
-//    - if 0 readings survive → skip, log warning
-//    - INSERT kanjis ON CONFLICT DO NOTHING
-//    - INSERT kanji_readings ON CONFLICT (character,reading,reading_type) DO NOTHING
-// 5. Per dict entry: 1× Opus 4.7 for 2 sentences, INSERT word_examples ON CONFLICT DO NOTHING
-// 6. Build stats, POST to Resend, exit
+```
+┌─────────────────────────────┐
+│   Claude scheduled agent    │
+│  (cron 0 4 * * *  UTC)      │
+└──────────────┬──────────────┘
+               │
+               │  Step 1: fetch
+               ▼
+   ┌──────────────────────────┐
+   │ fetch-example-candidates │  DB-only (postgres)
+   │       .ts                │  outputs JSON to stdout
+   └──────────┬───────────────┘
+              │
+              │  Step 2: agent authors examples
+              ▼
+   ┌──────────────────────────┐
+   │ Claude agent (or         │  NO external API
+   │  Task-dispatched         │  Writes JSON results file
+   │  sub-agents)             │
+   └──────────┬───────────────┘
+              │
+              │  Step 3: insert
+              ▼
+   ┌──────────────────────────┐
+   │  insert-examples.ts      │  DB + Resend mail
+   │                          │
+   └──────────────────────────┘
 ```
 
-Agreement helper:
+### Script: `fetch-example-candidates.ts`
 
-```ts
-function agreeReadings(samples: Reading[][]): Reading[] {
-  type Slot = { reading: Reading; count: number; allMeanings: Reading[] };
-  const buckets = new Map<string, Slot>();
-  for (const sample of samples) {
-    for (const r of sample) {
-      const key = `${r.type}:${r.reading}`;
-      const slot = buckets.get(key) ?? { reading: r, count: 0, allMeanings: [] };
-      slot.count++;
-      slot.allMeanings.push(r);
-      buckets.set(key, slot);
-    }
-  }
-  return Array.from(buckets.values())
-    .filter((s) => s.count >= 2)
-    .map((s) => consolidateMeanings(s.allMeanings));
+DB-only. Outputs candidate JSON on stdout. Shape per entry:
+```json
+{
+  "id": "uuid",
+  "term": "...",
+  "reading": "...",
+  "meanings": ["..."],
+  "meanings_ko": ["..."] | null,
+  "source": "jmdict" | "jisho" | ...,
+  "priority": "A" | "B"
 }
 ```
 
-`consolidateMeanings`: per-language, choose the gloss list that appears in ≥2 samples; if no agreement, pick the shortest list.
+### Agent step — authoring (Claude)
 
----
+For each candidate, produce 2 sentences obeying these rules:
+- `sentence_ja`: natural everyday Japanese using the target word. JLPT N5–N3 grammar unless the word itself is advanced
+- `sentence_reading`: full hiragana reading of the entire sentence
+- `sentence_meaning`: natural Korean translation (corner brackets `「」` for any quotes)
+- 10–25 chars JA
+- Two sentences must show **different contexts/conjugations** of the word — not paraphrases
+- Do not leave the target word in pure dictionary form when it conjugates
 
-## Email format
-
-Subject: `[VocaBook] Daily enrich ✓ +5 kanji +12 examples` (success) / `[VocaBook] Daily enrich ✗ failed` (failure)
-
-Body (simple HTML table):
-
+Output a results file with shape:
+```json
+[
+  {
+    "dictionary_entry_id": "<id from candidate>",
+    "term": "...",
+    "reading": "...",
+    "priority": "A" | "B",
+    "examples": [
+      { "sentence_ja": "...", "sentence_reading": "...", "sentence_meaning": "..." },
+      { "sentence_ja": "...", "sentence_reading": "...", "sentence_meaning": "..." }
+    ]
+  },
+  ...
+]
 ```
-Run finished 2026-05-13 13:04 KST
-Duration: 4m 12s
 
-Examples
-  inserted: 12
-  skipped (conflict): 0
-  remaining backlog: 0
+For >30 candidates, **dispatch sub-agents** via the `Task` tool with `subagent_type=general-purpose`, chunking by ~20 entries per sub-agent. Each sub-agent returns a partial JSON array; main agent concatenates them.
 
-Kanji
-  inserted: 5
-  skipped (disagreement): 1   [蜾]
-  remaining backlog: 0
+### Script: `insert-examples.ts <results.json>`
 
-New kanji:
-  char  strokes  jlpt  grade  on        kun         meaning
-  溺    13       —     —      デキ      おぼ.れる   drown, indulge
-  …
-
-Cost estimate: $0.08
-```
+DB + Resend mail. Idempotent (`ON CONFLICT DO NOTHING`). Source tagged `'claude-routine'`. Validates sentence shape, tracks duplicates, computes backlog after, emails summary.
 
 ---
 
@@ -196,31 +174,27 @@ Cost estimate: $0.08
 
 | Failure | Handling |
 |---|---|
-| DB connection fails | Exit 1; send error email if `RESEND_API_KEY` present |
-| `RESEND_API_KEY` missing | Log to stdout, exit 0 — routine logs are the audit |
-| LLM call network/rate-limit | Retry 1× with 30s backoff, then skip |
-| LLM JSON parse fails | Skip item, increment `stats.parseFailures` |
-| Multi-sample disagreement (all 3 differ) | Skip kanji, increment `stats.disagreements` |
-| >5 consecutive LLM failures | Abort, send error email |
-| Wall clock >15 min | Stop dispatch, finalize partial summary, mark `partial: true` in email |
-
----
-
-## Open questions
-
-- Static data licensing: tanos JLPT lists are scraped from public sources — include attribution + license in `_meta`. Verify before commit.
-- Backfill ordering: examples DESC (recent user words) vs kanji ASC (oldest broken) — confirm after Phase 0 numbers.
-
----
+| DB connection fails (either script) | Exit non-zero; if RESEND key set, the routine agent should attempt to mail the error itself |
+| `RESEND_API_KEY` missing | `insert-examples.ts` logs and exits 0 — run still counts as successful |
+| Agent JSON output malformed | `insert-examples.ts` increments `skippedInvalid` and continues |
+| Agent runs > 20 min wall clock | Routine agent should stop dispatching new sub-agents, insert what it has, mark `partial: true` in mail |
+| `>5` consecutive agent failures | Abort, send `✗ failed` mail with last error |
+| Both priorities yield 0 candidates | `insert-examples.ts` suppresses mail (no inbox noise) |
 
 ## Implementation Notes
 
-(Fill in as we go.)
+- 2026-05-13: discovered orphans are 94.6% jmdict seed — re-scoped from "1-shot 16k backfill" to "user-linked only + jisho fallback".
+- 2026-05-13: `溺` already in `kanjis`; only 蝲, 蠊 missing. Inserted manually (source `manual-2026-05-13`).
+- 2026-05-13: user-linked backlog of 7 backfilled manually with Claude-authored sentences (source `claude-manual`).
+- 2026-05-13: separate bug discovered — `/api/dictionary/route.ts:289` fire-and-forget to `/api/examples/generate` fails 401 due to missing session cookies in server-to-server fetch. Tracked in `_docs/dictionary-example-gen-auth-bug.md`.
+- 2026-05-14: refactored routine to be agent-driven — removed all `fetch('anthropic.com')` and similar; scripts handle DB + mail only. Authoring is Claude's job.
 
 ## User Feedback
 
-- 2026-05-13: option (A) confirmed (DB-level kanji insertion for hyōgaiji). Env injection via schedule. Caps 100 examples / 100 kanji. Resend `onboarding@resend.dev` → `haring157@gmail.com`. Multi-sample N=3 strategy for LLM-derived fields approved over self-reported confidence.
+- 2026-05-13: option (A) confirmed (DB-level kanji insertion). Caps 100/100. Resend `onboarding@resend.dev` → `haring157@gmail.com`.
+- 2026-05-14: when Priority A is empty, fall back to jisho-orphan (100/day = 200 sentences/day). JMDict orphans permanently skipped.
+- 2026-05-14: **firm rule — example sentences and any kanji data are authored by Claude directly (main agent or sub-agent dispatch). No external LLM API calls from any routine script.**
 
 ## Final Summary
 
-(Post-completion.)
+(Post-routine-stable.)
