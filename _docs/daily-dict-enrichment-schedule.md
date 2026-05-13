@@ -43,7 +43,7 @@ Expected:
 ```
 Register a daily routine for the nihongo-vocabook repo.
 
-Schedule: 0 4 * * *  (UTC; = KST 13:00)
+Schedule: 0 15 * * *  (UTC; = KST 00:00 / midnight)
 Timeout: 25 minutes
 Retries: 0
 
@@ -117,7 +117,7 @@ Idempotent: safe to re-run. INSERT uses ON CONFLICT DO NOTHING.
 ## What success looks like
 
 Day 1 (post-registration):
-- Email arrives at 13:00 KST with `+100 entries (0A/100B)` showing 100 jisho-orphan entries filled
+- Email arrives at 00:00 KST (midnight) with `+100 entries (0A/100B)` showing 100 jisho-orphan entries filled
 - Backlog B drops from ~547 to ~447
 
 Day 5–6:

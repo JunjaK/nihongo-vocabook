@@ -266,6 +266,19 @@ export function AppWebView() {
       allowsInlineMediaPlayback
       javaScriptEnabled
       domStorageEnabled
+      // Defaults to white, which flashes through the home-indicator strip
+      // when the web body is shorter than the viewport or when the keyboard
+      // dismisses. Pin to the web app's dark background to keep edges flush.
+      style={{ flex: 1, backgroundColor: '#0a0a0a' }}
+      // The web layout already pads for `env(safe-area-inset-bottom)`;
+      // letting iOS double-pad bottom inset causes the visible white band.
+      contentInsetAdjustmentBehavior="never"
+      automaticallyAdjustContentInsets={false}
+      // Disable iOS rubber-band overscroll — when the user pulls past the
+      // top/bottom edge the inner UIScrollView would otherwise reveal its
+      // white background. The web app provides its own pull-to-refresh
+      // (or none), so the native bounce gesture is just visual noise.
+      bounces={false}
     />
   );
 }

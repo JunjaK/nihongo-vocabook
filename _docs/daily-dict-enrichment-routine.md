@@ -57,7 +57,7 @@ Total cap per run: **100 dict entries = 200 example sentences**.
 
 **Why exclude jlpt-seed and jmdict orphans from fallback**: they're not user-touched — nobody hovers them — generating examples is pure waste. Only `jisho` orphans (single-source proof a human searched the word) are worth filling.
 
-**Frequency**: daily, cron `0 4 * * *` UTC (= KST 13:00).
+**Frequency**: daily, cron `0 15 * * *` UTC (= KST 00:00 / midnight). Mail arrives right after midnight summarizing the day that just ended.
 
 **Authoring**: Claude agent. Two modes — pick per run based on candidate count:
 - **Direct (≤ ~30 entries)**: main agent writes all sentences itself

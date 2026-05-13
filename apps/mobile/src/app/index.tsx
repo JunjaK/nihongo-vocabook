@@ -14,7 +14,11 @@ import { getDeviceEligibility } from '../lib/ai/device-eligibility';
  */
 export default function HomeScreen() {
   const colorScheme = useColorScheme();
-  const bg = colorScheme === 'dark' ? '#1a1a2e' : '#f5f5f5';
+  // Match the web app's `--background` variable so the home-indicator
+  // strip below the WebView and the status-bar strip above it blend with
+  // the rendered HTML, avoiding the white iOS chrome flash on keyboard
+  // dismiss or first paint.
+  const bg = colorScheme === 'dark' ? '#0a0a0a' : '#ffffff';
 
   useEffect(() => {
     // Phase A verification beacon — proves the native module is wired all
