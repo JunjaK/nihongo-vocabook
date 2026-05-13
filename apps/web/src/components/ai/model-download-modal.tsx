@@ -12,109 +12,71 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { useTranslation } from '@/lib/i18n';
-import {
-  deleteModel,
-  getModelStatus,
-  setDownloadPromptDismissed,
-  subscribeModelStatus,
-} from '@/lib/ai/model-manager';
+import { getSnapshot, subscribeSnapshot } from '@/lib/ai/model-manager';
 
 interface ModelDownloadModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onConfirmDownload: () => void;
+  /** Navigate to the AI model settings page. The modal no longer initiates
+   *  downloads inline — multi-GB downloads belong in the dedicated settings
+   *  UI where the user can pick a variant and see storage / progress. */
+  onGoToSettings: () => void;
 }
 
 function formatGB(bytes: number): string {
   return (bytes / 1024 / 1024 / 1024).toFixed(2);
 }
 
-function formatSpeed(bps: number): string {
-  if (bps >= 1024 * 1024) return `${(bps / 1024 / 1024).toFixed(1)} MB/s`;
-  if (bps >= 1024) return `${(bps / 1024).toFixed(0)} KB/s`;
-  return `${Math.round(bps)} B/s`;
-}
-
-function formatEta(seconds: number): string {
-  if (seconds < 60) return `${seconds}s`;
-  const m = Math.floor(seconds / 60);
-  const s = seconds % 60;
-  if (m < 60) return `${m}m ${s}s`;
-  const h = Math.floor(m / 60);
-  return `${h}h ${m % 60}m`;
-}
-
 export function ModelDownloadModal({
   open,
   onOpenChange,
-  onConfirmDownload,
+  onGoToSettings,
 }: ModelDownloadModalProps) {
   const { t } = useTranslation();
-  const [status, setStatus] = useState(getModelStatus());
+  const [snapshot, setSnapshotState] = useState(getSnapshot());
 
-  useEffect(() => subscribeModelStatus(setStatus), []);
+  useEffect(() => subscribeSnapshot(setSnapshotState), []);
 
-  const isDownloading = status.state === 'downloading';
-  const isError = status.state === 'error';
-  const progressPercent =
-    status.state === 'downloading' ? Math.round(status.progress * 100) : 0;
+  const isDownloading = snapshot.downloading !== null;
+  const isError = snapshot.error !== null;
 
-  const bytesLabel =
-    status.state === 'downloading' && status.totalBytes
-      ? `${formatGB(status.loadedBytes ?? 0)} / ${formatGB(status.totalBytes)} GB`
-      : null;
-  const speedLabel =
-    status.state === 'downloading' && status.speedBps
-      ? formatSpeed(status.speedBps)
-      : null;
-  const etaLabel =
-    status.state === 'downloading' &&
-    typeof status.etaSeconds === 'number' &&
-    status.etaSeconds > 0
-      ? formatEta(status.etaSeconds)
-      : null;
-
-  const handleDownload = () => {
-    setDownloadPromptDismissed(false);
-    onConfirmDownload();
+  const handleGoToSettings = () => {
+    onGoToSettings();
+    onOpenChange(false);
   };
 
   const handleDismiss = () => {
-    // Only mark "don't prompt me again" when the user dismisses from the
-    // initial prompt state. Hiding the progress modal mid-download is not a
-    // refusal — they may simply want to do something else while it runs.
-    if (status.state === 'not_installed') {
-      setDownloadPromptDismissed(true);
-    }
     onOpenChange(false);
   };
 
-  const handleCancel = () => {
-    void deleteModel();
-    onOpenChange(false);
-  };
-
-  // Title/description shift to reflect the live state so users always know
-  // what the modal is asking of them. When the error message is one of the
-  // structured eligibility keys, render the localized human copy instead of
-  // the raw key (and use a softer, non-failure title for those cases).
+  // Resolve a structured error key to its localized copy when possible.
   const structuredError = (() => {
-    if (status.state !== 'error') return null;
-    // i18n table has function-valued entries; pick out only string ones.
+    if (!snapshot.error) return null;
     const table = t.aiModel as unknown as Record<string, string | undefined>;
-    const localized = table[status.message];
+    const localized = table[snapshot.error.message];
     return typeof localized === 'string' ? localized : null;
   })();
   const title = isError
-    ? (structuredError ? t.aiModel.promptTitle : t.aiModel.downloadFailed)
+    ? structuredError
+      ? t.aiModel.promptTitle
+      : t.aiModel.downloadFailed
     : isDownloading
       ? t.aiModel.statusDownloading
       : t.aiModel.promptTitle;
   const description = isError
-    ? (structuredError ?? status.message)
+    ? structuredError ?? snapshot.error?.message ?? ''
     : isDownloading
       ? t.aiModel.downloadInProgressDescription
-      : t.aiModel.promptDescription;
+      : t.aiModel.promptDescriptionNeedsModel;
+
+  const progressPercent =
+    snapshot.downloading
+      ? Math.round(snapshot.downloading.progress * 100)
+      : 0;
+  const bytesLabel =
+    snapshot.downloading && snapshot.downloading.totalBytes
+      ? `${formatGB(snapshot.downloading.loadedBytes ?? 0)} / ${formatGB(snapshot.downloading.totalBytes)} GB`
+      : null;
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
@@ -133,51 +95,20 @@ export function ModelDownloadModal({
               />
             </div>
             <div className="flex items-center justify-between text-xs tabular-nums text-muted-foreground">
-              <span>
-                {bytesLabel ?? t.aiModel.statusDownloading}
-              </span>
+              <span>{bytesLabel ?? t.aiModel.statusDownloading}</span>
               <span>{progressPercent}%</span>
             </div>
-            {(speedLabel || etaLabel) && (
-              <div className="flex items-center justify-between text-xs tabular-nums text-muted-foreground">
-                <span>{speedLabel ?? ''}</span>
-                <span>{etaLabel ? t.aiModel.etaPrefix + etaLabel : ''}</span>
-              </div>
-            )}
           </div>
         )}
 
         <AlertDialogFooter>
           {isDownloading ? (
-            <>
-              <AlertDialogCancel
-                onClick={handleCancel}
-                data-testid="ai-model-prompt-cancel"
-              >
-                {t.aiModel.cancelDownload}
-              </AlertDialogCancel>
-              <AlertDialogAction
-                onClick={() => onOpenChange(false)}
-                data-testid="ai-model-prompt-hide"
-              >
-                {t.aiModel.hide}
-              </AlertDialogAction>
-            </>
-          ) : isError ? (
-            <>
-              <AlertDialogCancel
-                onClick={handleCancel}
-                data-testid="ai-model-prompt-cancel"
-              >
-                {t.aiModel.delete}
-              </AlertDialogCancel>
-              <AlertDialogAction
-                onClick={handleDownload}
-                data-testid="ai-model-prompt-retry"
-              >
-                {t.aiModel.retry}
-              </AlertDialogAction>
-            </>
+            <AlertDialogAction
+              onClick={handleDismiss}
+              data-testid="ai-model-prompt-hide"
+            >
+              {t.aiModel.hide}
+            </AlertDialogAction>
           ) : (
             <>
               <AlertDialogCancel
@@ -187,10 +118,10 @@ export function ModelDownloadModal({
                 {t.aiModel.promptDismiss}
               </AlertDialogCancel>
               <AlertDialogAction
-                onClick={handleDownload}
-                data-testid="ai-model-prompt-download"
+                onClick={handleGoToSettings}
+                data-testid="ai-model-prompt-go-to-settings"
               >
-                {t.aiModel.promptDownload}
+                {t.aiModel.goToSettings}
               </AlertDialogAction>
             </>
           )}

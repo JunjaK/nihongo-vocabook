@@ -7,8 +7,9 @@ import * as SecureStore from 'expo-secure-store';
 import * as ImagePicker from 'expo-image-picker';
 import { getDeviceEligibility } from '../../lib/ai/device-eligibility';
 import { runNativeInference } from '../../lib/ai/inference';
-import { modelManager, type ModelStatus } from '../../lib/ai/model-manager';
+import { modelManager } from '../../lib/ai/model-manager';
 import type {
+  AiModelStatusSnapshot,
   WebToNativeMessage,
   NativeToWebMessage,
 } from '../../types/bridge';
@@ -44,20 +45,14 @@ export function AppWebView() {
   }, []);
 
   // --- AI model status → bridge message ---
-  // Builds the `AI_MODEL_STATUS_RESULT` payload from the live model-manager
-  // state, enriched with device-eligibility so the web UI can disable the
-  // download button on unsupported hardware without making a separate query.
+  // Wraps the multi-variant snapshot with device-eligibility info so the web
+  // UI can disable downloads on unsupported hardware without a separate query.
   const buildStatusMessage = useCallback(
-    (status: ModelStatus): NativeToWebMessage => {
+    (snapshot: AiModelStatusSnapshot): NativeToWebMessage => {
       const eligibility = getDeviceEligibility();
       return {
         type: 'AI_MODEL_STATUS_RESULT',
-        state: status.state,
-        variantId: status.variantId,
-        progress: status.progress,
-        loadedBytes: status.loadedBytes,
-        totalBytes: status.totalBytes,
-        message: status.message,
+        snapshot,
         deviceSupported: eligibility.supported,
         modelName: eligibility.modelName ?? undefined,
       };
@@ -66,33 +61,13 @@ export function AppWebView() {
   );
 
   // --- Subscribe to model-manager events and forward to web ---
-  // Status transitions become AI_MODEL_STATUS_RESULT. Progress ticks during
-  // downloading additionally fire AI_MODEL_DOWNLOAD_PROGRESS for UI components
-  // that only care about progress. Terminal states emit COMPLETE / FAILED.
+  // Every snapshot change pushes an AI_MODEL_STATUS_RESULT. The web side
+  // unpacks the per-variant view (installed[], active, downloading, error)
+  // without needing additional event types.
   useEffect(() => {
     void modelManager.ensureBooted();
-    let prevState = modelManager.getStatus().state;
-    return modelManager.subscribe((status) => {
-      sendToWeb(buildStatusMessage(status));
-      if (status.state === 'downloading' && status.progress !== undefined) {
-        sendToWeb({
-          type: 'AI_MODEL_DOWNLOAD_PROGRESS',
-          progress: status.progress,
-          loadedBytes: status.loadedBytes,
-          totalBytes: status.totalBytes,
-        });
-      }
-      if (prevState !== status.state) {
-        if (status.state === 'installed') {
-          sendToWeb({ type: 'AI_MODEL_DOWNLOAD_COMPLETE' });
-        } else if (status.state === 'error') {
-          sendToWeb({
-            type: 'AI_MODEL_DOWNLOAD_FAILED',
-            message: status.message ?? 'download_failed',
-          });
-        }
-        prevState = status.state;
-      }
+    return modelManager.subscribe((snapshot) => {
+      sendToWeb(buildStatusMessage(snapshot));
     });
   }, [buildStatusMessage, sendToWeb]);
 
@@ -121,7 +96,7 @@ export function AppWebView() {
           // initial value to render without having to wait for its own
           // AI_MODEL_STATUS round-trip.
           await modelManager.ensureBooted();
-          sendToWeb(buildStatusMessage(modelManager.getStatus()));
+          sendToWeb(buildStatusMessage(modelManager.getSnapshot()));
           break;
         }
 
@@ -192,16 +167,14 @@ export function AppWebView() {
           // version still fires from READY, but the web side can re-ask any
           // time it remounts /settings/ocr.
           await modelManager.ensureBooted();
-          sendToWeb(buildStatusMessage(modelManager.getStatus()));
+          sendToWeb(buildStatusMessage(modelManager.getSnapshot()));
           break;
         }
 
-        case 'AI_MODEL_SET_VARIANT':
-          // Persist the user's variant preference. Does NOT start a download
-          // — that's a separate explicit action. The model-manager re-emits
-          // status after this, so the web UI's "active variant" indicator
-          // updates immediately.
-          await modelManager.setSelectedVariant(message.variantId);
+        case 'AI_MODEL_SET_ACTIVE':
+          // Switch which installed variant is used for inference. No-op
+          // when the variant isn't installed (UI shouldn't expose it).
+          await modelManager.setActive(message.variantId);
           break;
 
         case 'AI_MODEL_DOWNLOAD_START': {
@@ -209,18 +182,21 @@ export function AppWebView() {
           // even if the web client mistakenly enabled the button.
           const eligibility = getDeviceEligibility();
           if (!eligibility.supported) {
-            sendToWeb({
-              type: 'AI_MODEL_DOWNLOAD_FAILED',
-              message: 'unsupported_device',
-            });
+            // Synthesize an error tied to the requested variant so the UI
+            // can clear it after the user acknowledges. The status
+            // subscriber will repaint.
+            sendToWeb(
+              buildStatusMessage({
+                ...modelManager.getSnapshot(),
+                error: {
+                  variantId: message.variantId,
+                  message: 'unsupported_device',
+                },
+              }),
+            );
             break;
           }
-          // Fire-and-forget — progress flows via the model-manager listener
-          // wired in the effect above. Errors land on the same listener as
-          // state === 'error' and we map them to AI_MODEL_DOWNLOAD_FAILED.
-          // `variantId` is optional: when absent, model-manager uses the
-          // currently-selected variant (driven by AI_MODEL_SET_VARIANT or
-          // boot-time default).
+          // Fire-and-forget — progress flows via the snapshot subscriber.
           void modelManager.startDownload(message.variantId);
           break;
         }
@@ -230,7 +206,7 @@ export function AppWebView() {
           break;
 
         case 'AI_MODEL_DELETE':
-          await modelManager.deleteModel();
+          await modelManager.deleteVariant(message.variantId);
           break;
 
         case 'AI_INFER_VISION': {

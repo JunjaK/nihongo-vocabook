@@ -1,78 +1,38 @@
 'use client';
 
-import type { ModelStatus, ModelStatusListener } from './types';
+import type { AiModelStatusSnapshot } from '@/lib/native-bridge';
+import {
+  emptySnapshot,
+  type SnapshotListener,
+} from './types';
 
-const INSTALLED_KEY = 'nivoca-ai-model-installed';
-const DISMISSED_KEY = 'nivoca-ai-download-prompt-dismissed';
+/**
+ * Web-side mirror of the native multi-variant model status. Lives in WebView
+ * memory only — the source of truth is `apps/mobile/src/lib/ai/model-manager.ts`.
+ * The native side pushes `AI_MODEL_STATUS_RESULT` snapshots through the
+ * bridge; `setSnapshot` here just routes them to subscribed UI components.
+ */
 
-let currentStatus: ModelStatus = { state: 'not_installed' };
-const listeners = new Set<ModelStatusListener>();
+let currentSnapshot: AiModelStatusSnapshot = emptySnapshot();
+const listeners = new Set<SnapshotListener>();
 
-function readInstalled(): boolean {
-  if (typeof window === 'undefined') return false;
-  return localStorage.getItem(INSTALLED_KEY) === 'true';
+function emit(): void {
+  for (const listener of listeners) listener(currentSnapshot);
 }
 
-function emit() {
-  for (const listener of listeners) listener(currentStatus);
+export function getSnapshot(): AiModelStatusSnapshot {
+  return currentSnapshot;
 }
 
-if (typeof window !== 'undefined' && readInstalled()) {
-  currentStatus = { state: 'installed' };
-}
-
-export function getModelStatus(): ModelStatus {
-  return currentStatus;
-}
-
-export function subscribeModelStatus(listener: ModelStatusListener): () => void {
+export function subscribeSnapshot(listener: SnapshotListener): () => void {
   listeners.add(listener);
-  listener(currentStatus);
+  listener(currentSnapshot);
   return () => {
     listeners.delete(listener);
   };
 }
 
-export function setModelStatus(status: ModelStatus): void {
-  currentStatus = status;
-  if (typeof window !== 'undefined') {
-    if (status.state === 'installed') {
-      localStorage.setItem(INSTALLED_KEY, 'true');
-    } else if (status.state === 'not_installed') {
-      localStorage.removeItem(INSTALLED_KEY);
-    }
-  }
+export function setSnapshot(snapshot: AiModelStatusSnapshot): void {
+  currentSnapshot = snapshot;
   emit();
-}
-
-export function isDownloadPromptDismissed(): boolean {
-  if (typeof window === 'undefined') return false;
-  return localStorage.getItem(DISMISSED_KEY) === 'true';
-}
-
-export function setDownloadPromptDismissed(dismissed: boolean): void {
-  if (typeof window === 'undefined') return;
-  if (dismissed) {
-    localStorage.setItem(DISMISSED_KEY, 'true');
-  } else {
-    localStorage.removeItem(DISMISSED_KEY);
-  }
-}
-
-export async function deleteModel(): Promise<void> {
-  if (typeof window === 'undefined') return;
-  if ('caches' in window) {
-    const names = await caches.keys();
-    await Promise.all(
-      names
-        .filter((name) => name.startsWith('nivoca-ai-cache'))
-        .map((name) => caches.delete(name)),
-    );
-  }
-  setModelStatus({ state: 'not_installed' });
-}
-
-export async function requestStoragePersist(): Promise<boolean> {
-  if (typeof navigator === 'undefined' || !navigator.storage?.persist) return false;
-  return navigator.storage.persist();
 }

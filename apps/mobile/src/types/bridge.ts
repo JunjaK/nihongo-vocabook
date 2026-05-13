@@ -11,10 +11,13 @@ export type WebToNativeMessage =
   | { type: 'OPEN_EXTERNAL_URL'; url: string }
   | { type: 'SHARE'; text: string; url?: string }
   | { type: 'AI_MODEL_STATUS' }
-  | { type: 'AI_MODEL_SET_VARIANT'; variantId: AiModelVariantId }
-  | { type: 'AI_MODEL_DOWNLOAD_START'; variantId?: AiModelVariantId }
+  /** Choose which installed variant is used for inference. No-op if the
+   *  variant isn't installed yet. */
+  | { type: 'AI_MODEL_SET_ACTIVE'; variantId: AiModelVariantId }
+  | { type: 'AI_MODEL_DOWNLOAD_START'; variantId: AiModelVariantId }
+  /** Cancel the in-flight download (sequential policy — at most one). */
   | { type: 'AI_MODEL_DOWNLOAD_CANCEL' }
-  | { type: 'AI_MODEL_DELETE' }
+  | { type: 'AI_MODEL_DELETE'; variantId: AiModelVariantId }
   | {
       type: 'AI_INFER_VISION';
       requestId: string;
@@ -29,11 +32,27 @@ export interface AiExtractedWord {
   jlptLevel: number | null;
 }
 
-export type AiModelState =
-  | 'not_installed'
-  | 'downloading'
-  | 'installed'
-  | 'error';
+/** Snapshot of the on-device model lifecycle. Sent to web on every status
+ *  change so the UI can render per-variant cards without further round-trips. */
+export interface AiModelStatusSnapshot {
+  /** Which variants are present on disk. May be empty / one / both. */
+  installed: AiModelVariantId[];
+  /** The variant currently selected as the inference target.
+   *  `null` when nothing is installed. */
+  active: AiModelVariantId | null;
+  /** Sequential download policy — at most one in flight at any time. */
+  downloading: {
+    variantId: AiModelVariantId;
+    progress: number;
+    loadedBytes?: number;
+    totalBytes?: number;
+  } | null;
+  /** Sticky error tied to a specific variant. Cleared by retry / dismiss. */
+  error: {
+    variantId: AiModelVariantId;
+    message: string;
+  } | null;
+}
 
 /** Messages sent from Native (Expo) to Web (WebView) */
 export type NativeToWebMessage =
@@ -53,34 +72,12 @@ export type NativeToWebMessage =
     }
   | {
       type: 'AI_MODEL_STATUS_RESULT';
-      state: AiModelState;
-      /** Which variant the status refers to. Always set. */
-      variantId: AiModelVariantId;
-      /** 0..1, only present while state === 'downloading'. */
-      progress?: number;
-      /** Bytes streamed so far — drives the human "1.2 / 2.5 GB" label. */
-      loadedBytes?: number;
-      /** Reported by `URLSession`; may be undefined for chunked encodings. */
-      totalBytes?: number;
-      /** Localized error or structured key (e.g. "unsupported_device"). */
-      message?: string;
+      /** Per-variant snapshot — the entire state machine, not a single state. */
+      snapshot: AiModelStatusSnapshot;
       /** Result of the native device-eligibility whitelist (A15+ iPhone / M1+ iPad). */
       deviceSupported?: boolean;
       /** Marketing-style device name from `expo-device` (e.g. "iPhone 15 Pro"). */
       modelName?: string;
-    }
-  | {
-      type: 'AI_MODEL_DOWNLOAD_PROGRESS';
-      progress: number;
-      loadedBytes?: number;
-      totalBytes?: number;
-    }
-  | {
-      type: 'AI_MODEL_DOWNLOAD_COMPLETE';
-    }
-  | {
-      type: 'AI_MODEL_DOWNLOAD_FAILED';
-      message: string;
     }
   | {
       type: 'AI_INFER_VISION_RESULT';

@@ -7,33 +7,33 @@ import {
   getInfoAsync,
   makeDirectoryAsync,
   deleteAsync,
+  writeAsStringAsync,
 } from 'expo-file-system/legacy';
 import * as SecureStore from 'expo-secure-store';
 
+import type { AiModelStatusSnapshot } from '../../types/bridge';
+
 /**
  * On-device model manager (iOS-native path) — owns download / cancel / delete
- * for LiteRT-LM Gemma 4 model files. Mirrors the API shape of
- * `apps/web/src/lib/ai/model-manager.ts` so the bridge layer can sink status
- * updates into the existing web UI without translation.
+ * for LiteRT-LM Gemma 4 model files. Multi-variant: both Gemma 4 E2B
+ * (2.58 GB, 4 GB RAM min) and E4B (3.41 GB, 6 GB RAM min) can coexist on
+ * disk. Sequential download policy — only one download in flight at any
+ * time so the user (and iOS Jetsam) doesn't get clobbered by parallel
+ * 2-3 GB streams.
  *
- * Variants: we support Gemma 4 E2B (2.58 GB, 4 GB RAM min) and E4B (3.41 GB,
- * 6 GB RAM min). Only one variant can be installed at a time — switching
- * deletes the old file before starting the new download. The user picks the
- * variant from the web settings page; the native side never decides on its
- * own which one to download.
+ * Active variant — when both variants are installed, exactly one is the
+ * "active" one used for inference. The Swift side reads
+ * `ai-models/active.txt` to know which `.litertlm` file to load.
  *
- * State persistence: SecureStore key `nivoca-ai-meta` holds the installed
- * variantId + file path. The in-flight `DownloadResumable.savable()` is
- * persisted to `nivoca-ai-resume` so a process kill mid-download can resume
- * on next launch without re-fetching the whole 2-3 GB.
+ * State persistence:
+ *   - On-disk file existence is the source of truth for "installed".
+ *   - SecureStore key `nivoca-ai-active` holds the active variantId.
+ *   - SecureStore key `nivoca-ai-resume` persists the in-flight
+ *     `DownloadResumable.savable()` (so a process kill mid-download can
+ *     resume on next launch without re-fetching the multi-GB blob).
+ *   - `ai-models/active.txt` (plaintext, one variant id) is the file
+ *     Swift reads — kept in sync with `nivoca-ai-active`.
  */
-
-// Must match `apps/mobile/modules/nivoca-ai/src/NivocaAi.types.ts`.
-export type ModelStatusState =
-  | 'not_installed'
-  | 'downloading'
-  | 'installed'
-  | 'error';
 
 export type ModelVariantId = 'gemma-4-e2b' | 'gemma-4-e4b';
 
@@ -50,13 +50,6 @@ export interface ModelVariant {
   minRamGB: number;
   /** Marketing-style minimum recommended device. */
   recommendedDevice: string;
-  /**
-   * `> 2 GB` models need
-   * `com.apple.developer.kernel.extended-virtual-addressing` on iOS — paid
-   * Apple Developer account only. Personal Team builds will hit
-   * `engine_create_failed` in ~0.1s.
-   */
-  requiresExtendedAddressing: boolean;
 }
 
 export const MODEL_VARIANTS: readonly ModelVariant[] = [
@@ -68,7 +61,6 @@ export const MODEL_VARIANTS: readonly ModelVariant[] = [
     sizeBytes: 2_588_147_712,
     minRamGB: 4,
     recommendedDevice: 'iPhone 13 or later',
-    requiresExtendedAddressing: true,
   },
   {
     id: 'gemma-4-e4b',
@@ -78,40 +70,20 @@ export const MODEL_VARIANTS: readonly ModelVariant[] = [
     sizeBytes: 3_659_530_240,
     minRamGB: 6,
     recommendedDevice: 'iPhone 15 Pro or later',
-    requiresExtendedAddressing: true,
   },
 ];
 
-export const DEFAULT_VARIANT_ID: ModelVariantId = 'gemma-4-e2b';
-
-export interface ModelStatus {
-  state: ModelStatusState;
-  /** Which variant the current state refers to. Always set, even for `not_installed`. */
-  variantId: ModelVariantId;
-  /** 0..1 — present only while `state === 'downloading'`. */
-  progress?: number;
-  loadedBytes?: number;
-  totalBytes?: number;
-  message?: string;
-}
-
 const MODEL_SUBDIR = 'ai-models';
-const META_KEY = 'nivoca-ai-meta';
+const ACTIVE_KEY = 'nivoca-ai-active';
 const RESUME_KEY = 'nivoca-ai-resume';
-const SELECTED_VARIANT_KEY = 'nivoca-ai-selected-variant';
+const ACTIVE_FILENAME = 'active.txt';
 
 /** Throttle download progress callbacks to ≤1 Hz. */
 const PROGRESS_THROTTLE_MS = 1000;
 
-interface PersistedMeta {
-  installed: boolean;
-  variantId: ModelVariantId;
-  path: string;
-}
+type Listener = (snapshot: AiModelStatusSnapshot) => void;
 
-type Listener = (status: ModelStatus) => void;
-
-function findVariant(id: ModelVariantId | string): ModelVariant {
+function findVariant(id: ModelVariantId): ModelVariant {
   const v = MODEL_VARIANTS.find((x) => x.id === id);
   if (!v) throw new Error(`Unknown variant: ${id}`);
   return v;
@@ -121,41 +93,50 @@ function pathFor(variant: ModelVariant): string {
   return `${documentDirectory}${MODEL_SUBDIR}/${variant.filename}`;
 }
 
+function activeFilePath(): string {
+  return `${documentDirectory}${MODEL_SUBDIR}/${ACTIVE_FILENAME}`;
+}
+
+interface ResumeMeta extends DownloadPauseState {
+  variantId: ModelVariantId;
+}
+
 class ModelManager {
-  private status: ModelStatus = {
-    state: 'not_installed',
-    variantId: DEFAULT_VARIANT_ID,
+  private snapshot: AiModelStatusSnapshot = {
+    installed: [],
+    active: null,
+    downloading: null,
+    error: null,
   };
   private listeners = new Set<Listener>();
   private resumable: DownloadResumable | null = null;
   private downloadingVariant: ModelVariant | null = null;
   private lastEmitAt = 0;
   private pendingEmitTimer: ReturnType<typeof setTimeout> | null = null;
-  private pendingStatus: ModelStatus | null = null;
+  private pendingSnapshot: AiModelStatusSnapshot | null = null;
   private bootPromise: Promise<void> | null = null;
 
-  getStatus(): ModelStatus {
-    return this.status;
+  getSnapshot(): AiModelStatusSnapshot {
+    return this.snapshot;
   }
 
   subscribe(listener: Listener): () => void {
     this.listeners.add(listener);
-    listener(this.status);
+    listener(this.snapshot);
     return () => {
       this.listeners.delete(listener);
     };
   }
 
   /**
-   * Resolve persisted state on first call. Idempotent — repeat calls await the
-   * same boot promise so the bridge layer can call this from multiple entry
-   * points without racing.
+   * Resolve persisted state on first call. Idempotent — repeat calls await
+   * the same boot promise so the bridge layer can call this from multiple
+   * entry points without racing.
    *
-   * Boot strategy: the file on disk is the source of truth. SecureStore is
-   * only a hint about *which* variant was installed last; we cross-check by
-   * actually probing each variant's expected path. Dev builds re-sign with
-   * slightly different keychain access groups between runs and that wipes
-   * SecureStore even when the multi-GB file is still in Documents/.
+   * Probe both variants on disk. If exactly one is present, auto-activate it.
+   * If both are present, fall back to the persisted active variant; if that
+   * is missing or invalid, default to whichever was probed first
+   * (canonical MODEL_VARIANTS order, E2B before E4B).
    */
   async ensureBooted(): Promise<void> {
     if (!this.bootPromise) this.bootPromise = this.boot();
@@ -164,88 +145,71 @@ class ModelManager {
 
   private async boot(): Promise<void> {
     try {
-      // Determine "selected variant" — preference, not an installed flag.
-      const selectedRaw = await SecureStore.getItemAsync(
-        SELECTED_VARIANT_KEY,
-      ).catch(() => null);
-      const selectedVariantId: ModelVariantId =
-        selectedRaw && MODEL_VARIANTS.some((v) => v.id === selectedRaw)
-          ? (selectedRaw as ModelVariantId)
-          : DEFAULT_VARIANT_ID;
-
-      // Probe both variants on disk. If any is installed, that wins —
-      // single-variant-at-a-time policy means at most one will be present.
+      await this.ensureModelDirectory();
+      const installed: ModelVariantId[] = [];
       for (const variant of MODEL_VARIANTS) {
         const info = await getInfoAsync(pathFor(variant));
-        if (info.exists) {
-          const meta: PersistedMeta = {
-            installed: true,
-            variantId: variant.id,
-            path: pathFor(variant),
-          };
-          await SecureStore.setItemAsync(META_KEY, JSON.stringify(meta)).catch(
-            () => undefined,
-          );
-          await SecureStore.setItemAsync(
-            SELECTED_VARIANT_KEY,
-            variant.id,
-          ).catch(() => undefined);
-          this.setStatus({ state: 'installed', variantId: variant.id });
-          return;
-        }
+        if (info.exists) installed.push(variant.id);
       }
 
-      // Nothing installed — clear stale meta and report on the preferred
-      // (selected) variant so the UI can show the right "Download" button.
-      await SecureStore.deleteItemAsync(META_KEY).catch(() => undefined);
-      await SecureStore.deleteItemAsync(RESUME_KEY).catch(() => undefined);
-      this.setStatus({
-        state: 'not_installed',
-        variantId: selectedVariantId,
+      const persistedActive = (await SecureStore.getItemAsync(ACTIVE_KEY).catch(
+        () => null,
+      )) as ModelVariantId | null;
+      let active: ModelVariantId | null = null;
+      if (persistedActive && installed.includes(persistedActive)) {
+        active = persistedActive;
+      } else if (installed.length > 0) {
+        // First installed variant wins. Persist so subsequent boots are stable.
+        active = installed[0];
+        await this.persistActive(active);
+      } else {
+        // No model installed yet — clear any stale active marker.
+        await SecureStore.deleteItemAsync(ACTIVE_KEY).catch(() => undefined);
+      }
+
+      this.setSnapshot({
+        installed,
+        active,
+        downloading: null,
+        error: null,
       });
     } catch {
-      await SecureStore.deleteItemAsync(META_KEY).catch(() => undefined);
-      await SecureStore.deleteItemAsync(RESUME_KEY).catch(() => undefined);
+      // Boot is best-effort; on failure leave the default empty snapshot so
+      // the UI can still render and the user can retry from settings.
     }
   }
 
-  /** Persist the user's variant preference. Does not start a download. */
-  async setSelectedVariant(variantId: ModelVariantId): Promise<void> {
+  async setActive(variantId: ModelVariantId): Promise<void> {
     findVariant(variantId);
-    await SecureStore.setItemAsync(SELECTED_VARIANT_KEY, variantId).catch(
-      () => undefined,
-    );
-    // Don't overwrite an "installed" / "downloading" status — those refer to
-    // an actual file in flight or on disk. Only update the visible
-    // `variantId` when we're in `not_installed`.
-    if (this.status.state === 'not_installed') {
-      this.setStatus({ state: 'not_installed', variantId });
+    if (!this.snapshot.installed.includes(variantId)) {
+      // Activating a non-installed variant is a no-op — UI shouldn't even
+      // expose the option, but guard the API surface anyway.
+      return;
     }
+    if (this.snapshot.active === variantId) return;
+    await this.persistActive(variantId);
+    this.setSnapshot({ ...this.snapshot, active: variantId });
   }
 
-  async startDownload(variantId?: ModelVariantId): Promise<void> {
-    if (this.status.state === 'downloading') return;
-
-    const targetId = variantId ?? this.status.variantId;
-    const target = findVariant(targetId);
-
-    // Switching variants: wipe whatever else is installed first. Disk on
-    // iPhones is precious; we don't keep both 2.5 GB + 3.4 GB blobs around.
-    if (this.status.state === 'installed' && this.status.variantId !== targetId) {
-      await this.purgeAllVariantFiles().catch(() => undefined);
-    } else if (this.status.state === 'installed') {
-      // Already installed and matches the requested variant — nothing to do.
+  async startDownload(variantId: ModelVariantId): Promise<void> {
+    if (this.snapshot.downloading) {
+      // Sequential policy — refuse to start a second download while one is
+      // in flight. UI keeps the other variant's button disabled.
+      return;
+    }
+    const target = findVariant(variantId);
+    if (this.snapshot.installed.includes(variantId)) {
+      // Already on disk — just make sure it's active (matches the
+      // "select" semantics in the UI button).
+      await this.setActive(variantId);
       return;
     }
 
-    await SecureStore.setItemAsync(SELECTED_VARIANT_KEY, target.id).catch(
-      () => undefined,
-    );
     this.downloadingVariant = target;
-    this.setStatus({
-      state: 'downloading',
-      variantId: target.id,
-      progress: 0,
+    this.setSnapshot({
+      ...this.snapshot,
+      downloading: { variantId, progress: 0 },
+      error: null,
     });
 
     try {
@@ -253,11 +217,8 @@ class ModelManager {
 
       const resumeJson = await SecureStore.getItemAsync(RESUME_KEY);
       const resumeData = resumeJson
-        ? (JSON.parse(resumeJson) as DownloadPauseState & {
-            variantId?: ModelVariantId;
-          })
+        ? (JSON.parse(resumeJson) as ResumeMeta)
         : null;
-      // Discard resume data if it's for a different variant.
       const usableResume =
         resumeData && resumeData.variantId === target.id ? resumeData : null;
 
@@ -273,55 +234,74 @@ class ModelManager {
       this.resumable = null;
       await SecureStore.deleteItemAsync(RESUME_KEY).catch(() => undefined);
 
-      // `downloadAsync()` resolves with `undefined` when the task was canceled.
       if (!result) {
+        // Cancelled — `cancelDownload` already cleaned up state.
         this.downloadingVariant = null;
         return;
       }
 
-      await this.markInstalled(target, result.uri);
+      await this.markInstalled(target);
     } catch (err) {
       this.resumable = null;
       this.downloadingVariant = null;
       const message = err instanceof Error ? err.message : 'download_failed';
-      this.setStatus({ state: 'error', variantId: target.id, message });
+      this.flushPendingEmit();
+      this.setSnapshot({
+        ...this.snapshot,
+        downloading: null,
+        error: { variantId: target.id, message },
+      });
     }
   }
 
   async cancelDownload(): Promise<void> {
-    const current = this.downloadingVariant ?? findVariant(this.status.variantId);
-    if (!this.resumable) {
-      await this.removeFile(current).catch(() => undefined);
-      this.downloadingVariant = null;
-      this.setStatus({ state: 'not_installed', variantId: current.id });
-      return;
-    }
-    try {
-      const pause = await this.resumable.pauseAsync().catch(() => null);
-      if (pause) {
-        // User asked to cancel — deliberately do NOT persist resume data.
-        void pause;
+    const dl = this.snapshot.downloading;
+    if (!dl) return;
+    const variant = findVariant(dl.variantId);
+    if (this.resumable) {
+      try {
+        await this.resumable.pauseAsync().catch(() => null);
+      } finally {
+        this.resumable = null;
       }
-    } finally {
-      this.resumable = null;
     }
-    await this.removeFile(current).catch(() => undefined);
+    await this.removeFile(variant).catch(() => undefined);
     await SecureStore.deleteItemAsync(RESUME_KEY).catch(() => undefined);
     this.flushPendingEmit();
     this.downloadingVariant = null;
-    this.setStatus({ state: 'not_installed', variantId: current.id });
+    this.setSnapshot({
+      ...this.snapshot,
+      downloading: null,
+      error: null,
+    });
   }
 
-  async deleteModel(): Promise<void> {
-    if (this.resumable) {
+  async deleteVariant(variantId: ModelVariantId): Promise<void> {
+    const variant = findVariant(variantId);
+    // If the user hits "Cancel" on the in-flight variant we route to
+    // cancelDownload — semantics match the UI label swap.
+    if (this.snapshot.downloading?.variantId === variantId) {
       await this.cancelDownload();
       return;
     }
-    const current = findVariant(this.status.variantId);
-    await this.purgeAllVariantFiles().catch(() => undefined);
-    await SecureStore.deleteItemAsync(META_KEY).catch(() => undefined);
-    await SecureStore.deleteItemAsync(RESUME_KEY).catch(() => undefined);
-    this.setStatus({ state: 'not_installed', variantId: current.id });
+    await this.removeFile(variant).catch(() => undefined);
+    const installed = this.snapshot.installed.filter((id) => id !== variantId);
+    let active = this.snapshot.active;
+    if (active === variantId) {
+      active = installed[0] ?? null;
+      if (active) {
+        await this.persistActive(active);
+      } else {
+        await SecureStore.deleteItemAsync(ACTIVE_KEY).catch(() => undefined);
+        await this.removeActiveFile().catch(() => undefined);
+      }
+    }
+    this.setSnapshot({
+      ...this.snapshot,
+      installed,
+      active,
+      error: null,
+    });
   }
 
   // ---------------------------------------------------------------------------
@@ -342,31 +322,41 @@ class ModelManager {
     }
   }
 
-  /** Wipe every known variant file. Used when switching variants. */
-  private async purgeAllVariantFiles(): Promise<void> {
-    for (const variant of MODEL_VARIANTS) {
-      await this.removeFile(variant).catch(() => undefined);
+  private async removeActiveFile(): Promise<void> {
+    const info = await getInfoAsync(activeFilePath());
+    if (info.exists) {
+      await deleteAsync(activeFilePath(), { idempotent: true });
     }
   }
 
-  private async markInstalled(
-    variant: ModelVariant,
-    uri: string,
-  ): Promise<void> {
-    // TODO(phase-d): expo-file-system v55 dropped
-    // `setIsExcludedFromBackupAsync`. To keep the 2.5–3.4 GB blob out of
-    // iCloud backup we'll add a native Swift call from the `nivoca-ai`
-    // module (`NSURL.setResourceValue(true, forKey: .isExcludedFromBackupKey)`).
-    const meta: PersistedMeta = {
-      installed: true,
-      variantId: variant.id,
-      path: uri,
-    };
-    await SecureStore.setItemAsync(META_KEY, JSON.stringify(meta));
-    await SecureStore.setItemAsync(SELECTED_VARIANT_KEY, variant.id);
+  /** Persist the user's active-variant choice to both SecureStore (for the
+   *  TS side) and `ai-models/active.txt` (for Swift to read at load time). */
+  private async persistActive(variantId: ModelVariantId): Promise<void> {
+    await SecureStore.setItemAsync(ACTIVE_KEY, variantId).catch(() => undefined);
+    await this.ensureModelDirectory();
+    await writeAsStringAsync(activeFilePath(), variantId).catch(() => undefined);
+  }
+
+  private async markInstalled(variant: ModelVariant): Promise<void> {
     this.flushPendingEmit();
     this.downloadingVariant = null;
-    this.setStatus({ state: 'installed', variantId: variant.id });
+    const installed = this.snapshot.installed.includes(variant.id)
+      ? this.snapshot.installed
+      : [...this.snapshot.installed, variant.id];
+    // Auto-activate when this is the first installed variant; otherwise
+    // leave the existing active selection alone so a user finishing the
+    // second download doesn't lose their preferred model.
+    const active =
+      this.snapshot.active === null ? variant.id : this.snapshot.active;
+    if (active === variant.id) {
+      await this.persistActive(variant.id);
+    }
+    this.setSnapshot({
+      installed,
+      active,
+      downloading: null,
+      error: null,
+    });
   }
 
   private handleProgress = (data: DownloadProgressData) => {
@@ -375,19 +365,22 @@ class ModelManager {
     const progress = total > 0 ? Math.min(1, loaded / total) : 0;
     const variant = this.downloadingVariant;
     if (!variant) return;
-    const next: ModelStatus = {
-      state: 'downloading',
-      variantId: variant.id,
-      progress,
-      loadedBytes: loaded,
-      totalBytes: total || undefined,
+    const next: AiModelStatusSnapshot = {
+      ...this.snapshot,
+      downloading: {
+        variantId: variant.id,
+        progress,
+        loadedBytes: loaded,
+        totalBytes: total || undefined,
+      },
     };
     this.scheduleEmit(next);
   };
 
-  /** Trailing-edge 1 Hz throttle — same pattern as `gemma-web.ts:149-202`. */
-  private scheduleEmit(status: ModelStatus) {
-    this.pendingStatus = status;
+  /** Trailing-edge 1 Hz throttle — same pattern as the prior single-variant
+   *  manager so the JS<->WebView bridge doesn't get flooded. */
+  private scheduleEmit(snapshot: AiModelStatusSnapshot) {
+    this.pendingSnapshot = snapshot;
     const now = Date.now();
     const delta = now - this.lastEmitAt;
     if (delta >= PROGRESS_THROTTLE_MS) {
@@ -405,15 +398,15 @@ class ModelManager {
       clearTimeout(this.pendingEmitTimer);
       this.pendingEmitTimer = null;
     }
-    if (this.pendingStatus) {
-      this.setStatus(this.pendingStatus);
-      this.pendingStatus = null;
+    if (this.pendingSnapshot) {
+      this.setSnapshot(this.pendingSnapshot);
+      this.pendingSnapshot = null;
       this.lastEmitAt = Date.now();
     }
   }
 
-  private setStatus(next: ModelStatus): void {
-    this.status = next;
+  private setSnapshot(next: AiModelStatusSnapshot): void {
+    this.snapshot = next;
     for (const listener of this.listeners) listener(next);
   }
 }

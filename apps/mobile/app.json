@@ -23,6 +23,9 @@
           "fetch",
           "processing"
         ]
+      },
+      "entitlements": {
+        "com.apple.developer.kernel.extended-virtual-addressing": true
       }
     },
     "android": {

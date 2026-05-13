@@ -13,6 +13,19 @@
 
 export type AiModelVariantId = 'gemma-4-e2b' | 'gemma-4-e4b';
 
+/** Mirror of `apps/mobile/src/types/bridge.ts:AiModelStatusSnapshot`. */
+export interface AiModelStatusSnapshot {
+  installed: AiModelVariantId[];
+  active: AiModelVariantId | null;
+  downloading: {
+    variantId: AiModelVariantId;
+    progress: number;
+    loadedBytes?: number;
+    totalBytes?: number;
+  } | null;
+  error: { variantId: AiModelVariantId; message: string } | null;
+}
+
 type WebToNativeMessage =
   | { type: 'READY'; bridgeVersion: number }
   | { type: 'AUTH_TOKEN'; refreshToken: string }
@@ -22,10 +35,10 @@ type WebToNativeMessage =
   | { type: 'OPEN_EXTERNAL_URL'; url: string }
   | { type: 'SHARE'; text: string; url?: string }
   | { type: 'AI_MODEL_STATUS' }
-  | { type: 'AI_MODEL_SET_VARIANT'; variantId: AiModelVariantId }
-  | { type: 'AI_MODEL_DOWNLOAD_START'; variantId?: AiModelVariantId }
+  | { type: 'AI_MODEL_SET_ACTIVE'; variantId: AiModelVariantId }
+  | { type: 'AI_MODEL_DOWNLOAD_START'; variantId: AiModelVariantId }
   | { type: 'AI_MODEL_DOWNLOAD_CANCEL' }
-  | { type: 'AI_MODEL_DELETE' }
+  | { type: 'AI_MODEL_DELETE'; variantId: AiModelVariantId }
   | { type: 'AI_INFER_VISION'; requestId: string; imageBase64: string; locale: string };
 
 interface AiExtractedWord {
@@ -34,8 +47,6 @@ interface AiExtractedWord {
   meaning: string;
   jlptLevel: number | null;
 }
-
-type AiModelState = 'not_installed' | 'downloading' | 'installed' | 'error';
 
 type NativeToWebMessage =
   | { type: 'RESTORE_AUTH'; refreshToken: string }
@@ -46,18 +57,10 @@ type NativeToWebMessage =
   | { type: 'APP_STATE_CHANGE'; state: 'active' | 'background' | 'inactive' }
   | {
       type: 'AI_MODEL_STATUS_RESULT';
-      state: AiModelState;
-      variantId: AiModelVariantId;
-      progress?: number;
-      loadedBytes?: number;
-      totalBytes?: number;
-      message?: string;
+      snapshot: AiModelStatusSnapshot;
       deviceSupported?: boolean;
       modelName?: string;
     }
-  | { type: 'AI_MODEL_DOWNLOAD_PROGRESS'; progress: number; loadedBytes?: number; totalBytes?: number }
-  | { type: 'AI_MODEL_DOWNLOAD_COMPLETE' }
-  | { type: 'AI_MODEL_DOWNLOAD_FAILED'; message: string }
   | { type: 'AI_INFER_VISION_RESULT'; requestId: string; words: AiExtractedWord[] }
   | { type: 'AI_INFER_VISION_FAILED'; requestId: string; message: string };
 

@@ -19,22 +19,19 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { AppOnlyGate } from '@/components/ai/app-only-gate';
 import { ModelDownloadModal } from '@/components/ai/model-download-modal';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { bottomBar, bottomSep } from '@/lib/styles';
 import { useRepository } from '@/lib/repository/provider';
 import { useTranslation } from '@/lib/i18n';
 import { invalidateListCache } from '@/lib/list-cache';
+import { isNativeApp } from '@/lib/native-bridge';
 import { useAuthStore } from '@/stores/auth-store';
 import { useScanStore } from '@/stores/scan-store';
 import { useBottomNavLock } from '@/hooks/use-bottom-nav-lock';
-import {
-  getModelStatus,
-  isDownloadPromptDismissed,
-  subscribeModelStatus,
-} from '@/lib/ai/model-manager';
-import { ensureGemmaReady } from '@/lib/ai/gemma-web';
-import { getAiBlockedKey } from '@/lib/ai/runtime-gate';
+import { getSnapshot, subscribeSnapshot } from '@/lib/ai/model-manager';
+import { emptySnapshot } from '@/lib/ai/types';
 import { fetchProfile } from '@/lib/profile/fetch';
 import type { ExtractedWord } from '@/lib/ocr/llm-vision';
 import Link from 'next/link';
@@ -59,50 +56,42 @@ export default function ScanPage() {
   const [existingTerms, setExistingTerms] = useState<Set<string>>(new Set());
   const [leaveConfirmOpen, setLeaveConfirmOpen] = useState(false);
   const [modelPromptOpen, setModelPromptOpen] = useState(false);
-  const [blockedKey, setBlockedKey] = useState<string | null>(null);
-  const autoPromptCheckedRef = useRef(false);
+  const [native, setNative] = useState<boolean | null>(null);
 
-  // Runtime-gate check after mount (window-based detection isn't SSR-safe).
-  // Mobile-browser + PWA can't run AI inference, so we render an explanation
-  // instead of the camera UI to avoid letting the user start a flow that
-  // can't complete.
+  // SSR-safe native detection — show the app-only gate for non-native
+  // runtimes so users on the website / mobile browser get a clear
+  // "install the app" CTA instead of a half-broken scan flow.
   useEffect(() => {
-    setBlockedKey(getAiBlockedKey());
+    setNative(isNativeApp());
   }, []);
 
-  const modelStatusState = useSyncExternalStore(
-    subscribeModelStatus,
-    getModelStatus,
-    () => ({ state: 'not_installed' as const }),
+  const snapshot = useSyncExternalStore(
+    subscribeSnapshot,
+    getSnapshot,
+    () => emptySnapshot(),
   );
+  const modelReady = snapshot.active !== null;
 
   const isExtracting = status === 'extracting';
   const isEnriching = status === 'enriching';
   useBottomNavLock(isExtracting || isEnriching);
 
   useEffect(() => {
-    // Auto-open the modal when (a) the user lands here without the model and
-    // hasn't already dismissed the prompt, OR (b) a download/error is live —
-    // so navigating back to /words/scan during download always shows progress.
-    if (modelStatusState.state === 'downloading' || modelStatusState.state === 'error') {
+    // Always show the model-prompt modal when no variant is active — OCR
+    // can't run without one. The modal handles the "Go to settings"
+    // redirect; we no longer keep a "don't ask again" dismiss state.
+    if (!modelReady) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setModelPromptOpen(true);
-      autoPromptCheckedRef.current = true;
-      return;
     }
-    if (autoPromptCheckedRef.current) return;
-    autoPromptCheckedRef.current = true;
-    if (modelStatusState.state === 'not_installed' && !isDownloadPromptDismissed()) {
-      setModelPromptOpen(true);
-    }
-  }, [modelStatusState.state]);
+  }, [modelReady]);
 
   useEffect(() => {
-    if (modelStatusState.state !== 'installed' || !modelPromptOpen) return;
+    if (!modelReady || !modelPromptOpen) return;
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setModelPromptOpen(false);
     toast.success(t.aiModel.downloadComplete);
-  }, [modelStatusState.state, modelPromptOpen, t.aiModel.downloadComplete]);
+  }, [modelReady, modelPromptOpen, t.aiModel.downloadComplete]);
 
   useEffect(() => {
     if (!user) return;
@@ -181,11 +170,8 @@ export default function ScanPage() {
     router.push('/words');
   };
 
-  const handleStartModelDownload = () => {
-    ensureGemmaReady().catch((err: unknown) => {
-      const message = err instanceof Error ? err.message : t.aiModel.downloadFailed;
-      toast.error(message);
-    });
+  const handleGoToModelSettings = () => {
+    router.push('/settings/ocr');
   };
 
   const handleModelPromptOpenChange = (open: boolean) => {
@@ -230,21 +216,11 @@ export default function ScanPage() {
     );
   }
 
-  // Mobile browser / PWA — block before the camera UI so the user doesn't
-  // capture an image only to find inference can't run.
-  if (blockedKey) {
-    const table = t.aiModel as unknown as Record<string, string | undefined>;
-    const blockedMessage = table[blockedKey] ?? blockedKey;
-    return (
-      <>
-        <Header title={t.scan.title} showBack onBack={() => router.back()} />
-        <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-3 px-6 text-center">
-          <p className="max-w-md text-sm leading-relaxed text-muted-foreground">
-            {blockedMessage}
-          </p>
-        </div>
-      </>
-    );
+  // App-only feature — non-native runtimes see the install-the-app gate
+  // instead of the camera UI. `native === null` is the pre-mount state.
+  if (native === null) return null;
+  if (!native) {
+    return <AppOnlyGate title={t.scan.title} />;
   }
 
   return (
@@ -347,7 +323,7 @@ export default function ScanPage() {
       <ModelDownloadModal
         open={modelPromptOpen}
         onOpenChange={handleModelPromptOpenChange}
-        onConfirmDownload={handleStartModelDownload}
+        onGoToSettings={handleGoToModelSettings}
       />
 
       <AlertDialog open={leaveConfirmOpen} onOpenChange={setLeaveConfirmOpen}>

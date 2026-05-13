@@ -376,16 +376,13 @@ export interface Translations {
     skippedCount: (n: number) => string;
   };
   aiModel: {
-    title: string;
-    /** Native iOS path uses Gemma 4 (LiteRT-LM), web path uses Qwen3.5. */
+    /** Native iOS path uses Gemma 4 (LiteRT-LM). */
     nativeTitle: string;
     description: string;
     status: string;
     statusNotInstalled: string;
     statusInstalled: string;
     statusDownloading: string;
-    approxSize: string;
-    nativeApproxSize: string;
     wifiRecommended: string;
     download: string;
     retry: string;
@@ -399,20 +396,23 @@ export interface Translations {
     deleteSuccess: string;
     downloadComplete: string;
     downloadFailed: string;
-    unsupportedIOS: string;
-    unsupportedWebGPU: string;
+    /** Native iPhone too old / too little RAM to run any model. */
+    unsupportedDevice: string;
     promptTitle: string;
-    promptDescription: string;
-    promptDownload: string;
+    /** Shown in the OCR scan modal when the user has no model installed. */
+    promptDescriptionNeedsModel: string;
+    /** "Go to settings" CTA — redirects to /settings/ocr. */
+    goToSettings: string;
     promptDismiss: string;
-    poweredBy: string;
     nativePoweredBy: string;
-    /** Runtime-gate blocking copy (mobile browser / PWA). */
-    mobileBrowserBlocked: string;
-    pwaBlocked: string;
+    /** Generic app-only gate (non-native runtime). */
+    appOnlyTitle: string;
+    appOnlyDescription: string;
+    appOnlyOpenStore: string;
     /** Native iOS variant selector. */
     variantSectionTitle: string;
     variantSelectActive: string;
+    variantSelected: string;
     variantActive: string;
     variantSwitchConfirm: string;
     variantE2bName: string;
@@ -423,7 +423,6 @@ export interface Translations {
     variantE4bQuality: string;
     variantMinRam: (n: number) => string;
     variantDownloadSize: (gb: string) => string;
-    variantRequiresPaidDev: string;
   };
   profile: {
     title: string;

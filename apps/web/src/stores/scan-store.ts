@@ -1,9 +1,9 @@
 'use client';
 
 import { create } from 'zustand';
-import { extractWithTesseract } from '@/lib/ocr/tesseract';
-import { extractWithGemma } from '@/lib/ai/gemma-web';
-import { isGemmaReady } from '@/lib/ai/gemma-web';
+import { extractViaBridge } from '@/lib/ai/native-bridge-adapter';
+import { getSnapshot } from '@/lib/ai/model-manager';
+import { isNativeApp } from '@/lib/native-bridge';
 import { searchDictionary, searchDictionaryBatch } from '@/lib/dictionary/jisho';
 import type { ExtractedWord } from '@/lib/ocr/llm-vision';
 import type { DictionaryEntry } from '@/types/word';
@@ -313,26 +313,25 @@ export const useScanStore = create<ScanState>((set, get) => ({
     });
 
     try {
-      const useGemma = isGemmaReady();
+      // OCR is app-only now — the scan page gates non-native runtimes, but
+      // the store guards too in case it's ever wired up from elsewhere.
+      if (!isNativeApp() || getSnapshot().active === null) {
+        throw new Error('ai_model_not_ready');
+      }
+      const useGemma = true;
       const collectedTerms: string[] = [];
       const hints = new Map<string, ExtractedWord>();
 
       for (const imageDataUrl of imageDataUrls) {
         if (get().cancelId !== id) return;
-
-        if (useGemma) {
-          const words = await extractWithGemma(imageDataUrl, locale, controller.signal);
-          for (const w of words) {
-            collectedTerms.push(w.term);
-            if (!hints.has(w.term)) hints.set(w.term, w);
-          }
-        } else {
-          try {
-            const words = await extractWithTesseract(imageDataUrl, undefined, controller.signal);
-            collectedTerms.push(...words);
-          } catch {
-            if (controller.signal.aborted) return;
-          }
+        const words = await extractViaBridge(
+          imageDataUrl,
+          locale,
+          controller.signal,
+        );
+        for (const w of words) {
+          collectedTerms.push(w.term);
+          if (!hints.has(w.term)) hints.set(w.term, w);
         }
       }
 
