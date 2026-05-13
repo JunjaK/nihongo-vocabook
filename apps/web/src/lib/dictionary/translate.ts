@@ -30,7 +30,7 @@ export async function translateToKorean(
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: 'gpt-5-nano',
+      model: 'gpt-5.4-nano',
       messages: [
         {
           role: 'system',
