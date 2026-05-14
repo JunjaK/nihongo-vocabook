@@ -24,6 +24,12 @@ const en: Translations = {
     hideReading: 'Reading',
     hideMeaning: 'Meaning',
     sort: 'Sort',
+    view: 'View',
+    review: 'Review',
+    selectAll: 'Select all',
+    deselectAll: 'Deselect all',
+    execute: 'Execute',
+    retry: 'Retry',
   },
   nav: {
     words: 'Words',
@@ -31,6 +37,7 @@ const en: Translations = {
     quiz: 'Quiz',
     mastered: 'Mastered',
     settings: 'Settings',
+    assistant: 'Assistant',
   },
   landing: {
     title: 'NiVoca',
@@ -104,6 +111,8 @@ const en: Translations = {
     duplicateWord: 'This word already exists.',
     totalWordCount: (n: number) => `Total words: ${n}`,
     loadMore: 'Load more',
+    activeTab: 'Active',
+    masteredTab: 'Mastered',
   },
   wordForm: {
     dictionarySearch: 'Dictionary Search',
@@ -553,6 +562,66 @@ const en: Translations = {
     dailyGoalStreak30: '30-Day Goal Streak',
     dailyGoalStreak30Desc: 'Hit your daily goal 30 days in a row',
     progress: (current: number, target: number) => `${current} / ${target}`,
+  },
+  assistant: {
+    title: 'Assistant',
+    openContextChat: 'Open AI assistant',
+    newChat: 'New chat',
+    newChatConfirm: 'Clear all messages?',
+    inputPlaceholder: 'Type a message...',
+    attachImage: 'Attach image',
+    send: 'Send',
+    cancel: 'Cancel',
+    typing: 'AI is typing...',
+    thinking: 'Thinking...',
+    preparing: 'Preparing model (first-time setup may take ~50s)',
+    responseReady: 'AI response ready',
+    toolConfirmNeeded: (count: number) =>
+      `AI is waiting for ${count} confirmation${count === 1 ? '' : 's'}`,
+    toolCard: {
+      title: (count: number) =>
+        `AI requests the following (${count})`,
+      execute: (count: number) => `Execute (${count})`,
+      statusRunning: 'Running...',
+      statusDone: (n: number) => `${n} done`,
+      statusPartial: (done: number, failed: number, skipped: number) =>
+        `${done} done · ${failed} failed · ${skipped} skipped`,
+      actionFor: {
+        add_word: (term: string) => `Add word "${term}"`,
+        edit_word: 'Edit word',
+        delete_word: (term: string) =>
+          `Delete word "${term}" (cannot be undone)`,
+        set_mastered: (term: string, mastered: boolean) =>
+          mastered
+            ? `Mark "${term}" as mastered`
+            : `Unmark "${term}" as mastered`,
+        create_wordbook: (name: string) => `Create wordbook "${name}"`,
+        edit_wordbook: 'Edit wordbook',
+        delete_wordbook: (name: string) =>
+          `Delete wordbook "${name}" (cannot be undone)`,
+        add_word_to_wordbook: (term: string, wbName: string) =>
+          `Add "${term}" to wordbook "${wbName}"`,
+        remove_word_from_wordbook: (term: string, wbName: string) =>
+          `Remove "${term}" from wordbook "${wbName}"`,
+        search_words: (query: string) => `Search words: ${query}`,
+        find_similar: (term: string) => `Find similar to "${term}"`,
+      },
+    },
+    fallback: {
+      webNotSupported: 'AI assistant is only available in the iOS app',
+      webNotSupportedHint: 'Get the Nivoca app from the App Store',
+      deviceTooWeak: 'This device does not support the AI assistant',
+      modelNotInstalled: 'Please download the AI model first',
+      modelNotInstalledCta: 'Open Settings → AI model',
+    },
+    error: {
+      generateFailed: 'Failed to generate a response',
+      cancelled: 'Cancelled',
+      modelMissing: 'AI model is not installed',
+    },
+    imageBlockedInHistory: '[image]',
+    contextTruncated: 'Earlier messages omitted from context',
+    emptyHint: 'How can I help?',
   },
 };
 

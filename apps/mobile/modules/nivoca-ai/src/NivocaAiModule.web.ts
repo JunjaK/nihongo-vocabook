@@ -27,6 +27,9 @@ class NivocaAiModule extends NativeModule<NivocaAiModuleEvents> {
   async infer(_prompt: string, _imagePath: string): Promise<string> {
     throw new Error('NivocaAi is iOS-only — infer is unsupported on web');
   }
+  async inferText(_requestJson: string): Promise<string> {
+    throw new Error('NivocaAi is iOS-only — inferText is unsupported on web');
+  }
 }
 
 export default registerWebModule(NivocaAiModule, 'NivocaAiModule');

@@ -26,6 +26,31 @@ export interface AiModelStatusSnapshot {
   error: { variantId: AiModelVariantId; message: string } | null;
 }
 
+/** A single content block in a chat message. Mirrors `AiContentBlock` in
+ *  apps/web/src/types/chat.ts but uses a `source` field for images instead of
+ *  attachmentId, because the bridge transports base64 directly. */
+export type AiInferContentBlock =
+  | { type: 'text'; text: string }
+  | { type: 'image'; source: string }
+  | { type: 'tool_result'; toolName: string; toolCallId: string; result: unknown };
+
+export interface AiInferMessage {
+  role: 'user' | 'assistant' | 'system' | 'tool';
+  content: AiInferContentBlock[];
+}
+
+export interface AiInferToolDef {
+  name: string;
+  description: string;
+  parameters: Record<string, unknown>;
+}
+
+export interface AiInferRequest {
+  messages: AiInferMessage[];
+  tools?: AiInferToolDef[];
+  options?: { maxOutputTokens?: number; temperature?: number };
+}
+
 type WebToNativeMessage =
   | { type: 'READY'; bridgeVersion: number }
   | { type: 'AUTH_TOKEN'; refreshToken: string }
@@ -39,7 +64,9 @@ type WebToNativeMessage =
   | { type: 'AI_MODEL_DOWNLOAD_START'; variantId: AiModelVariantId }
   | { type: 'AI_MODEL_DOWNLOAD_CANCEL' }
   | { type: 'AI_MODEL_DELETE'; variantId: AiModelVariantId }
-  | { type: 'AI_INFER_VISION'; requestId: string; imageBase64: string; locale: string };
+  | { type: 'AI_INFER_VISION'; requestId: string; imageBase64: string; locale: string }
+  | { type: 'AI_INFER'; requestId: string; request: AiInferRequest }
+  | { type: 'AI_INFER_CANCEL'; requestId: string };
 
 interface AiExtractedWord {
   term: string;
@@ -62,7 +89,18 @@ type NativeToWebMessage =
       modelName?: string;
     }
   | { type: 'AI_INFER_VISION_RESULT'; requestId: string; words: AiExtractedWord[] }
-  | { type: 'AI_INFER_VISION_FAILED'; requestId: string; message: string };
+  | { type: 'AI_INFER_VISION_FAILED'; requestId: string; message: string }
+  | { type: 'AI_INFER_TOKEN'; requestId: string; delta: string }
+  | {
+      type: 'AI_INFER_DONE';
+      requestId: string;
+      fullText: string;
+      finishReason: 'stop' | 'length' | 'tool_call' | 'error';
+      inputTokens?: number;
+      outputTokens?: number;
+      modelVariant?: string;
+    }
+  | { type: 'AI_INFER_ERROR'; requestId: string; code: string; message: string };
 
 // ---------------------------------------------------------------------------
 // Global type augmentation

@@ -7,7 +7,9 @@ import { useNavigationLockStore } from '@/stores/navigation-lock-store';
 
 interface HeaderProps {
   title: string;
-  desc?: string;
+  /** Subtitle / metadata next to the title. Plain string or a React node
+   *  (e.g. a segmented toggle). */
+  desc?: ReactNode;
   actions?: ReactNode;
   showBack?: boolean;
   onBack?: () => void;

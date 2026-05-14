@@ -28,6 +28,88 @@ private let logger = Logger(subsystem: "win.jun-devlog.nivoca", category: "nivoc
  * image as a *file path* and handles decoding + preprocessing internally —
  * this is the only multimodal path Google's iOS build supports.
  */
+// MARK: - Text inference request types (PoC + Phase 1)
+
+/**
+ * Wire format for the `inferText` AsyncFunction. Decoded from the JSON string
+ * passed across the Expo bridge. Mirrors `AiTextInferRequest` in
+ * apps/mobile/src/types/bridge.ts.
+ *
+ * PoC simplification: this struct accepts the full Phase 1 shape (multi-message,
+ * tools, options), but the current runTextInference flattens it into a single
+ * user-message payload for the conversation API. The richer multi-turn /
+ * structured-tool template is deferred to Phase 1 once PoC measures whether
+ * a prompt-only tool description is sufficient.
+ */
+private struct TextInferRequest: Decodable {
+  struct Message: Decodable {
+    let role: String
+    let content: [ContentBlock]
+  }
+  struct ContentBlock: Decodable {
+    let type: String           // "text" | "image" | "tool_result"
+    let text: String?
+    let path: String?
+    let toolName: String?
+    let toolCallId: String?
+    let result: NivocaJSONValue?
+  }
+  struct ToolDef: Decodable {
+    let name: String
+    let description: String
+    let parameters: NivocaJSONValue?
+  }
+  struct Options: Decodable {
+    let maxOutputTokens: Int?
+    let temperature: Double?
+  }
+  let messages: [Message]
+  let tools: [ToolDef]?
+  let options: Options?
+}
+
+/**
+ * Minimal JSON passthrough type that survives Decodable round-tripping
+ * and converts back into Foundation-native types for `JSONSerialization`.
+ *
+ * Named `NivocaJSONValue` to avoid collisions with framework-level
+ * `JSONValue` types that some pods declare.
+ */
+private indirect enum NivocaJSONValue: Decodable {
+  case string(String)
+  case number(Double)
+  case bool(Bool)
+  case null
+  case array([NivocaJSONValue])
+  case object([String: NivocaJSONValue])
+
+  init(from decoder: Decoder) throws {
+    let container = try decoder.singleValueContainer()
+    if container.decodeNil() { self = .null; return }
+    if let v = try? container.decode(Bool.self) { self = .bool(v); return }
+    if let v = try? container.decode(Double.self) { self = .number(v); return }
+    if let v = try? container.decode(String.self) { self = .string(v); return }
+    if let v = try? container.decode([NivocaJSONValue].self) { self = .array(v); return }
+    if let v = try? container.decode([String: NivocaJSONValue].self) { self = .object(v); return }
+    throw DecodingError.dataCorruptedError(
+      in: container, debugDescription: "Unsupported JSON shape")
+  }
+
+  fileprivate func toJSONObject() -> Any {
+    switch self {
+    case .null: return NSNull()
+    case .bool(let b): return b
+    case .number(let n): return n
+    case .string(let s): return s
+    case .array(let arr): return arr.map { $0.toJSONObject() }
+    case .object(let dict):
+      var result: [String: Any] = [:]
+      for (k, v) in dict { result[k] = v.toJSONObject() }
+      return result
+    }
+  }
+}
+
 public class NivocaAiModule: Module {
   /// Directory under `Documents/` that `model-manager.ts` writes to. The
   /// filename is variant-dependent (gemma-4-E2B-it / gemma-4-E4B-it), so
@@ -91,6 +173,12 @@ public class NivocaAiModule: Module {
     // ---- Phase D: real multimodal inference ----
     AsyncFunction("infer") { (prompt: String, imagePath: String) -> String in
       return try self.runInference(prompt: prompt, imagePath: imagePath)
+    }
+
+    // ---- Phase 0 (PoC): blocking text-only inference for function-calling
+    //      experiments. Phase 1 will add a streaming variant on top of this.
+    AsyncFunction("inferText") { (requestJson: String) -> String in
+      return try self.runTextInference(requestJson: requestJson)
     }
   }
 
@@ -503,6 +591,141 @@ public class NivocaAiModule: Module {
     let text = extractTextFromResponse(rawJson)
     logger.info("runInference: extracted text.len=\(text.count)")
     return text
+  }
+
+  // MARK: - Text inference (PoC)
+
+  /**
+   * Phase 0 PoC implementation of `inferText`. Decodes the structured request,
+   * flattens it into a single user-message payload (combining tools description
+   * + system / assistant / user messages into one text body), and reuses the
+   * existing conversation API path — same shape as OCR's `runInference`, minus
+   * the image block.
+   *
+   * Rationale: the conversation API already accepts `{"role":"user","content":[
+   * {"type":"text", "text":"..."}]}` payloads (validated by OCR). To verify
+   * Gemma 4 E2B int4's function-calling capability quickly, we inject the tool
+   * catalog as a JSON block inside the prompt text instead of patching the
+   * chat template. If PoC scenarios pass (>=9/10 true positive) with this
+   * prompt-only approach, Phase 1 can keep the same shape — no structural
+   * template patch needed. If the model under-performs, Phase 1 adds the
+   * `tools` parameter to `SimpleFormatMessages` for native chat-template
+   * tool injection.
+   */
+  private func runTextInference(requestJson: String) throws -> String {
+    logger.info("runTextInference: requestJson.len=\(requestJson.count)")
+
+    guard let requestData = requestJson.data(using: .utf8) else {
+      throw NivocaAiError("bad_request", "Request JSON is not valid UTF-8")
+    }
+    let request: TextInferRequest
+    do {
+      request = try JSONDecoder().decode(TextInferRequest.self, from: requestData)
+    } catch {
+      throw NivocaAiError("bad_request", "Failed to decode request: \(error.localizedDescription)")
+    }
+
+    // Build the combined prompt text:
+    //   1. Tools block (if present): rendered as JSON + call-format instructions.
+    //   2. Each message: prefixed with [role] and only its text-content blocks.
+    //      Image / tool_result blocks are skipped at PoC scope — Phase 1 will
+    //      route image messages through the existing OCR-style image path.
+    var promptParts: [String] = []
+
+    if let tools = request.tools, !tools.isEmpty {
+      var toolsArr: [[String: Any]] = []
+      for tool in tools {
+        var entry: [String: Any] = [
+          "name": tool.name,
+          "description": tool.description,
+        ]
+        if let params = tool.parameters {
+          entry["parameters"] = params.toJSONObject()
+        }
+        toolsArr.append(entry)
+      }
+      do {
+        let toolsData = try JSONSerialization.data(
+          withJSONObject: toolsArr, options: [.prettyPrinted])
+        let toolsStr = String(data: toolsData, encoding: .utf8) ?? "[]"
+        promptParts.append("Available tools:\n\(toolsStr)")
+      } catch {
+        throw NivocaAiError("json_encode_failed", "Could not serialize tools: \(error.localizedDescription)")
+      }
+      promptParts.append("To call a tool, emit exactly: <tool_call>{\"name\":\"...\",\"arguments\":{...}}</tool_call>")
+      promptParts.append("When multiple related actions are requested, emit all calls in the same assistant turn.")
+      promptParts.append("Do NOT invent identifiers. If a needed ID is not in the context, ask a clarifying question instead of calling a tool.")
+    }
+
+    for msg in request.messages {
+      var msgText = ""
+      for block in msg.content {
+        if block.type == "text", let t = block.text {
+          msgText += t
+        }
+        // image / tool_result blocks intentionally ignored at PoC scope.
+      }
+      if !msgText.isEmpty {
+        promptParts.append("[\(msg.role)]\n\(msgText)")
+      }
+    }
+
+    let combinedPrompt = promptParts.joined(separator: "\n\n")
+    logger.info("runTextInference: combinedPrompt.len=\(combinedPrompt.count) messages=\(request.messages.count) tools=\(request.tools?.count ?? 0)")
+
+    try ensureLoaded()
+    guard let engine = self.engine, let convConfig = self.convConfig else {
+      throw NivocaAiError("not_ready", "Engine not initialized")
+    }
+
+    // Single-user-message payload — identical shape to OCR's path minus image.
+    let payload: [String: Any] = [
+      "role": "user",
+      "content": [
+        ["type": "text", "text": combinedPrompt]
+      ]
+    ]
+    let payloadJson: String
+    do {
+      let payloadData = try JSONSerialization.data(withJSONObject: payload, options: [])
+      guard let s = String(data: payloadData, encoding: .utf8) else {
+        throw NivocaAiError("json_encode_failed", "Could not UTF-8 encode payload")
+      }
+      payloadJson = s
+    } catch let err as NivocaAiError {
+      throw err
+    } catch {
+      throw NivocaAiError("json_encode_failed", "JSON serialization failed: \(error.localizedDescription)")
+    }
+
+    // Fresh conversation per call — same state-pollution mitigation as OCR.
+    guard let conversation = litert_lm_conversation_create(engine, convConfig) else {
+      throw NivocaAiError("not_ready", "Could not create conversation")
+    }
+    defer { litert_lm_conversation_delete(conversation) }
+
+    logger.info("runTextInference: calling conversation_send_message (blocking)")
+    let started = Date()
+    let response = payloadJson.withCString { cstr in
+      litert_lm_conversation_send_message(conversation, cstr, nil)
+    }
+    let elapsed = Date().timeIntervalSince(started)
+
+    guard let response = response else {
+      logger.error("runTextInference: send_message returned NULL after \(elapsed)s")
+      throw NivocaAiError(
+        "generate_failed",
+        "conversation_send_message returned NULL after \(elapsed)s")
+    }
+    defer { litert_lm_json_response_delete(response) }
+    logger.info("runTextInference: send_message done in \(elapsed)s")
+
+    guard let cstr = litert_lm_json_response_get_string(response) else {
+      throw NivocaAiError("empty_response", "Response had no JSON payload")
+    }
+    let rawJson = String(cString: cstr)
+    logger.info("runTextInference: rawJson.len=\(rawJson.count)")
+    return extractTextFromResponse(rawJson)
   }
 }
 

@@ -23,6 +23,16 @@ import type {
 import type { QuizSettings, DailyStats, Achievement } from '@/types/quiz';
 import { DEFAULT_QUIZ_SETTINGS } from '@/types/quiz';
 import type {
+  ChatMessage,
+  ChatMessageStatus,
+  ChatFinishReason,
+  ChatScope,
+  ChatSession,
+  ToolCallStatus,
+  ToolExecutionRecord,
+} from '@/types/chat';
+import type {
+  ChatRepository,
   DataRepository,
   WordRepository,
   StudyRepository,
@@ -1736,15 +1746,266 @@ class SupabaseWordbookRepository implements WordbookRepository {
   }
 }
 
+interface DbAiSession {
+  id: string;
+  user_id: string;
+  scope: string;
+  scope_entity_id: string | null;
+  title: string | null;
+  context_snapshot: unknown;
+  last_message_at: string | null;
+  message_count: number;
+  total_input_tokens: number;
+  total_output_tokens: number;
+  created_at: string;
+  updated_at: string;
+}
+
+interface DbAiMessage {
+  id: string;
+  session_id: string;
+  user_id: string;
+  role: string;
+  content: unknown;
+  tool_calls: unknown;
+  status: string;
+  finish_reason: string | null;
+  input_tokens: number | null;
+  output_tokens: number | null;
+  model_variant: string | null;
+  error_code: string | null;
+  error_message: string | null;
+  attachment_ids: unknown;
+  created_at: string;
+}
+
+class SupabaseChatRepository implements ChatRepository {
+  constructor(private supabase: SupabaseClient) {}
+
+  private async currentUserId(): Promise<string> {
+    const { data, error } = await this.supabase.auth.getUser();
+    if (error || !data.user) throw new Error('LOGIN_REQUIRED');
+    return data.user.id;
+  }
+
+  private mapSession(row: DbAiSession, messages: ChatMessage[] = []): ChatSession {
+    const scope: ChatScope = { kind: 'general' };
+    return {
+      id: row.id,
+      scope,
+      title: row.title ?? undefined,
+      contextSnapshot: row.context_snapshot ?? undefined,
+      messages,
+      lastMessageAt: row.last_message_at ? new Date(row.last_message_at).getTime() : undefined,
+      messageCount: row.message_count,
+      totalInputTokens: row.total_input_tokens,
+      totalOutputTokens: row.total_output_tokens,
+      createdAt: new Date(row.created_at).getTime(),
+      updatedAt: new Date(row.updated_at).getTime(),
+    };
+  }
+
+  private mapMessage(row: DbAiMessage): ChatMessage {
+    return {
+      id: row.id,
+      sessionId: row.session_id,
+      role: row.role as ChatMessage['role'],
+      content: (row.content as ChatMessage['content']) ?? [],
+      toolCalls: (row.tool_calls as ChatMessage['toolCalls']) ?? undefined,
+      status: row.status as ChatMessageStatus,
+      finishReason: (row.finish_reason as ChatFinishReason) ?? undefined,
+      inputTokens: row.input_tokens ?? undefined,
+      outputTokens: row.output_tokens ?? undefined,
+      modelVariant: (row.model_variant as ChatMessage['modelVariant']) ?? undefined,
+      errorCode: row.error_code ?? undefined,
+      errorMessage: row.error_message ?? undefined,
+      attachmentIds: (row.attachment_ids as string[]) ?? undefined,
+      createdAt: new Date(row.created_at).getTime(),
+    };
+  }
+
+  async getCurrentSession(): Promise<ChatSession | null> {
+    const userId = await this.currentUserId();
+    const { data: sessionRow, error } = await this.supabase
+      .from('ai_sessions')
+      .select('*')
+      .eq('user_id', userId)
+      .order('last_message_at', { ascending: false, nullsFirst: false })
+      .limit(1)
+      .maybeSingle();
+    if (error || !sessionRow) return null;
+    const messages = await this.listMessages((sessionRow as DbAiSession).id);
+    return this.mapSession(sessionRow as DbAiSession, messages);
+  }
+
+  async listSessions(limit = 20): Promise<ChatSession[]> {
+    const userId = await this.currentUserId();
+    const { data, error } = await this.supabase
+      .from('ai_sessions')
+      .select('*')
+      .eq('user_id', userId)
+      .order('last_message_at', { ascending: false, nullsFirst: false })
+      .limit(limit);
+    if (error || !data) return [];
+    return (data as DbAiSession[]).map((row) => this.mapSession(row));
+  }
+
+  async createSession(scope: ChatScope, contextSnapshot?: unknown): Promise<ChatSession> {
+    const userId = await this.currentUserId();
+    if (scope.kind !== 'general') {
+      throw new Error('Only general scope is persisted to Supabase');
+    }
+    const { data, error } = await this.supabase
+      .from('ai_sessions')
+      .insert({
+        user_id: userId,
+        scope: 'general',
+        context_snapshot: contextSnapshot ?? null,
+      })
+      .select('*')
+      .single();
+    if (error || !data) throw new Error(error?.message ?? 'createSession failed');
+    return this.mapSession(data as DbAiSession);
+  }
+
+  async updateSessionTitle(sessionId: string, title: string): Promise<void> {
+    await this.supabase
+      .from('ai_sessions')
+      .update({ title, updated_at: new Date().toISOString() })
+      .eq('id', sessionId);
+  }
+
+  async deleteSession(sessionId: string): Promise<void> {
+    await this.supabase.from('ai_sessions').delete().eq('id', sessionId);
+  }
+
+  async clearAllSessions(): Promise<void> {
+    const userId = await this.currentUserId();
+    await this.supabase.from('ai_sessions').delete().eq('user_id', userId);
+  }
+
+  async appendMessage(message: ChatMessage): Promise<void> {
+    const userId = await this.currentUserId();
+    const { error } = await this.supabase.from('ai_messages').insert({
+      id: message.id,
+      session_id: message.sessionId,
+      user_id: userId,
+      role: message.role,
+      content: message.content,
+      tool_calls: message.toolCalls ?? null,
+      status: message.status,
+      finish_reason: message.finishReason ?? null,
+      input_tokens: message.inputTokens ?? null,
+      output_tokens: message.outputTokens ?? null,
+      model_variant: message.modelVariant ?? null,
+      error_code: message.errorCode ?? null,
+      error_message: message.errorMessage ?? null,
+      attachment_ids: message.attachmentIds ?? null,
+      created_at: new Date(message.createdAt).toISOString(),
+    });
+    if (error) throw new Error(error.message);
+  }
+
+  async updateMessageStatus(
+    messageId: string,
+    status: ChatMessageStatus,
+    patch?: {
+      finishReason?: ChatFinishReason;
+      inputTokens?: number;
+      outputTokens?: number;
+      modelVariant?: string;
+      errorCode?: string;
+      errorMessage?: string;
+      content?: ChatMessage['content'];
+      toolCalls?: ChatMessage['toolCalls'];
+    },
+  ): Promise<void> {
+    const update: Record<string, unknown> = { status };
+    if (patch?.finishReason !== undefined) update.finish_reason = patch.finishReason;
+    if (patch?.inputTokens !== undefined) update.input_tokens = patch.inputTokens;
+    if (patch?.outputTokens !== undefined) update.output_tokens = patch.outputTokens;
+    if (patch?.modelVariant !== undefined) update.model_variant = patch.modelVariant;
+    if (patch?.errorCode !== undefined) update.error_code = patch.errorCode;
+    if (patch?.errorMessage !== undefined) update.error_message = patch.errorMessage;
+    if (patch?.content !== undefined) update.content = patch.content;
+    if (patch?.toolCalls !== undefined) update.tool_calls = patch.toolCalls;
+    await this.supabase.from('ai_messages').update(update).eq('id', messageId);
+  }
+
+  async listMessages(
+    sessionId: string,
+    limit = 100,
+    before?: number,
+  ): Promise<ChatMessage[]> {
+    let query = this.supabase
+      .from('ai_messages')
+      .select('*')
+      .eq('session_id', sessionId)
+      .order('created_at', { ascending: true })
+      .limit(limit);
+    if (before !== undefined) {
+      query = query.lt('created_at', new Date(before).toISOString());
+    }
+    const { data, error } = await query;
+    if (error || !data) return [];
+    return (data as DbAiMessage[]).map((row) => this.mapMessage(row));
+  }
+
+  async recordToolExecution(execution: ToolExecutionRecord): Promise<void> {
+    const userId = await this.currentUserId();
+    const { error } = await this.supabase.from('ai_tool_executions').insert({
+      id: execution.id,
+      message_id: execution.messageId,
+      user_id: userId,
+      tool_name: execution.toolName,
+      tool_call_id: execution.toolCallId,
+      args: execution.args,
+      status: execution.status,
+      result: execution.result ?? null,
+      error_message: execution.errorMessage ?? null,
+      duration_ms: execution.durationMs ?? null,
+      created_at: new Date(execution.createdAt).toISOString(),
+      completed_at: execution.completedAt
+        ? new Date(execution.completedAt).toISOString()
+        : null,
+    });
+    if (error) throw new Error(error.message);
+  }
+
+  async updateToolExecution(
+    id: string,
+    patch: {
+      status?: ToolCallStatus;
+      result?: unknown;
+      errorMessage?: string;
+      durationMs?: number;
+      completedAt?: number;
+    },
+  ): Promise<void> {
+    const update: Record<string, unknown> = {};
+    if (patch.status !== undefined) update.status = patch.status;
+    if (patch.result !== undefined) update.result = patch.result;
+    if (patch.errorMessage !== undefined) update.error_message = patch.errorMessage;
+    if (patch.durationMs !== undefined) update.duration_ms = patch.durationMs;
+    if (patch.completedAt !== undefined) {
+      update.completed_at = new Date(patch.completedAt).toISOString();
+    }
+    if (Object.keys(update).length === 0) return;
+    await this.supabase.from('ai_tool_executions').update(update).eq('id', id);
+  }
+}
+
 export class SupabaseRepository implements DataRepository {
   words: WordRepository;
   study: StudyRepository;
   wordbooks: WordbookRepository;
+  chat: ChatRepository;
 
   constructor(private supabase: SupabaseClient) {
     this.words = new SupabaseWordRepository(supabase);
     this.study = new SupabaseStudyRepository(supabase);
     this.wordbooks = new SupabaseWordbookRepository(supabase);
+    this.chat = new SupabaseChatRepository(supabase);
   }
 
   /** Look up a dict entry by (term, reading); upsert from the provided meaning if absent. */

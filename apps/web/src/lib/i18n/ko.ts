@@ -24,6 +24,12 @@ const ko: Translations = {
     hideReading: '읽기',
     hideMeaning: '뜻',
     sort: '정렬',
+    view: '열기',
+    review: '확인',
+    selectAll: '전체 선택',
+    deselectAll: '전체 해제',
+    execute: '실행',
+    retry: '재시도',
   },
   nav: {
     words: '단어',
@@ -31,6 +37,7 @@ const ko: Translations = {
     quiz: '퀴즈',
     mastered: '암기 완료',
     settings: '설정',
+    assistant: '어시스턴트',
   },
   landing: {
     title: 'NiVoca',
@@ -104,6 +111,8 @@ const ko: Translations = {
     duplicateWord: '이미 존재하는 단어입니다.',
     totalWordCount: (n: number) => `총 단어 수: ${n}개`,
     loadMore: '더 보기',
+    activeTab: '학습중',
+    masteredTab: '암기완료',
   },
   wordForm: {
     dictionarySearch: '사전 검색',
@@ -553,6 +562,64 @@ const ko: Translations = {
     dailyGoalStreak30: '30일 연속 목표 달성',
     dailyGoalStreak30Desc: '30일 연속으로 하루 목표량을 달성했어요',
     progress: (current: number, target: number) => `${current} / ${target}`,
+  },
+  assistant: {
+    title: '어시스턴트',
+    openContextChat: 'AI 어시스턴트 열기',
+    newChat: '새 채팅',
+    newChatConfirm: '대화를 모두 지울까요?',
+    inputPlaceholder: '메시지 입력...',
+    attachImage: '이미지 첨부',
+    send: '전송',
+    cancel: '취소',
+    typing: 'AI가 답변 중...',
+    thinking: '생각 중...',
+    preparing: '모델 준비 중 (최초 1회 약 50초 소요)',
+    responseReady: 'AI 응답 도착',
+    toolConfirmNeeded: (count: number) =>
+      `AI가 ${count}건의 작업 확인을 기다립니다`,
+    toolCard: {
+      title: (count: number) => `AI가 다음 작업을 요청합니다 (${count}건)`,
+      execute: (count: number) => `실행 (${count}건)`,
+      statusRunning: '실행 중...',
+      statusDone: (n: number) => `${n}건 완료`,
+      statusPartial: (done: number, failed: number, skipped: number) =>
+        `${done}건 완료 · ${failed}건 실패 · ${skipped}건 제외`,
+      actionFor: {
+        add_word: (term: string) => `단어 「${term}」 추가`,
+        edit_word: '단어 편집',
+        delete_word: (term: string) => `단어 「${term}」 삭제 (취소 불가)`,
+        set_mastered: (term: string, mastered: boolean) =>
+          mastered
+            ? `단어 「${term}」 암기완료로 표시`
+            : `단어 「${term}」 암기 해제`,
+        create_wordbook: (name: string) => `단어장 「${name}」 생성`,
+        edit_wordbook: '단어장 편집',
+        delete_wordbook: (name: string) =>
+          `단어장 「${name}」 삭제 (취소 불가)`,
+        add_word_to_wordbook: (term: string, wbName: string) =>
+          `단어장 「${wbName}」에 「${term}」 추가`,
+        remove_word_from_wordbook: (term: string, wbName: string) =>
+          `단어장 「${wbName}」에서 「${term}」 제거`,
+        search_words: (query: string) => `단어 검색: ${query}`,
+        find_similar: (term: string) => `「${term}」 유사어 추천`,
+      },
+    },
+    fallback: {
+      webNotSupported: 'AI 어시스턴트는 iOS 앱에서만 사용 가능합니다',
+      webNotSupportedHint: 'App Store에서 「Nivoca」 앱을 받아주세요',
+      deviceTooWeak: '이 디바이스는 AI 어시스턴트를 지원하지 않습니다',
+      modelNotInstalled: 'AI 모델을 먼저 받아주세요',
+      modelNotInstalledCta: '설정 → AI 모델로 이동',
+    },
+    error: {
+      generateFailed: '응답 생성에 실패했습니다',
+      cancelled: '취소되었습니다',
+      modelMissing: 'AI 모델이 설치되어 있지 않습니다',
+    },
+    imageBlockedInHistory: '[이미지]',
+    contextTruncated: '이전 메시지가 컨텍스트에서 제외됨',
+    emptyHint: '무엇을 도와드릴까요?',
   },
 };
 

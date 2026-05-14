@@ -16,6 +16,15 @@ import type {
   SharedWordbookListItem,
 } from '@/types/wordbook';
 import type { QuizSettings, DailyStats, Achievement } from '@/types/quiz';
+import type {
+  ChatMessage,
+  ChatScope,
+  ChatSession,
+  ChatMessageStatus,
+  ChatFinishReason,
+  ToolExecutionRecord,
+  ToolCallStatus,
+} from '@/types/chat';
 
 export type WordSortOrder = 'priority' | 'newest' | 'alphabetical';
 
@@ -101,10 +110,56 @@ export interface WordbookRepository {
   copySharedWordbook(wordbookId: string, overrides?: { name: string; description: string | null }): Promise<Wordbook>;
 }
 
+export interface ChatRepository {
+  // Sessions
+  getCurrentSession(): Promise<ChatSession | null>;
+  listSessions(limit?: number): Promise<ChatSession[]>;
+  createSession(scope: ChatScope, contextSnapshot?: unknown): Promise<ChatSession>;
+  updateSessionTitle(sessionId: string, title: string): Promise<void>;
+  deleteSession(sessionId: string): Promise<void>;
+  clearAllSessions(): Promise<void>;
+
+  // Messages
+  appendMessage(message: ChatMessage): Promise<void>;
+  updateMessageStatus(
+    messageId: string,
+    status: ChatMessageStatus,
+    patch?: {
+      finishReason?: ChatFinishReason;
+      inputTokens?: number;
+      outputTokens?: number;
+      modelVariant?: string;
+      errorCode?: string;
+      errorMessage?: string;
+      content?: ChatMessage['content'];
+      toolCalls?: ChatMessage['toolCalls'];
+    },
+  ): Promise<void>;
+  listMessages(
+    sessionId: string,
+    limit?: number,
+    before?: number,
+  ): Promise<ChatMessage[]>;
+
+  // Tool executions
+  recordToolExecution(execution: ToolExecutionRecord): Promise<void>;
+  updateToolExecution(
+    id: string,
+    patch: {
+      status?: ToolCallStatus;
+      result?: unknown;
+      errorMessage?: string;
+      durationMs?: number;
+      completedAt?: number;
+    },
+  ): Promise<void>;
+}
+
 export interface DataRepository {
   words: WordRepository;
   study: StudyRepository;
   wordbooks: WordbookRepository;
+  chat: ChatRepository;
   exportAll(): Promise<ExportData>;
   importAll(data: ImportData): Promise<void>;
 }

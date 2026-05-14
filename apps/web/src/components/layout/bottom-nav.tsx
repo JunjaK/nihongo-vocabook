@@ -10,6 +10,7 @@ import { useAuthStore } from '@/stores/auth-store';
 import { useNavigationLockStore } from '@/stores/navigation-lock-store';
 import { getDueCountRefreshEventName } from '@/lib/quiz/due-count-sync';
 import { setBadgeCount } from '@/lib/native-bridge';
+import { useChatStore } from '@/lib/ai/chat';
 
 export function BottomNav() {
   const pathname = usePathname();
@@ -18,6 +19,7 @@ export function BottomNav() {
   const authLoading = useAuthStore((s) => s.loading);
   const navLocked = useNavigationLockStore((s) => s.lockCount > 0);
   const [dueCount, setDueCount] = useState(0);
+  const unreadAssistant = useChatStore((s) => s.unreadCount);
   const fetchCount = useCallback(() => {
     repo.study.getDueCount().then((count) => {
       setDueCount(count);
@@ -62,8 +64,8 @@ export function BottomNav() {
   const navItems = [
     { href: '/words', label: t.nav.words, icon: BookIcon },
     { href: '/wordbooks', label: t.nav.wordbooks, icon: FolderIcon },
+    { href: '/assistant', label: t.nav.assistant, icon: SparklesNavIcon },
     { href: '/quiz', label: t.nav.quiz, icon: BrainIcon },
-    { href: '/mastered', label: t.nav.mastered, icon: CheckCircleIcon },
     { href: '/settings', label: t.nav.settings, icon: SettingsIcon },
   ] as const;
 
@@ -78,7 +80,9 @@ export function BottomNav() {
       <div className="flex h-14 rounded-full border border-border bg-background p-1 shadow-[0_2px_12px_rgba(0,0,0,0.08)]">
         {navItems.map(({ href, label, icon: Icon }) => {
           const isActive = pathname.startsWith(href);
-          const showBadge = href === '/quiz' && dueCount > 0;
+          const showBadge =
+            (href === '/quiz' && dueCount > 0) ||
+            (href === '/assistant' && unreadAssistant > 0);
           return (
             <Link
               key={href}
@@ -95,10 +99,13 @@ export function BottomNav() {
               >
                 <div className="relative">
                   <Icon className={cn('size-icon', isActive ? 'text-primary-foreground' : 'text-text-tertiary')} />
-                  {showBadge && (
+                  {showBadge && href === '/quiz' && (
                     <span className="absolute -top-1 -right-1.5 flex size-4 items-center justify-center rounded-full bg-destructive text-micro font-medium text-white">
                       {dueCount > 99 ? '99' : dueCount}
                     </span>
+                  )}
+                  {showBadge && href === '/assistant' && (
+                    <span className="absolute -top-0.5 -right-0.5 size-2.5 rounded-full bg-primary" />
                   )}
                 </div>
                 <span
@@ -115,6 +122,24 @@ export function BottomNav() {
         })}
       </div>
     </nav>
+  );
+}
+
+function SparklesNavIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+    >
+      <path d="M12 3v2M12 19v2M5 12H3M21 12h-2M6 6l1.5 1.5M16.5 16.5L18 18M6 18l1.5-1.5M16.5 7.5L18 6" />
+      <path d="M12 8a4 4 0 0 0 4 4 4 4 0 0 0-4 4 4 4 0 0 0-4-4 4 4 0 0 0 4-4z" />
+    </svg>
   );
 }
 

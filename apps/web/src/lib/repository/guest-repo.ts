@@ -1,5 +1,6 @@
 import { DEFAULT_QUIZ_SETTINGS } from '@/types/quiz';
 import type {
+  ChatRepository,
   DataRepository,
   PaginatedWords,
   StudyRepository,
@@ -79,10 +80,25 @@ const wordbookRepo: WordbookRepository = {
   copySharedWordbook: LOGIN_REQUIRED,
 };
 
+const chatRepo: ChatRepository = {
+  getCurrentSession: () => Promise.resolve(null),
+  listSessions: () => Promise.resolve([]),
+  createSession: LOGIN_REQUIRED,
+  updateSessionTitle: LOGIN_REQUIRED,
+  deleteSession: LOGIN_REQUIRED,
+  clearAllSessions: LOGIN_REQUIRED,
+  appendMessage: LOGIN_REQUIRED,
+  updateMessageStatus: LOGIN_REQUIRED,
+  listMessages: () => Promise.resolve([]),
+  recordToolExecution: LOGIN_REQUIRED,
+  updateToolExecution: LOGIN_REQUIRED,
+};
+
 export const guestRepository: DataRepository = {
   words: wordRepo,
   study: studyRepo,
   wordbooks: wordbookRepo,
+  chat: chatRepo,
   exportAll: () =>
     Promise.resolve({
       version: 3,

@@ -22,12 +22,19 @@ export interface Translations {
     hideReading: string;
     hideMeaning: string;
     sort: string;
+    view: string;
+    review: string;
+    selectAll: string;
+    deselectAll: string;
+    execute: string;
+    retry: string;
   };
   nav: {
     words: string;
     wordbooks: string;
     quiz: string;
     mastered: string;
+    assistant: string;
     settings: string;
   };
   landing: {
@@ -102,6 +109,8 @@ export interface Translations {
     duplicateWord: string;
     totalWordCount: (n: number) => string;
     loadMore: string;
+    activeTab: string;
+    masteredTab: string;
   };
   wordForm: {
     dictionarySearch: string;
@@ -554,5 +563,55 @@ export interface Translations {
     dailyGoalStreak30: string;
     dailyGoalStreak30Desc: string;
     progress: (current: number, target: number) => string;
+  };
+  assistant: {
+    title: string;
+    openContextChat: string;
+    newChat: string;
+    newChatConfirm: string;
+    inputPlaceholder: string;
+    attachImage: string;
+    send: string;
+    cancel: string;
+    typing: string;
+    thinking: string;
+    preparing: string;
+    responseReady: string;
+    toolConfirmNeeded: (count: number) => string;
+    toolCard: {
+      title: (count: number) => string;
+      execute: (count: number) => string;
+      statusRunning: string;
+      statusDone: (n: number) => string;
+      statusPartial: (done: number, failed: number, skipped: number) => string;
+      actionFor: {
+        add_word: (term: string) => string;
+        edit_word: string;
+        delete_word: (term: string) => string;
+        set_mastered: (term: string, mastered: boolean) => string;
+        create_wordbook: (name: string) => string;
+        edit_wordbook: string;
+        delete_wordbook: (name: string) => string;
+        add_word_to_wordbook: (term: string, wbName: string) => string;
+        remove_word_from_wordbook: (term: string, wbName: string) => string;
+        search_words: (query: string) => string;
+        find_similar: (term: string) => string;
+      };
+    };
+    fallback: {
+      webNotSupported: string;
+      webNotSupportedHint: string;
+      deviceTooWeak: string;
+      modelNotInstalled: string;
+      modelNotInstalledCta: string;
+    };
+    error: {
+      generateFailed: string;
+      cancelled: string;
+      modelMissing: string;
+    };
+    imageBlockedInHistory: string;
+    contextTruncated: string;
+    emptyHint: string;
   };
 }

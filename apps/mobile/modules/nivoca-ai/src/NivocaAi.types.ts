@@ -20,3 +20,39 @@ export type NivocaAiModuleEvents = {
    */
   onModelStatus: (payload: ModelStatusPayload) => void;
 };
+
+// ---------------------------------------------------------------------------
+// Text inference (Phase 0 PoC + Phase 1)
+// ---------------------------------------------------------------------------
+
+/** A single multimodal content block inside a message. */
+export type AiContentBlock =
+  | { type: 'text'; text: string }
+  | { type: 'image'; path: string }
+  | { type: 'tool_result'; toolName: string; toolCallId: string; result: unknown };
+
+/** One message in a chat history. */
+export interface AiTextMessage {
+  role: 'user' | 'assistant' | 'system' | 'tool';
+  content: AiContentBlock[];
+}
+
+/** Function-calling tool definition. `parameters` is a JSON Schema object. */
+export interface AiToolDef {
+  name: string;
+  description: string;
+  parameters: Record<string, unknown>;
+}
+
+/** Sampling / generation options. All fields optional — defaults applied natively. */
+export interface AiTextInferOptions {
+  maxOutputTokens?: number;
+  temperature?: number;
+}
+
+/** Full request payload for the native `inferText` call. */
+export interface AiTextInferRequest {
+  messages: AiTextMessage[];
+  tools?: AiToolDef[];
+  options?: AiTextInferOptions;
+}

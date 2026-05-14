@@ -62,6 +62,7 @@ const migrations = [
   '014_quiz_improvements.sql',
   '015_batch_rpcs.sql',
   '016_dictionary_reading_index.sql',
+  '028_ai_chat.sql',
 ];
 
 async function run() {

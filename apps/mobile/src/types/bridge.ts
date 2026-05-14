@@ -23,7 +23,39 @@ export type WebToNativeMessage =
       requestId: string;
       imageBase64: string;
       locale: string;
+    }
+  | {
+      type: 'AI_INFER';
+      requestId: string;
+      request: BridgeAiInferRequest;
+    }
+  | {
+      type: 'AI_INFER_CANCEL';
+      requestId: string;
     };
+
+/** Bridge wire format for the multi-turn / function-calling inference call. */
+export type BridgeAiInferContentBlock =
+  | { type: 'text'; text: string }
+  | { type: 'image'; source: string }
+  | { type: 'tool_result'; toolName: string; toolCallId: string; result: unknown };
+
+export interface BridgeAiInferMessage {
+  role: 'user' | 'assistant' | 'system' | 'tool';
+  content: BridgeAiInferContentBlock[];
+}
+
+export interface BridgeAiInferToolDef {
+  name: string;
+  description: string;
+  parameters: Record<string, unknown>;
+}
+
+export interface BridgeAiInferRequest {
+  messages: BridgeAiInferMessage[];
+  tools?: BridgeAiInferToolDef[];
+  options?: { maxOutputTokens?: number; temperature?: number };
+}
 
 export interface AiExtractedWord {
   term: string;
@@ -87,5 +119,25 @@ export type NativeToWebMessage =
   | {
       type: 'AI_INFER_VISION_FAILED';
       requestId: string;
+      message: string;
+    }
+  | {
+      type: 'AI_INFER_TOKEN';
+      requestId: string;
+      delta: string;
+    }
+  | {
+      type: 'AI_INFER_DONE';
+      requestId: string;
+      fullText: string;
+      finishReason: 'stop' | 'length' | 'tool_call' | 'error';
+      inputTokens?: number;
+      outputTokens?: number;
+      modelVariant?: string;
+    }
+  | {
+      type: 'AI_INFER_ERROR';
+      requestId: string;
+      code: string;
       message: string;
     };
