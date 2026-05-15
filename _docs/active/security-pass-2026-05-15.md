@@ -119,7 +119,9 @@ happily eat a 100 MB image and OOM the conversion worker.
 **Mitigation:** validate at the boundary before any conversion work:
 - Reject if any file has `type` not starting with `image/`
 - Reject if any single file exceeds 20 MB
-- Reject if more than 20 files selected in one pick
+- Reject if more than 5 files selected in one pick (tightened from the
+  initial 20 after a UX review — 5 is the practical limit for one OCR
+  session and keeps the convert loop responsive)
 
 User-facing errors via `toast.error()` with three new i18n keys
 (`scan.imageTooLarge`, `scan.invalidImageType`, `scan.tooManyImages`).
@@ -185,7 +187,12 @@ nickname → stored. Send `javascript:alert(1)` as `avatarUrl` → stored and
 later rendered as an `<img src=…>` value.
 
 **Mitigation:** explicit per-field validation:
-- `nickname`: type `string`, trimmed, length 1–50
+- `nickname`: type `string`, trimmed, length 1–50. **Not nullable** — every
+  account has a nickname auto-seeded at signup by the
+  `handle_new_user` trigger in
+  `supabase/migrations/005_user_profiles.sql` (`'user-' || substr(uuid,
+  1, 8)`), so the API has no path to clear it. This asymmetry vs. the
+  other fields is intentional.
 - `avatarUrl`: nullable, parsed via `new URL()`, protocol must be `http:`
   or `https:` (blocks `javascript:` / `data:` / `blob:`), length ≤ 500
 - `jlptLevel`: nullable integer 1–5 (uses `Number.isInteger`, not just
@@ -226,6 +233,41 @@ dictionary/route.ts`, `api/kanji/route.ts`). The IP-based rate limiter
 remains as the sole anonymous-throttle layer, which is the correct
 shape: throttle abuse based on traffic volume, not on cosmetic header
 patterns.
+
+---
+
+---
+
+## Follow-up patches (2026-05-16)
+
+After a logic-regression review, two small hardening passes landed:
+
+### CSP tightening
+- `img-src`: dropped the blanket `https:` clause — narrowed to
+  `https://*.supabase.co` (avatars + scan previews). A future XSS
+  payload can no longer smuggle a tracking pixel from an arbitrary
+  host.
+- `connect-src`: removed `https://jisho.org`. The fallback runs in an
+  API route (server-side fetch), so the browser CSP doesn't need to
+  permit it.
+
+### `getClientIp` XFF-spoofing fix
+The original implementation took the **leftmost** entry of
+`x-forwarded-for`, which any client can prepend itself — a single curl
+request with `X-Forwarded-For: 1.2.3.4` would key the rate limiter on
+a fabricated IP. Rewrote `apps/web/src/lib/api/rate-limit.ts`
+`getClientIp` to:
+1. Prefer `x-real-ip` (set authoritatively by the immediate reverse
+   proxy, which overwrites any client value).
+2. Fall back to the **rightmost** `x-forwarded-for` entry — the closest
+   trusted hop's view of the caller.
+
+If a second trusted proxy is ever introduced, the XFF index needs to
+move to `-N` where N is the trusted-hop count. Documented inline.
+
+This was already a problem before the security pass, but the previous
+work made it the single source of bucket identity (UA was dropped from
+the key), so fixing it is now load-bearing.
 
 ---
 

@@ -5,10 +5,34 @@ const DEFAULT_MAX_REQUESTS = 30;
 /** Sweep old buckets every N inserts so the Map can't grow without bound. */
 const CLEANUP_EVERY_N_INSERTS = 256;
 
+/**
+ * Resolve the client IP used as the rate-limit bucket key.
+ *
+ * Priority:
+ *   1. `x-real-ip` — set authoritatively by the immediate reverse proxy.
+ *      Trusted by default because the proxy overwrites any client-supplied
+ *      value.
+ *   2. `x-forwarded-for` — last entry (RIGHTMOST). Each proxy appends as it
+ *      forwards, so the rightmost is the closest trusted hop's view of the
+ *      caller. Reading the leftmost (the old code) is spoofable: any
+ *      attacker can prepend their own `x-forwarded-for: 1.2.3.4` and the
+ *      app would key on that fabricated address.
+ *   3. `'unknown'` — every off-proxy request shares this bucket. Acceptable
+ *      because it limits *all* untraceable traffic together.
+ *
+ * If you ever sit the app behind more than one trusted proxy, change the
+ * XFF index to `-N` where N is the number of trusted hops; without that,
+ * the rightmost is the *closest* proxy, not the original client.
+ */
 function getClientIp(request: NextRequest): string {
-  const forwardedFor = request.headers.get('x-forwarded-for');
-  if (forwardedFor) return forwardedFor.split(',')[0].trim();
-  return request.headers.get('x-real-ip') ?? 'unknown';
+  const realIp = request.headers.get('x-real-ip');
+  if (realIp) return realIp.trim();
+  const xff = request.headers.get('x-forwarded-for');
+  if (xff) {
+    const parts = xff.split(',');
+    return parts[parts.length - 1].trim();
+  }
+  return 'unknown';
 }
 
 interface RateLimitBucket {

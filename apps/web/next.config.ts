@@ -27,11 +27,16 @@ const securityHeaders = [
       "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
       // Tailwind/Shadcn inject inline styles; we also use CSS-var <style> tags.
       "style-src 'self' 'unsafe-inline'",
-      "img-src 'self' data: blob: https:",
+      // Avatars and OCR previews come from Supabase Storage; `data:` /
+      // `blob:` cover client-side normalize / camera capture. Wildcard
+      // `https:` was previously open — narrowed to Supabase so a future
+      // XSS can't smuggle a tracking pixel from an arbitrary host.
+      "img-src 'self' data: blob: https://*.supabase.co",
       "font-src 'self' data:",
-      // Supabase REST/realtime + jisho.org dictionary fallback + Anthropic/OpenAI
-      // when the client routes through us (it doesn't today but leaving room).
-      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://jisho.org",
+      // Browser-side requests only. The jisho.org fallback runs in an API
+      // route (server-side fetch — CSP doesn't apply), so it stays out of
+      // this list.
+      "connect-src 'self' https://*.supabase.co wss://*.supabase.co",
       "frame-ancestors 'none'",
       "base-uri 'self'",
       "form-action 'self'",
