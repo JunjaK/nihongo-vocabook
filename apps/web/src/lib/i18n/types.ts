@@ -623,6 +623,9 @@ export interface Translations {
       cancelled: string;
       modelMissing: string;
       attachFailed: string;
+      attachTooLarge: (sizeMb: number) => string;
+      attachInvalidType: string;
+      tooManyAttachments: (max: number) => string;
       micPermissionDenied: string;
       recordFailed: string;
       recordNotSupportedOnWeb: string;

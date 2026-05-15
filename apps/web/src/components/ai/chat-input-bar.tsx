@@ -28,6 +28,13 @@ interface PendingAttachment {
 }
 
 const MAX_RECORD_SECONDS = 30;
+/** Max pending attachments per outgoing message. Keeps the multimodal
+ *  prompt small enough for the on-device model and bounds upload size. */
+const MAX_ATTACHMENTS = 3;
+/** Per-attachment byte cap — covers phone-camera JPEGs without letting a
+ *  malformed multi-GB file reach the storage layer. */
+const MAX_ATTACHMENT_BYTES = 20 * 1024 * 1024;
+const MAX_ATTACHMENT_MB = MAX_ATTACHMENT_BYTES / 1024 / 1024;
 
 export function ChatInputBar({ scope }: ChatInputBarProps) {
   const { t } = useTranslation();
@@ -71,8 +78,16 @@ export function ChatInputBar({ scope }: ChatInputBarProps) {
   }, [t]);
 
   async function handleAudioBlob(base64: string, mimeType: string, durationMs?: number) {
+    if (pending.length >= MAX_ATTACHMENTS) {
+      toast.error(t.assistant.error.tooManyAttachments(MAX_ATTACHMENTS));
+      return;
+    }
     try {
       const blob = base64ToBlob(base64, mimeType);
+      if (blob.size > MAX_ATTACHMENT_BYTES) {
+        toast.error(t.assistant.error.attachTooLarge(MAX_ATTACHMENT_MB));
+        return;
+      }
       const id = await storeAttachment(blob, { mimeType });
       const previewUrl = URL.createObjectURL(blob);
       setPending((p) => [
@@ -91,6 +106,21 @@ export function ChatInputBar({ scope }: ChatInputBarProps) {
     const file = e.target.files?.[0];
     e.target.value = ''; // reset so same-file re-pick fires change
     if (!file) return;
+    // Validate at the boundary before storing — reject unsupported types,
+    // oversized files, and over-cap selections so a single bad pick can't
+    // poison the pending queue or fill IndexedDB.
+    if (!file.type.startsWith('image/') && !file.type.startsWith('audio/')) {
+      toast.error(t.assistant.error.attachInvalidType);
+      return;
+    }
+    if (file.size > MAX_ATTACHMENT_BYTES) {
+      toast.error(t.assistant.error.attachTooLarge(MAX_ATTACHMENT_MB));
+      return;
+    }
+    if (pending.length >= MAX_ATTACHMENTS) {
+      toast.error(t.assistant.error.tooManyAttachments(MAX_ATTACHMENTS));
+      return;
+    }
     try {
       const kind = file.type.startsWith('audio/') ? 'audio' : 'image';
       const id = await storeAttachment(file, { mimeType: file.type });
@@ -216,7 +246,7 @@ export function ChatInputBar({ scope }: ChatInputBarProps) {
             size="icon"
             className="size-11 shrink-0"
             onClick={onAttachClick}
-            disabled={isStreaming}
+            disabled={isStreaming || pending.length >= MAX_ATTACHMENTS}
             aria-label={t.assistant.attachImage}
             data-testid="chat-input-attach"
           >
@@ -227,7 +257,7 @@ export function ChatInputBar({ scope }: ChatInputBarProps) {
             size="icon"
             className="size-11 shrink-0"
             onClick={startRecording}
-            disabled={isStreaming}
+            disabled={isStreaming || pending.length >= MAX_ATTACHMENTS}
             aria-label={t.assistant.recordAudio}
             data-testid="chat-input-mic"
           >

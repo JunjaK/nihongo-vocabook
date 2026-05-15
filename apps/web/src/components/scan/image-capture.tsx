@@ -14,9 +14,10 @@ import { isNativeApp, requestCamera, onNativeMessage } from '@/lib/native-bridge
  *  file doesn't OOM the OCR pipeline. */
 const MAX_IMAGE_BYTES = 20 * 1024 * 1024;
 const MAX_IMAGE_MB = MAX_IMAGE_BYTES / 1024 / 1024;
-/** Hard cap on a single multi-select — protects the convert loop from
- *  pathological inputs while leaving room for legitimate notebook scans. */
-const MAX_IMAGES_PER_PICK = 20;
+/** Hard cap on a single multi-select. Five is the practical limit for one
+ *  scan session — keeps the on-device OCR pipeline responsive and protects
+ *  the convert loop from pathological inputs. */
+const MAX_IMAGES_PER_PICK = 5;
 
 interface ImageCaptureProps {
   onExtract: (imageDataUrls: string[]) => void;
