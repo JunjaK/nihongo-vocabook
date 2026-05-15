@@ -277,6 +277,19 @@ export function WordPreview({
                         {t.scan.alreadyAdded}
                       </span>
                     )}
+                    {/* Surface dictionary auto-correction so the user can see
+                        when the displayed form differs from the model's raw
+                        output (inflection normalized, compound split, etc.). */}
+                    {word.matchSource === 'inflection' ||
+                    word.matchSource === 'reading' ||
+                    word.matchSource === 'split' ? (
+                      <span
+                        className="shrink-0 rounded bg-accent-muted/20 px-1.5 py-0.5 text-xs font-normal text-text-tertiary"
+                        title={word.matchSource}
+                      >
+                        {t.scan.autoCorrected}
+                      </span>
+                    ) : null}
                     {word.jlptLevel && (
                       <span className="ml-auto shrink-0 rounded bg-primary/10 px-1.5 py-0.5 text-xs font-medium text-primary">
                         N{word.jlptLevel}

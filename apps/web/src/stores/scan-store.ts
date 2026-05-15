@@ -12,18 +12,148 @@ const KANJI_CHAR_REGEX = /[一-鿿㐀-䶿]/;
 const SINGLE_KANJI_REGEX = /^[一-鿿㐀-䶿]$/;
 const KATAKANA_ONLY_REGEX = /^[゠-ヿ]+$/;
 const HIRAGANA_ONLY_REGEX = /^[぀-ゟ]+$/;
+const KANJI_GLOBAL_REGEX = /[一-鿿㐀-䶿]/g;
 
-function buildNormalizedLookupForms(raw: string): string[] {
+/**
+ * Inflection endings stripped from a raw term to recover dictionary-form
+ * candidates. Ordered longest-first per group so a specific ending (e.g.
+ * "ませんでした") strips before a generic one ("した") matches.
+ *
+ * Grouped by morphological category. The strip applier walks this flat list
+ * and stops at the first match; group boundaries are for human readability
+ * only. See `_docs/scan-dictionary-fuzzy-match.md` for the full table and
+ * design rationale.
+ */
+const INFLECTION_ENDINGS: readonly string[] = [
+  // Group 1 — polite & copula
+  'ませんでした',
+  'ましょう', 'ましても', 'ませんで', 'でしょう',
+  'でした', 'ました', 'ません', 'である', 'だった', 'だろう', 'でしょ',
+  'です', 'ます',
+  // Group 2 — negative
+  'くなかった', 'くなくて', 'なかった',
+  'なくては', 'なければ', 'なくて',
+  'なきゃ', 'ない',
+  // Group 3 — desiderative / propensity / aux
+  'たかった', 'たくない', 'たくて',
+  'やすい', 'にくい', 'がたい', 'すぎる', 'すぎた',
+  'たがる', 'がち', 'がる',
+  'たい', 'たく', 'そう',
+  // Group 4 — passive / causative / potential
+  'させられる', 'させられた',
+  'られない', 'られます', 'られた',
+  'させない', 'させます', 'させた',
+  'られる', 'させる',
+  'れる', 'せる', 'れた', 'せた',
+  // Group 5 — i-adjective (entries that overlap with negatives like
+  // 'くなかった' are deduped at runtime via Set semantics)
+  'ければ', 'かった', 'くない', 'くて', 'くなる', 'くする',
+  // Group 6 — te / ta form (highest false-positive risk; 1-char endings
+  // gated separately via MIN_STEM_FOR_SHORT_ENDING)
+  'てしまう', 'ちゃう', 'じゃう',
+  'ています', 'ていた', 'ている',
+  'ながら', 'つつ',
+  'って', 'んで', 'いて', 'した', 'して',
+  'たら', 'たり', 'ても', 'なら',
+  'た', 'て',
+  // Group 7 — imperative / volitional / formal
+  'なさい', 'ください', 'おる', 'よう', 'ろ',
+] as const;
+
+/**
+ * Endings shorter than this length require a longer stem to apply, since the
+ * shorter the ending the higher the chance of accidentally chopping a real
+ * noun (e.g. 反応 ends in 応, not in the inflection 'う'). 2+ char endings
+ * use MIN_STEM_LENGTH instead.
+ */
+const MIN_STEM_LENGTH = 2;
+const MIN_STEM_FOR_SHORT_ENDING = 3;
+
+/**
+ * Godan verb i-row → u-row mapping. After stripping a masu-stem ending the
+ * stem ends in an i-row kana; rotating that last char to its u-row sibling
+ * reconstructs the dictionary form (e.g. 飲み → 飲む, 書き → 書く).
+ */
+const I_ROW_TO_U_ROW: Readonly<Record<string, string>> = {
+  き: 'く', ぎ: 'ぐ',
+  し: 'す', じ: 'ず',
+  ち: 'つ',
+  に: 'ぬ',
+  ひ: 'ふ', び: 'ぶ', ぴ: 'ぷ',
+  み: 'む',
+  り: 'る',
+  い: 'う',
+};
+
+function containsKanji(s: string): boolean {
+  return KANJI_CHAR_REGEX.test(s);
+}
+
+function extractKanjiSet(s: string): Set<string> {
+  return new Set(s.match(KANJI_GLOBAL_REGEX) ?? []);
+}
+
+/**
+ * Returns true when `candidate` preserves every kanji that appears in `raw`.
+ * Prevents the +る / +い / godan rotators from producing forms that silently
+ * drop part of the kanji compound (e.g. raw 食べる → never accept candidate る).
+ */
+function preservesKanji(raw: string, candidate: string): boolean {
+  const rawKanji = extractKanjiSet(raw);
+  if (rawKanji.size === 0) return true;
+  for (const k of rawKanji) {
+    if (!candidate.includes(k)) return false;
+  }
+  return true;
+}
+
+/**
+ * Produces the dictionary-lookup forms to try for a single raw term.
+ *
+ * Pass 1 (the existing exact-match batch query) consumes only the first
+ * element (the raw term). Pass 2 (variant lookup for unmatched terms) uses
+ * the full list:
+ *
+ *   1. raw term (as emitted by the model, NFKC-normalized)
+ *   2. for each matching inflection ending:
+ *      a. bare stem                          → noun / na-adjective
+ *      b. stem + る                          → 一段 verb
+ *      c. stem + い                          → い-adjective
+ *      d. stem with i-row last → u-row       → 五段 verb
+ *
+ * Guards (see `_docs/scan-dictionary-fuzzy-match.md` § Guards):
+ *   - stem ≥ MIN_STEM_LENGTH (or MIN_STEM_FOR_SHORT_ENDING for 1-char endings)
+ *   - stem must contain at least one kanji (pure-kana stems strip too freely)
+ *   - every generated candidate must preserve raw's kanji set
+ */
+export function buildNormalizedLookupForms(raw: string): string[] {
   const normalized = raw.normalize('NFKC');
   const forms = new Set<string>([normalized]);
 
-  const stripEndings = ['ながら', 'つつ', 'など', 'です', 'でした', 'ます', 'ました', 'して'];
-  for (const ending of stripEndings) {
+  for (const ending of INFLECTION_ENDINGS) {
     if (!normalized.endsWith(ending)) continue;
     const stem = normalized.slice(0, -ending.length);
-    if (stem.length < 2) continue;
-    forms.add(stem);
-    forms.add(`${stem}る`);
+    const minStem = ending.length === 1 ? MIN_STEM_FOR_SHORT_ENDING : MIN_STEM_LENGTH;
+    // Single-kanji stems are dict entries on their own (見, 高, 食, …) so
+    // we exempt them from the regular length floor. They still have to pass
+    // the kanji-required guard below.
+    const isSingleKanjiStem = stem.length === 1 && SINGLE_KANJI_REGEX.test(stem);
+    if (stem.length < minStem && !isSingleKanjiStem) continue;
+    if (!containsKanji(stem)) continue;
+
+    const candidates = [
+      stem,
+      `${stem}る`,
+      `${stem}い`,
+    ];
+    const lastChar = stem[stem.length - 1];
+    const uRow = I_ROW_TO_U_ROW[lastChar];
+    if (uRow) candidates.push(`${stem.slice(0, -1)}${uRow}`);
+
+    for (const candidate of candidates) {
+      if (!preservesKanji(normalized, candidate)) continue;
+      forms.add(candidate);
+    }
   }
 
   return [...forms];
@@ -289,6 +419,196 @@ function isAbortError(err: unknown): boolean {
   return err instanceof DOMException && err.name === 'AbortError';
 }
 
+/**
+ * Tags a pass-1 dictionary hit with the most specific `matchSource` we can
+ * infer without tracking which DB column matched:
+ *   - raw === dict term     → 'exact' (clean direct hit)
+ *   - raw === dict reading  → 'reading' (model emitted kana, dict has kanji form)
+ *   - otherwise             → 'inflection' (Jisho substituted a base form)
+ *
+ * Pass 2 sets matchSource explicitly from its own variant-origin map, so this
+ * helper is only for the pass-1 paths.
+ */
+function tagPass1Match(raw: string, word: ExtractedWord): ExtractedWord {
+  if (!word.dictionaryEntryId) return word;
+  const rawNormalized = raw.normalize('NFKC');
+  if (word.term === rawNormalized) return { ...word, matchSource: 'exact' };
+  if (word.reading === rawNormalized) return { ...word, matchSource: 'reading' };
+  return { ...word, matchSource: 'inflection' };
+}
+
+interface PassContext {
+  lookupTargets: string[];
+  resultMap: Map<string, ExtractedWord>;
+  hints: Map<string, ExtractedWord>;
+  locale: string;
+  signal: AbortSignal;
+  isCancelled: () => boolean;
+}
+
+interface SplitPassContext extends Omit<PassContext, 'hints'> {
+  splitReplacements: Map<string, ExtractedWord[]>;
+}
+
+type VariantKind = 'inflection' | 'reading';
+
+/**
+ * Pass 2 — variant lookup for terms with no dictionary match after pass 1.
+ *
+ * For each still-unmatched raw term we build a pool of:
+ *   - inflection-stripped candidates (bare stem, +る, +い, godan u-row)
+ *   - the model's hint reading (hiragana)
+ *
+ * All variants across all raws are flattened into ONE batch request. Hits
+ * are mapped back to their source raw via the `variantOrigins` reverse
+ * index, then scored with the existing `toExtractedWord` pipeline. The
+ * winning entry's variant kind decides whether `matchSource` is
+ * `'inflection'` or `'reading'`.
+ */
+async function runVariantLookupPass(ctx: Omit<PassContext, never>): Promise<void> {
+  const stillUnmatched: string[] = [];
+  for (const raw of ctx.lookupTargets) {
+    const existing = ctx.resultMap.get(raw);
+    if (!existing || existing.dictionaryEntryId == null) stillUnmatched.push(raw);
+  }
+  if (stillUnmatched.length === 0) return;
+
+  type Origin = { raw: string; kind: VariantKind };
+  const variantOrigins = new Map<string, Origin[]>();
+  const pushOrigin = (variant: string, origin: Origin) => {
+    const list = variantOrigins.get(variant);
+    if (list) list.push(origin);
+    else variantOrigins.set(variant, [origin]);
+  };
+
+  for (const raw of stillUnmatched) {
+    const normalized = raw.normalize('NFKC');
+    for (const v of buildNormalizedLookupForms(raw)) {
+      if (v === normalized) continue;
+      pushOrigin(v, { raw, kind: 'inflection' });
+    }
+    const hintReading = ctx.hints.get(raw)?.reading?.normalize('NFKC');
+    if (hintReading && hintReading.length >= 2 && hintReading !== normalized) {
+      pushOrigin(hintReading, { raw, kind: 'reading' });
+    }
+  }
+
+  const variantList = [...variantOrigins.keys()];
+  if (variantList.length === 0) return;
+
+  let batchResult: Awaited<ReturnType<typeof searchDictionaryBatch>>;
+  try {
+    batchResult = await searchDictionaryBatch(variantList, ctx.locale, {
+      signal: ctx.signal,
+    });
+  } catch (err) {
+    if (ctx.signal.aborted) return;
+    // Variant lookup is best-effort — if it fails we just keep the
+    // existing pass-1 fallback (model hint, matchSource=null).
+    console.warn('[scan] variant lookup failed', err);
+    return;
+  }
+  if (ctx.isCancelled()) return;
+
+  // Aggregate per raw: candidate entries + their source kind. A single
+  // entry can be reached via multiple variants (e.g. both inflection AND
+  // reading); we keep the FIRST kind seen so inflection (added first below)
+  // wins ties — matches the user-facing "inflection" framing of the most
+  // common correction case.
+  const rawToGroups = new Map<
+    string,
+    Array<{ entries: DictionaryEntry[]; kind: VariantKind }>
+  >();
+  for (const [variant, entries] of batchResult.found) {
+    const origins = variantOrigins.get(variant);
+    if (!origins) continue;
+    for (const { raw, kind } of origins) {
+      const arr = rawToGroups.get(raw);
+      if (arr) arr.push({ entries, kind });
+      else rawToGroups.set(raw, [{ entries, kind }]);
+    }
+  }
+
+  for (const [raw, groups] of rawToGroups) {
+    if (ctx.isCancelled()) return;
+    const entryKinds = new Map<string, VariantKind>();
+    const allEntries: DictionaryEntry[] = [];
+    for (const { entries, kind } of groups) {
+      for (const e of entries) {
+        if (!entryKinds.has(e.id)) entryKinds.set(e.id, kind);
+        allEntries.push(e);
+      }
+    }
+    const result = toExtractedWord(raw, allEntries, ctx.locale, ctx.hints.get(raw));
+    if (!result.dictionaryEntryId) continue;
+    const kind = entryKinds.get(result.dictionaryEntryId) ?? 'inflection';
+    ctx.resultMap.set(raw, { ...result, matchSource: kind });
+  }
+}
+
+/**
+ * Pass 3 — 2-2 kanji split fallback.
+ *
+ * Triggered only when:
+ *   - the raw term has no dict match after pass 2
+ *   - the term is exactly 4 characters
+ *   - all 4 characters are kanji
+ *
+ * Both halves must resolve in the dictionary. Partial matches reject the
+ * split so proper nouns (e.g. 大谷翔平 — 大谷 hits but 翔平 doesn't) and
+ * unregistered compounds stay intact as a `matchSource=null` model output.
+ */
+async function runSplitFallbackPass(ctx: SplitPassContext): Promise<void> {
+  const candidates: Array<{ raw: string; left: string; right: string }> = [];
+  for (const raw of ctx.lookupTargets) {
+    const existing = ctx.resultMap.get(raw);
+    if (existing?.dictionaryEntryId) continue;
+    const normalized = raw.normalize('NFKC');
+    if (normalized.length !== 4) continue;
+    if (![...normalized].every((c) => KANJI_CHAR_REGEX.test(c))) continue;
+    candidates.push({
+      raw,
+      left: normalized.slice(0, 2),
+      right: normalized.slice(2, 4),
+    });
+  }
+  if (candidates.length === 0) return;
+
+  const halves = new Set<string>();
+  for (const c of candidates) {
+    halves.add(c.left);
+    halves.add(c.right);
+  }
+
+  let batchResult: Awaited<ReturnType<typeof searchDictionaryBatch>>;
+  try {
+    batchResult = await searchDictionaryBatch([...halves], ctx.locale, {
+      signal: ctx.signal,
+    });
+  } catch (err) {
+    if (ctx.signal.aborted) return;
+    console.warn('[scan] split fallback lookup failed', err);
+    return;
+  }
+  if (ctx.isCancelled()) return;
+
+  for (const c of candidates) {
+    if (ctx.isCancelled()) return;
+    const leftEntries = batchResult.found.get(c.left);
+    const rightEntries = batchResult.found.get(c.right);
+    if (!leftEntries?.length || !rightEntries?.length) continue;
+
+    const leftWord = toExtractedWord(c.left, leftEntries, ctx.locale);
+    const rightWord = toExtractedWord(c.right, rightEntries, ctx.locale);
+    if (!leftWord.dictionaryEntryId || !rightWord.dictionaryEntryId) continue;
+
+    ctx.splitReplacements.set(c.raw, [
+      { ...leftWord, matchSource: 'split' },
+      { ...rightWord, matchSource: 'split' },
+    ]);
+  }
+}
+
 export const useScanStore = create<ScanState>((set, get) => ({
   status: 'idle',
   capturedImages: [],
@@ -357,21 +677,29 @@ export const useScanStore = create<ScanState>((set, get) => ({
         resultMap.set(term, hints.get(term) ?? { term, reading: '', meaning: '', jlptLevel: null });
       }
 
+      // Track which raw terms got replaced by a 2-2 kanji split in pass 3.
+      // Split halves bypass the normal resultMap lookup so that the original
+      // raw term is removed from the output and the two halves take its slot.
+      const splitReplacements = new Map<string, ExtractedWord[]>();
+
       if (lookupTargets.length > 0) {
         set({ status: 'enriching', enrichProgress: { current: 0, total: lookupTargets.length } });
 
+        // ── Pass 1a: batch lookup by raw term ────────────────────────────
         const batchResult = await searchDictionaryBatch(lookupTargets, locale, {
           signal: controller.signal,
         });
         if (get().cancelId !== id) return;
 
         for (const [term, entries] of batchResult.found) {
-          resultMap.set(term, toExtractedWord(term, entries, locale, hints.get(term)));
+          const word = toExtractedWord(term, entries, locale, hints.get(term));
+          resultMap.set(term, tagPass1Match(term, word));
         }
 
         const batchFoundCount = batchResult.found.size;
         set({ enrichProgress: { current: batchFoundCount, total: lookupTargets.length } });
 
+        // ── Pass 1b: per-missing Jisho fallback (one at a time) ──────────
         for (let i = 0; i < batchResult.missing.length; i++) {
           if (get().cancelId !== id) return;
 
@@ -382,7 +710,8 @@ export const useScanStore = create<ScanState>((set, get) => ({
             const entries = await searchDictionary(raw, locale, {
               signal: controller.signal,
             });
-            resultMap.set(raw, toExtractedWord(raw, entries, locale, hints.get(raw)));
+            const word = toExtractedWord(raw, entries, locale, hints.get(raw));
+            resultMap.set(raw, tagPass1Match(raw, word));
           } catch {
             if (controller.signal.aborted) return;
             resultMap.set(raw, hints.get(raw) ?? { term: raw, reading: '', meaning: '', jlptLevel: null });
@@ -391,13 +720,52 @@ export const useScanStore = create<ScanState>((set, get) => ({
             enrichProgress: { current: batchFoundCount + i + 1, total: lookupTargets.length },
           });
         }
+
+        // ── Pass 2: variant lookup for terms still without a dict match ──
+        // Builds a flat pool of inflection-stripped + reading variants for
+        // every still-unmatched raw term, runs ONE batch query, then maps
+        // hits back to their source raw(s) via the origins map.
+        await runVariantLookupPass({
+          lookupTargets,
+          resultMap,
+          hints,
+          locale,
+          signal: controller.signal,
+          isCancelled: () => get().cancelId !== id,
+        });
+        if (get().cancelId !== id) return;
+
+        // ── Pass 3: 2-2 kanji split fallback ─────────────────────────────
+        // Only attempted on still-unmatched 4-kanji terms. Both halves must
+        // resolve in the dictionary; partial matches reject the split so
+        // proper nouns and unregistered compounds stay intact.
+        await runSplitFallbackPass({
+          lookupTargets,
+          resultMap,
+          splitReplacements,
+          locale,
+          signal: controller.signal,
+          isCancelled: () => get().cancelId !== id,
+        });
+        if (get().cancelId !== id) return;
       }
 
       if (get().cancelId !== id) return;
 
-      const results = filteredTerms.map(
-        (raw) => resultMap.get(raw) ?? hints.get(raw) ?? { term: raw, reading: '', meaning: '', jlptLevel: null },
-      );
+      // Build final list — a split raw term expands into its halves at the
+      // original slot; everything else falls back through resultMap → hint.
+      const results: ExtractedWord[] = [];
+      for (const raw of filteredTerms) {
+        const splits = splitReplacements.get(raw);
+        if (splits) {
+          results.push(...splits);
+          continue;
+        }
+        results.push(
+          resultMap.get(raw) ??
+            hints.get(raw) ?? { term: raw, reading: '', meaning: '', jlptLevel: null },
+        );
+      }
 
       set({
         status: 'preview',
