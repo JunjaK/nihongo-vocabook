@@ -13,8 +13,8 @@ import { Separator } from '@/components/ui/separator';
 import { useTranslation } from '@/lib/i18n';
 import { useAuthStore } from '@/stores/auth-store';
 import { createClient } from '@/lib/supabase/client';
-import { fetchProfile, saveProfile } from '@/lib/profile/fetch';
-import { bottomBar, bottomSep, settingsScroll, settingsSection, settingsHeading } from '@/lib/styles';
+import { saveProfile } from '@/lib/profile/fetch';
+import { bottomBar, bottomSep } from '@/lib/styles';
 import {
   Combobox,
   ComboboxInput,
@@ -42,9 +42,11 @@ export default function ProfilePage() {
   const router = useRouter();
   const { t } = useTranslation();
   const user = useAuthStore((s) => s.user);
+  const profile = useAuthStore((s) => s.profile);
+  const profileLoading = useAuthStore((s) => s.profileLoading);
+  const setProfile = useAuthStore((s) => s.setProfile);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [nickname, setNickname] = useState('');
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
@@ -58,27 +60,25 @@ export default function ProfilePage() {
   const [changingPassword, setChangingPassword] = useState(false);
   const [deletingAccount, setDeletingAccount] = useState(false);
 
+  // Hydrate the form from the cached profile in the auth store. When the
+  // store updates (initial load or after a save), reseed the local fields.
+  // The local copies stay decoupled from the store so editing doesn't push
+  // unsaved values to other pages reading from the store.
+  const loading = !!user && profileLoading && !profile;
   useEffect(() => {
-    if (!user) return;
-    fetchProfile()
-      .then((profile) => {
-        setNickname(profile.nickname ?? '');
-        setAvatarUrl(profile.avatarUrl);
-        if (profile.jlptLevel) setJlptLevel(profile.jlptLevel);
-        if (profile.studyPurpose) {
-          if (profile.studyPurpose === 'certification' || profile.studyPurpose === 'study') {
-            setStudyPurpose(profile.studyPurpose);
-          } else {
-            setStudyPurpose('other');
-            setOtherPurpose(profile.studyPurpose);
-          }
-        }
-      })
-      .catch(() => {
-        // Ignore — new user might not have settings
-      })
-      .finally(() => setLoading(false));
-  }, [user]);
+    if (!profile) return;
+    setNickname(profile.nickname ?? '');
+    setAvatarUrl(profile.avatarUrl);
+    if (profile.jlptLevel) setJlptLevel(profile.jlptLevel);
+    if (profile.studyPurpose) {
+      if (profile.studyPurpose === 'certification' || profile.studyPurpose === 'study') {
+        setStudyPurpose(profile.studyPurpose);
+      } else {
+        setStudyPurpose('other');
+        setOtherPurpose(profile.studyPurpose);
+      }
+    }
+  }, [profile]);
 
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -101,16 +101,27 @@ export default function ProfilePage() {
     const url = `${data.publicUrl}?t=${Date.now()}`;
     setAvatarUrl(url);
     await saveProfile({ avatarUrl: url });
+    if (profile) setProfile({ ...profile, avatarUrl: url });
   };
 
   const handleSave = async () => {
     setSaving(true);
     try {
       const purpose = studyPurpose === 'other' ? otherPurpose.trim() : studyPurpose;
+      const trimmedNickname = nickname.trim();
+      const purposeOrNull = purpose || null;
       await saveProfile({
-        nickname: nickname.trim(),
+        nickname: trimmedNickname,
         jlptLevel,
-        studyPurpose: purpose || null,
+        studyPurpose: purposeOrNull,
+      });
+      // Reflect the saved values in the cached profile so other pages
+      // (settings, scan, etc.) see them without a refetch.
+      setProfile({
+        nickname: trimmedNickname,
+        avatarUrl,
+        jlptLevel,
+        studyPurpose: purposeOrNull,
       });
       toast.success(t.profile.saved);
     } catch {

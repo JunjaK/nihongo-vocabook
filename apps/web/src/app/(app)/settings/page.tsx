@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useTheme } from 'next-themes';
@@ -10,7 +10,7 @@ import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
-import { ChevronRight, ExternalLink, Trophy, SlidersHorizontal, BarChart3, Trash2, AlertTriangle, LogOut, Sparkles } from '@/components/ui/icons';
+import { ChevronRight, ExternalLink, Trophy, SlidersHorizontal, BarChart3, AlertTriangle, LogOut, Sparkles } from '@/components/ui/icons';
 import { useAuthStore } from '@/stores/auth-store';
 import { useRepository } from '@/lib/repository/provider';
 import { createClient } from '@/lib/supabase/client';
@@ -19,7 +19,6 @@ import { useBottomNavLock } from '@/hooks/use-bottom-nav-lock';
 import { invalidateListCache } from '@/lib/list-cache';
 import { clearSession } from '@/lib/quiz/session-store';
 import { requestDueCountRefresh } from '@/lib/quiz/due-count-sync';
-import { fetchProfile } from '@/lib/profile/fetch';
 import { searchDictionary } from '@/lib/dictionary/jisho';
 import {
   settingsScroll,
@@ -32,6 +31,8 @@ import {
 export default function SettingsPage() {
   const router = useRouter();
   const user = useAuthStore((s) => s.user);
+  const profile = useAuthStore((s) => s.profile);
+  const profileLoading = useAuthStore((s) => s.profileLoading);
   const repo = useRepository();
   const { t, locale, setLocale } = useTranslation();
   const { theme, setTheme } = useTheme();
@@ -39,21 +40,12 @@ export default function SettingsPage() {
   const [importing, setImporting] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [resetting, setResetting] = useState(false);
-  const [profileNickname, setProfileNickname] = useState<string | null>(null);
-  const [profileLoading, setProfileLoading] = useState(true);
   useBottomNavLock(importing);
 
-  useEffect(() => {
-    if (!user) {
-      setProfileLoading(false);
-      return;
-    }
-    setProfileLoading(true);
-    fetchProfile()
-      .then((p) => setProfileNickname(p.nickname))
-      .catch(() => {})
-      .finally(() => setProfileLoading(false));
-  }, [user]);
+  const profileNickname = profile?.nickname ?? null;
+  // Skeleton only when we have a user but no profile yet (first session load).
+  // Once cached, re-entries are instant — no skeleton flash.
+  const showProfileSkeleton = !!user && profileLoading && !profile;
 
   const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -177,7 +169,7 @@ export default function SettingsPage() {
                 {(profileNickname?.[0] ?? user.email?.[0] ?? 'U').toUpperCase()}
               </div>
               <div className="min-w-0 flex-1">
-                {profileLoading ? (
+                {showProfileSkeleton ? (
                   <div className="space-y-1.5">
                     <Skeleton className="h-4 w-24" />
                     <Skeleton className="h-3 w-36" />
@@ -470,13 +462,6 @@ export default function SettingsPage() {
       />
     </>
   );
-}
-
-function csvEscape(value: string): string {
-  if (value.includes(',') || value.includes('"') || value.includes('\n')) {
-    return `"${value.replace(/"/g, '""')}"`;
-  }
-  return value;
 }
 
 function parseCSVLine(line: string): string[] {

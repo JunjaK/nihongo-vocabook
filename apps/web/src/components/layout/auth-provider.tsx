@@ -12,6 +12,8 @@ import {
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const setUser = useAuthStore((s) => s.setUser);
+  const loadProfile = useAuthStore((s) => s.loadProfile);
+  const userId = useAuthStore((s) => s.user?.id ?? null);
 
   // Core auth: get user + listen for state changes
   useEffect(() => {
@@ -34,6 +36,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     return () => subscription.unsubscribe();
   }, [setUser]);
+
+  // Profile cache — fetched once when the user becomes non-null, so every page
+  // that needs nickname/avatar/jlpt-level reads instantly from the store
+  // instead of round-tripping /api/profile on each visit.
+  useEffect(() => {
+    if (!userId) return;
+    loadProfile();
+  }, [userId, loadProfile]);
 
   // Native bridge: listen for RESTORE_AUTH, then signal READY
   useEffect(() => {

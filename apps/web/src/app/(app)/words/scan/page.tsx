@@ -32,7 +32,6 @@ import { useScanStore } from '@/stores/scan-store';
 import { useBottomNavLock } from '@/hooks/use-bottom-nav-lock';
 import { getSnapshot, subscribeSnapshot } from '@/lib/ai/model-manager';
 import { emptySnapshot } from '@/lib/ai/types';
-import { fetchProfile } from '@/lib/profile/fetch';
 import type { ExtractedWord } from '@/lib/ocr/llm-vision';
 import Link from 'next/link';
 
@@ -41,6 +40,7 @@ export default function ScanPage() {
   const repo = useRepository();
   const { t, locale } = useTranslation();
   const user = useAuthStore((s) => s.user);
+  const profileJlptLevel = useAuthStore((s) => s.profile?.jlptLevel ?? null);
   const imageCaptureRef = useRef<ImageCaptureHandle>(null);
 
   const status = useScanStore((s) => s.status);
@@ -52,7 +52,6 @@ export default function ScanPage() {
   const setDone = useScanStore((s) => s.setDone);
   const reset = useScanStore((s) => s.reset);
 
-  const [userJlptLevel, setUserJlptLevel] = useState<number | null>(null);
   const [existingTerms, setExistingTerms] = useState<Set<string>>(new Set());
   const [leaveConfirmOpen, setLeaveConfirmOpen] = useState(false);
   const [modelPromptOpen, setModelPromptOpen] = useState(false);
@@ -62,6 +61,8 @@ export default function ScanPage() {
   // runtimes so users on the website / mobile browser get a clear
   // "install the app" CTA instead of a half-broken scan flow.
   useEffect(() => {
+    // isNativeApp() reads from window/userAgent — server-side cannot evaluate.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setNative(isNativeApp());
   }, []);
 
@@ -92,13 +93,6 @@ export default function ScanPage() {
     setModelPromptOpen(false);
     toast.success(t.aiModel.downloadComplete);
   }, [modelReady, modelPromptOpen, t.aiModel.downloadComplete]);
-
-  useEffect(() => {
-    if (!user) return;
-    fetchProfile()
-      .then((p) => setUserJlptLevel(p.jlptLevel))
-      .catch(() => {});
-  }, [user]);
 
   useEffect(() => {
     if (status !== 'preview' || enrichedWords.length === 0) return;
@@ -310,7 +304,7 @@ export default function ScanPage() {
       ) : step === 'preview' ? (
         <WordPreview
           words={enrichedWords}
-          userJlptLevel={userJlptLevel}
+          userJlptLevel={profileJlptLevel}
           existingTerms={existingTerms}
           onConfirm={handleBulkAdd}
           onEditAndAdd={handleEditAndAdd}
