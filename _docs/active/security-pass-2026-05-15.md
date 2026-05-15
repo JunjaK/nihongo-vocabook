@@ -305,14 +305,14 @@ have real ROI at this scale.
 
 ## Follow-ups worth doing later
 
+Operator confirmed the rest of the original follow-up list is already in
+place (CSP at the CF edge, CF Access on destructive endpoints, Pi
+hardening, Supabase 2FA + Vault, scheduled backups). The only
+outstanding action item is:
+
 | Item | Why |
 |---|---|
-| Move CSP / security headers from `next.config.ts` to a Cloudflare Transform Rule | Single source of truth at the edge; survives Next misconfig and applies to any sibling service on the same hostname. Code-side `headers()` can stay as defense-in-depth. |
-| Enable Cloudflare **Bot Fight Mode** + a generous IP rate-limit rule on `/api/*` | Removes most need for the in-app rate limiter. Free tier, zero code. |
-| Cloudflare **Access** policy on `/api/account/*` and admin-flavored routes | Restricts deletion / destructive endpoints to your own identity via Zero-Trust login. Free for ≤50 users. |
-| Pi-side hardening checklist | SSH key-only + disable password auth, UFW default-deny inbound, fail2ban on sshd, Docker user namespace, container `read_only: true` + `tmpfs` for `/tmp`. Outside this audit's web-app scope but more impactful than CSP nonces at this scale. |
-| Supabase 2FA + Vault for `service_role` | The deploy workflow already pulls the key from GH Secrets, but turning on 2FA on the Supabase account and using Vault inside SQL functions (migration 023 already does this for cron jobs) closes the "compromised laptop" path. |
-| Supabase scheduled backup → Pi-side rsync | Data loss is the realistic disaster, not breach. Worth automating. |
+| Enable Cloudflare **Bot Fight Mode** (+ optional rate-limit rule on `/api/*`) | Removes most automated-traffic noise before it hits the Pi and removes the in-app rate limiter's only real workload. Free tier, zero code. **How:** CF dashboard → the zone → Security → Bots → toggle "Bot Fight Mode" on. Optional next step: Security → WAF → Rate limiting rules → "Request path contains `/api/`" → 30 req/min per IP → "Managed Challenge". |
 | `git filter-repo` GitHub-side cache cleanup | ~90 days self-clears. Solo private repo — acceptable to wait. |
 
 ## Verification
