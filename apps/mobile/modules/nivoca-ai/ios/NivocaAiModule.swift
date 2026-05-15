@@ -309,10 +309,18 @@ public class NivocaAiModule: Module {
       logger.error("tryCreateEngine: settings_create returned NULL for backend=\(backend, privacy: .public)")
       return false
     }
-    // KV cache size = prefill (image ~256 + prompt ~400 + template) + decode (≤1024).
-    // 1024 overflows when the model + image fills ~700 tokens before generation starts,
-    // which manifested as a DYNAMIC_UPDATE_SLICE prepare-time failure at decode node 1164.
-    litert_lm_engine_settings_set_max_num_tokens(settings, 2048)
+    // KV cache size. Gemma 4 E2B (.litertlm) supports up to 32K tokens per the
+    // litert-community model card. We set the published max so multi-turn chat
+    // + 13 tool definitions + occasional image/audio attachments fit without
+    // truncation. Memory cost on iPhone 15 Pro+ (8 GB RAM): ~1.5-2 GB working
+    // set including model weights + KV cache + scratch — well under iOS
+    // Jetsam pressure for our supported devices. Lower this to 8192 or 16384
+    // if low-RAM iPhones report OOM kills.
+    //
+    // Previously 2048 to avoid an early DYNAMIC_UPDATE_SLICE bug in v0.11.0;
+    // that bug was MTP-drafter shape mismatch, not max_num_tokens-related,
+    // and is handled by the gpu+MTP / gpu / cpu fallback chain above.
+    litert_lm_engine_settings_set_max_num_tokens(settings, 32768)
     litert_lm_engine_settings_set_cache_dir(settings, cacheDir)
     // MTP (multi-token prediction) — Gemma 4's official 2-3× decode speedup.
     // Google's guidance: enable on GPU backends universally; on CPU only for
@@ -574,6 +582,11 @@ public class NivocaAiModule: Module {
     }
 
     guard let conversation = litert_lm_conversation_create(engine, convConfig) else {
+      // Engine is in a bad state after a prior failure (e.g. token-overflow
+      // from a previous turn poisoned the conversation handle). Tear it down
+      // so the NEXT call rebuilds from scratch via ensureLoaded.
+      logger.error("startTextStream: conversation_create returned NULL — tearing down engine for recovery")
+      loadQueue.sync { self.teardownEngine() }
       throw NivocaAiError("not_ready", "Could not create conversation")
     }
 
@@ -869,7 +882,8 @@ public class NivocaAiModule: Module {
     // until the model EOS's immediately (we saw raw.len collapse from
     // 2176 → 2 → 1 across consecutive calls with a shared conversation).
     guard let conversation = litert_lm_conversation_create(engine, convConfig) else {
-      logger.error("runInference: conversation_create returned NULL")
+      logger.error("runInference: conversation_create returned NULL — tearing down engine")
+      loadQueue.sync { self.teardownEngine() }
       throw NivocaAiError("not_ready", "Could not create conversation for this request")
     }
     defer { litert_lm_conversation_delete(conversation) }
@@ -1031,6 +1045,8 @@ public class NivocaAiModule: Module {
 
     // Fresh conversation per call — same state-pollution mitigation as OCR.
     guard let conversation = litert_lm_conversation_create(engine, convConfig) else {
+      logger.error("runTextInference: conversation_create returned NULL — tearing down engine")
+      loadQueue.sync { self.teardownEngine() }
       throw NivocaAiError("not_ready", "Could not create conversation")
     }
     defer { litert_lm_conversation_delete(conversation) }
