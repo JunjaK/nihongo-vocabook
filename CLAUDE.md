@@ -38,16 +38,21 @@ When exploring or debugging code, if you hit a dead end or can't pinpoint the ca
 
 Before starting complex tasks, always check `_docs/`:
 
-1. **Read `_docs/`** — Check if related documentation exists
-2. **Reference related docs** — Read existing plans/implementation docs first
-3. **After completion** — Update docs when creating new plans
+1. **Read `_docs/active/`** first — work-in-progress plans, handoffs, NEEDS REVIEW items
+2. **Skim `_docs/complete/`** if the topic is related — historical context for a shipped feature
+3. **Ignore `_docs/archive/`** unless you're explicitly digging into history
+4. **After completion** — move the doc between folders as its lifecycle changes
 
 ```
 _docs/
-├── ocr-scan-plan.md              # OCR/Scan feature plan
-├── quiz-improvements-2026-02.md  # Quiz improvements plan
-└── ...                           # Other feature plans
+├── active/      # In-progress / needs-action / handoff in flight
+├── complete/    # Shipped, kept as reference for the matching code
+└── archive/     # One-shot analyses, old plans, PoC artifacts — read-only history
+
+_notes/          # Long-form blog drafts / journey writeups — not project plans
 ```
+
+**Lifecycle**: `active/` → (ship the feature) → `complete/`. Move to `archive/` only when a doc is superseded by newer plans or describes a path we abandoned.
 
 ---
 
@@ -131,20 +136,24 @@ If user explicitly says "only this file", "just this file", "이 파일만", or 
 
 ## Plan Mode Documentation Rules
 
-**Required**: Plan documents must be saved in `_docs/`
+**Required**: Plan documents must be saved in `_docs/active/` while in flight, then moved to `_docs/complete/` when shipped.
 
 ### Document Lifecycle
 
 ```
-Plan → _docs/ save → Spec/Checklist → Implementation → User Feedback → _docs rewrite → Complete
+Draft plan → _docs/active/<name>.md (Status: Planning)
+          → (approved) Status: In Progress
+          → (shipped + verified) git mv to _docs/complete/
+          → (superseded or abandoned) git mv to _docs/archive/
 ```
 
-| Status | Meaning |
-|--------|---------|
-| Planning | Plan drafted, not yet approved |
-| In Progress | Implementation started |
-| Feedback | Waiting for user review |
-| Complete | Verified and docs finalized |
+| Status | Folder | Meaning |
+|--------|--------|---------|
+| Planning | `_docs/active/` | Plan drafted, not yet approved |
+| In Progress | `_docs/active/` | Implementation started |
+| Feedback | `_docs/active/` | Waiting for user review |
+| Complete | `_docs/complete/` | Verified, kept as reference |
+| Archived | `_docs/archive/` | Superseded or one-shot analysis |
 
 ### Plan Document Template
 

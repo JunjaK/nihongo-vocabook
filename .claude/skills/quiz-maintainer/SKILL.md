@@ -20,7 +20,7 @@ Operational rules to prevent regressions when modifying quiz/practice features. 
 - Distinguish practice mode (wordbook-based) from SRS quiz (review-based).
 - Prefer the `user_word_state` path for user state values.
 - Use i18n keys for all user-facing strings.
-- Document key changes and verification points in `_docs/`.
+- Document key changes and verification points in `_docs/active/` (or `complete/` after ship).
 
 ---
 
@@ -99,7 +99,7 @@ Before completing quiz/practice changes, verify:
 - [ ] Changes to user state use `user_word_state` path, not `words` table directly
 - [ ] UI changes do not break existing click logic
 - [ ] i18n triad (`types.ts`, `en.ts`, `ko.ts`) is synchronized
-- [ ] `_docs/` documentation reflects the latest changes
+- [ ] `_docs/active/` (or `complete/` after ship) documentation reflects the latest changes
 - [ ] Changed files pass lint
 
 ---
@@ -114,4 +114,4 @@ Before completing quiz/practice changes, verify:
 | Navigation | `src/components/layout/bottom-nav.tsx` |
 | Repository | `src/lib/repository/supabase-repo.ts`, `src/lib/repository/indexeddb-repo.ts`, `src/lib/repository/types.ts` |
 | i18n | `src/lib/i18n/types.ts`, `src/lib/i18n/ko.ts`, `src/lib/i18n/en.ts` |
-| Docs | `_docs/*quiz*.md` |
+| Docs | `_docs/complete/*quiz*.md` (or `_docs/active/` if drafting) |

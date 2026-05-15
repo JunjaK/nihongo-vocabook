@@ -11,7 +11,7 @@ nihongo-vocabook/
 ├── apps/mobile/       # Expo React Native app (WebView + native features)
 ├── packages/          # Shared packages (future)
 ├── supabase/          # Shared infra (migrations, seeds)
-└── _docs/             # Shared documentation
+└── _docs/             # Shared documentation (active/ complete/ archive/)
 ```
 
 ## Web App — Core Infrastructure
