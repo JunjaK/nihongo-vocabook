@@ -65,10 +65,19 @@ export default function LandingPage() {
           <Image
             src="/main_logo.png"
             alt="NiVoca"
-            width={260}
-            height={64}
+            width={320}
+            height={79}
             priority
-            className="h-auto w-[260px] dark:invert dark:brightness-200 dark:contrast-100"
+            className="block h-auto w-[320px] dark:hidden"
+          />
+          <Image
+            src="/main_logo_dark.png"
+            alt=""
+            aria-hidden
+            width={320}
+            height={79}
+            priority
+            className="hidden h-auto w-[320px] dark:block"
           />
         </h1>
         <p className="w-[260px] whitespace-pre-line text-title-sm leading-[1.5] text-muted-foreground">

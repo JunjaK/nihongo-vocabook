@@ -71,10 +71,19 @@ export default function LoginPage() {
         <Image
           src="/main_logo.png"
           alt="NiVoca"
-          width={180}
-          height={44}
+          width={220}
+          height={54}
           priority
-          className="h-auto w-[180px] dark:invert dark:brightness-200 dark:contrast-100"
+          className="block h-auto w-[220px] dark:hidden"
+        />
+        <Image
+          src="/main_logo_dark.png"
+          alt=""
+          aria-hidden
+          width={220}
+          height={54}
+          priority
+          className="hidden h-auto w-[220px] dark:block"
         />
         <p className="text-body text-muted-foreground">{t.auth.welcomeBack}</p>
       </div>
