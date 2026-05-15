@@ -4,6 +4,7 @@ import { useEffect, useRef, type ReactNode } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { useScanStore } from '@/stores/scan-store';
+import { useAuthStore } from '@/stores/auth-store';
 import { useChatStore } from '@/lib/ai/chat';
 import { useRepository } from '@/lib/repository/provider';
 import { useTranslation } from '@/lib/i18n';
@@ -38,15 +39,29 @@ export function MobileShell({ children }: { children: ReactNode }) {
     }
   }, [scanStatus, pathname, router, t]);
 
-  // ----- Chat store: hydrate once, sync locale on change -----
+  // ----- Chat store: hydrate after auth resolves; re-init when repo swaps.
+  //
+  // The repository instance is rebuilt by RepositoryProvider whenever the
+  // signed-in user id changes (guestRepository ↔ SupabaseRepository). The
+  // previous gate (`if (hydrated) return`) ran exactly once with whatever
+  // repo happened to exist at mount time — usually `guestRepository`
+  // because `authLoading` starts true. Every later message would then
+  // call `guestRepository.chat.appendMessage` which throws LOGIN_REQUIRED,
+  // is swallowed by the store's try/catch, and never reaches Supabase. UX
+  // result: chat messages appear in the bubble but vanish on app reload.
+  //
+  // The fix waits for `authLoading` to resolve, then re-runs `init`
+  // whenever the repo identity changes. `init` already overwrites the
+  // store's `_repo` and re-fetches the current session.
+  const authLoading = useAuthStore((s) => s.loading);
   const hydrated = useChatStore((s) => s.hydrated);
   const setLocale = useChatStore((s) => s.setLocale);
   const initChat = useChatStore((s) => s.init);
 
   useEffect(() => {
-    if (hydrated) return;
+    if (authLoading) return;
     void initChat(repo, locale);
-  }, [hydrated, repo, locale, initChat]);
+  }, [authLoading, repo, locale, initChat]);
 
   useEffect(() => {
     if (!hydrated) return;

@@ -125,6 +125,20 @@ function uuid(): string {
 const summarizeInflight = new Set<string>();
 
 /**
+ * Surface a swallowed repository failure in dev so the next stealth bug
+ * doesn't sit invisible for weeks. We keep the `catch` silent at runtime
+ * because chat is optimistic — the bubble already renders — but a warn
+ * here would have caught the guest-vs-supabase repo mix-up that hid the
+ * "messages vanish on reload" bug for ~2 months. Prod stays quiet to
+ * avoid leaking error shapes through console / Sentry breadcrumbs.
+ */
+function devWarn(scope: string, err: unknown): void {
+  if (process.env.NODE_ENV !== 'production') {
+    console.warn(`[chat] ${scope} failed`, err);
+  }
+}
+
+/**
  * Returns true when a session of the given scope should be persisted to the
  * `ai_sessions` / `ai_messages` tables.
  *  - General: always (single rolling user session).
@@ -193,14 +207,25 @@ export const useChatStore = create<ChatStoreState>((set, get) => ({
   _repo: null,
 
   init: async (repo, locale) => {
-    set({ _repo: repo, locale });
+    // Re-init can fire when the repo identity flips (guest ↔ Supabase).
+    // Clear everything tied to the previous repo so a logged-out user
+    // doesn't keep seeing a logged-in user's session (and vice versa).
+    set({
+      _repo: repo,
+      locale,
+      generalSession: null,
+      contextSessions: {},
+      pendingConfirms: [],
+      hydrated: false,
+    });
     try {
       const existing = await repo.chat.getCurrentSession();
-      if (existing) {
-        set({ generalSession: existing });
-      }
-    } catch {
-      // LOGIN_REQUIRED (guest) — keep null; assistant page falls back.
+      set({ generalSession: existing ?? null });
+    } catch (err) {
+      // Expected when the active repo is the guest one (LOGIN_REQUIRED).
+      // Anything else is the kind of regression we want surfaced in dev.
+      devWarn('init.getCurrentSession', err);
+      set({ generalSession: null });
     }
     set({ hydrated: true });
   },
@@ -223,7 +248,8 @@ export const useChatStore = create<ChatStoreState>((set, get) => ({
         const created = await repo.chat.createSession(scope);
         set({ generalSession: created });
         return created;
-      } catch {
+      } catch (err) {
+        devWarn('ensureSession.createSession(general)', err);
         const fallback = newSession(scope);
         set({ generalSession: fallback });
         return fallback;
@@ -255,8 +281,8 @@ export const useChatStore = create<ChatStoreState>((set, get) => ({
     if (repo) {
       try {
         await repo.chat.clearAllSessions();
-      } catch {
-        // ignore — local clear still happens
+      } catch (err) {
+        devWarn('clearGeneralSession.clearAllSessions', err);
       }
     }
     set({
@@ -293,7 +319,8 @@ export const useChatStore = create<ChatStoreState>((set, get) => ({
     if (!repo) return [];
     try {
       return await repo.chat.listSessions(limit);
-    } catch {
+    } catch (err) {
+      devWarn('listGeneralSessions', err);
       return [];
     }
   },
@@ -322,8 +349,8 @@ export const useChatStore = create<ChatStoreState>((set, get) => ({
     if (!repo) return;
     try {
       await repo.chat.deleteSession(sessionId);
-    } catch {
-      // ignore
+    } catch (err) {
+      devWarn('deleteGeneralSession', err);
     }
     // If the deleted session was the active one, clear local state.
     if (get().generalSession?.id === sessionId) {
@@ -336,8 +363,8 @@ export const useChatStore = create<ChatStoreState>((set, get) => ({
     if (!repo) return;
     try {
       await repo.chat.updateSessionTitle(sessionId, title);
-    } catch {
-      // ignore
+    } catch (err) {
+      devWarn('renameGeneralSession', err);
     }
     set((s) => ({
       generalSession:
@@ -429,8 +456,12 @@ export const useChatStore = create<ChatStoreState>((set, get) => ({
     if (shouldPersistScope(scope) && userMessage) {
       try {
         await repo.chat.appendMessage(userMessage);
-      } catch {
-        // ignore — UI already shows it
+      } catch (err) {
+        // UI already shows the bubble; surface the silent fail in dev so
+        // a stale-repo regression like the one fixed alongside this helper
+        // (chat store stuck on guestRepository while user was authed)
+        // doesn't sit invisible for weeks.
+        devWarn('sendMessage.appendMessage(user)', err);
       }
       // Auto-title: the first user message in a session becomes its title
       // (truncated). Fire-and-forget; users can rename later.
@@ -684,8 +715,8 @@ export const useChatStore = create<ChatStoreState>((set, get) => ({
                 inputTokens: event.inputTokens,
                 outputTokens: event.outputTokens,
               });
-            } catch {
-              // ignore
+            } catch (err) {
+              devWarn('sendMessage.appendMessage(assistant)', err);
             }
           }
 
@@ -729,8 +760,8 @@ export const useChatStore = create<ChatStoreState>((set, get) => ({
                 errorCode: event.code,
                 errorMessage: event.message,
               });
-            } catch {
-              // ignore
+            } catch (err) {
+              devWarn('sendMessage.updateMessageStatus(failed)', err);
             }
           }
         }
@@ -1071,8 +1102,9 @@ export const useChatStore = create<ChatStoreState>((set, get) => ({
     if (!repo) return;
     try {
       await repo.chat.setMessageFeedback(messageId, feedback);
-    } catch {
+    } catch (err) {
       // Ephemeral session or transient failure — local state stays patched.
+      devWarn('setMessageFeedback', err);
     }
   },
 }));
