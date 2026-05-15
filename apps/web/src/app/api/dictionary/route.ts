@@ -2,10 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { translateToKorean } from '@/lib/dictionary/translate';
 import { createLogger } from '@/lib/logger';
-import {
-  createAnonymousRateLimiter,
-  shouldBlockAnonymousBot,
-} from '@/lib/api/rate-limit';
+import { createAnonymousRateLimiter } from '@/lib/api/rate-limit';
 import { quotePostgrestValue } from '@/lib/api/postgrest-safe';
 
 const MAX_QUERY_LEN = 100;
@@ -207,15 +204,8 @@ export async function GET(request: NextRequest) {
   } = await supabase.auth.getUser();
   const isAuthenticated = Boolean(user);
 
-  if (!isAuthenticated) {
-    const botBlock = shouldBlockAnonymousBot(request);
-    if (botBlock) {
-      return NextResponse.json({ error: botBlock.error }, { status: botBlock.status });
-    }
-
-    if (isAnonymousRateLimited(request)) {
-      return NextResponse.json({ error: 'RATE_LIMITED' }, { status: 429 });
-    }
+  if (!isAuthenticated && isAnonymousRateLimited(request)) {
+    return NextResponse.json({ error: 'RATE_LIMITED' }, { status: 429 });
   }
 
   // 1. Try local DB first — match both term and reading, including hiragana ↔

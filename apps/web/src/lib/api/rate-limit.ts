@@ -4,26 +4,11 @@ const DEFAULT_WINDOW_MS = 60_000;
 const DEFAULT_MAX_REQUESTS = 30;
 /** Sweep old buckets every N inserts so the Map can't grow without bound. */
 const CLEANUP_EVERY_N_INSERTS = 256;
-const BOT_UA_PATTERN =
-  /(bot|crawler|spider|curl|wget|python-requests|httpclient|axios|postman|insomnia|node-fetch)/i;
-
-export interface BlockDecision {
-  status: 403 | 429;
-  error: string;
-}
 
 function getClientIp(request: NextRequest): string {
   const forwardedFor = request.headers.get('x-forwarded-for');
   if (forwardedFor) return forwardedFor.split(',')[0].trim();
   return request.headers.get('x-real-ip') ?? 'unknown';
-}
-
-export function shouldBlockAnonymousBot(request: NextRequest): BlockDecision | null {
-  const userAgent = request.headers.get('user-agent') ?? '';
-  if (!userAgent || BOT_UA_PATTERN.test(userAgent)) {
-    return { status: 403, error: 'BOT_TRAFFIC_BLOCKED' };
-  }
-  return null;
 }
 
 interface RateLimitBucket {

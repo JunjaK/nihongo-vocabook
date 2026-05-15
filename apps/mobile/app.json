@@ -75,7 +75,8 @@
           }
         }
       ],
-      "expo-audio"
+      "expo-audio",
+      "./plugins/with-disable-previews"
     ],
     "scheme": "nivoca",
     "extra": {
