@@ -2,10 +2,7 @@ import { NextResponse, after, type NextRequest } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { createLogger } from '@/lib/logger';
-import {
-  createAnonymousRateLimiter,
-  shouldBlockAnonymousBot,
-} from '@/lib/api/rate-limit';
+import { createAnonymousRateLimiter } from '@/lib/api/rate-limit';
 import { KANJI_REGEX } from '@/lib/ruby';
 import {
   translateKanjiReadings,
@@ -85,14 +82,8 @@ export async function GET(request: NextRequest) {
   } = await supabase.auth.getUser();
   const isAuthenticated = Boolean(user);
 
-  if (!isAuthenticated) {
-    const botBlock = shouldBlockAnonymousBot(request);
-    if (botBlock) {
-      return NextResponse.json({ error: botBlock.error }, { status: botBlock.status });
-    }
-    if (isAnonymousRateLimited(request)) {
-      return NextResponse.json({ error: 'RATE_LIMITED' }, { status: 429 });
-    }
+  if (!isAuthenticated && isAnonymousRateLimited(request)) {
+    return NextResponse.json({ error: 'RATE_LIMITED' }, { status: 429 });
   }
 
   const { data: row, error } = await supabase

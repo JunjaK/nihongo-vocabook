@@ -101,10 +101,11 @@ export async function POST(request: NextRequest) {
     .or(`term.in.(${termList}),reading.in.(${termList})`);
 
   if (error) {
-    return NextResponse.json(
-      { error: `Database error: ${error.message}` },
-      { status: 500 },
-    );
+    // Server-side log retains the full Postgres error; the client receives
+    // only an opaque code so we don't leak table/column names or constraint
+    // hints to the caller.
+    logger.error('dictionary_entries select failed', error.message);
+    return NextResponse.json({ error: 'DB_ERROR' }, { status: 500 });
   }
 
   // Backfill missing Korean meanings for authenticated users
