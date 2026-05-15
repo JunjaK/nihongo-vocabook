@@ -69,7 +69,24 @@ function ChartContainer({
   )
 }
 
+// Allow only CSS-identifier-safe chars in interpolated tokens. The id and
+// key wind up inside a `[data-chart=…]` selector and a `--color-…` variable
+// name respectively — both are positions where a stray `}`, `{`, `<`, `;`,
+// or `*` could break out of the rule and inject styles or worse. Reject
+// rather than escape so the rule is simple to audit.
+const SAFE_CSS_IDENT = /^[A-Za-z0-9_-]+$/
+// Color values can be hex, rgb()/oklch(), or var(--name). Reject anything
+// containing CSS rule terminators or quotes that could let a value escape
+// the declaration.
+const UNSAFE_CSS_VALUE = /[;{}<>"'`\\]/
+
 const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
+  // Drop the whole <style> if the chart id itself is unsafe — without a
+  // trustworthy selector, every rule below would be ambiguous.
+  if (!SAFE_CSS_IDENT.test(id)) {
+    return null
+  }
+
   const colorConfig = Object.entries(config).filter(
     ([, config]) => config.theme || config.color
   )
@@ -78,28 +95,31 @@ const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
     return null
   }
 
-  return (
-    <style
-      dangerouslySetInnerHTML={{
-        __html: Object.entries(THEMES)
-          .map(
-            ([theme, prefix]) => `
+  const css = Object.entries(THEMES)
+    .map(
+      ([theme, prefix]) => `
 ${prefix} [data-chart=${id}] {
 ${colorConfig
   .map(([key, itemConfig]) => {
     const color =
       itemConfig.theme?.[theme as keyof typeof itemConfig.theme] ||
       itemConfig.color
-    return color ? `  --color-${key}: ${color};` : null
+    if (!color) return null
+    if (!SAFE_CSS_IDENT.test(key)) return null
+    if (UNSAFE_CSS_VALUE.test(color)) return null
+    return `  --color-${key}: ${color};`
   })
+  .filter(Boolean)
   .join("\n")}
 }
 `
-          )
-          .join("\n"),
-      }}
-    />
-  )
+    )
+    .join("\n")
+
+  // React renders child strings as text content of <style>, which the
+  // browser parses as CSS. This is the safe alternative to
+  // dangerouslySetInnerHTML and lets React escape any stray markup.
+  return <style>{css}</style>
 }
 
 const ChartTooltip = RechartsPrimitive.Tooltip
