@@ -118,14 +118,70 @@ export default async function JlptLevelPage({ params }: { params: Promise<{ leve
     active: l === level,
   }));
 
+  const sampleWords = (words as JlptWord[]) ?? [];
+  const jsonLd = buildJsonLd(level as Level, data, sampleWords);
+
   return (
-    <JlptWordList
-      level={data.label}
-      title={data.title}
-      headline={data.headline}
-      wordCount={data.wordCount}
-      words={(words as JlptWord[]) ?? []}
-      levelLinks={levelLinks}
-    />
+    <>
+      {/* Structured data — static JSON, server-rendered. React text-escapes
+          children which is safe for the JSON values used here. */}
+      <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
+      <JlptWordList
+        level={data.label}
+        title={data.title}
+        headline={data.headline}
+        wordCount={data.wordCount}
+        words={sampleWords}
+        levelLinks={levelLinks}
+      />
+    </>
   );
+}
+
+const BASE_URL = 'https://nivoca.jun-devlog.win';
+
+function buildJsonLd(level: Level, data: typeof JLPT_DATA[Level], words: JlptWord[]) {
+  const pageUrl = `${BASE_URL}/jlpt/${level}`;
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'NiVoca', item: BASE_URL },
+          { '@type': 'ListItem', position: 2, name: 'JLPT', item: `${BASE_URL}/jlpt/n5` },
+          { '@type': 'ListItem', position: 3, name: `JLPT ${data.label}`, item: pageUrl },
+        ],
+      },
+      {
+        '@type': 'CollectionPage',
+        '@id': `${pageUrl}#page`,
+        url: pageUrl,
+        name: data.title,
+        description: `${data.description} ${data.wordCount} 단어, ${data.kanjiCount} 한자 수록.`,
+        inLanguage: 'ko-KR',
+        isPartOf: { '@id': `${BASE_URL}/#website` },
+      },
+      {
+        '@type': 'ItemList',
+        '@id': `${pageUrl}#wordlist`,
+        name: `JLPT ${data.label} 샘플 단어`,
+        numberOfItems: words.length,
+        itemListElement: words.slice(0, 30).map((w, i) => ({
+          '@type': 'ListItem',
+          position: i + 1,
+          item: {
+            '@type': 'DefinedTerm',
+            name: w.term,
+            alternateName: w.reading,
+            description:
+              (w.meanings_ko && w.meanings_ko[0]) ||
+              w.meanings[0] ||
+              '',
+            inDefinedTermSet: `JLPT ${data.label}`,
+          },
+        })),
+      },
+    ],
+  };
 }

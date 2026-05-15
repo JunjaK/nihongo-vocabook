@@ -115,8 +115,8 @@ export function JlptWordList({
               >
                 <WordCard
                   word={word}
-                  showReading={false}
-                  showMeaning={false}
+                  showReading
+                  showMeaning
                   onClick={() => setShowPrompt(true)}
                 />
               </div>
