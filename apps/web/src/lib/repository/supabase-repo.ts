@@ -2,6 +2,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { reviewCard, createInitialProgress, isNewCard } from '@/lib/spaced-repetition';
 import { getLocalDateString } from '@/lib/quiz/date-utils';
 import { selectDueWords, shuffleArray } from '@/lib/quiz/word-scoring';
+import { sanitizeIlikeQuery } from '@/lib/api/postgrest-safe';
 import type {
   Word,
   WordExample,
@@ -387,11 +388,13 @@ class SupabaseWordRepository implements WordRepository {
 
   async search(query: string): Promise<Word[]> {
     const userId = await this.getUserId();
+    const safe = sanitizeIlikeQuery(query);
+    if (!safe) return [];
     // Use v_words_active to exclude mastered words server-side
     const { data, error } = await this.supabase
       .from('v_words_active')
       .select('*')
-      .or(`term.ilike.%${query}%,reading.ilike.%${query}%,meaning.ilike.%${query}%`)
+      .or(`term.ilike.%${safe}%,reading.ilike.%${safe}%,meaning.ilike.%${safe}%`)
       .order('created_at', { ascending: false });
     if (error) throw error;
     return (data ?? []).map((row: Record<string, unknown>) => {

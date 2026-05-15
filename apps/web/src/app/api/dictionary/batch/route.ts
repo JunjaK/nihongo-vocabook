@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { translateToKorean } from '@/lib/dictionary/translate';
 import { createLogger } from '@/lib/logger';
+import { quotePostgrestValue } from '@/lib/api/postgrest-safe';
 
 const logger = createLogger('api/dictionary/batch');
 
@@ -75,6 +76,15 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  // Reject non-string entries instead of silently coercing — protects the
+  // PostgREST filter below and the downstream LLM translator from junk.
+  if (!terms.every((t): t is string => typeof t === 'string' && t.length > 0)) {
+    return NextResponse.json(
+      { error: 'All terms must be non-empty strings' },
+      { status: 400 },
+    );
+  }
+
   const uniqueTerms = [...new Set(terms)];
   const supabase = await createClient();
   const {
@@ -82,7 +92,9 @@ export async function POST(request: NextRequest) {
   } = await supabase.auth.getUser();
   const isAuthenticated = Boolean(user);
 
-  const termList = uniqueTerms.join(',');
+  // Quote each value so commas/parens/quotes inside a term cannot break out
+  // of the in-list and tack on additional filter clauses.
+  const termList = uniqueTerms.map(quotePostgrestValue).join(',');
   const { data: rows, error } = await supabase
     .from('dictionary_entries')
     .select('id, term, reading, meanings, meanings_ko, parts_of_speech, jlpt_level')

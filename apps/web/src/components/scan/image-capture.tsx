@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useState, useEffect, useImperativeHandle, forwardRef } from 'react';
+import { toast } from 'sonner';
 import { ImagePlus, X } from '@/components/ui/icons';
 import { Button } from '@/components/ui/button';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
@@ -8,6 +9,14 @@ import { useTranslation } from '@/lib/i18n';
 import { bottomBar, bottomSep } from '@/lib/styles';
 import { normalizeImage, normalizeDataUrl } from '@/lib/image/normalize';
 import { isNativeApp, requestCamera, onNativeMessage } from '@/lib/native-bridge';
+
+/** Phone cameras can produce ~12 MB JPEGs; cap at 20 MB so a single huge
+ *  file doesn't OOM the OCR pipeline. */
+const MAX_IMAGE_BYTES = 20 * 1024 * 1024;
+const MAX_IMAGE_MB = MAX_IMAGE_BYTES / 1024 / 1024;
+/** Hard cap on a single multi-select — protects the convert loop from
+ *  pathological inputs while leaving room for legitimate notebook scans. */
+const MAX_IMAGES_PER_PICK = 20;
 
 interface ImageCaptureProps {
   onExtract: (imageDataUrls: string[]) => void;
@@ -83,6 +92,23 @@ export const ImageCapture = forwardRef<ImageCaptureHandle, ImageCaptureProps>(
 
       const fileList = Array.from(files);
       e.target.value = '';
+
+      // Validate at the boundary — reject non-images, oversized files, and
+      // pathological selection counts before any conversion work starts.
+      if (fileList.length > MAX_IMAGES_PER_PICK) {
+        toast.error(t.scan.tooManyImages(MAX_IMAGES_PER_PICK));
+        return;
+      }
+      const badType = fileList.find((f) => !f.type.startsWith('image/'));
+      if (badType) {
+        toast.error(t.scan.invalidImageType);
+        return;
+      }
+      const tooBig = fileList.find((f) => f.size > MAX_IMAGE_BYTES);
+      if (tooBig) {
+        toast.error(t.scan.imageTooLarge(MAX_IMAGE_MB));
+        return;
+      }
 
       convertCancelRef.current = false;
       setConverting(true);

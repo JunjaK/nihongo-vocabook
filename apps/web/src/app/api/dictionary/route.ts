@@ -6,6 +6,9 @@ import {
   createAnonymousRateLimiter,
   shouldBlockAnonymousBot,
 } from '@/lib/api/rate-limit';
+import { quotePostgrestValue } from '@/lib/api/postgrest-safe';
+
+const MAX_QUERY_LEN = 100;
 
 interface JishoResult {
   id?: string;
@@ -191,6 +194,13 @@ export async function GET(request: NextRequest) {
     );
   }
 
+  if (query.length > MAX_QUERY_LEN) {
+    return NextResponse.json(
+      { error: `Query too long (max ${MAX_QUERY_LEN} chars)` },
+      { status: 400 },
+    );
+  }
+
   const supabase = await createClient();
   const {
     data: { user },
@@ -210,9 +220,14 @@ export async function GET(request: NextRequest) {
 
   // 1. Try local DB first — match both term and reading, including hiragana ↔
   //    katakana variants so e.g. "こーひー" still finds an entry stored as "コーヒー".
+  //    Each variant is double-quoted so commas/parens/colons inside the value
+  //    can't break out of the eq operand and append filter clauses.
   const variants = buildKanaVariants(query);
   const orFilter = variants
-    .flatMap((v) => [`term.eq.${v}`, `reading.eq.${v}`])
+    .flatMap((v) => {
+      const q = quotePostgrestValue(v);
+      return [`term.eq.${q}`, `reading.eq.${q}`];
+    })
     .join(',');
   const { data: rows } = await supabase
     .from('dictionary_entries')

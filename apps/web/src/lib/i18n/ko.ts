@@ -398,6 +398,9 @@ const ko: Translations = {
     editWordProgress: (current: number, total: number) => `${current} / ${total}`,
     skippedCount: (n: number) => `${n}개 건너뜀`,
     autoCorrected: '사전 자동 보정',
+    imageTooLarge: (sizeMb: number) => `이미지가 너무 큽니다 (최대 ${sizeMb}MB)`,
+    invalidImageType: '이미지 파일만 업로드할 수 있어요.',
+    tooManyImages: (max: number) => `이미지는 한 번에 최대 ${max}장까지 선택할 수 있어요.`,
   },
   aiModel: {
     nativeTitle: 'AI 모델',

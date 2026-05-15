@@ -398,6 +398,9 @@ const en: Translations = {
     editWordProgress: (current: number, total: number) => `${current} / ${total}`,
     skippedCount: (n: number) => `Skipped ${n}`,
     autoCorrected: 'Auto-corrected',
+    imageTooLarge: (sizeMb: number) => `Image too large (max ${sizeMb}MB)`,
+    invalidImageType: 'Only image files are allowed.',
+    tooManyImages: (max: number) => `You can select at most ${max} images at a time.`,
   },
   aiModel: {
     nativeTitle: 'AI Model',
