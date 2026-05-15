@@ -21,6 +21,11 @@ out/
 /apps/mobile/android/
 *.jks
 *.keystore
+# build artifacts — large signed binaries should never enter git
+apps/mobile/build-*.ipa
+*.ipa
+*.app
+*.xcarchive
 
 # production
 build/
