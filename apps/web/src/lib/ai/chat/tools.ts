@@ -94,8 +94,7 @@ function stripWordbookForToolResult(wb: Wordbook) {
 export const TOOLS: Record<string, ToolDefinition> = {
   add_word: {
     name: 'add_word',
-    description:
-      "Add a new Japanese vocabulary word to the user's personal list. Use when the user asks to add, save, register, or note a word.",
+    description: "Add a Japanese word to the user's list.",
     parameters: {
       type: 'object',
       required: ['term', 'reading', 'meaning'],
@@ -155,8 +154,7 @@ export const TOOLS: Record<string, ToolDefinition> = {
 
   edit_word: {
     name: 'edit_word',
-    description:
-      "Edit an existing word's reading, meaning, or JLPT level. The term (kanji form) cannot be changed — delete and re-add to change the term.",
+    description: "Edit a word's reading/meaning/JLPT (not the kanji term).",
     parameters: {
       type: 'object',
       required: ['wordId'],
@@ -182,7 +180,7 @@ export const TOOLS: Record<string, ToolDefinition> = {
 
   delete_word: {
     name: 'delete_word',
-    description: 'Permanently delete a word. Destructive — cannot be undone.',
+    description: 'Delete a word permanently.',
     parameters: {
       type: 'object',
       required: ['wordId'],
@@ -199,8 +197,7 @@ export const TOOLS: Record<string, ToolDefinition> = {
 
   set_mastered: {
     name: 'set_mastered',
-    description:
-      'Mark a word as mastered (true) or move it back to the active list (false).',
+    description: 'Toggle word mastered status (true=mastered, false=active).',
     parameters: {
       type: 'object',
       required: ['wordId', 'mastered'],
@@ -241,7 +238,7 @@ export const TOOLS: Record<string, ToolDefinition> = {
 
   edit_wordbook: {
     name: 'edit_wordbook',
-    description: 'Rename or edit the description of a wordbook.',
+    description: 'Rename or change a wordbook description.',
     parameters: {
       type: 'object',
       required: ['wordbookId'],
@@ -264,7 +261,7 @@ export const TOOLS: Record<string, ToolDefinition> = {
 
   delete_wordbook: {
     name: 'delete_wordbook',
-    description: 'Permanently delete a wordbook (words preserved). Destructive.',
+    description: 'Delete a wordbook (words preserved).',
     parameters: {
       type: 'object',
       required: ['wordbookId'],
@@ -302,7 +299,7 @@ export const TOOLS: Record<string, ToolDefinition> = {
 
   remove_word_from_wordbook: {
     name: 'remove_word_from_wordbook',
-    description: 'Remove a word from a wordbook (does NOT delete the word).',
+    description: 'Remove a word from a wordbook (keeps the word).',
     parameters: {
       type: 'object',
       required: ['wordId', 'wordbookId'],
@@ -323,8 +320,7 @@ export const TOOLS: Record<string, ToolDefinition> = {
 
   search_words: {
     name: 'search_words',
-    description:
-      "Search the user's vocabulary by term, reading, or meaning. Returns up to 20 matches.",
+    description: "Search the user's vocab by term/reading/meaning (≤20 matches).",
     parameters: {
       type: 'object',
       required: ['query'],
@@ -344,8 +340,7 @@ export const TOOLS: Record<string, ToolDefinition> = {
 
   find_similar: {
     name: 'find_similar',
-    description:
-      'Marker tool: acknowledges that the assistant intends to suggest words similar to or thematically related to the given term. The suggestions themselves appear in the assistant\'s next response text or as add_word tool calls.',
+    description: 'Marker: assistant will suggest related words next (in text or add_word calls).',
     parameters: {
       type: 'object',
       required: ['term'],
@@ -366,16 +361,12 @@ export const TOOLS: Record<string, ToolDefinition> = {
   extract_words_from_image: {
     name: 'extract_words_from_image',
     description:
-      "Extract Japanese vocabulary words from an image the user attached to this turn. Returns up to 50 candidate words with reading + Korean/English meaning. Use this when the user shares an image and asks to find/extract/scan/recognize words. After getting results, propose `add_word` calls for the words the user wants to keep.",
+      "Extract Japanese words from an image attached this turn (≤50). Follow with add_word calls for words the user wants to keep.",
     parameters: {
       type: 'object',
       required: ['attachmentId'],
       properties: {
-        attachmentId: {
-          type: 'string',
-          description:
-            'The id of an image attachment on the most recent user message. The model knows this id from the conversation history.',
-        },
+        attachmentId: { type: 'string' },
       },
     },
     mutates: false,
@@ -403,7 +394,7 @@ export const TOOLS: Record<string, ToolDefinition> = {
   generate_example_sentence: {
     name: 'generate_example_sentence',
     description:
-      "Generate ONE example sentence for an existing word and save it to the word's example list. Call multiple times for multiple sentences (emit each as a separate tool_call). Sentence should be natural Japanese using the term in context. Provide hiragana/katakana reading and a translation in the user's language.",
+      "Save ONE Japanese example sentence for a word (call multiple times for multiple sentences, separate tool_call tags). Include reading + translation.",
     parameters: {
       type: 'object',
       required: ['wordId', 'sentenceJa'],

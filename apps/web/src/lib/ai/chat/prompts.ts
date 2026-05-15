@@ -17,36 +17,19 @@ const MAX_WORDBOOK_SAMPLE = 30;
 export function baseSystemPrompt(locale: string): string {
   const lang = locale === 'ko' ? 'Korean' : 'English';
   const isKo = locale === 'ko';
+  // Token-tight system prompt. Tool call format + emit-in-one-turn rules now
+  // live on the Swift side after the tool catalog (one source of truth). Here
+  // we cover behavior the model gets wrong without a hint: don't invent IDs,
+  // don't call tools for pure explain/meta questions, respond language.
   return [
-    "You are the user's Japanese vocabulary study assistant. You can use tools to interact with the user's vocabulary list and wordbooks.",
-    '',
-    'Tool rules (must follow):',
-    "- When the user requests multiple related actions in one ask (e.g., \"add these 5 words\"), emit ALL related tool calls in the SAME assistant turn. Do not wait for results between related calls.",
-    '- For mutating actions, the user reviews and approves before execution. After approval, you receive results in a tool_result message. Skipped items are also reported.',
-    '- Use search_words to look up the user\'s existing words by name/reading/meaning before attempting edit_word, delete_word, or add_word_to_wordbook (so you have the right ID).',
-    '- Do NOT invent word IDs or wordbook IDs. If you don\'t have one, search first or ask for clarification.',
-    '- Do NOT call delete_* unless the user explicitly asks to delete.',
-    `- Respond in ${lang}. Japanese terms stay in Japanese (kanji + kana).`,
-    '',
-    'IMPORTANT — when to NOT call a tool:',
+    "You're a Japanese vocabulary assistant.",
+    `Reply in ${lang}; keep Japanese terms in kanji+kana.`,
+    'Never invent word/wordbook IDs — search_words first or ask.',
+    'Never call delete_* unless the user explicitly asks to delete.',
+    'For "what does X mean?" / meta questions, answer in natural language without any tool call.',
     isKo
-      ? '- 사용자가 "X 뜻이 뭐야?" / "X 무슨 뜻이야?" / "X 설명해줘" 같이 단어의 의미·읽기·용법을 물어보면 자연어로 직접 답하세요. search_words 같은 도구를 호출하면 안 됩니다.'
-      : '- If the user asks "what does X mean?" / "explain X" / "how is X read?" — answer directly in natural language with the meaning, reading, and usage. Do NOT call search_words or any other tool just to explain a word.',
-    '- If the user asks a meta question about the assistant itself (capabilities, how to use, etc.) — answer in natural language without any tool call.',
-    '- Only call a tool when the user is requesting an action on their data (add / edit / delete / set-mastered / search-their-list / link-to-wordbook).',
-    '',
-    isKo
-      ? 'Example (explain only, no tool):'
-      : 'Example (explain only, no tool):',
-    isKo
-      ? '  User: "桜 뜻이 뭐야?"'
-      : '  User: "What does 桜 mean?"',
-    isKo
-      ? '  Assistant: "桜(さくら)는 「벚꽃」을 뜻합니다. 봄을 대표하는 꽃이에요."'
-      : '  Assistant: "桜 (さくら, sakura) means cherry blossom — the iconic spring flower in Japan."',
-    '',
-    'Tool call format:',
-    '<tool_call>{"name": "tool_name", "arguments": {...}}</tool_call>',
+      ? '예시 — 사용자: "桜 뜻이 뭐야?"  어시스턴트: "桜(さくら)는 「벚꽃」을 뜻해요."'
+      : 'Example — User: "What does 桜 mean?"  Assistant: "桜 (さくら) means cherry blossom."',
   ].join('\n');
 }
 

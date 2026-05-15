@@ -705,13 +705,16 @@ public class NivocaAiModule: Module {
         }
         toolsArr.append(entry)
       }
-      if let toolsData = try? JSONSerialization.data(withJSONObject: toolsArr, options: [.prettyPrinted]),
+      // Compact (no `.prettyPrinted`) — saves ~30-40% of the tool catalog
+      // byte/token count by dropping whitespace. The model parses JSON fine.
+      if let toolsData = try? JSONSerialization.data(withJSONObject: toolsArr),
          let toolsStr = String(data: toolsData, encoding: .utf8) {
-        promptParts.append("Available tools:\n\(toolsStr)")
+        promptParts.append("Tools:\n\(toolsStr)")
       }
-      promptParts.append("To call a tool, emit exactly: <tool_call>{\"name\":\"...\",\"arguments\":{...}}</tool_call>")
-      promptParts.append("When multiple related actions are requested, emit all calls in the same assistant turn.")
-      promptParts.append("Do NOT invent identifiers. If a needed ID is not in the context, ask a clarifying question instead of calling a tool.")
+      promptParts.append(
+        "Call format: <tool_call>{\"name\":\"...\",\"arguments\":{...}}</tool_call>. "
+          + "Emit all related calls in one turn. Do not invent IDs — search or ask first."
+      )
     }
 
     let lastUserIdx = request.messages.lastIndex { $0.role == "user" }
