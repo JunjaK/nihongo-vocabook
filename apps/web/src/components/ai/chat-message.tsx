@@ -1,6 +1,8 @@
 'use client';
 
 import * as React from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { cn } from '@/lib/utils';
 import { useTranslation } from '@/lib/i18n';
 import { getAttachmentPreviewUrl } from '@/lib/ai/chat';
@@ -217,7 +219,7 @@ function AssistantBubble({ message }: BubbleProps) {
         )}
       >
         {text ? (
-          <p className="whitespace-pre-wrap break-words">{text}</p>
+          <MarkdownText text={text} />
         ) : isStreaming ? (
           <span className="inline-flex items-center gap-1 text-text-tertiary">
             <span className="size-1.5 animate-pulse rounded-full bg-current" />
@@ -232,6 +234,81 @@ function AssistantBubble({ message }: BubbleProps) {
         )}
       </div>
       {!isStreaming && text && <FeedbackRow message={message} />}
+    </div>
+  );
+}
+
+// Compact markdown rendering for assistant bubbles. Tuned for chat density:
+// no heading sizes, tight list spacing, code blocks scroll horizontally.
+// Streaming-safe — react-markdown renders unterminated `**`/`_` as literal
+// characters until the closer arrives, so per-token updates never flicker
+// into broken layout.
+const MARKDOWN_COMPONENTS = {
+  p: (props: { children?: React.ReactNode }) => (
+    <p className="my-1 whitespace-pre-wrap break-words first:mt-0 last:mb-0">
+      {props.children}
+    </p>
+  ),
+  ul: (props: { children?: React.ReactNode }) => (
+    <ul className="my-1 ml-4 list-disc space-y-0.5 first:mt-0 last:mb-0">
+      {props.children}
+    </ul>
+  ),
+  ol: (props: { children?: React.ReactNode }) => (
+    <ol className="my-1 ml-4 list-decimal space-y-0.5 first:mt-0 last:mb-0">
+      {props.children}
+    </ol>
+  ),
+  li: (props: { children?: React.ReactNode }) => (
+    <li className="break-words">{props.children}</li>
+  ),
+  strong: (props: { children?: React.ReactNode }) => (
+    <strong className="font-semibold">{props.children}</strong>
+  ),
+  em: (props: { children?: React.ReactNode }) => (
+    <em className="italic">{props.children}</em>
+  ),
+  a: (props: { href?: string; children?: React.ReactNode }) => (
+    <a
+      href={props.href}
+      target="_blank"
+      rel="noreferrer noopener"
+      className="underline underline-offset-2 hover:opacity-80"
+    >
+      {props.children}
+    </a>
+  ),
+  code: (props: { inline?: boolean; children?: React.ReactNode }) => {
+    if (props.inline) {
+      return (
+        <code className="rounded bg-background/40 px-1 py-0.5 font-mono text-[0.85em]">
+          {props.children}
+        </code>
+      );
+    }
+    return (
+      <code className="font-mono text-[0.85em]">{props.children}</code>
+    );
+  },
+  pre: (props: { children?: React.ReactNode }) => (
+    <pre className="my-1 overflow-x-auto rounded-md bg-background/40 p-2 first:mt-0 last:mb-0">
+      {props.children}
+    </pre>
+  ),
+  blockquote: (props: { children?: React.ReactNode }) => (
+    <blockquote className="my-1 border-l-2 border-current/30 pl-2 italic opacity-90 first:mt-0 last:mb-0">
+      {props.children}
+    </blockquote>
+  ),
+  hr: () => <hr className="my-2 border-current/20" />,
+};
+
+function MarkdownText({ text }: { text: string }) {
+  return (
+    <div className="max-w-none break-words text-current">
+      <ReactMarkdown remarkPlugins={[remarkGfm]} components={MARKDOWN_COMPONENTS}>
+        {text}
+      </ReactMarkdown>
     </div>
   );
 }

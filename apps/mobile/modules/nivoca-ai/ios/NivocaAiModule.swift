@@ -686,8 +686,13 @@ public class NivocaAiModule: Module {
     }
 
     if let chunk = chunk, !chunk.isEmpty {
-      // Strip Gemma control tokens that the iOS XCFramework leaves in.
-      let cleaned = stripGemmaControlTokens(chunk)
+      // The C API streams chunks wrapped in
+      //   {"role":"assistant","content":[{"type":"text","text":"…"}]}
+      // envelopes (one envelope per token most of the time). Extract the
+      // inner text — never forward the raw envelope to JS, or the user
+      // sees JSON noise in the chat bubble.
+      let extracted = extractStreamingText(ctx: ctx, raw: chunk)
+      let cleaned = stripControlTokensStreaming(ctx: ctx, text: extracted, isFinal: false)
       if !cleaned.isEmpty {
         sendEvent("onInferStreamToken", [
           "requestId": ctx.requestId,
@@ -697,6 +702,14 @@ public class NivocaAiModule: Module {
     }
 
     if isFinal {
+      // Flush any remaining tail (incomplete control token, leftover buffer).
+      let tail = stripControlTokensStreaming(ctx: ctx, text: "", isFinal: true)
+      if !tail.isEmpty {
+        sendEvent("onInferStreamToken", [
+          "requestId": ctx.requestId,
+          "chunk": tail,
+        ])
+      }
       ctx.finished = true
       sendEvent("onInferStreamDone", [
         "requestId": ctx.requestId,
@@ -812,6 +825,116 @@ public class NivocaAiModule: Module {
     }
 
     return (content, tempFiles)
+  }
+
+  /**
+   * Pull the inner `content[*].text` out of one or more JSON envelopes that
+   * arrived from the C streaming callback. The C API wraps every emitted
+   * token in `{"role":"assistant","content":[{"type":"text","text":"…"}]}`,
+   * so without this step the raw envelope JSON ends up rendered in the chat
+   * bubble.
+   *
+   * A single callback chunk may contain 0, 1, or many complete envelopes;
+   * a chunk may also end mid-object — we keep that tail in `ctx.jsonBuffer`
+   * until the next call completes the brace.
+   */
+  private func extractStreamingText(ctx: StreamContext, raw: String) -> String {
+    ctx.jsonBuffer += raw
+    let chars = Array(ctx.jsonBuffer)
+    var extracted = ""
+    var consumed = 0
+    var depth = 0
+    var inString = false
+    var escape = false
+    var objStart = -1
+
+    for i in 0..<chars.count {
+      let c = chars[i]
+      if escape { escape = false; continue }
+      if inString {
+        if c == "\\" { escape = true; continue }
+        if c == "\"" { inString = false }
+        continue
+      }
+      if c == "\"" { inString = true; continue }
+      if c == "{" {
+        if depth == 0 { objStart = i }
+        depth += 1
+      } else if c == "}" {
+        depth -= 1
+        if depth == 0 && objStart != -1 {
+          let objStr = String(chars[objStart...i])
+          if let text = decodeEnvelopeText(objStr) {
+            extracted += text
+          }
+          consumed = i + 1
+          objStart = -1
+        }
+      }
+    }
+    ctx.jsonBuffer = consumed >= chars.count
+      ? ""
+      : String(chars[consumed..<chars.count])
+    return extracted
+  }
+
+  /// Decode a single envelope object; return joined text fields or nil.
+  private func decodeEnvelopeText(_ json: String) -> String? {
+    guard let data = json.data(using: .utf8),
+          let obj = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
+    else { return nil }
+    if let arr = obj["content"] as? [[String: Any]] {
+      var s = ""
+      for entry in arr {
+        if entry["type"] as? String == "text", let t = entry["text"] as? String {
+          s += t
+        }
+      }
+      return s
+    }
+    if let s = obj["content"] as? String { return s }
+    return nil
+  }
+
+  /**
+   * Strip Gemma chat-template control tokens from a streaming text flow.
+   * The naive per-chunk replace misses tokens that straddle chunk boundaries
+   * (the screenshot bug — `<end`, `_of`, `_turn` rendered as three separate
+   * user-visible chunks).
+   *
+   * We append to `ctx.controlTail`, strip every full occurrence, and then
+   * hold back the suffix starting at the last `<` whose remainder is shorter
+   * than the longest control token. On isFinal we flush whatever remains.
+   */
+  private func stripControlTokensStreaming(
+    ctx: StreamContext, text: String, isFinal: Bool
+  ) -> String {
+    ctx.controlTail += text
+    var s = ctx.controlTail
+    let tokens = [
+      "<end_of_turn>",
+      "<start_of_turn>model",
+      "<start_of_turn>user",
+      "<start_of_turn>",
+      "<eos>",
+    ]
+    for tok in tokens {
+      s = s.replacingOccurrences(of: tok, with: "")
+    }
+    if isFinal {
+      ctx.controlTail = ""
+      return s
+    }
+    if let lt = s.lastIndex(of: "<") {
+      let tail = String(s[lt...])
+      // Longest control token = "<start_of_turn>model" (20 chars).
+      if tail.count < 20 {
+        ctx.controlTail = tail
+        return String(s[s.startIndex..<lt])
+      }
+    }
+    ctx.controlTail = ""
+    return s
   }
 
   private func stripGemmaControlTokens(_ s: String) -> String {
@@ -1134,6 +1257,11 @@ fileprivate final class StreamContext {
   var cancelled: Bool = false
   /** Temp files written from base64 media — cleaned up after the stream ends. */
   var tempFiles: [String] = []
+  /** Holds an incomplete JSON envelope that spans across callback chunks. */
+  var jsonBuffer: String = ""
+  /** Holds a tail that could be the start of a Gemma control token like
+      `<end_of_turn>` split across chunks. Emitted on isFinal. */
+  var controlTail: String = ""
   init(module: NivocaAiModule, requestId: String, conversation: OpaquePointer) {
     self.module = module
     self.requestId = requestId
