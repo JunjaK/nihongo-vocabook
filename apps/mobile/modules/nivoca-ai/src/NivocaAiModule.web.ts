@@ -30,6 +30,15 @@ class NivocaAiModule extends NativeModule<NivocaAiModuleEvents> {
   async inferText(_requestJson: string): Promise<string> {
     throw new Error('NivocaAi is iOS-only — inferText is unsupported on web');
   }
+  async inferTextStream(_requestId: string, _requestJson: string): Promise<void> {
+    throw new Error('NivocaAi is iOS-only — inferTextStream is unsupported on web');
+  }
+  async cancelInferText(_requestId: string): Promise<void> {
+    throw new Error('NivocaAi is iOS-only — cancelInferText is unsupported on web');
+  }
+  async prewarm(): Promise<void> {
+    throw new Error('NivocaAi is iOS-only — prewarm is unsupported on web');
+  }
 }
 
 export default registerWebModule(NivocaAiModule, 'NivocaAiModule');

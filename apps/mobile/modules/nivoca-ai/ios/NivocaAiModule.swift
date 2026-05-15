@@ -47,9 +47,15 @@ private struct TextInferRequest: Decodable {
     let content: [ContentBlock]
   }
   struct ContentBlock: Decodable {
-    let type: String           // "text" | "image" | "tool_result"
+    let type: String           // "text" | "image" | "audio" | "tool_result"
     let text: String?
+    /** File path (preferred) — when set, the native side feeds this path
+     *  directly to the conversation API. */
     let path: String?
+    /** Data URL or raw base64 (with or without mime prefix) — used for the
+     *  web→native bridge path. Decoded to a temp file before inference. */
+    let source: String?
+    let mimeType: String?
     let toolName: String?
     let toolCallId: String?
     let result: NivocaJSONValue?
@@ -147,10 +153,13 @@ public class NivocaAiModule: Module {
   // configs remain cached because they're the expensive setup work.
   private let loadQueue = DispatchQueue(label: "win.jun-devlog.nivoca.ai.load")
 
+  fileprivate var activeStreams: [String: StreamContext] = [:]
+  fileprivate let streamsQueue = DispatchQueue(label: "win.jun-devlog.nivoca.ai.streams")
+
   public func definition() -> ModuleDefinition {
     Name("NivocaAi")
 
-    Events("onModelStatus")
+    Events("onModelStatus", "onInferStreamToken", "onInferStreamDone", "onInferStreamError")
 
     Function("ping") { () -> String in
       return "nivoca-ai:ios:phase-d"
@@ -179,6 +188,28 @@ public class NivocaAiModule: Module {
     //      experiments. Phase 1 will add a streaming variant on top of this.
     AsyncFunction("inferText") { (requestJson: String) -> String in
       return try self.runTextInference(requestJson: requestJson)
+    }
+
+    // ---- Phase 1: streaming text inference. Emits onInferStreamToken events
+    //      for each chunk, onInferStreamDone when the stream completes, and
+    //      onInferStreamError on failure. Returns once the stream has been
+    //      *started* — actual chunk delivery happens via events.
+    AsyncFunction("inferTextStream") { (requestId: String, requestJson: String) -> Void in
+      try self.startTextStream(requestId: requestId, requestJson: requestJson)
+    }
+
+    // ---- Phase 1: cancel an in-flight stream.
+    AsyncFunction("cancelInferText") { (requestId: String) -> Void in
+      self.cancelTextStream(requestId: requestId)
+    }
+
+    // ---- Phase 1.5: pre-warm the engine without running any inference.
+    //      JS settings toggle calls this on app boot when the user has opted
+    //      in. Engine + sampler config are loaded into memory so the first
+    //      real `infer*` call doesn't pay the 5-15s cold-start cost.
+    //      Throws if model is missing or all backends fail.
+    AsyncFunction("prewarm") { () -> Void in
+      try self.ensureLoaded()
     }
   }
 
@@ -268,9 +299,10 @@ public class NivocaAiModule: Module {
     modelPath: String,
     backend: String,
     visionBackend: String?,
-    cacheDir: String
+    cacheDir: String,
+    enableMtp: Bool
   ) -> Bool {
-    logger.info("tryCreateEngine: backend=\(backend, privacy: .public) vision=\(visionBackend ?? "nil") audio=cpu")
+    logger.info("tryCreateEngine: backend=\(backend, privacy: .public) vision=\(visionBackend ?? "nil") audio=cpu mtp=\(enableMtp)")
     guard let settings = litert_lm_engine_settings_create(
       modelPath, backend, visionBackend, "cpu"
     ) else {
@@ -282,12 +314,14 @@ public class NivocaAiModule: Module {
     // which manifested as a DYNAMIC_UPDATE_SLICE prepare-time failure at decode node 1164.
     litert_lm_engine_settings_set_max_num_tokens(settings, 2048)
     litert_lm_engine_settings_set_cache_dir(settings, cacheDir)
-    // Gemma 4's .litertlm bundle ships an MTP drafter section; v0.11.0 enables
-    // speculative decoding by default when it sees one. The drafter writes K
-    // tokens per step into a single cache slot, which mismatches the main
-    // decoder's K=1 slice shape and trips the same DYNAMIC_UPDATE_SLICE check.
-    // Disabling MTP costs throughput but avoids the shape conflict entirely.
-    litert_lm_engine_settings_set_enable_speculative_decoding(settings, false)
+    // MTP (multi-token prediction) — Gemma 4's official 2-3× decode speedup.
+    // Google's guidance: enable on GPU backends universally; on CPU only for
+    // E4B. Our model is E2B, so we only flip this on for GPU decoder paths.
+    // Earlier we kept this off because v0.11.0 LiteRT-LM had a shape mismatch
+    // (drafter K-tokens-per-step vs main K=1 slice → DYNAMIC_UPDATE_SLICE).
+    // Re-enabling per-backend now that the entitlement issue is resolved and
+    // GPU is exercisable on physical devices.
+    litert_lm_engine_settings_set_enable_speculative_decoding(settings, enableMtp)
 
     let engineStart = Date()
     let eng = litert_lm_engine_create(settings)
@@ -451,15 +485,27 @@ public class NivocaAiModule: Module {
       // file can succeed on `cpu/gpu` but fail on `gpu/gpu` if the Metal
       // shader compile step OOMs, and even `cpu/cpu` is preferable to a
       // hard failure. Order from most-preferred (fastest) to most-reliable.
-      let attempts: [(String, String?)] = [
-        ("gpu", "gpu"),   // primary: full Metal acceleration
-        ("cpu", "gpu"),   // vision encoder on GPU, decoder on CPU
-        ("cpu", "cpu"),   // pure CPU
+      //
+      // MTP per Google's guidance: enable on GPU decoder paths universally.
+      // E2B on CPU is NOT a recommended MTP target, so the cpu/* attempts
+      // run without it. If the GPU+MTP path hits a v0.11.0 drafter shape
+      // bug, we also retry GPU once with MTP=off before falling to cpu/gpu.
+      let attempts: [(backend: String, vision: String?, mtp: Bool)] = [
+        ("gpu", "gpu", true),   // primary: full Metal + MTP (2-3× decode)
+        ("gpu", "gpu", false),  // GPU-only retry if MTP triggers the shape bug
+        ("cpu", "gpu", false),  // vision encoder on GPU, decoder on CPU
+        ("cpu", "cpu", false),  // pure CPU (simulator + unsupported devices)
       ]
-      for (backend, vision) in attempts {
-        if tryCreateEngine(modelPath: modelPath, backend: backend, visionBackend: vision, cacheDir: cacheDir) {
+      for attempt in attempts {
+        if tryCreateEngine(
+          modelPath: modelPath,
+          backend: attempt.backend,
+          visionBackend: attempt.vision,
+          cacheDir: cacheDir,
+          enableMtp: attempt.mtp,
+        ) {
           self.loadedModelPath = modelPath
-          logger.info("ensureLoaded: succeeded with backend=\(backend, privacy: .public) vision=\(vision ?? "nil")")
+          logger.info("ensureLoaded: succeeded with backend=\(attempt.backend, privacy: .public) vision=\(attempt.vision ?? "nil") mtp=\(attempt.mtp)")
           return
         }
       }
@@ -469,6 +515,265 @@ public class NivocaAiModule: Module {
         "Could not initialize LiteRT-LM engine on any backend (gpu/gpu, cpu/gpu, cpu/cpu). Likely a corrupted model file — try deleting + redownloading from Settings → OCR."
       )
     }
+  }
+
+  // MARK: - Text streaming (Phase 1)
+
+  /**
+   * Build the same combined-prompt user message as `runTextInference`, then
+   * kick off the C streaming API. Returns once the stream is **registered**;
+   * actual chunk delivery happens via events on a background thread owned
+   * by the LiteRT-LM engine.
+   */
+  private func startTextStream(requestId: String, requestJson: String) throws {
+    logger.info("startTextStream: requestId=\(requestId, privacy: .public) json.len=\(requestJson.count)")
+
+    // Reject duplicate requestIds — the caller is supposed to generate a
+    // unique id per send. If we let two contexts share the same id we'd
+    // leak the older one on cancel + spray its events into the new request.
+    let alreadyActive: Bool = streamsQueue.sync {
+      return self.activeStreams[requestId] != nil
+    }
+    if alreadyActive {
+      throw NivocaAiError("duplicate_request", "Stream with requestId \(requestId) is already active")
+    }
+
+    guard let requestData = requestJson.data(using: .utf8) else {
+      throw NivocaAiError("bad_request", "Request JSON is not valid UTF-8")
+    }
+    let request: TextInferRequest
+    do {
+      request = try JSONDecoder().decode(TextInferRequest.self, from: requestData)
+    } catch {
+      throw NivocaAiError("bad_request", "Failed to decode request: \(error.localizedDescription)")
+    }
+
+    let combinedPrompt = buildCombinedPrompt(request: request)
+    logger.info("startTextStream: combinedPrompt.len=\(combinedPrompt.count) messages=\(request.messages.count) tools=\(request.tools?.count ?? 0)")
+
+    try ensureLoaded()
+    guard let engine = self.engine, let convConfig = self.convConfig else {
+      throw NivocaAiError("not_ready", "Engine not initialized")
+    }
+
+    let (activeContent, tempFiles) =
+      buildActiveContent(request: request, combinedPrompt: combinedPrompt)
+    let payload: [String: Any] = [
+      "role": "user",
+      "content": activeContent,
+    ]
+    let payloadJson: String
+    do {
+      let data = try JSONSerialization.data(withJSONObject: payload, options: [])
+      guard let s = String(data: data, encoding: .utf8) else {
+        throw NivocaAiError("json_encode_failed", "Could not UTF-8 encode payload")
+      }
+      payloadJson = s
+    } catch {
+      throw NivocaAiError("json_encode_failed", "JSON serialization failed: \(error.localizedDescription)")
+    }
+
+    guard let conversation = litert_lm_conversation_create(engine, convConfig) else {
+      throw NivocaAiError("not_ready", "Could not create conversation")
+    }
+
+    let ctx = StreamContext(module: self, requestId: requestId, conversation: conversation)
+    streamsQueue.sync {
+      self.activeStreams[requestId] = ctx
+    }
+    // Schedule temp file cleanup once the stream finalizes — store the paths
+    // on the StreamContext so the trampoline can rm them after is_final.
+    ctx.tempFiles = tempFiles
+
+    // Retain the context for the lifetime of the C stream — released in the
+    // callback trampoline when is_final fires or an error is reported.
+    let ctxPtr = Unmanaged<StreamContext>.passRetained(ctx).toOpaque()
+
+    let started = Date()
+    let rc = payloadJson.withCString { cstr -> Int32 in
+      return litert_lm_conversation_send_message_stream(
+        conversation, cstr, nil, nivocaAiStreamTrampoline, ctxPtr)
+    }
+    logger.info("startTextStream: send_message_stream rc=\(rc) in \(Date().timeIntervalSince(started))s")
+
+    if rc != 0 {
+      // Release the retain we just took — the callback will never fire.
+      Unmanaged<StreamContext>.fromOpaque(ctxPtr).release()
+      streamsQueue.sync { _ = self.activeStreams.removeValue(forKey: requestId) }
+      litert_lm_conversation_delete(conversation)
+      throw NivocaAiError("stream_start_failed", "send_message_stream returned rc=\(rc)")
+    }
+  }
+
+  private func cancelTextStream(requestId: String) {
+    logger.info("cancelTextStream: requestId=\(requestId, privacy: .public)")
+    let ctx: StreamContext? = streamsQueue.sync { self.activeStreams[requestId] }
+    guard let ctx = ctx else {
+      logger.info("cancelTextStream: no active stream for requestId=\(requestId, privacy: .public)")
+      return
+    }
+    ctx.cancelled = true
+    if let conv = ctx.conversation {
+      litert_lm_conversation_cancel_process(conv)
+    }
+  }
+
+  /// Called from the C trampoline (any thread). Forwards the chunk to JS and
+  /// performs cleanup on the final/error frame.
+  fileprivate func handleStreamCallback(
+    ctx: StreamContext, chunk: String?, isFinal: Bool, errorMsg: String?
+  ) {
+    if ctx.finished { return }
+
+    if let errorMsg = errorMsg, !errorMsg.isEmpty {
+      ctx.finished = true
+      sendEvent("onInferStreamError", [
+        "requestId": ctx.requestId,
+        "message": errorMsg,
+      ])
+      teardownStream(ctx: ctx)
+      return
+    }
+
+    if let chunk = chunk, !chunk.isEmpty {
+      // Strip Gemma control tokens that the iOS XCFramework leaves in.
+      let cleaned = stripGemmaControlTokens(chunk)
+      if !cleaned.isEmpty {
+        sendEvent("onInferStreamToken", [
+          "requestId": ctx.requestId,
+          "chunk": cleaned,
+        ])
+      }
+    }
+
+    if isFinal {
+      ctx.finished = true
+      sendEvent("onInferStreamDone", [
+        "requestId": ctx.requestId,
+        "cancelled": ctx.cancelled,
+      ])
+      teardownStream(ctx: ctx)
+    }
+  }
+
+  private func teardownStream(ctx: StreamContext) {
+    streamsQueue.sync {
+      _ = self.activeStreams.removeValue(forKey: ctx.requestId)
+    }
+    if let conv = ctx.conversation {
+      litert_lm_conversation_delete(conv)
+      ctx.conversation = nil
+    }
+    for path in ctx.tempFiles {
+      try? FileManager.default.removeItem(atPath: path)
+    }
+    ctx.tempFiles = []
+  }
+
+  /// Build the same flattened prompt as `runTextInference`. Extracted so the
+  /// streaming variant shares the exact same prompt construction.
+  /**
+   * Build the combined prompt prefix (system tools + all prior turns minus
+   * the live one). Caller appends the live user message and any media blocks
+   * onto the returned text via the `content` array.
+   */
+  private func buildCombinedPrompt(request: TextInferRequest) -> String {
+    var promptParts: [String] = []
+
+    if let tools = request.tools, !tools.isEmpty {
+      var toolsArr: [[String: Any]] = []
+      for tool in tools {
+        var entry: [String: Any] = [
+          "name": tool.name,
+          "description": tool.description,
+        ]
+        if let params = tool.parameters {
+          entry["parameters"] = params.toJSONObject()
+        }
+        toolsArr.append(entry)
+      }
+      if let toolsData = try? JSONSerialization.data(withJSONObject: toolsArr, options: [.prettyPrinted]),
+         let toolsStr = String(data: toolsData, encoding: .utf8) {
+        promptParts.append("Available tools:\n\(toolsStr)")
+      }
+      promptParts.append("To call a tool, emit exactly: <tool_call>{\"name\":\"...\",\"arguments\":{...}}</tool_call>")
+      promptParts.append("When multiple related actions are requested, emit all calls in the same assistant turn.")
+      promptParts.append("Do NOT invent identifiers. If a needed ID is not in the context, ask a clarifying question instead of calling a tool.")
+    }
+
+    let lastUserIdx = request.messages.lastIndex { $0.role == "user" }
+    for (i, msg) in request.messages.enumerated() {
+      if i == lastUserIdx { continue }
+      var msgText = ""
+      for block in msg.content {
+        if block.type == "text", let t = block.text {
+          msgText += t
+        }
+      }
+      if !msgText.isEmpty {
+        promptParts.append("[\(msg.role)]\n\(msgText)")
+      }
+    }
+
+    return promptParts.joined(separator: "\n\n")
+  }
+
+  /**
+   * Build the active user-turn `content` array — text prompt plus any image
+   * or audio blocks attached to the live user message. Returns the array and
+   * the list of temp files written from base64 (for cleanup after inference).
+   */
+  private func buildActiveContent(
+    request: TextInferRequest, combinedPrompt: String
+  ) -> ([[String: Any]], [String]) {
+    var content: [[String: Any]] = []
+    var tempFiles: [String] = []
+
+    let lastUserIdx = request.messages.lastIndex { $0.role == "user" }
+    var lastUserText = ""
+    if let idx = lastUserIdx {
+      for block in request.messages[idx].content where block.type == "text" {
+        if let t = block.text { lastUserText += t }
+      }
+    }
+    let promptText = combinedPrompt.isEmpty
+      ? lastUserText
+      : (lastUserText.isEmpty ? combinedPrompt : "\(combinedPrompt)\n\n[user]\n\(lastUserText)")
+    content.append(["type": "text", "text": promptText])
+
+    if let idx = lastUserIdx {
+      for block in request.messages[idx].content {
+        if block.type == "image" || block.type == "audio" {
+          do {
+            let path = try resolveMediaPath(
+              block: block, fallbackExt: block.type == "audio" ? "m4a" : "jpg")
+            content.append(["type": block.type, "path": path])
+            if block.path == nil, !path.isEmpty {
+              tempFiles.append(path)
+            }
+          } catch {
+            logger.error("buildActiveContent: skip \(block.type) block: \(error.localizedDescription)")
+          }
+        }
+      }
+    }
+
+    return (content, tempFiles)
+  }
+
+  private func stripGemmaControlTokens(_ s: String) -> String {
+    var out = s
+    let controlTokens = [
+      "<end_of_turn>",
+      "<start_of_turn>model",
+      "<start_of_turn>user",
+      "<start_of_turn>",
+      "<eos>",
+    ]
+    for tok in controlTokens {
+      out = out.replacingOccurrences(of: tok, with: "")
+    }
+    return out
   }
 
   // MARK: - Inference
@@ -596,6 +901,73 @@ public class NivocaAiModule: Module {
   // MARK: - Text inference (PoC)
 
   /**
+   * Resolve an image / audio block into a file path the conversation API can
+   * consume. Order of precedence:
+   *   1. `block.path` — caller already wrote the file (preferred)
+   *   2. `block.source` starting with `data:` — decode base64 to a temp file
+   *   3. `block.source` looking like a file path — use it directly
+   *
+   * `fallbackExt` is used when we can't infer an extension from the data URL.
+   */
+  private func resolveMediaPath(
+    block: TextInferRequest.ContentBlock, fallbackExt: String
+  ) throws -> String {
+    if let p = block.path, !p.isEmpty { return p }
+    guard let source = block.source, !source.isEmpty else {
+      throw NivocaAiError("bad_request", "media block has neither path nor source")
+    }
+
+    // Already a file path
+    if source.hasPrefix("/") || source.hasPrefix("file://") {
+      return source.hasPrefix("file://")
+        ? String(source.dropFirst("file://".count))
+        : source
+    }
+
+    // Data URL form: data:<mime>;base64,<payload>
+    var ext = fallbackExt
+    var base64Body = source
+    if source.hasPrefix("data:") {
+      if let commaRange = source.range(of: ",") {
+        let header = source[source.index(source.startIndex, offsetBy: 5)..<commaRange.lowerBound]
+        base64Body = String(source[commaRange.upperBound...])
+        if let semi = header.range(of: ";") {
+          let mime = String(header[..<semi.lowerBound])
+          ext = extForMime(mime) ?? fallbackExt
+        } else {
+          ext = extForMime(String(header)) ?? fallbackExt
+        }
+      } else {
+        throw NivocaAiError("bad_request", "malformed data URL (no comma)")
+      }
+    }
+
+    guard let data = Data(base64Encoded: base64Body, options: .ignoreUnknownCharacters) else {
+      throw NivocaAiError("bad_request", "invalid base64 in media block")
+    }
+
+    let cacheDir = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first!
+    let filename = "nivoca-ai-\(UUID().uuidString).\(ext)"
+    let url = cacheDir.appendingPathComponent(filename)
+    try data.write(to: url, options: .atomic)
+    return url.path
+  }
+
+  private func extForMime(_ mime: String) -> String? {
+    switch mime.lowercased() {
+    case "image/jpeg", "image/jpg": return "jpg"
+    case "image/png": return "png"
+    case "image/heic": return "heic"
+    case "image/webp": return "webp"
+    case "audio/m4a", "audio/x-m4a", "audio/mp4": return "m4a"
+    case "audio/mpeg", "audio/mp3": return "mp3"
+    case "audio/wav", "audio/x-wav", "audio/wave": return "wav"
+    case "audio/ogg", "audio/opus": return "ogg"
+    default: return nil
+    }
+  }
+
+  /**
    * Phase 0 PoC implementation of `inferText`. Decodes the structured request,
    * flattens it into a single user-message payload (combining tools description
    * + system / assistant / user messages into one text body), and reuses the
@@ -625,52 +997,7 @@ public class NivocaAiModule: Module {
       throw NivocaAiError("bad_request", "Failed to decode request: \(error.localizedDescription)")
     }
 
-    // Build the combined prompt text:
-    //   1. Tools block (if present): rendered as JSON + call-format instructions.
-    //   2. Each message: prefixed with [role] and only its text-content blocks.
-    //      Image / tool_result blocks are skipped at PoC scope — Phase 1 will
-    //      route image messages through the existing OCR-style image path.
-    var promptParts: [String] = []
-
-    if let tools = request.tools, !tools.isEmpty {
-      var toolsArr: [[String: Any]] = []
-      for tool in tools {
-        var entry: [String: Any] = [
-          "name": tool.name,
-          "description": tool.description,
-        ]
-        if let params = tool.parameters {
-          entry["parameters"] = params.toJSONObject()
-        }
-        toolsArr.append(entry)
-      }
-      do {
-        let toolsData = try JSONSerialization.data(
-          withJSONObject: toolsArr, options: [.prettyPrinted])
-        let toolsStr = String(data: toolsData, encoding: .utf8) ?? "[]"
-        promptParts.append("Available tools:\n\(toolsStr)")
-      } catch {
-        throw NivocaAiError("json_encode_failed", "Could not serialize tools: \(error.localizedDescription)")
-      }
-      promptParts.append("To call a tool, emit exactly: <tool_call>{\"name\":\"...\",\"arguments\":{...}}</tool_call>")
-      promptParts.append("When multiple related actions are requested, emit all calls in the same assistant turn.")
-      promptParts.append("Do NOT invent identifiers. If a needed ID is not in the context, ask a clarifying question instead of calling a tool.")
-    }
-
-    for msg in request.messages {
-      var msgText = ""
-      for block in msg.content {
-        if block.type == "text", let t = block.text {
-          msgText += t
-        }
-        // image / tool_result blocks intentionally ignored at PoC scope.
-      }
-      if !msgText.isEmpty {
-        promptParts.append("[\(msg.role)]\n\(msgText)")
-      }
-    }
-
-    let combinedPrompt = promptParts.joined(separator: "\n\n")
+    let combinedPrompt = buildCombinedPrompt(request: request)
     logger.info("runTextInference: combinedPrompt.len=\(combinedPrompt.count) messages=\(request.messages.count) tools=\(request.tools?.count ?? 0)")
 
     try ensureLoaded()
@@ -678,13 +1005,17 @@ public class NivocaAiModule: Module {
       throw NivocaAiError("not_ready", "Engine not initialized")
     }
 
-    // Single-user-message payload — identical shape to OCR's path minus image.
+    let (activeContent, tempFilesToClean) =
+      buildActiveContent(request: request, combinedPrompt: combinedPrompt)
     let payload: [String: Any] = [
       "role": "user",
-      "content": [
-        ["type": "text", "text": combinedPrompt]
-      ]
+      "content": activeContent,
     ]
+    defer {
+      for path in tempFilesToClean {
+        try? FileManager.default.removeItem(atPath: path)
+      }
+    }
     let payloadJson: String
     do {
       let payloadData = try JSONSerialization.data(withJSONObject: payload, options: [])
@@ -726,6 +1057,57 @@ public class NivocaAiModule: Module {
     let rawJson = String(cString: cstr)
     logger.info("runTextInference: rawJson.len=\(rawJson.count)")
     return extractTextFromResponse(rawJson)
+  }
+}
+
+// MARK: - Stream callback plumbing
+
+/**
+ * Context for a single in-flight `inferTextStream` call. Held by both
+ * `NivocaAiModule.activeStreams` (for cancel lookups) and by the C streaming
+ * callback (as an `Unmanaged.passRetained` pointer). The callback releases
+ * the retain when it observes is_final or an error; cancel signals the engine
+ * via `litert_lm_conversation_cancel_process`, which causes the engine to
+ * emit a final frame, which then runs the same cleanup path.
+ */
+fileprivate final class StreamContext {
+  weak var module: NivocaAiModule?
+  let requestId: String
+  var conversation: OpaquePointer?
+  var finished: Bool = false
+  var cancelled: Bool = false
+  /** Temp files written from base64 media — cleaned up after the stream ends. */
+  var tempFiles: [String] = []
+  init(module: NivocaAiModule, requestId: String, conversation: OpaquePointer) {
+    self.module = module
+    self.requestId = requestId
+    self.conversation = conversation
+  }
+}
+
+/**
+ * C-ABI trampoline that the LiteRT-LM engine invokes for each chunk of a
+ * streamed response. Decodes the user-data pointer back into a StreamContext,
+ * forwards the chunk to the module via `handleStreamCallback`, and releases
+ * the retain when the stream terminates.
+ *
+ * Must be `@convention(c)` (no captures) — LiteRT-LM stores it as a C
+ * function pointer.
+ */
+fileprivate let nivocaAiStreamTrampoline: @convention(c) (
+  UnsafeMutableRawPointer?, UnsafePointer<CChar>?, Bool, UnsafePointer<CChar>?
+) -> Void = { rawData, chunkCstr, isFinal, errorCstr in
+  guard let rawData = rawData else { return }
+  let ctx = Unmanaged<StreamContext>.fromOpaque(rawData).takeUnretainedValue()
+  let chunk: String? = chunkCstr.map { String(cString: $0) }
+  let errorMsg: String? = errorCstr.map { String(cString: $0) }
+  // Hand off to the module (which may forward to JS).
+  if let module = ctx.module {
+    module.handleStreamCallback(ctx: ctx, chunk: chunk, isFinal: isFinal, errorMsg: errorMsg)
+  }
+  // Terminal frame: release the retain established at stream start.
+  if isFinal || (errorMsg != nil && !(errorMsg ?? "").isEmpty) {
+    Unmanaged<StreamContext>.fromOpaque(rawData).release()
   }
 }
 

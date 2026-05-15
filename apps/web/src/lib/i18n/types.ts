@@ -211,6 +211,7 @@ export interface Translations {
     randomPracticeDesc: string;
     exampleQuiz: string;
     showExamples: string;
+    assistantUnavailableYet: string;
   };
   settings: {
     title: string;
@@ -279,6 +280,13 @@ export interface Translations {
     notificationMinute: string;
     notificationPermissionDenied: string;
     notificationPermissionDeniedDesc: string;
+    assistantSection: string;
+    saveQuizAiSessions: string;
+    saveQuizAiSessionsDesc: string;
+    prewarm: string;
+    prewarmDesc: string;
+    telemetry: string;
+    telemetryDesc: string;
   };
   wordbooks: {
     title: string;
@@ -383,6 +391,7 @@ export interface Translations {
     alreadyAdded: string;
     alreadyRegistered: (n: number) => string;
     skippedCount: (n: number) => string;
+    autoCorrected: string;
   };
   aiModel: {
     /** Native iOS path uses Gemma 4 (LiteRT-LM). */
@@ -609,9 +618,40 @@ export interface Translations {
       generateFailed: string;
       cancelled: string;
       modelMissing: string;
+      attachFailed: string;
+      micPermissionDenied: string;
+      recordFailed: string;
+      recordNotSupportedOnWeb: string;
     };
+    recordAudio: string;
+    recordStop: string;
+    recordCancel: string;
     imageBlockedInHistory: string;
     contextTruncated: string;
     emptyHint: string;
+    feedbackThumbsUp: string;
+    feedbackThumbsDown: string;
+    sessionsTitle: string;
+    sessionsLink: string;
+    sessionsEmpty: string;
+    sessionsUntitled: string;
+    sessionsDeleteConfirm: string;
+    sessionsJustNow: string;
+    sessionsMessageCount: (n: number) => string;
+    summarizedNotice: (n: number) => string;
+  };
+  aiStats: {
+    title: string;
+    usageSection: string;
+    healthSection: string;
+    toolSection: string;
+    messagesSent: string;
+    inferenceCount: string;
+    avgLatencyMs: string;
+    outputTokens: string;
+    errorCount: string;
+    cancelledCount: string;
+    noToolCalls: string;
+    localOnlyHint: string;
   };
 }

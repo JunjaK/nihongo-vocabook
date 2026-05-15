@@ -8,6 +8,20 @@
  * `[image]` text.
  */
 
+/**
+ * Read a `Blob` as a `data:<mime>;base64,...` URL. Used when the chat needs
+ * to ship an attachment across the native bridge — Object URLs (`blob:`) are
+ * renderer-only.
+ */
+export function blobToDataUrl(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = () => reject(reader.error ?? new Error('FileReader error'));
+    reader.readAsDataURL(blob);
+  });
+}
+
 // Shared DB with metrics.ts — both modules must agree on DB_VERSION and run
 // each store's `onupgradeneeded` branch defensively.
 const DB_NAME = 'nivoca-chat';

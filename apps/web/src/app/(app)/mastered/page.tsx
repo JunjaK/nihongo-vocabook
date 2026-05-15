@@ -9,6 +9,7 @@ import { Flag, Trash2 } from '@/components/ui/icons';
 import { Header } from '@/components/layout/header';
 import { ListToolbar } from '@/components/layout/list-toolbar';
 import { SwipeableWordCard } from '@/components/word/swipeable-word-card';
+import { WordsListToggle } from '@/components/word/words-list-toggle';
 import { useRepository } from '@/lib/repository/provider';
 import { useAuthStore } from '@/stores/auth-store';
 import { useTranslation } from '@/lib/i18n';
@@ -131,7 +132,14 @@ export default function MasteredPage() {
     <div className={pageWrapper}>
       <Header
         title={t.masteredPage.title}
-        desc={!loading && totalCount > 0 ? t.words.totalWordCount(totalCount) : undefined}
+        desc={<WordsListToggle current="mastered" />}
+        actions={
+          !loading && totalCount > 0 ? (
+            <span className="text-badge font-medium text-text-tertiary tabular-nums">
+              {t.words.totalWordCount(totalCount)}
+            </span>
+          ) : undefined
+        }
       />
 
       <ListToolbar

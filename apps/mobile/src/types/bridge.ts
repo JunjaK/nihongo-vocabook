@@ -32,12 +32,23 @@ export type WebToNativeMessage =
   | {
       type: 'AI_INFER_CANCEL';
       requestId: string;
-    };
+    }
+  /** Pre-warm the on-device engine without running inference. Fire-and-forget;
+   *  failures are reported via a future AI_PREWARM_RESULT if we add one. */
+  | { type: 'AI_PREWARM' }
+  /** Start recording audio via the native mic. Native emits TICK events while
+   *  recording, RESULT on stop, CANCELLED if cancelled, ERROR on failure. */
+  | { type: 'AUDIO_RECORD_START'; maxSeconds?: number }
+  | { type: 'AUDIO_RECORD_STOP' }
+  | { type: 'AUDIO_RECORD_CANCEL' }
+  /** Open native document picker for audio files. */
+  | { type: 'PICK_AUDIO_FILE' };
 
 /** Bridge wire format for the multi-turn / function-calling inference call. */
 export type BridgeAiInferContentBlock =
   | { type: 'text'; text: string }
   | { type: 'image'; source: string }
+  | { type: 'audio'; source: string; mimeType?: string }
   | { type: 'tool_result'; toolName: string; toolCallId: string; result: unknown };
 
 export interface BridgeAiInferMessage {
@@ -140,4 +151,23 @@ export type NativeToWebMessage =
       requestId: string;
       code: string;
       message: string;
-    };
+    }
+  /** Periodic update while recording — used to drive UI timer + level meter. */
+  | { type: 'AUDIO_RECORD_TICK'; elapsedMs: number; level?: number }
+  /** Recording finished successfully. base64 is the raw audio bytes. */
+  | {
+      type: 'AUDIO_RECORD_RESULT';
+      base64: string;
+      mimeType: string;
+      durationMs: number;
+    }
+  | { type: 'AUDIO_RECORD_CANCELLED' }
+  | { type: 'AUDIO_RECORD_ERROR'; message: string }
+  /** Picked audio file from document picker. base64 = file bytes. */
+  | {
+      type: 'AUDIO_FILE_RESULT';
+      base64: string;
+      mimeType: string;
+      name?: string;
+    }
+  | { type: 'AUDIO_FILE_CANCELLED' };

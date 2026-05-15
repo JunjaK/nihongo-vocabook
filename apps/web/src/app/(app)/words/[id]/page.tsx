@@ -13,6 +13,7 @@ import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import { WordForm } from '@/components/word/word-form';
 import { AddToWordbookDialog } from '@/components/wordbook/add-to-wordbook-dialog';
+import { AssistantButton } from '@/components/ai/assistant-button';
 import { KanjiText } from '@/components/kanji/kanji-text';
 import { useRepository } from '@/lib/repository/provider';
 import { useAuthStore } from '@/stores/auth-store';
@@ -347,31 +348,39 @@ export default function WordDetailPage({
         title={t.wordDetail.title}
         showBack
         onBack={() => router.push(basePath)}
-        actions={word.isOwned ? (
+        actions={(
           <div className="flex gap-1">
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              onClick={() => {
-                setEditDirty(false);
-                setEditing(true);
-              }}
-              data-testid="word-edit-button"
-              aria-label={t.common.edit}
-            >
-              <Pencil className="size-5" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              onClick={() => setShowDeleteConfirm(true)}
-              data-testid="word-delete-button"
-              aria-label={t.common.delete}
-            >
-              <Trash2 className="size-5" />
-            </Button>
+            <AssistantButton
+              scope={{ kind: 'word', wordId: id }}
+              testId="word-assistant-button"
+            />
+            {word.isOwned && (
+              <>
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  onClick={() => {
+                    setEditDirty(false);
+                    setEditing(true);
+                  }}
+                  data-testid="word-edit-button"
+                  aria-label={t.common.edit}
+                >
+                  <Pencil className="size-5" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  onClick={() => setShowDeleteConfirm(true)}
+                  data-testid="word-delete-button"
+                  aria-label={t.common.delete}
+                >
+                  <Trash2 className="size-5" />
+                </Button>
+              </>
+            )}
           </div>
-        ) : undefined}
+        )}
       />
 
       <div className={cn(scrollArea, 'px-5 py-4')}>

@@ -29,6 +29,13 @@ export type ChatContentBlock =
   | { type: 'text'; text: string }
   | { type: 'image'; attachmentId: string; previewUrl?: string }
   | {
+      type: 'audio';
+      attachmentId: string;
+      previewUrl?: string;
+      durationMs?: number;
+      mimeType?: string;
+    }
+  | {
       type: 'tool_result';
       toolName: string;
       toolCallId: string;
@@ -77,6 +84,24 @@ export interface PendingToolBatchItem {
   error?: string;
 }
 
+export type ChatFeedback = 'thumbs_up' | 'thumbs_down';
+
+/**
+ * Anonymous telemetry event uploaded to Supabase when the user opts in.
+ * NEVER include message content, tool arguments, attachment data, or any
+ * free-form user text in `payload`. Counters and enum-like strings only.
+ */
+export interface AiTelemetryEvent {
+  event: string;
+  payload: Record<string, number | string | boolean | null>;
+  scope?: 'general' | 'word' | 'wordbook' | 'quiz';
+  modelVariant?: string;
+  platform?: 'ios' | 'web';
+  appVersion?: string;
+  /** Client-side timestamp (ms epoch). Server records its own created_at. */
+  timestamp: number;
+}
+
 export interface ChatMessage {
   id: string;
   sessionId: string;
@@ -91,6 +116,8 @@ export interface ChatMessage {
   errorCode?: string;
   errorMessage?: string;
   attachmentIds?: string[];
+  /** User rating on an assistant message. Undefined = unrated. */
+  feedback?: ChatFeedback;
   createdAt: number;
 }
 
@@ -104,6 +131,19 @@ export interface ChatSession {
   messageCount: number;
   totalInputTokens: number;
   totalOutputTokens: number;
+  /**
+   * Auto-generated summary of older messages. Inserted as a system addendum
+   * in place of the messages it covers, so the live context stays under the
+   * token budget without dropping facts the user discussed earlier.
+   */
+  contextSummary?: string;
+  /**
+   * ID of the last message included in `contextSummary`. Anything with a
+   * later `createdAt` is still kept verbatim in the live context.
+   */
+  summarizedThroughMessageId?: string;
+  /** Count of messages absorbed into the summary so the UI can show "N earlier messages summarized". */
+  summarizedMessageCount?: number;
   createdAt: number;
   updatedAt: number;
 }

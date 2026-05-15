@@ -14,6 +14,8 @@
 
 import type { DataRepository } from '@/lib/repository/types';
 import { searchDictionary } from '@/lib/dictionary/jisho';
+import { getAttachment, blobToDataUrl } from './attachments';
+import { extractViaBridge } from '@/lib/ai/native-bridge-adapter';
 import type { Word } from '@/types/word';
 import type { Wordbook } from '@/types/wordbook';
 import type { AiToolDef } from '@/types/chat';
@@ -359,6 +361,74 @@ export const TOOLS: Record<string, ToolDefinition> = {
       count: optInt(args, 'count', 10) ?? 5,
     }),
     describeAction: (args) => `유사어 추천: ${args.term ?? ''}`,
+  },
+
+  extract_words_from_image: {
+    name: 'extract_words_from_image',
+    description:
+      "Extract Japanese vocabulary words from an image the user attached to this turn. Returns up to 50 candidate words with reading + Korean/English meaning. Use this when the user shares an image and asks to find/extract/scan/recognize words. After getting results, propose `add_word` calls for the words the user wants to keep.",
+    parameters: {
+      type: 'object',
+      required: ['attachmentId'],
+      properties: {
+        attachmentId: {
+          type: 'string',
+          description:
+            'The id of an image attachment on the most recent user message. The model knows this id from the conversation history.',
+        },
+      },
+    },
+    mutates: false,
+    execute: async (args, { locale }) => {
+      const attachmentId = str(args, 'attachmentId');
+      const blob = await getAttachment(attachmentId);
+      if (!blob) {
+        throw new Error(`Attachment ${attachmentId} not found in local storage.`);
+      }
+      const dataUrl = await blobToDataUrl(blob);
+      const words = await extractViaBridge(dataUrl, locale);
+      return {
+        count: words.length,
+        words: words.slice(0, 50).map((w) => ({
+          term: w.term,
+          reading: w.reading,
+          meaning: w.meaning,
+          jlptLevel: w.jlptLevel,
+        })),
+      };
+    },
+    describeAction: () => `이미지에서 단어 추출`,
+  },
+
+  generate_example_sentence: {
+    name: 'generate_example_sentence',
+    description:
+      "Generate ONE example sentence for an existing word and save it to the word's example list. Call multiple times for multiple sentences (emit each as a separate tool_call). Sentence should be natural Japanese using the term in context. Provide hiragana/katakana reading and a translation in the user's language.",
+    parameters: {
+      type: 'object',
+      required: ['wordId', 'sentenceJa'],
+      properties: {
+        wordId: { type: 'string' },
+        sentenceJa: { type: 'string' },
+        sentenceReading: { type: 'string' },
+        sentenceMeaning: { type: 'string' },
+      },
+    },
+    mutates: true,
+    execute: async (args, { repo }) => {
+      const created = await repo.words.addExample(str(args, 'wordId'), {
+        sentenceJa: str(args, 'sentenceJa'),
+        sentenceReading: optStr(args, 'sentenceReading'),
+        sentenceMeaning: optStr(args, 'sentenceMeaning'),
+        source: 'ai_generated',
+      });
+      return {
+        id: created.id,
+        sentenceJa: created.sentenceJa,
+      };
+    },
+    describeAction: (args) =>
+      `예문 추가: 「${typeof args.sentenceJa === 'string' && args.sentenceJa.length > 40 ? args.sentenceJa.slice(0, 40) + '…' : args.sentenceJa ?? ''}」`,
   },
 };
 

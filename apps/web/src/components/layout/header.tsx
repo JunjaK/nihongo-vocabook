@@ -43,8 +43,10 @@ export function Header({
         </Button>
         <div className="flex items-end gap-2.5">
           <h1 className="text-section font-semibold text-foreground">{title}</h1>
-          {desc && (
+          {typeof desc === 'string' ? (
             <span className="text-badge font-medium text-text-tertiary">{desc}</span>
+          ) : (
+            desc
           )}
         </div>
         {actions && <div className="ml-auto flex items-center gap-1">{actions}</div>}
@@ -56,8 +58,10 @@ export function Header({
     <header className="sticky top-0 z-10 flex h-14 items-center justify-between bg-background px-5">
       <div className="flex items-end gap-2.5">
         <h1 className="text-section font-semibold text-foreground">{title}</h1>
-        {desc && (
+        {typeof desc === 'string' ? (
           <span className="text-badge font-medium text-text-tertiary pb-0.5">{desc}</span>
+        ) : (
+          desc
         )}
       </div>
       {actions && <div className="flex items-center gap-1">{actions}</div>}

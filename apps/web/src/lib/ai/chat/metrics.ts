@@ -78,6 +78,22 @@ function runTx<T>(
 let appendsSincePrune = 0;
 const PRUNE_EVERY = 100;
 
+/**
+ * Whitelist of events that also get uploaded as anonymous telemetry when the
+ * user opts in. Everything else stays local-only. Payload shape for these
+ * events is already counter/enum (no free-form strings).
+ */
+const TELEMETRY_EVENTS = new Set([
+  'chat.message_sent',
+  'chat.inference_start',
+  'chat.inference_done',
+  'chat.inference_error',
+  'chat.cancelled_by_user',
+  'chat.tool_call_executed',
+  'chat.tool_call_failed',
+  'chat.context_truncated',
+]);
+
 export async function recordMetric(
   event: string,
   payload: Record<string, unknown>,
@@ -101,6 +117,34 @@ export async function recordMetric(
     appendsSincePrune = 0;
     pruneMetrics().catch(() => {});
   }
+
+  // Mirror to opt-in telemetry. Dynamic import so this module stays
+  // independent of the uploader (avoids a circular dependency).
+  if (TELEMETRY_EVENTS.has(event)) {
+    void import('./telemetry-uploader').then((m) => {
+      m.recordTelemetry(
+        event,
+        coerceCounters(payload),
+        (scope as 'general' | 'word' | 'wordbook' | 'quiz' | undefined) ?? undefined,
+      );
+    });
+  }
+}
+
+/**
+ * Shrink `payload` to counter-safe primitive values. The repository-level
+ * `scrubPayload` is the final safety net — this is the first pass.
+ */
+function coerceCounters(
+  payload: Record<string, unknown>,
+): Record<string, number | string | boolean | null> {
+  const out: Record<string, number | string | boolean | null> = {};
+  for (const [k, v] of Object.entries(payload)) {
+    if (typeof v === 'number' && Number.isFinite(v)) out[k] = v;
+    else if (typeof v === 'boolean' || v === null) out[k] = v;
+    else if (typeof v === 'string' && v.length <= 64) out[k] = v;
+  }
+  return out;
 }
 
 export async function listMetrics(opts?: {

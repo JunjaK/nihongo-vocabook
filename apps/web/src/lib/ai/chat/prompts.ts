@@ -16,6 +16,7 @@ const MAX_WORDBOOK_SAMPLE = 30;
 
 export function baseSystemPrompt(locale: string): string {
   const lang = locale === 'ko' ? 'Korean' : 'English';
+  const isKo = locale === 'ko';
   return [
     "You are the user's Japanese vocabulary study assistant. You can use tools to interact with the user's vocabulary list and wordbooks.",
     '',
@@ -26,6 +27,23 @@ export function baseSystemPrompt(locale: string): string {
     '- Do NOT invent word IDs or wordbook IDs. If you don\'t have one, search first or ask for clarification.',
     '- Do NOT call delete_* unless the user explicitly asks to delete.',
     `- Respond in ${lang}. Japanese terms stay in Japanese (kanji + kana).`,
+    '',
+    'IMPORTANT — when to NOT call a tool:',
+    isKo
+      ? '- 사용자가 "X 뜻이 뭐야?" / "X 무슨 뜻이야?" / "X 설명해줘" 같이 단어의 의미·읽기·용법을 물어보면 자연어로 직접 답하세요. search_words 같은 도구를 호출하면 안 됩니다.'
+      : '- If the user asks "what does X mean?" / "explain X" / "how is X read?" — answer directly in natural language with the meaning, reading, and usage. Do NOT call search_words or any other tool just to explain a word.',
+    '- If the user asks a meta question about the assistant itself (capabilities, how to use, etc.) — answer in natural language without any tool call.',
+    '- Only call a tool when the user is requesting an action on their data (add / edit / delete / set-mastered / search-their-list / link-to-wordbook).',
+    '',
+    isKo
+      ? 'Example (explain only, no tool):'
+      : 'Example (explain only, no tool):',
+    isKo
+      ? '  User: "桜 뜻이 뭐야?"'
+      : '  User: "What does 桜 mean?"',
+    isKo
+      ? '  Assistant: "桜(さくら)는 「벚꽃」을 뜻합니다. 봄을 대표하는 꽃이에요."'
+      : '  Assistant: "桜 (さくら, sakura) means cherry blossom — the iconic spring flower in Japan."',
     '',
     'Tool call format:',
     '<tool_call>{"name": "tool_name", "arguments": {...}}</tool_call>',
@@ -159,10 +177,13 @@ export function estimateTokens(text: string): number {
   return Math.ceil(text.length / 4);
 }
 
+const AUDIO_TOKEN_COST = 384; // rough per-clip estimate; updated when verified
+
 interface MessageLike {
   content: Array<
     | { type: 'text'; text: string }
     | { type: 'image'; attachmentId?: string; source?: string }
+    | { type: 'audio'; attachmentId?: string; source?: string; mimeType?: string }
     | { type: 'tool_result'; result: unknown }
   >;
 }
@@ -174,6 +195,8 @@ export function estimateMessageTokens(msg: MessageLike): number {
       total += estimateTokens(block.text);
     } else if (block.type === 'image') {
       total += IMAGE_TOKEN_COST;
+    } else if (block.type === 'audio') {
+      total += AUDIO_TOKEN_COST;
     } else if (block.type === 'tool_result') {
       total += estimateTokens(JSON.stringify(block.result ?? {}));
     }

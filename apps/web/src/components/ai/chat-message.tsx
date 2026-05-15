@@ -4,6 +4,7 @@ import * as React from 'react';
 import { cn } from '@/lib/utils';
 import { useTranslation } from '@/lib/i18n';
 import { getAttachmentPreviewUrl } from '@/lib/ai/chat';
+import { useChatStore } from '@/lib/ai/chat';
 import type { ChatMessage } from '@/types/chat';
 
 interface BubbleProps {
@@ -78,11 +79,110 @@ function UserBubble({ message }: BubbleProps) {
               </div>
             );
           }
+          if (block.type === 'audio') {
+            return (
+              <div key={i} className="mt-2 first:mt-0">
+                <AudioBlock attachmentId={block.attachmentId} durationMs={block.durationMs} />
+              </div>
+            );
+          }
           return null;
         })}
       </div>
     </div>
   );
+}
+
+function AudioBlock({
+  attachmentId,
+  durationMs,
+}: {
+  attachmentId: string;
+  durationMs?: number;
+}) {
+  const { t } = useTranslation();
+  const [url, setUrl] = React.useState<string | null>(null);
+  const [playing, setPlaying] = React.useState(false);
+  const audioRef = React.useRef<HTMLAudioElement>(null);
+
+  React.useEffect(() => {
+    let cancelled = false;
+    let objectUrl: string | null = null;
+    getAttachmentPreviewUrl(attachmentId)
+      .then((u) => {
+        if (cancelled) {
+          if (u) URL.revokeObjectURL(u);
+          return;
+        }
+        objectUrl = u;
+        setUrl(u);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
+  }, [attachmentId]);
+
+  if (!url) {
+    return (
+      <div className="text-xs italic text-text-tertiary">
+        {t.assistant.imageBlockedInHistory}
+      </div>
+    );
+  }
+
+  const toggle = () => {
+    const el = audioRef.current;
+    if (!el) return;
+    if (el.paused) {
+      void el.play();
+      setPlaying(true);
+    } else {
+      el.pause();
+      setPlaying(false);
+    }
+  };
+
+  return (
+    <div className="flex items-center gap-2 rounded-md bg-background/20 px-2 py-1.5">
+      <button
+        type="button"
+        onClick={toggle}
+        className="flex size-7 items-center justify-center rounded-full bg-primary-foreground text-primary"
+        aria-label={playing ? 'Pause' : 'Play'}
+      >
+        {playing ? (
+          <svg viewBox="0 0 24 24" fill="currentColor" className="size-3.5">
+            <rect x="6" y="5" width="4" height="14" />
+            <rect x="14" y="5" width="4" height="14" />
+          </svg>
+        ) : (
+          <svg viewBox="0 0 24 24" fill="currentColor" className="size-3.5">
+            <path d="M8 5v14l11-7z" />
+          </svg>
+        )}
+      </button>
+      <span className="font-mono text-[11px] tabular-nums opacity-80">
+        {formatAudioDuration(durationMs ?? 0)}
+      </span>
+      <audio
+        ref={audioRef}
+        src={url}
+        onEnded={() => setPlaying(false)}
+        onPause={() => setPlaying(false)}
+        preload="metadata"
+        className="hidden"
+      />
+    </div>
+  );
+}
+
+function formatAudioDuration(ms: number): string {
+  const totalSec = Math.floor(ms / 1000);
+  const m = Math.floor(totalSec / 60);
+  const s = totalSec % 60;
+  return `${m}:${String(s).padStart(2, '0')}`;
 }
 
 function AssistantBubble({ message }: BubbleProps) {
@@ -96,16 +196,21 @@ function AssistantBubble({ message }: BubbleProps) {
 
   if (failed) {
     return (
-      <div className="flex justify-start">
+      <div className="flex flex-col items-start gap-1">
         <div className="max-w-[80%] rounded-2xl rounded-bl-sm border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive">
-          {message.errorMessage ?? t.assistant.error.generateFailed}
+          <div>{message.errorMessage ?? t.assistant.error.generateFailed}</div>
+          {message.errorCode && (
+            <div className="mt-0.5 text-[10px] uppercase tracking-wide opacity-60">
+              {message.errorCode}
+            </div>
+          )}
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex justify-start">
+    <div className="flex flex-col items-start gap-1">
       <div
         className={cn(
           'max-w-[80%] rounded-2xl rounded-bl-sm bg-secondary px-3 py-2 text-sm text-secondary-foreground',
@@ -126,7 +231,66 @@ function AssistantBubble({ message }: BubbleProps) {
           />
         )}
       </div>
+      {!isStreaming && text && <FeedbackRow message={message} />}
     </div>
+  );
+}
+
+function FeedbackRow({ message }: BubbleProps) {
+  const { t } = useTranslation();
+  const setMessageFeedback = useChatStore((s) => s.setMessageFeedback);
+  const fb = message.feedback;
+
+  const click = (next: 'thumbs_up' | 'thumbs_down') => {
+    const value = fb === next ? null : next;
+    void setMessageFeedback(message.id, value);
+  };
+
+  return (
+    <div className="ml-1 flex items-center gap-1 text-text-tertiary">
+      <button
+        type="button"
+        onClick={() => click('thumbs_up')}
+        aria-pressed={fb === 'thumbs_up'}
+        aria-label={t.assistant.feedbackThumbsUp}
+        className={cn(
+          'rounded-md p-1 transition-colors hover:bg-secondary',
+          fb === 'thumbs_up' && 'text-primary dark:text-accent-muted',
+        )}
+        data-testid="chat-feedback-thumbs-up"
+      >
+        <ThumbsUpIcon className="size-3.5" />
+      </button>
+      <button
+        type="button"
+        onClick={() => click('thumbs_down')}
+        aria-pressed={fb === 'thumbs_down'}
+        aria-label={t.assistant.feedbackThumbsDown}
+        className={cn(
+          'rounded-md p-1 transition-colors hover:bg-secondary',
+          fb === 'thumbs_down' && 'text-destructive',
+        )}
+        data-testid="chat-feedback-thumbs-down"
+      >
+        <ThumbsDownIcon className="size-3.5" />
+      </button>
+    </div>
+  );
+}
+
+function ThumbsUpIcon({ className }: { className?: string }) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={className}>
+      <path d="M2 21V9h4v12H2zm6 0V9.275l5.55-5.55a.97.97 0 0 1 .825-.225.99.99 0 0 1 .675.55.95.95 0 0 1 .125.475c.034.158.05.317.05.475l-.875 4H20a1.96 1.96 0 0 1 1.413.587A1.926 1.926 0 0 1 22 10.5q0 .2-.05.413a3.058 3.058 0 0 1-.1.387l-2.85 6.65A2.13 2.13 0 0 1 18.2 19c-.367.267-.767.4-1.2.4H8z" />
+    </svg>
+  );
+}
+
+function ThumbsDownIcon({ className }: { className?: string }) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={className}>
+      <path d="M22 3v12h-4V3h4zm-6 0v11.725l-5.55 5.55a.97.97 0 0 1-.825.225.99.99 0 0 1-.675-.55.95.95 0 0 1-.125-.475 2.94 2.94 0 0 1-.05-.475l.875-4H4a1.96 1.96 0 0 1-1.413-.588A1.926 1.926 0 0 1 2 13.5q0-.2.05-.413c.034-.142.067-.27.1-.387l2.85-6.65a2.13 2.13 0 0 1 .8-.95C6.167 4.833 6.567 4.7 7 4.7h9z" />
+    </svg>
   );
 }
 

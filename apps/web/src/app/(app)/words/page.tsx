@@ -10,6 +10,7 @@ import { Header } from '@/components/layout/header';
 import { ListToolbar } from '@/components/layout/list-toolbar';
 import { Button } from '@/components/ui/button';
 import { SwipeableWordCard } from '@/components/word/swipeable-word-card';
+import { WordsListToggle } from '@/components/word/words-list-toggle';
 import { AddToWordbookDialog } from '@/components/wordbook/add-to-wordbook-dialog';
 import { useRepository } from '@/lib/repository/provider';
 import { useAuthStore } from '@/stores/auth-store';
@@ -169,7 +170,7 @@ export default function WordsPage() {
     <div className={pageWrapper}>
       <Header
         title={t.words.title}
-        desc={!loading && totalCount > 0 ? t.words.totalWordCount(totalCount) : undefined}
+        desc={<WordsListToggle current="active" />}
         actions={
           <div className="flex items-center gap-1">
             {(scanStatus === 'extracting' || scanStatus === 'enriching') && (
@@ -186,6 +187,11 @@ export default function WordsPage() {
                 )}
               </Button>
             </Link>
+            {!loading && totalCount > 0 && (
+              <span className="ml-1 text-badge font-medium text-text-tertiary tabular-nums">
+                {t.words.totalWordCount(totalCount)}
+              </span>
+            )}
           </div>
         }
       />

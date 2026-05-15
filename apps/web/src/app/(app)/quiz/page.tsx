@@ -11,6 +11,7 @@ import { Header } from '@/components/layout/header';
 import { Flashcard } from '@/components/quiz/flashcard';
 import { ExampleQuizCard } from '@/components/quiz/example-quiz-card';
 import { SessionReport } from '@/components/quiz/session-report';
+import { AssistantButton } from '@/components/ai/assistant-button';
 import { useRepository } from '@/lib/repository/provider';
 import { useAuthStore } from '@/stores/auth-store';
 import { useTranslation } from '@/lib/i18n';
@@ -135,6 +136,14 @@ function QuizContent() {
   const [dailyComplete, setDailyComplete] = useState(false);
   const [cardDirection, setCardDirection] = useState<CardDirection>('term_first');
   const [sessionStats, setSessionStats] = useState<SessionStats>({ ...EMPTY_STATS });
+  const [quizSessionId] = useState(() => `quiz-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`);
+  /**
+   * Per-card AI-button gate.
+   *  - flashcard (단순 알기 체크): reveal 후에만 활성 (사용자가 답을 보기 전에 AI가 정답 노출 방지)
+   *  - example quiz (단어 채우기): 답안 선택 후에만 활성
+   * Reset to false on every card advance so the next card starts gated.
+   */
+  const [cardGateOpen, setCardGateOpen] = useState(false);
 
   const [loading] = useLoader(async () => {
     cleanupLegacyKeys();
@@ -296,6 +305,7 @@ function QuizContent() {
   };
 
   const advanceToNext = () => {
+    setCardGateOpen(false);
     if (currentIndex + 1 < cards.length) {
       setCurrentIndex((i) => i + 1);
     } else {
@@ -516,6 +526,21 @@ function QuizContent() {
                     {progressCount}
                   </span>
                 )}
+                {/* AI button — same chat session across the entire quiz run.
+                    Per-card visibility gated:
+                      - flashcard: visible after reveal
+                      - example quiz: visible after the user picks an answer
+                    Hidden entirely outside an active card (report, no cards). */}
+                {cardGateOpen && current && !showReport && !dailyComplete && (
+                  <AssistantButton
+                    scope={{
+                      kind: 'quiz',
+                      sessionId: quizSessionId,
+                      currentWordId: current.word.id,
+                    }}
+                    testId="quiz-assistant-button"
+                  />
+                )}
               </>
             )}
           </div>
@@ -538,6 +563,7 @@ function QuizContent() {
           card={current}
           onAnswer={handleExampleAnswer}
           onAdvance={advanceToNext}
+          onPhaseChange={(phase) => setCardGateOpen(phase === 'revealed')}
           progress={{ current: completed + 1, total: totalSessionSize }}
           isLoading={loading}
         />
@@ -548,6 +574,7 @@ function QuizContent() {
           examples={current?.kind === 'word' ? current.examples : undefined}
           onRate={handleWordRate}
           onMaster={handleMaster}
+          onRevealedChange={setCardGateOpen}
           progress={{ current: completed + 1, total: totalSessionSize }}
           isLoading={loading}
           cardDirection={cardDirection}

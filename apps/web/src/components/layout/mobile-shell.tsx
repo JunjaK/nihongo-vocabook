@@ -7,6 +7,10 @@ import { useScanStore } from '@/stores/scan-store';
 import { useChatStore } from '@/lib/ai/chat';
 import { useRepository } from '@/lib/repository/provider';
 import { useTranslation } from '@/lib/i18n';
+import { isNativeApp, sendToNative } from '@/lib/native-bridge';
+import { isBridgeReady } from '@/lib/ai/native-bridge-adapter';
+import { getPrewarm, subscribeAssistantPrefs } from '@/lib/ai/assistant-prefs';
+import { installTelemetryUploader } from '@/lib/ai/chat/telemetry-uploader';
 
 export function MobileShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
@@ -48,6 +52,37 @@ export function MobileShell({ children }: { children: ReactNode }) {
     if (!hydrated) return;
     setLocale(locale);
   }, [locale, hydrated, setLocale]);
+
+  // ----- Telemetry uploader: install once with the current repository -----
+  useEffect(() => {
+    return installTelemetryUploader(repo);
+  }, [repo]);
+
+  // ----- Pre-warm engine on boot when the toggle is ON -----
+  // Fires once after the bridge becomes ready. Subsequent toggle flips also
+  // re-trigger so the user can warm up the engine without restarting.
+  useEffect(() => {
+    if (!isNativeApp()) return;
+    let didWarm = false;
+    const tryWarm = () => {
+      if (didWarm) return;
+      if (!isBridgeReady()) return;
+      if (!getPrewarm()) return;
+      sendToNative({ type: 'AI_PREWARM' });
+      didWarm = true;
+    };
+    tryWarm();
+    // Re-attempt when bridge becomes ready later, or when the toggle flips.
+    const interval = setInterval(tryWarm, 1500);
+    const unsub = subscribeAssistantPrefs(() => {
+      didWarm = false;
+      tryWarm();
+    });
+    return () => {
+      clearInterval(interval);
+      unsub();
+    };
+  }, []);
 
   // ----- Chat cross-page notifications -----
   const activeInference = useChatStore((s) => s.activeInference);

@@ -13,6 +13,7 @@ import { ListToolbar } from '@/components/layout/list-toolbar';
 import { Button } from '@/components/ui/button';
 import { SwipeableWordCard } from '@/components/word/swipeable-word-card';
 import { WordCard } from '@/components/word/word-card';
+import { AssistantButton } from '@/components/ai/assistant-button';
 import { WordbookForm } from '@/components/wordbook/wordbook-form';
 import { useRepository } from '@/lib/repository/provider';
 import { useAuthStore } from '@/stores/auth-store';
@@ -446,29 +447,37 @@ export default function WordbookDetailPage({
         desc={!loading && totalCount > 0 ? t.wordbooks.wordCount(totalCount) : undefined}
         showBack
         actions={
-          loading ? undefined : isSubscribed ? (
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              onClick={() => setShowInfo(true)}
-              data-testid="wordbook-info-button"
-              aria-label={t.wordbooks.wordbookInfo}
-            >
-              <Info className="size-5" />
-            </Button>
-          ) : (
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              onClick={() => {
-                setEditDirty(false);
-                setEditing(true);
-              }}
-              data-testid="wordbook-edit-button"
-              aria-label={t.common.edit}
-            >
-              <Pencil className="size-5" />
-            </Button>
+          loading ? undefined : (
+            <div className="flex gap-1">
+              <AssistantButton
+                scope={{ kind: 'wordbook', wordbookId: id }}
+                testId="wordbook-assistant-button"
+              />
+              {isSubscribed ? (
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  onClick={() => setShowInfo(true)}
+                  data-testid="wordbook-info-button"
+                  aria-label={t.wordbooks.wordbookInfo}
+                >
+                  <Info className="size-5" />
+                </Button>
+              ) : (
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  onClick={() => {
+                    setEditDirty(false);
+                    setEditing(true);
+                  }}
+                  data-testid="wordbook-edit-button"
+                  aria-label={t.common.edit}
+                >
+                  <Pencil className="size-5" />
+                </Button>
+              )}
+            </div>
           )
         }
       />

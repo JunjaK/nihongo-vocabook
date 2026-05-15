@@ -1,0 +1,198 @@
+{
+  "runIndex": 3,
+  "summary": {
+    "total": 10,
+    "passed": 6,
+    "failed": 4,
+    "truePositive": {
+      "passed": 4,
+      "total": 6
+    },
+    "falsePositive": {
+      "passed": 1,
+      "total": 2
+    },
+    "multiTool": {
+      "passed": 0,
+      "total": 1
+    },
+    "clarification": {
+      "passed": 1,
+      "total": 1
+    },
+    "meanDurationMs": 6823.6,
+    "parseRate": 0.625
+  },
+  "results": [
+    {
+      "scenarioId": "tp-add-word",
+      "ask": "「桜」を単語として追加して。読みは「さくら」、意味は「벚꽃」。",
+      "rawOutput": "<tool_call>{\"name\":\"add_word\",\"arguments\":{\n\"term\":\"桜\",\n\"reading\":\"さくら\",\n\"meaning\":\"벚꽃\"\n}}</tool_call>",
+      "durationMs": 5682,
+      "toolCalls": [
+        {
+          "name": "add_word",
+          "argsRaw": "{\"name\":\"add_word\",\"arguments\":{\n\"term\":\"桜\",\n\"reading\":\"さくら\",\n\"meaning\":\"벚꽃\"\n}}",
+          "argsParsed": {
+            "name": "add_word",
+            "arguments": {
+              "term": "桜",
+              "reading": "さくら",
+              "meaning": "벚꽃"
+            }
+          },
+          "parseOk": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "scenarioId": "tp-delete-word",
+      "ask": "「桜」 삭제해줘",
+      "rawOutput": "<tool_call>{\"name\":\"delete_word\",\"arguments\":{\"wordId\":\"w-1\"}}</tool_call>",
+      "durationMs": 5207,
+      "toolCalls": [
+        {
+          "name": "delete_word",
+          "argsRaw": "{\"name\":\"delete_word\",\"arguments\":{\"wordId\":\"w-1\"}}",
+          "argsParsed": {
+            "name": "delete_word",
+            "arguments": {
+              "wordId": "w-1"
+            }
+          },
+          "parseOk": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "scenarioId": "tp-create-wordbook",
+      "ask": "단어장 「일본 봄」 만들어줘",
+      "rawOutput": "<tool_call>create_wordbook{\"name\":\"일본 봄\"}</tool_call>",
+      "durationMs": 4972,
+      "toolCalls": [
+        {
+          "name": "<unparsed>",
+          "argsRaw": "create_wordbook{\"name\":\"일본 봄\"}",
+          "argsParsed": null,
+          "parseOk": false
+        }
+      ],
+      "passed": false,
+      "failureReason": "expected exactly one create_wordbook, got <unparsed>"
+    },
+    {
+      "scenarioId": "tp-add-to-wordbook",
+      "ask": "寿司를 「일식」 단어장에 추가해줘",
+      "rawOutput": "<tool_call>{\"name\":\"add_word_to_wordbook\",\"arguments\":{\"wordId\":\"w-2\",\"wordbookId\":\"wb-1\"}}</tool_call>",
+      "durationMs": 5681,
+      "toolCalls": [
+        {
+          "name": "add_word_to_wordbook",
+          "argsRaw": "{\"name\":\"add_word_to_wordbook\",\"arguments\":{\"wordId\":\"w-2\",\"wordbookId\":\"wb-1\"}}",
+          "argsParsed": {
+            "name": "add_word_to_wordbook",
+            "arguments": {
+              "wordId": "w-2",
+              "wordbookId": "wb-1"
+            }
+          },
+          "parseOk": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "scenarioId": "tp-set-mastered",
+      "ask": "「桜」 암기완료로 표시해줘",
+      "rawOutput": "<tool_call>{\"name\":\"set_mastered\",\"arguments\":{\"wordId\":\"w-1\",\"mastered\":true}}</tool_call>",
+      "durationMs": 5408,
+      "toolCalls": [
+        {
+          "name": "set_mastered",
+          "argsRaw": "{\"name\":\"set_mastered\",\"arguments\":{\"wordId\":\"w-1\",\"mastered\":true}}",
+          "argsParsed": {
+            "name": "set_mastered",
+            "arguments": {
+              "wordId": "w-1",
+              "mastered": true
+            }
+          },
+          "parseOk": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "scenarioId": "multi-add-batch",
+      "ask": "봄에 어울리는 단어 다섯 개 골라서 「일본 봄」 단어장에 추가해줘",
+      "rawOutput": "<tool_call>{\"name\":\"add_word_to_wordbook\",\"arguments\":{\n  \"wordId\":\"1\",\n  \"wordbookId\":\"wb-1\"\n,  \"term\":\"花\",\n  \"reading\":\"はな\",\n  \"meaning\":\"꽃\"\n,  \"jlptLevel\":2\n,  \"wordId\":\"2\",\n  \"wordbookId\":\"wb-1\"\n  \"term\":\"桜\",\n  \"reading\":\"さくら\",\n  \"meaning\":\"벚꽃\"\n,  \"jlptLevel\":2\n,  \"wordId\":\"3\",\n  \"wordbookId\":\"wb-1\"\n  \"term\":\"春\",\n  \"reading\":\"はる\",\n  \"meaning\":\"spring\"\n,  \"jlptLevel\":2\n,  \"wordId\":\"4\",\n  \"wordbookId\":\"wb-1\"\n  \"term\":\"陽\",\n  \"reading\":\"ひ\",\n  \"meaning\":\"sun\"\n,  \"jlptLevel\":2\n,  \"wordId\":\"5\",\n  \"wordbookId\":\"wb-1\"\n  \"term\":\"風\",\n  \"reading\":\"かぜ\",\n  \"meaning\":\"wind\"\n,  \"jlptLevel\":2\n  }\n</tool_call>",
+      "durationMs": 13454,
+      "toolCalls": [
+        {
+          "name": "<unparsed>",
+          "argsRaw": "{\"name\":\"add_word_to_wordbook\",\"arguments\":{\n  \"wordId\":\"1\",\n  \"wordbookId\":\"wb-1\"\n,  \"term\":\"花\",\n  \"reading\":\"はな\",\n  \"meaning\":\"꽃\"\n,  \"jlptLevel\":2\n,  \"wordId\":\"2\",\n  \"wordbookId\":\"wb-1\"\n  \"term\":\"桜\",\n  \"reading\":\"さくら\",\n  \"meaning\":\"벚꽃\"\n,  \"jlptLevel\":2\n,  \"wordId\":\"3\",\n  \"wordbookId\":\"wb-1\"\n  \"term\":\"春\",\n  \"reading\":\"はる\",\n  \"meaning\":\"spring\"\n,  \"jlptLevel\":2\n,  \"wordId\":\"4\",\n  \"wordbookId\":\"wb-1\"\n  \"term\":\"陽\",\n  \"reading\":\"ひ\",\n  \"meaning\":\"sun\"\n,  \"jlptLevel\":2\n,  \"wordId\":\"5\",\n  \"wordbookId\":\"wb-1\"\n  \"term\":\"風\",\n  \"reading\":\"かぜ\",\n  \"meaning\":\"wind\"\n,  \"jlptLevel\":2\n  }",
+          "argsParsed": null,
+          "parseOk": false
+        }
+      ],
+      "passed": false,
+      "failureReason": "expected >=5 calls, got 1"
+    },
+    {
+      "scenarioId": "fp-explain-word",
+      "ask": "「桜」 어떻게 읽어?",
+      "rawOutput": "<tool_call>{\"name\":\"search_words\",\"arguments\": {\"query\":\"桜\"}}</tool_call>",
+      "durationMs": 5091,
+      "toolCalls": [
+        {
+          "name": "search_words",
+          "argsRaw": "{\"name\":\"search_words\",\"arguments\": {\"query\":\"桜\"}}",
+          "argsParsed": {
+            "name": "search_words",
+            "arguments": {
+              "query": "桜"
+            }
+          },
+          "parseOk": true
+        }
+      ],
+      "passed": false,
+      "failureReason": "expected no tool, got search_words"
+    },
+    {
+      "scenarioId": "fp-meta-comment",
+      "ask": "나는 단어 외우는 게 너무 어려워",
+      "rawOutput": "단어 외우는 것이 어렵다고 하시니, 제가 외우는 데 도움이 될 만한 몇 가지 방법을 제안해 드릴게요. 어떤 방법이 가장 흥미로우신가요?\n\n1. **연상법 (Mnemonic Devices)**: 단어의 뜻과 억지로 연결해서 재미있는 이미지나 이야기를 만드는 방법입니다.\n2. **소리 내어 읽기 (Auditory Learning)**: 단어를 입으로 소리 내어 읽으며 발음과 억양을 익히는 방법입니다.\n3. **반복 및 간격 반복 (Spaced Repetition)**: 외운 단어를 주기적으로 복습하여 장기 기억으로 옮기는 과학적인 방법입니다.\n4. **문장 만들기 (Contextualization)**: 단어를 독립된 단어가 아닌, 실제 문장 속에서 사용해 보는 연습입니다.\n\n이 중에서 어떤 것부터 시도해 보고 싶으신가요? 아니면, 제가 바로 단어 외우기 연습을 도와드릴까요?",
+      "durationMs": 11386,
+      "toolCalls": [],
+      "passed": true
+    },
+    {
+      "scenarioId": "amb-delete-no-target",
+      "ask": "이거 빼줘",
+      "rawOutput": "어떤 것을 빼달라고 말씀하시는 건가요? vocabulary 목록에서 특정 단어를 삭제하고 싶으신가요, 아니면 특정 단어가 포함된 단어장(wordbook)에서 단어를 제거하고 싶으신가요? 자세히 알려주시면 도와드릴게요.",
+      "durationMs": 6240,
+      "toolCalls": [],
+      "passed": true
+    },
+    {
+      "scenarioId": "read-search",
+      "ask": "내 단어 중에 「桜」 있어?",
+      "rawOutput": "<tool_call>{\"name\":\"search_words\",\"arguments\":{\"query\":\"桜\"}}$$</tool_call>",
+      "durationMs": 5115,
+      "toolCalls": [
+        {
+          "name": "<unparsed>",
+          "argsRaw": "{\"name\":\"search_words\",\"arguments\":{\"query\":\"桜\"}}$$",
+          "argsParsed": null,
+          "parseOk": false
+        }
+      ],
+      "passed": false,
+      "failureReason": "expected exactly one search_words, got <unparsed>"
+    }
+  ],
+  "completedAt": "2026-05-14T15:53:43.333Z"
+}

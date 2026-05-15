@@ -43,6 +43,8 @@ export function ChatMessageList({ session, scope }: ChatMessageListProps) {
     confirmsByMessage.set(batch.messageId, arr);
   }
 
+  const summarizedCount = session.summarizedMessageCount ?? 0;
+
   return (
     <div
       ref={scrollRef}
@@ -50,6 +52,14 @@ export function ChatMessageList({ session, scope }: ChatMessageListProps) {
       data-testid="chat-message-list"
     >
       <div className="mx-auto flex max-w-2xl flex-col gap-3">
+        {summarizedCount > 0 && (
+          <div
+            className="self-center rounded-full bg-secondary/60 px-3 py-1 text-[11px] text-text-tertiary"
+            data-testid="chat-summary-indicator"
+          >
+            {t.assistant.summarizedNotice(summarizedCount)}
+          </div>
+        )}
         {session.messages.map((msg: ChatMessage) => (
           <React.Fragment key={msg.id}>
             <ChatMessageBubble message={msg} />

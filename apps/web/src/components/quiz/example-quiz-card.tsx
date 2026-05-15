@@ -15,6 +15,8 @@ interface ExampleQuizCardProps {
   onAdvance: () => void;
   progress: { current: number; total: number };
   isLoading?: boolean;
+  /** Fires when the user picks an answer (phase → 'revealed') or resets on advance. */
+  onPhaseChange?: (phase: 'choosing' | 'revealed') => void;
 }
 
 type Phase = 'choosing' | 'revealed';
@@ -25,6 +27,7 @@ export function ExampleQuizCard({
   onAdvance,
   progress,
   isLoading = false,
+  onPhaseChange,
 }: ExampleQuizCardProps) {
   const { t } = useTranslation();
   const [selectedTerm, setSelectedTerm] = useState<string | null>(null);
@@ -70,11 +73,13 @@ export function ExampleQuizCard({
     const correct = term === correctTerm;
     onAnswer(correct);
     setPhase('revealed');
+    onPhaseChange?.('revealed');
   }
 
   function handleNext() {
     setSelectedTerm(null);
     setPhase('choosing');
+    onPhaseChange?.('choosing');
     onAdvance();
   }
 

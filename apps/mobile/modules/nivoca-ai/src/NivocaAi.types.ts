@@ -13,12 +13,33 @@ export interface ModelStatusPayload {
   message?: string;
 }
 
+export interface AiStreamTokenPayload {
+  requestId: string;
+  chunk: string;
+}
+
+export interface AiStreamDonePayload {
+  requestId: string;
+  cancelled: boolean;
+}
+
+export interface AiStreamErrorPayload {
+  requestId: string;
+  message: string;
+}
+
 export type NivocaAiModuleEvents = {
   /**
    * Emitted on download progress + state transitions (throttled to ≤1 Hz on
    * the native side to keep React Native bridge traffic low).
    */
   onModelStatus: (payload: ModelStatusPayload) => void;
+  /** Streaming text-inference token chunk. */
+  onInferStreamToken: (payload: AiStreamTokenPayload) => void;
+  /** Streaming text-inference finished (success or cancelled). */
+  onInferStreamDone: (payload: AiStreamDonePayload) => void;
+  /** Streaming text-inference failed mid-flight. */
+  onInferStreamError: (payload: AiStreamErrorPayload) => void;
 };
 
 // ---------------------------------------------------------------------------

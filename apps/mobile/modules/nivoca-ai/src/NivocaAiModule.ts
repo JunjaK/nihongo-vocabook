@@ -22,6 +22,30 @@ declare class NivocaAiModule extends NativeModule<NivocaAiModuleEvents> {
    * streaming variant that emits tokens via an event channel.
    */
   inferText(requestJson: string): Promise<string>;
+
+  /**
+   * Phase 1 — streaming text inference. `requestJson` is the JSON-encoded
+   * form of `AiTextInferRequest`. Resolves once the stream is *started*;
+   * actual chunks arrive via `onInferStreamToken` events keyed on
+   * `requestId`. Completion fires `onInferStreamDone`, errors fire
+   * `onInferStreamError`.
+   */
+  inferTextStream(requestId: string, requestJson: string): Promise<void>;
+
+  /**
+   * Phase 1 — cancel an in-flight stream. Safe to call with an unknown
+   * requestId (no-op). The engine emits a final frame after cancel, so
+   * `onInferStreamDone` still fires (with `cancelled: true`).
+   */
+  cancelInferText(requestId: string): Promise<void>;
+
+  /**
+   * Phase 1.5 — pre-warm the engine without running any inference. Loads the
+   * model + sampler config into memory so the first real inference call
+   * doesn't pay the 5-15s cold-start cost. Rejects if model is missing or all
+   * backends fail.
+   */
+  prewarm(): Promise<void>;
 }
 
 // Loads the native module object from JSI. Throws on platforms where the

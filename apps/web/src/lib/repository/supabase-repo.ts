@@ -30,6 +30,7 @@ import type {
   ChatSession,
   ToolCallStatus,
   ToolExecutionRecord,
+  AiTelemetryEvent,
 } from '@/types/chat';
 import type {
   ChatRepository,
@@ -626,6 +627,72 @@ class SupabaseWordRepository implements WordRepository {
     }
     return map;
   }
+
+  async addExample(
+    wordId: string,
+    input: {
+      sentenceJa: string;
+      sentenceReading?: string;
+      sentenceMeaning?: string;
+      source?: 'manual' | 'ai_generated';
+    },
+  ): Promise<WordExample> {
+    // Resolve the word's dictionary_entry_id so the example lands on the shared
+    // table keyed by dict entry, not by user word.
+    const { data: wordRow, error: wordErr } = await this.supabase
+      .from('words')
+      .select('dictionary_entry_id')
+      .eq('id', wordId)
+      .single();
+    if (wordErr) throw wordErr;
+    const dictionaryEntryId = (wordRow as { dictionary_entry_id: string | null })
+      .dictionary_entry_id;
+    if (!dictionaryEntryId) {
+      throw new Error(
+        `Cannot add example: word ${wordId} has no dictionary entry. Re-add the word from dictionary search.`,
+      );
+    }
+
+    const insertRow = {
+      dictionary_entry_id: dictionaryEntryId,
+      // Legacy NOT NULL column kept for compatibility (see 025 migration).
+      word_id: wordId,
+      sentence_ja: input.sentenceJa,
+      sentence_reading: input.sentenceReading ?? null,
+      sentence_meaning: input.sentenceMeaning ?? null,
+      source: input.source ?? 'ai_generated',
+    };
+    const { data, error } = await this.supabase
+      .from('word_examples')
+      .insert(insertRow)
+      .select('*')
+      .single();
+    if (error) throw error;
+    return dbExampleToExample(data as DbWordExample);
+  }
+}
+
+/**
+ * Drop any payload value that doesn't look like a counter or short enum.
+ * Defensive layer above the type system — even if a caller violates the
+ * `AiTelemetryEvent.payload` contract, free-form text will never reach the
+ * server. Keeps numbers, booleans, null, and short strings without whitespace.
+ */
+function scrubPayload(
+  payload: Record<string, number | string | boolean | null>,
+): Record<string, number | string | boolean | null> {
+  const out: Record<string, number | string | boolean | null> = {};
+  for (const [k, v] of Object.entries(payload)) {
+    if (typeof v === 'number' && Number.isFinite(v)) {
+      out[k] = v;
+    } else if (typeof v === 'boolean' || v === null) {
+      out[k] = v;
+    } else if (typeof v === 'string' && v.length <= 64 && !/\s{2,}/.test(v)) {
+      out[k] = v;
+    }
+    // Anything else (long strings, objects, arrays, undefined) → dropped.
+  }
+  return out;
 }
 
 /** Cached userId helper shared across repositories */
@@ -1757,6 +1824,9 @@ interface DbAiSession {
   message_count: number;
   total_input_tokens: number;
   total_output_tokens: number;
+  context_summary: string | null;
+  summarized_through_message_id: string | null;
+  summarized_message_count: number;
   created_at: string;
   updated_at: string;
 }
@@ -1776,6 +1846,7 @@ interface DbAiMessage {
   error_code: string | null;
   error_message: string | null;
   attachment_ids: unknown;
+  feedback: string | null;
   created_at: string;
 }
 
@@ -1800,6 +1871,9 @@ class SupabaseChatRepository implements ChatRepository {
       messageCount: row.message_count,
       totalInputTokens: row.total_input_tokens,
       totalOutputTokens: row.total_output_tokens,
+      contextSummary: row.context_summary ?? undefined,
+      summarizedThroughMessageId: row.summarized_through_message_id ?? undefined,
+      summarizedMessageCount: row.summarized_message_count || undefined,
       createdAt: new Date(row.created_at).getTime(),
       updatedAt: new Date(row.updated_at).getTime(),
     };
@@ -1820,6 +1894,7 @@ class SupabaseChatRepository implements ChatRepository {
       errorCode: row.error_code ?? undefined,
       errorMessage: row.error_message ?? undefined,
       attachmentIds: (row.attachment_ids as string[]) ?? undefined,
+      feedback: (row.feedback as ChatMessage['feedback']) ?? undefined,
       createdAt: new Date(row.created_at).getTime(),
     };
   }
@@ -1949,6 +2024,59 @@ class SupabaseChatRepository implements ChatRepository {
     const { data, error } = await query;
     if (error || !data) return [];
     return (data as DbAiMessage[]).map((row) => this.mapMessage(row));
+  }
+
+  async setMessageFeedback(
+    messageId: string,
+    feedback: 'thumbs_up' | 'thumbs_down' | null,
+  ): Promise<void> {
+    const userId = await this.currentUserId();
+    const { error } = await this.supabase
+      .from('ai_messages')
+      .update({ feedback })
+      .eq('id', messageId)
+      .eq('user_id', userId);
+    if (error) throw new Error(error.message);
+  }
+
+  async setSessionSummary(
+    sessionId: string,
+    summary: string | null,
+    summarizedThroughMessageId: string | null,
+    summarizedMessageCount: number,
+  ): Promise<void> {
+    const userId = await this.currentUserId();
+    const { error } = await this.supabase
+      .from('ai_sessions')
+      .update({
+        context_summary: summary,
+        summarized_through_message_id: summarizedThroughMessageId,
+        summarized_message_count: summarizedMessageCount,
+      })
+      .eq('id', sessionId)
+      .eq('user_id', userId);
+    if (error) throw new Error(error.message);
+  }
+
+  async uploadTelemetry(events: AiTelemetryEvent[]): Promise<void> {
+    if (events.length === 0) return;
+    const userId = await this.currentUserId();
+    // Defensive scrub: drop any payload value that looks like free-form text.
+    // Counters / latencies are numbers; enum strings are <= 64 chars and
+    // contain no whitespace beyond underscores. Anything else is dropped so
+    // an accidental `prompt: "<user message>"` field never makes it through.
+    const rows = events.map((e) => ({
+      user_id: userId,
+      event: e.event,
+      payload: scrubPayload(e.payload),
+      scope: e.scope ?? null,
+      model_variant: e.modelVariant ?? null,
+      platform: e.platform ?? null,
+      app_version: e.appVersion ?? null,
+      // created_at is set server-side; we ignore e.timestamp for now.
+    }));
+    const { error } = await this.supabase.from('ai_telemetry').insert(rows);
+    if (error) throw new Error(error.message);
   }
 
   async recordToolExecution(execution: ToolExecutionRecord): Promise<void> {

@@ -1,11 +1,11 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
-import { Plus } from '@/components/ui/icons';
+import { Plus, BookOpen } from '@/components/ui/icons';
 import { Header } from '@/components/layout/header';
-import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { ChatMessageList } from '@/components/ai/chat-message-list';
 import { ChatInputBar } from '@/components/ai/chat-input-bar';
 import { AssistantFallback } from '@/components/ai/assistant-fallback';
@@ -31,10 +31,9 @@ export default function AssistantPage() {
   const hydrated = useChatStore((s) => s.hydrated);
   const session = useChatStore((s) => s.generalSession);
   const markSessionViewed = useChatStore((s) => s.markSessionViewed);
-  const clearGeneralSession = useChatStore((s) => s.clearGeneralSession);
+  const startNew = useChatStore((s) => s.startNewGeneralSession);
   const [snapshot, setSnapshotState] = useState(getSnapshot);
   useEffect(() => subscribeSnapshot(setSnapshotState), []);
-  const [confirmClear, setConfirmClear] = useState(false);
 
   // Mark unread cleared as soon as the page is in view.
   useEffect(() => {
@@ -48,11 +47,10 @@ export default function AssistantPage() {
     installedCount: snapshot.installed.length,
   });
 
-  const handleClear = async () => {
-    setConfirmClear(false);
+  const handleNew = async () => {
     try {
-      await clearGeneralSession();
-      toast.success(t.common.complete);
+      await startNew();
+      toast.success(t.assistant.newChat);
     } catch (err) {
       toast.error(t.common.error);
       console.error(err);
@@ -65,16 +63,28 @@ export default function AssistantPage() {
         title={t.assistant.title}
         actions={
           variant === null && (
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              onClick={() => setConfirmClear(true)}
-              aria-label={t.assistant.newChat}
-              data-testid="assistant-new-chat-button"
-              disabled={!session || session.messages.length === 0}
-            >
-              <Plus className="size-icon" />
-            </Button>
+            <div className="flex items-center gap-1">
+              <Link href="/assistant/sessions" aria-label={t.assistant.sessionsLink}>
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  aria-label={t.assistant.sessionsLink}
+                  data-testid="assistant-sessions-link"
+                >
+                  <BookOpen className="size-icon" />
+                </Button>
+              </Link>
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                onClick={handleNew}
+                aria-label={t.assistant.newChat}
+                data-testid="assistant-new-chat-button"
+                disabled={!session || session.messages.length === 0}
+              >
+                <Plus className="size-icon" />
+              </Button>
+            </div>
           )
         }
       />
@@ -97,14 +107,6 @@ export default function AssistantPage() {
           <ChatInputBar scope={GENERAL} />
         </>
       )}
-
-      <ConfirmDialog
-        open={confirmClear}
-        title={t.assistant.newChat}
-        description={t.assistant.newChatConfirm}
-        onConfirm={handleClear}
-        onCancel={() => setConfirmClear(false)}
-      />
     </div>
   );
 }

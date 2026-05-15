@@ -20,6 +20,8 @@ interface BaseFlashcardProps {
   renderActions: (props: { word: Word; onAdvance: () => void; revealed: boolean }) => ReactNode;
   renderLoadingActions: () => ReactNode;
   testId?: string;
+  /** Fires whenever the user toggles the reveal (used to gate quiz-scope AI button). */
+  onRevealedChange?: (revealed: boolean) => void;
 }
 
 /** Resolve 'random' once per card mount */
@@ -87,6 +89,7 @@ export function BaseFlashcard({
   renderActions,
   renderLoadingActions,
   testId = 'flashcard',
+  onRevealedChange,
 }: BaseFlashcardProps) {
   const { t } = useTranslation();
   const [revealed, setRevealed] = useState(false);
@@ -95,7 +98,8 @@ export function BaseFlashcard({
 
   useEffect(() => {
     if (!revealed) setExamplesShown(false);
-  }, [revealed]);
+    onRevealedChange?.(revealed);
+  }, [revealed, onRevealedChange]);
 
   const pct = progress.total > 0 ? (progress.current / progress.total) * 100 : 0;
 

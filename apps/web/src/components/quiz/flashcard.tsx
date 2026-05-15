@@ -15,9 +15,10 @@ interface FlashcardProps {
   progress: { current: number; total: number };
   isLoading?: boolean;
   cardDirection?: CardDirection;
+  onRevealedChange?: (revealed: boolean) => void;
 }
 
-export function Flashcard({ word, examples, onRate, onMaster, progress, isLoading = false, cardDirection }: FlashcardProps) {
+export function Flashcard({ word, examples, onRate, onMaster, progress, isLoading = false, cardDirection, onRevealedChange }: FlashcardProps) {
   const { t } = useTranslation();
 
   return (
@@ -27,6 +28,7 @@ export function Flashcard({ word, examples, onRate, onMaster, progress, isLoadin
       progress={progress}
       isLoading={isLoading}
       cardDirection={cardDirection}
+      onRevealedChange={onRevealedChange}
       testId="flashcard"
       renderLoadingActions={() => (
         <>

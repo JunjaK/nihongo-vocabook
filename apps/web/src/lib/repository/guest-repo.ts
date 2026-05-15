@@ -37,6 +37,7 @@ const wordRepo: WordRepository = {
   setMastered: LOGIN_REQUIRED,
   getExamples: () => Promise.resolve([]),
   getExamplesForDictionaryEntries: () => Promise.resolve(new Map()),
+  addExample: LOGIN_REQUIRED,
 };
 
 const studyRepo: StudyRepository = {
@@ -90,6 +91,9 @@ const chatRepo: ChatRepository = {
   appendMessage: LOGIN_REQUIRED,
   updateMessageStatus: LOGIN_REQUIRED,
   listMessages: () => Promise.resolve([]),
+  setMessageFeedback: LOGIN_REQUIRED,
+  setSessionSummary: () => Promise.resolve(),
+  uploadTelemetry: () => Promise.resolve(),
   recordToolExecution: LOGIN_REQUIRED,
   updateToolExecution: LOGIN_REQUIRED,
 };

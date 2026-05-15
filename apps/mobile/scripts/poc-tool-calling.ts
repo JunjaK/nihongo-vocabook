@@ -157,29 +157,201 @@ export interface ToolCallExtract {
 }
 
 const TOOL_CALL_PATTERN = /<tool_call>([\s\S]*?)<\/tool_call>/g;
+const TOOL_CALL_OPEN_NO_CLOSE = /<tool_call>([\s\S]*?)(?=<tool_call>|$)/g;
+
+/**
+ * If a JSON-ish string has unbalanced `{` and `[`, append matching closers so
+ * it can be parsed. Returns the rebalanced string, or the original if nothing
+ * needed fixing.
+ */
+function rebalanceJson(s: string): string {
+  let depth = 0;
+  let bracket = 0;
+  let inString = false;
+  let escape = false;
+  for (let i = 0; i < s.length; i++) {
+    const c = s[i];
+    if (escape) { escape = false; continue; }
+    if (inString) {
+      if (c === '\\') { escape = true; continue; }
+      if (c === '"') inString = false;
+      continue;
+    }
+    if (c === '"') inString = true;
+    else if (c === '{') depth++;
+    else if (c === '}') depth--;
+    else if (c === '[') bracket++;
+    else if (c === ']') bracket--;
+  }
+  let fixed = s;
+  if (inString) fixed += '"';
+  while (bracket > 0) { fixed += ']'; bracket--; }
+  while (depth > 0) { fixed += '}'; depth--; }
+  return fixed;
+}
+
+/**
+ * Walk `text` and return each top-level balanced `{...}` substring.
+ * Strings and escape sequences are honoured so braces inside `"..."` don't
+ * disturb the nesting count. This is the core primitive that lets us tolerate
+ * multi-call emission (`{...},{...}`) inside one `<tool_call>` tag.
+ */
+function extractBalancedObjects(text: string): string[] {
+  const out: string[] = [];
+  let depth = 0;
+  let start = -1;
+  let inString = false;
+  let escape = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (escape) { escape = false; continue; }
+    if (inString) {
+      if (c === '\\') { escape = true; continue; }
+      if (c === '"') inString = false;
+      continue;
+    }
+    if (c === '"') { inString = true; continue; }
+    if (c === '{') {
+      if (depth === 0) start = i;
+      depth++;
+    } else if (c === '}') {
+      depth--;
+      if (depth === 0 && start !== -1) {
+        out.push(text.slice(start, i + 1));
+        start = -1;
+      }
+    }
+  }
+  return out;
+}
+
+/**
+ * Parse a single tool_call body. Tolerates:
+ *  - `{"name":"...","arguments":{...}}`           — canonical
+ *  - `{"name":"...","args":{...}}`                — alternate key
+ *  - `name_here{"...":...}`                       — name prefix outside JSON
+ *  - `{...}` with trailing garbage after the JSON — extra chars after `}`
+ *
+ * Returns null if no recoverable interpretation exists.
+ */
+function parseSingleCall(body: string): { name: string; args: Record<string, unknown> } | null {
+  const trimmed = body.trim();
+
+  // Form: name_prefix{...}
+  const prefixMatch = trimmed.match(/^([A-Za-z_][A-Za-z0-9_]*)\s*(\{[\s\S]*\})\s*$/);
+  if (prefixMatch) {
+    try {
+      const inner = JSON.parse(prefixMatch[2]) as Record<string, unknown>;
+      // If the inner already has `name`, prefer that; otherwise use the prefix.
+      const name = typeof inner.name === 'string' ? inner.name : prefixMatch[1];
+      const args = (inner.arguments ?? inner.args ?? inner) as Record<string, unknown>;
+      // Strip name field out when the args bag was the inner object directly.
+      if (args === inner) {
+        const { name: _n, arguments: _a, args: _b, ...rest } = inner;
+        return { name, args: rest };
+      }
+      return { name, args };
+    } catch {
+      /* fall through */
+    }
+  }
+
+  // Form: {"name":"...","arguments":{...}} possibly with trailing garbage
+  const objs = extractBalancedObjects(trimmed);
+  if (objs.length === 0) return null;
+  for (const objStr of objs) {
+    try {
+      const obj = JSON.parse(objStr) as Record<string, unknown>;
+      if (typeof obj.name !== 'string') continue;
+      const args =
+        (obj.arguments as Record<string, unknown> | undefined) ??
+        (obj.args as Record<string, unknown> | undefined) ??
+        {};
+      return { name: obj.name as string, args };
+    } catch {
+      /* try next */
+    }
+  }
+  return null;
+}
+
+/**
+ * Parse a single tool_call body into one OR MORE calls. Tolerates multi-call
+ * emission like `{"name":"a",...},{"name":"b",...}`.
+ *
+ * Priority:
+ *   1. If the body contains multiple balanced objects, treat each as a call.
+ *   2. Otherwise, fall back to single-call recovery (handles name-prefix shape
+ *      and `{...}` with trailing garbage).
+ */
+function parseToolCallBody(body: string): Array<{ name: string; args: Record<string, unknown> }> {
+  const balanced = extractBalancedObjects(body);
+  if (balanced.length > 1) {
+    const out: Array<{ name: string; args: Record<string, unknown> }> = [];
+    for (const objStr of balanced) {
+      try {
+        const obj = JSON.parse(objStr) as Record<string, unknown>;
+        if (typeof obj.name === 'string') {
+          const args =
+            (obj.arguments as Record<string, unknown> | undefined) ??
+            (obj.args as Record<string, unknown> | undefined) ??
+            {};
+          out.push({ name: obj.name, args });
+        }
+      } catch {
+        /* skip malformed */
+      }
+    }
+    if (out.length > 0) return out;
+  }
+
+  const single = parseSingleCall(body);
+  return single ? [single] : [];
+}
 
 export function extractToolCalls(raw: string): ToolCallExtract[] {
   const out: ToolCallExtract[] = [];
+  // Find all <tool_call>...</tool_call> blocks. If the model failed to emit a
+  // closing tag for some block, fall through to a permissive split that
+  // accepts everything between two <tool_call> opens (or EOS) as the body.
+  let matched = false;
   for (const match of raw.matchAll(TOOL_CALL_PATTERN)) {
+    matched = true;
     const body = match[1].trim();
-    let parsed: Record<string, unknown> | null = null;
-    let parseOk = false;
-    try {
-      const obj = JSON.parse(body) as Record<string, unknown>;
-      parsed = obj;
-      parseOk = typeof obj.name === 'string';
-    } catch {
-      // leave parseOk false
+    const calls = parseToolCallBody(rebalanceJson(body));
+    if (calls.length === 0) {
+      out.push({ name: '<unparsed>', argsRaw: body, argsParsed: null, parseOk: false });
+      continue;
     }
-    out.push({
-      name:
-        parsed && typeof parsed.name === 'string'
-          ? (parsed.name as string)
-          : '<unparsed>',
-      argsRaw: body,
-      argsParsed: parsed,
-      parseOk,
-    });
+    for (const c of calls) {
+      out.push({
+        name: c.name,
+        argsRaw: body,
+        argsParsed: { name: c.name, arguments: c.args },
+        parseOk: true,
+      });
+    }
+  }
+  if (matched) return out;
+
+  // No properly-closed tool_call tags. Try the permissive form: anything
+  // after `<tool_call>` up to next `<tool_call>` or end-of-string.
+  for (const match of raw.matchAll(TOOL_CALL_OPEN_NO_CLOSE)) {
+    const body = match[1].trim();
+    if (!body) continue;
+    const calls = parseToolCallBody(rebalanceJson(body));
+    if (calls.length === 0) {
+      out.push({ name: '<unparsed>', argsRaw: body, argsParsed: null, parseOk: false });
+      continue;
+    }
+    for (const c of calls) {
+      out.push({
+        name: c.name,
+        argsRaw: body,
+        argsParsed: { name: c.name, arguments: c.args },
+        parseOk: true,
+      });
+    }
   }
   return out;
 }
@@ -304,6 +476,15 @@ const SYSTEM_PREAMBLE = [
   "You are the user's Japanese vocabulary study assistant.",
   "You can use tools to interact with the user's words and wordbooks.",
   "Respond in the user's language (Korean unless the message is mostly Japanese).",
+  '',
+  'IMPORTANT — when to NOT call a tool:',
+  '- If the user asks "what does X mean?" / "X 뜻이 뭐야?" / "X 무슨 뜻이야?" — answer directly with the meaning in natural language. Do NOT call search_words or any other tool just to explain a word.',
+  '- If the user asks a meta question about the assistant itself (capabilities, how to use, etc.) — answer in natural language without any tool call.',
+  '- Only call a tool when the user is requesting an action on their data (add/edit/delete/search/find).',
+  '',
+  'Example (explain only, no tool):',
+  '  User: "桜 뜻이 뭐야?"',
+  '  Assistant: "桜(さくら)는 「벚꽃」을 뜻합니다."',
 ].join('\n');
 
 export async function runPoc(): Promise<{

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { toast } from 'sonner';
 import { Info } from '@/components/ui/icons';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
@@ -19,6 +19,15 @@ import {
   subscribeWebPush,
   unsubscribeWebPush,
 } from '@/lib/notifications/web-push-client';
+import {
+  getSaveQuizAiSessions,
+  setSaveQuizAiSessions,
+  getPrewarm,
+  setPrewarm,
+  getTelemetryEnabled,
+  setTelemetryEnabled,
+} from '@/lib/ai/assistant-prefs';
+import { isNativeApp } from '@/lib/native-bridge';
 
 const DAILY_GOAL_OPTIONS = [10, 15, 20, 30, 50, 100];
 const EXAMPLE_RATIO_OPTIONS = [0, 20, 30, 50, 70, 100];
@@ -34,7 +43,17 @@ export default function QuizSettingsPage() {
   const { t } = useTranslation();
   const [settings, setSettings] = useState<QuizSettings>(DEFAULT_QUIZ_SETTINGS);
   const [saving, setSaving] = useState(false);
+  const [saveAiSessions, setSaveAiSessionsState] = useState(false);
+  const [prewarm, setPrewarmState] = useState(false);
+  const [telemetry, setTelemetryState] = useState(false);
   const initialSettingsRef = useRef<QuizSettings>(DEFAULT_QUIZ_SETTINGS);
+
+  // Read the local-only AI prefs on mount (localStorage, see assistant-prefs.ts).
+  useEffect(() => {
+    setSaveAiSessionsState(getSaveQuizAiSessions());
+    setPrewarmState(getPrewarm());
+    setTelemetryState(getTelemetryEnabled());
+  }, []);
 
   const [loading] = useLoader(async () => {
     const data = await repo.study.getQuizSettings();
@@ -301,6 +320,101 @@ export default function QuizSettingsPage() {
               )}
             </section>
           )}
+
+          {/* AI Assistant */}
+          <section className="space-y-2.5">
+            <h2 className="text-body font-semibold">{t.settings.assistantSection}</h2>
+            <div
+              role="checkbox"
+              aria-checked={saveAiSessions}
+              tabIndex={0}
+              className="flex cursor-pointer items-center justify-between rounded-lg border p-3"
+              onClick={() => {
+                const next = !saveAiSessions;
+                setSaveAiSessionsState(next);
+                setSaveQuizAiSessions(next);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === ' ' || e.key === 'Enter') {
+                  e.preventDefault();
+                  const next = !saveAiSessions;
+                  setSaveAiSessionsState(next);
+                  setSaveQuizAiSessions(next);
+                }
+              }}
+              data-testid="quiz-save-ai-sessions-toggle"
+            >
+              <div className="space-y-0.5">
+                <p className="text-sm font-medium">{t.settings.saveQuizAiSessions}</p>
+                <p className="text-xs text-muted-foreground">{t.settings.saveQuizAiSessionsDesc}</p>
+              </div>
+              <div className={`relative h-5 w-9 rounded-full transition-colors ${saveAiSessions ? 'bg-primary' : 'bg-muted'}`}>
+                <div className={`absolute top-0.5 size-4 rounded-full bg-white shadow transition-transform ${saveAiSessions ? 'translate-x-4' : 'translate-x-0.5'}`} />
+              </div>
+            </div>
+
+            {/* Pre-warm toggle — only meaningful in the native app */}
+            {isNativeApp() && (
+              <div
+                role="checkbox"
+                aria-checked={prewarm}
+                tabIndex={0}
+                className="flex cursor-pointer items-center justify-between rounded-lg border p-3"
+                onClick={() => {
+                  const next = !prewarm;
+                  setPrewarmState(next);
+                  setPrewarm(next);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === ' ' || e.key === 'Enter') {
+                    e.preventDefault();
+                    const next = !prewarm;
+                    setPrewarmState(next);
+                    setPrewarm(next);
+                  }
+                }}
+                data-testid="assistant-prewarm-toggle"
+              >
+                <div className="space-y-0.5">
+                  <p className="text-sm font-medium">{t.settings.prewarm}</p>
+                  <p className="text-xs text-muted-foreground">{t.settings.prewarmDesc}</p>
+                </div>
+                <div className={`relative h-5 w-9 rounded-full transition-colors ${prewarm ? 'bg-primary' : 'bg-muted'}`}>
+                  <div className={`absolute top-0.5 size-4 rounded-full bg-white shadow transition-transform ${prewarm ? 'translate-x-4' : 'translate-x-0.5'}`} />
+                </div>
+              </div>
+            )}
+
+            {/* Anonymous telemetry */}
+            <div
+              role="checkbox"
+              aria-checked={telemetry}
+              tabIndex={0}
+              className="flex cursor-pointer items-center justify-between rounded-lg border p-3"
+              onClick={() => {
+                const next = !telemetry;
+                setTelemetryState(next);
+                setTelemetryEnabled(next);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === ' ' || e.key === 'Enter') {
+                  e.preventDefault();
+                  const next = !telemetry;
+                  setTelemetryState(next);
+                  setTelemetryEnabled(next);
+                }
+              }}
+              data-testid="assistant-telemetry-toggle"
+            >
+              <div className="space-y-0.5">
+                <p className="text-sm font-medium">{t.settings.telemetry}</p>
+                <p className="text-xs text-muted-foreground">{t.settings.telemetryDesc}</p>
+              </div>
+              <div className={`relative h-5 w-9 rounded-full transition-colors ${telemetry ? 'bg-primary' : 'bg-muted'}`}>
+                <div className={`absolute top-0.5 size-4 rounded-full bg-white shadow transition-transform ${telemetry ? 'translate-x-4' : 'translate-x-0.5'}`} />
+              </div>
+            </div>
+          </section>
 
           {/* Rating guide */}
           <section className="rounded-lg bg-muted/50 p-3">

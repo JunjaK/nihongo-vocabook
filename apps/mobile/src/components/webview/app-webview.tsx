@@ -8,6 +8,18 @@ import * as ImagePicker from 'expo-image-picker';
 import { getDeviceEligibility } from '../../lib/ai/device-eligibility';
 import { runNativeInference } from '../../lib/ai/inference';
 import { modelManager } from '../../lib/ai/model-manager';
+import {
+  installStreamForwarder,
+  uninstallStreamForwarder,
+  startNativeStream,
+  cancelNativeStream,
+} from '../../lib/ai/stream-bridge';
+import {
+  startAudioRecording,
+  stopAudioRecording,
+  cancelAudioRecording,
+  pickAudioFile,
+} from '../../lib/ai/audio-bridge';
 import type {
   AiModelStatusSnapshot,
   WebToNativeMessage,
@@ -70,6 +82,12 @@ export function AppWebView() {
       sendToWeb(buildStatusMessage(snapshot));
     });
   }, [buildStatusMessage, sendToWeb]);
+
+  // --- Install native streaming forwarder once per WebView mount ---
+  useEffect(() => {
+    installStreamForwarder(sendToWeb);
+    return () => uninstallStreamForwarder();
+  }, [sendToWeb]);
 
   // --- Handle message FROM web ---
   const handleMessage = useCallback(
@@ -230,6 +248,65 @@ export function AppWebView() {
               requestId: message.requestId,
               message: err instanceof Error ? err.message : 'infer_failed',
             });
+          }
+          break;
+        }
+
+        case 'AI_INFER': {
+          // Streaming text inference. The stream-forwarder useEffect above
+          // already routes onInferStreamToken/Done/Error → AI_INFER_TOKEN/
+          // DONE/ERROR. Here we just start the stream and surface the
+          // synchronous start-failure case (engine not loaded, bad payload).
+          try {
+            await startNativeStream(message.requestId, message.request);
+          } catch (err) {
+            sendToWeb({
+              type: 'AI_INFER_ERROR',
+              requestId: message.requestId,
+              code: 'native_stream_start_failed',
+              message: err instanceof Error ? err.message : 'start_failed',
+            });
+          }
+          break;
+        }
+
+        case 'AI_INFER_CANCEL': {
+          try {
+            await cancelNativeStream(message.requestId);
+          } catch (err) {
+            // Cancel itself should not throw. Log and swallow — the original
+            // stream's error event will surface the broken state if any.
+            console.warn('[bridge] cancelNativeStream failed', err);
+          }
+          break;
+        }
+
+        case 'AUDIO_RECORD_START': {
+          await startAudioRecording(sendToWeb, message.maxSeconds);
+          break;
+        }
+        case 'AUDIO_RECORD_STOP': {
+          await stopAudioRecording(sendToWeb);
+          break;
+        }
+        case 'AUDIO_RECORD_CANCEL': {
+          await cancelAudioRecording(sendToWeb);
+          break;
+        }
+        case 'PICK_AUDIO_FILE': {
+          await pickAudioFile(sendToWeb);
+          break;
+        }
+
+        case 'AI_PREWARM': {
+          // Fire-and-forget. Failures (missing model / backend init) are
+          // silent — the next real inference call will surface a clean error.
+          try {
+            // Lazy import to avoid pulling the module into other paths.
+            const NivocaAi = (await import('../../../modules/nivoca-ai')).default;
+            await NivocaAi.prewarm();
+          } catch (err) {
+            console.warn('[bridge] prewarm failed', err);
           }
           break;
         }

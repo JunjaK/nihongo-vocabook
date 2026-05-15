@@ -32,6 +32,12 @@ export interface AiModelStatusSnapshot {
 export type AiInferContentBlock =
   | { type: 'text'; text: string }
   | { type: 'image'; source: string }
+  /**
+   * Audio attachment. `source` is a data URL or absolute file path that the
+   * native side can resolve. Phase 2 plumbing — UI recording flow ships
+   * separately once on-device audio inference is verified.
+   */
+  | { type: 'audio'; source: string; mimeType?: string }
   | { type: 'tool_result'; toolName: string; toolCallId: string; result: unknown };
 
 export interface AiInferMessage {
@@ -66,7 +72,12 @@ type WebToNativeMessage =
   | { type: 'AI_MODEL_DELETE'; variantId: AiModelVariantId }
   | { type: 'AI_INFER_VISION'; requestId: string; imageBase64: string; locale: string }
   | { type: 'AI_INFER'; requestId: string; request: AiInferRequest }
-  | { type: 'AI_INFER_CANCEL'; requestId: string };
+  | { type: 'AI_INFER_CANCEL'; requestId: string }
+  | { type: 'AI_PREWARM' }
+  | { type: 'AUDIO_RECORD_START'; maxSeconds?: number }
+  | { type: 'AUDIO_RECORD_STOP' }
+  | { type: 'AUDIO_RECORD_CANCEL' }
+  | { type: 'PICK_AUDIO_FILE' };
 
 interface AiExtractedWord {
   term: string;
@@ -100,7 +111,13 @@ type NativeToWebMessage =
       outputTokens?: number;
       modelVariant?: string;
     }
-  | { type: 'AI_INFER_ERROR'; requestId: string; code: string; message: string };
+  | { type: 'AI_INFER_ERROR'; requestId: string; code: string; message: string }
+  | { type: 'AUDIO_RECORD_TICK'; elapsedMs: number; level?: number }
+  | { type: 'AUDIO_RECORD_RESULT'; base64: string; mimeType: string; durationMs: number }
+  | { type: 'AUDIO_RECORD_CANCELLED' }
+  | { type: 'AUDIO_RECORD_ERROR'; message: string }
+  | { type: 'AUDIO_FILE_RESULT'; base64: string; mimeType: string; name?: string }
+  | { type: 'AUDIO_FILE_CANCELLED' };
 
 // ---------------------------------------------------------------------------
 // Global type augmentation

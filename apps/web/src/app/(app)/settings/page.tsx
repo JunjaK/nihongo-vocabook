@@ -303,6 +303,17 @@ export default function SettingsPage() {
                 </div>
                 <ChevronRight className="size-4 shrink-0 text-text-tertiary" />
               </Link>
+              <Link
+                href="/settings/ai-stats"
+                className={settingsRow}
+                data-testid="settings-ai-stats-link"
+              >
+                <div className="flex items-center gap-3">
+                  <BarChart3 className="size-[18px] text-muted-foreground" />
+                  <span className="text-body font-medium">{t.aiStats.title}</span>
+                </div>
+                <ChevronRight className="size-4 shrink-0 text-text-tertiary" />
+              </Link>
             </div>
           ) : (
             <div className="text-sm text-muted-foreground">
