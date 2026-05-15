@@ -5,7 +5,8 @@ import { toast } from 'sonner';
 import { useTranslation } from '@/lib/i18n';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { PhotoScan, XIcon } from '@/components/ui/icons';
+import { PhotoScan, XIcon, Send } from '@/components/ui/icons';
+import { cn } from '@/lib/utils';
 import { storeAttachment, useChatStore } from '@/lib/ai/chat';
 import {
   isNativeApp,
@@ -209,10 +210,11 @@ export function ChatInputBar({ scope }: ChatInputBarProps) {
           cancelLabel={t.assistant.recordCancel}
         />
       ) : (
-        <div className="flex items-end gap-2">
+        <div className="flex items-center gap-1">
           <Button
             variant="ghost"
-            size="icon-sm"
+            size="icon"
+            className="size-11 shrink-0"
             onClick={onAttachClick}
             disabled={isStreaming}
             aria-label={t.assistant.attachImage}
@@ -222,7 +224,8 @@ export function ChatInputBar({ scope }: ChatInputBarProps) {
           </Button>
           <Button
             variant="ghost"
-            size="icon-sm"
+            size="icon"
+            className="size-11 shrink-0"
             onClick={startRecording}
             disabled={isStreaming}
             aria-label={t.assistant.recordAudio}
@@ -237,39 +240,45 @@ export function ChatInputBar({ scope }: ChatInputBarProps) {
             className="hidden"
             onChange={onFileChange}
           />
-          <Input
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                void onSubmit();
+          {/* Input + send button as a single visual unit. The button sits
+              inside the input on the right, eliminating height mismatches. */}
+          <div className="relative flex-1">
+            <Input
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  void onSubmit();
+                }
+              }}
+              placeholder={t.assistant.inputPlaceholder}
+              disabled={isStreaming}
+              className="pr-12"
+              data-testid="chat-input-text"
+            />
+            <button
+              type="button"
+              onClick={() => (isStreaming ? cancelActive() : void onSubmit())}
+              disabled={
+                !isStreaming && (sending || (!text.trim() && pending.length === 0))
               }
-            }}
-            placeholder={t.assistant.inputPlaceholder}
-            disabled={isStreaming}
-            className="flex-1"
-            data-testid="chat-input-text"
-          />
-          {isStreaming ? (
-            <Button
-              variant="outline"
-              size="icon-sm"
-              onClick={() => cancelActive()}
-              aria-label={t.assistant.cancel}
-              data-testid="chat-input-cancel"
+              aria-label={isStreaming ? t.assistant.cancel : t.assistant.send}
+              data-testid={isStreaming ? 'chat-input-cancel' : 'chat-input-send'}
+              className={cn(
+                'absolute right-1.5 top-1/2 flex size-8 -translate-y-1/2 items-center justify-center rounded-md transition-all',
+                'bg-primary text-primary-foreground',
+                'enabled:active:scale-95',
+                'disabled:opacity-30 disabled:cursor-not-allowed',
+              )}
             >
-              <XIcon className="size-icon" />
-            </Button>
-          ) : (
-            <Button
-              onClick={() => void onSubmit()}
-              disabled={sending || (!text.trim() && pending.length === 0)}
-              data-testid="chat-input-send"
-            >
-              {t.assistant.send}
-            </Button>
-          )}
+              {isStreaming ? (
+                <XIcon className="size-4" />
+              ) : (
+                <Send className="size-4" />
+              )}
+            </button>
+          </div>
         </div>
       )}
     </div>

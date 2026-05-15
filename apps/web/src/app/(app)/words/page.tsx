@@ -170,13 +170,25 @@ export default function WordsPage() {
     <div className={pageWrapper}>
       <Header
         title={t.words.title}
-        desc={<WordsListToggle current="active" />}
+        desc={
+          <div className="flex items-center gap-2">
+            {!loading && totalCount > 0 && (
+              <span className="text-caption font-medium text-text-tertiary tabular-nums">
+                {t.words.countCompact(totalCount)}
+              </span>
+            )}
+            <WordsListToggle current="active" />
+          </div>
+        }
         actions={
           <div className="flex items-center gap-1">
             {(scanStatus === 'extracting' || scanStatus === 'enriching') && (
-              <Link href="/words/scan" className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                <Loader2 className="size-3.5 animate-spin" />
-                <span>{scanStatus === 'extracting' ? t.scan.extracting : t.scan.enrichingWords}</span>
+              <Link
+                href="/words/scan"
+                aria-label={scanStatus === 'extracting' ? t.scan.extracting : t.scan.enrichingWords}
+                className="flex size-8 items-center justify-center text-muted-foreground"
+              >
+                <Loader2 className="size-4 animate-spin" />
               </Link>
             )}
             <Link href="/words/scan">
@@ -187,11 +199,6 @@ export default function WordsPage() {
                 )}
               </Button>
             </Link>
-            {!loading && totalCount > 0 && (
-              <span className="ml-1 text-badge font-medium text-text-tertiary tabular-nums">
-                {t.words.totalWordCount(totalCount)}
-              </span>
-            )}
           </div>
         }
       />

@@ -10,7 +10,7 @@ import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
-import { ChevronRight, ExternalLink, Trophy, SlidersHorizontal, BarChart3, Trash2, AlertTriangle, LogOut } from '@/components/ui/icons';
+import { ChevronRight, ExternalLink, Trophy, SlidersHorizontal, BarChart3, Trash2, AlertTriangle, LogOut, Sparkles } from '@/components/ui/icons';
 import { useAuthStore } from '@/stores/auth-store';
 import { useRepository } from '@/lib/repository/provider';
 import { createClient } from '@/lib/supabase/client';
@@ -309,7 +309,7 @@ export default function SettingsPage() {
                 data-testid="settings-ai-stats-link"
               >
                 <div className="flex items-center gap-3">
-                  <BarChart3 className="size-[18px] text-muted-foreground" />
+                  <Sparkles className="size-[18px] text-muted-foreground" />
                   <span className="text-body font-medium">{t.aiStats.title}</span>
                 </div>
                 <ChevronRight className="size-4 shrink-0 text-text-tertiary" />

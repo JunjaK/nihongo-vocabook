@@ -132,13 +132,15 @@ export default function MasteredPage() {
     <div className={pageWrapper}>
       <Header
         title={t.masteredPage.title}
-        desc={<WordsListToggle current="mastered" />}
-        actions={
-          !loading && totalCount > 0 ? (
-            <span className="text-badge font-medium text-text-tertiary tabular-nums">
-              {t.words.totalWordCount(totalCount)}
-            </span>
-          ) : undefined
+        desc={
+          <div className="flex items-center gap-2">
+            {!loading && totalCount > 0 && (
+              <span className="text-caption font-medium text-text-tertiary tabular-nums">
+                {t.words.countCompact(totalCount)}
+              </span>
+            )}
+            <WordsListToggle current="mastered" />
+          </div>
         }
       />
 

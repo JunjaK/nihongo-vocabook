@@ -51,18 +51,20 @@ const tooltipContent: React.CSSProperties = {
 const tooltipLabel: React.CSSProperties = { color: 'var(--popover-foreground)' };
 const tooltipItem: React.CSSProperties = { color: 'var(--popover-foreground)', padding: '1px 0' };
 
-/** Stacked bar chart — must be perceptually distinct across light/dark */
-const BAR_COLOR_NEW = 'oklch(0.72 0.17 162)';     /* teal — new cards */
-const BAR_COLOR_REVIEW = 'oklch(0.60 0.14 250)';  /* blue — review cards */
+/** Daily activity stack — two-tone slate ramp (theme-aware via CSS vars) */
+const BAR_COLOR_NEW = 'var(--chart-bar-new)';
+const BAR_COLOR_REVIEW = 'var(--chart-bar-review)';
 
-/** Pie chart colors keyed by FSRS card state — consistent regardless of data order */
+/** Pie chart colors keyed by FSRS card state.
+ *  Restrained palette tinted toward brand hue: cool slate → teal → sage,
+ *  with a single warm amber for Relearning (the only state that asks for attention). */
 const STATE_COLORS: Record<number, string> = {
-  0: 'oklch(0.65 0.19 250)',   /* blue — New */
-  1: 'oklch(0.75 0.17 55)',    /* amber — Learning */
-  2: 'oklch(0.72 0.17 152)',   /* green — Review */
-  3: 'oklch(0.65 0.22 25)',    /* red-orange — Relearning */
+  0: 'var(--chart-state-new)',
+  1: 'var(--chart-state-learning)',
+  2: 'var(--chart-state-review)',
+  3: 'var(--chart-state-relearning)',
 };
-const STATE_COLOR_FALLBACK = 'oklch(0.70 0.17 310)';
+const STATE_COLOR_FALLBACK = 'var(--chart-3)';
 
 function getStateColor(state: number): string {
   return STATE_COLORS[state] ?? STATE_COLOR_FALLBACK;
@@ -147,9 +149,11 @@ export default function QuizStatsPage() {
                 >
                   <CardContent className="flex items-center gap-3 p-4">
                     <Icon className={`size-5 shrink-0 ${card.iconClass}`} />
-                    <div>
+                    <div className="min-w-0">
                       <div className="text-lg font-bold tabular-nums">{card.value}</div>
-                      <div className="text-xs text-muted-foreground">{card.label}</div>
+                      <div className="break-keep text-xs text-muted-foreground">
+                        {card.label}
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
@@ -178,16 +182,29 @@ export default function QuizStatsPage() {
                       newCount: s.newCount,
                       reviewOnly: Math.max(0, s.reviewCount - s.newCount),
                     }))}
+                    barCategoryGap="20%"
                   >
-                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                    <CartesianGrid
+                      vertical={false}
+                      stroke="var(--border)"
+                      strokeOpacity={0.5}
+                    />
                     <XAxis
                       dataKey="date"
                       tickFormatter={formatShortDate}
                       tick={{ fontSize: 10 }}
                       interval="preserveStartEnd"
                       stroke="var(--muted-foreground)"
+                      tickLine={false}
+                      axisLine={false}
                     />
-                    <YAxis tick={{ fontSize: 10 }} width={35} stroke="var(--muted-foreground)" />
+                    <YAxis
+                      tick={{ fontSize: 10 }}
+                      width={28}
+                      stroke="var(--muted-foreground)"
+                      tickLine={false}
+                      axisLine={false}
+                    />
                     <Tooltip
                       labelFormatter={formatShortDate}
                       contentStyle={tooltipContent}
@@ -200,16 +217,19 @@ export default function QuizStatsPage() {
                       name={t.stats.newCards}
                       stackId="a"
                       fill={BAR_COLOR_NEW}
-                      radius={[0, 0, 0, 0]}
                     />
                     <Bar
                       dataKey="reviewOnly"
                       name={t.stats.reviewCards}
                       stackId="a"
                       fill={BAR_COLOR_REVIEW}
-                      radius={[2, 2, 0, 0]}
+                      radius={[3, 3, 0, 0]}
                     />
-                    <Legend wrapperStyle={{ fontSize: '12px', color: 'var(--muted-foreground)' }} />
+                    <Legend
+                      wrapperStyle={{ fontSize: '11px', paddingTop: '4px' }}
+                      iconSize={8}
+                      iconType="circle"
+                    />
                   </BarChart>
                 </ResponsiveContainer>
               )}
@@ -237,20 +257,28 @@ export default function QuizStatsPage() {
                       accuracy: computeWeightedAccuracy(s),
                     }))}
                   >
-                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                    <CartesianGrid
+                      vertical={false}
+                      stroke="var(--border)"
+                      strokeOpacity={0.5}
+                    />
                     <XAxis
                       dataKey="date"
                       tickFormatter={formatShortDate}
                       tick={{ fontSize: 10 }}
                       interval="preserveStartEnd"
                       stroke="var(--muted-foreground)"
+                      tickLine={false}
+                      axisLine={false}
                     />
                     <YAxis
                       domain={[0, 100]}
                       tick={{ fontSize: 10 }}
-                      width={40}
+                      width={32}
                       tickFormatter={(v: number) => `${v}%`}
                       stroke="var(--muted-foreground)"
+                      tickLine={false}
+                      axisLine={false}
                     />
                     <Tooltip
                       labelFormatter={formatShortDate}
@@ -262,9 +290,9 @@ export default function QuizStatsPage() {
                     <Line
                       type="monotone"
                       dataKey="accuracy"
-                      stroke="var(--chart-4)"
+                      stroke="var(--chart-state-learning)"
                       strokeWidth={2}
-                      dot={{ r: 3 }}
+                      dot={{ r: 3, strokeWidth: 0, fill: 'var(--chart-state-learning)' }}
                       activeDot={{ r: 5, strokeWidth: 0 }}
                     />
                   </LineChart>
@@ -286,47 +314,11 @@ export default function QuizStatsPage() {
                   {t.stats.noData}
                 </div>
               ) : (
-                <div className="flex flex-col items-center gap-3">
-                  <ResponsiveContainer width="100%" height={180}>
-                    <PieChart>
-                      <Pie
-                        data={data.cardDistribution.map((d) => ({
-                          name: stateLabels[d.state] ?? `State ${d.state}`,
-                          value: d.count,
-                        }))}
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={45}
-                        outerRadius={75}
-                        dataKey="value"
-                        paddingAngle={3}
-                      >
-                        {data.cardDistribution.map((d) => (
-                          <Cell
-                            key={d.state}
-                            fill={getStateColor(d.state)}
-                          />
-                        ))}
-                      </Pie>
-                    </PieChart>
-                  </ResponsiveContainer>
-                  <div className="flex flex-wrap justify-center gap-x-4 gap-y-1.5 text-xs">
-                    {data.cardDistribution.map((d) => (
-                      <div key={d.state} className="flex items-center gap-1.5">
-                        <div
-                          className="size-2.5 rounded-full"
-                          style={{
-                            backgroundColor: getStateColor(d.state),
-                          }}
-                        />
-                        <span className="text-muted-foreground">
-                          {stateLabels[d.state] ?? `State ${d.state}`}
-                        </span>
-                        <span className="font-medium tabular-nums">{d.count}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                <CardDistribution
+                  distribution={data.cardDistribution}
+                  stateLabels={stateLabels}
+                  unitLabel={t.stats.cards}
+                />
               )}
             </CardContent>
           </Card>
@@ -355,6 +347,102 @@ export default function QuizStatsPage() {
   );
 }
 
+function CardDistribution({
+  distribution,
+  stateLabels,
+  unitLabel,
+}: {
+  distribution: { state: number; count: number }[];
+  stateLabels: Record<number, string>;
+  unitLabel: string;
+}) {
+  const total = distribution.reduce((sum, d) => sum + d.count, 0);
+  const pieData = distribution.map((d) => ({
+    name: stateLabels[d.state] ?? `State ${d.state}`,
+    value: d.count,
+  }));
+
+  return (
+    <div className="flex flex-col items-center gap-4">
+      <div className="relative w-full">
+        <ResponsiveContainer width="100%" height={196}>
+          <PieChart>
+            <Pie
+              data={pieData}
+              cx="50%"
+              cy="50%"
+              innerRadius={56}
+              outerRadius={86}
+              dataKey="value"
+              paddingAngle={1.5}
+              stroke="none"
+              startAngle={90}
+              endAngle={-270}
+            >
+              {distribution.map((d) => (
+                <Cell key={d.state} fill={getStateColor(d.state)} />
+              ))}
+            </Pie>
+          </PieChart>
+        </ResponsiveContainer>
+        {/* Center label — turns empty negative space into a meaningful total */}
+        <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+          <div className="text-2xl font-bold tabular-nums leading-none">
+            {total.toLocaleString()}
+          </div>
+          <div className="mt-1 text-[10px] uppercase tracking-wider text-muted-foreground">
+            {unitLabel}
+          </div>
+        </div>
+      </div>
+      {/* Legend rows — each state on its own row with bar weight reflecting share.
+          More informative than the original chip strip and aligns with Rating Distribution. */}
+      <div className="w-full space-y-1.5">
+        {distribution.map((d) => {
+          const pct = total > 0 ? (d.count / total) * 100 : 0;
+          return (
+            <div key={d.state} className="flex items-center gap-2.5 text-xs">
+              <span
+                className="size-2 shrink-0 rounded-sm"
+                style={{ backgroundColor: getStateColor(d.state) }}
+                aria-hidden
+              />
+              <span className="w-14 shrink-0 text-muted-foreground">
+                {stateLabels[d.state] ?? `State ${d.state}`}
+              </span>
+              <div className="flex-1">
+                <div className="h-1 w-full overflow-hidden rounded-full bg-muted/40">
+                  <div
+                    className="h-full rounded-full"
+                    style={{
+                      width: `${pct}%`,
+                      backgroundColor: getStateColor(d.state),
+                      opacity: 0.85,
+                    }}
+                  />
+                </div>
+              </div>
+              <span className="w-9 shrink-0 text-right text-xs font-medium tabular-nums">
+                {d.count}
+              </span>
+              <span className="w-9 shrink-0 text-right text-[10px] tabular-nums text-muted-foreground">
+                {Math.round(pct)}%
+              </span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+const RATING_COLORS = [
+  'var(--chart-rating-again)',
+  'var(--chart-rating-hard)',
+  'var(--chart-rating-good)',
+  'var(--chart-rating-easy)',
+] as const;
+
 function RatingBars({ stats }: { stats: DailyStats[] }) {
   const { t } = useTranslation();
   const totals = stats.reduce(
@@ -366,41 +454,49 @@ function RatingBars({ stats }: { stats: DailyStats[] }) {
     }),
     { again: 0, hard: 0, good: 0, easy: 0 },
   );
+  const totalSum = totals.again + totals.hard + totals.good + totals.easy;
   const max = Math.max(totals.again, totals.hard, totals.good, totals.easy, 1);
   const bars = [
-    { label: t.quiz.again, value: totals.again, color: 'bg-red-500' },
-    { label: t.quiz.hard, value: totals.hard, color: 'bg-orange-500' },
-    { label: t.quiz.good, value: totals.good, color: 'bg-blue-500' },
-    { label: t.quiz.easy, value: totals.easy, color: 'bg-green-500' },
+    { label: t.quiz.again, value: totals.again, color: RATING_COLORS[0] },
+    { label: t.quiz.hard, value: totals.hard, color: RATING_COLORS[1] },
+    { label: t.quiz.good, value: totals.good, color: RATING_COLORS[2] },
+    { label: t.quiz.easy, value: totals.easy, color: RATING_COLORS[3] },
   ];
 
   return (
-    <div className="space-y-3">
-      {bars.map((bar, i) => (
-        <div
-          key={bar.label}
-          className="animate-stagger flex items-center gap-3"
-          style={{ '--stagger': i } as React.CSSProperties}
-        >
-          <span className="w-12 text-right text-xs text-muted-foreground">
-            {bar.label}
-          </span>
-          <div className="flex-1">
-            <div className="h-5 w-full overflow-hidden rounded-full bg-muted/50">
-              <div
-                className={`h-full rounded-full ${bar.color}`}
-                style={{
-                  width: `${(bar.value / max) * 100}%`,
-                  animation: `bar-fill 0.6s ease-out ${150 + i * 80}ms both`,
-                }}
-              />
+    <div className="space-y-2.5">
+      {bars.map((bar, i) => {
+        const pct = totalSum > 0 ? (bar.value / totalSum) * 100 : 0;
+        return (
+          <div
+            key={bar.label}
+            className="animate-stagger flex items-center gap-3"
+            style={{ '--stagger': i } as React.CSSProperties}
+          >
+            <span className="w-10 shrink-0 text-right text-xs text-muted-foreground">
+              {bar.label}
+            </span>
+            <div className="flex-1">
+              <div className="h-2.5 w-full overflow-hidden rounded-md bg-muted/40">
+                <div
+                  className="h-full rounded-md"
+                  style={{
+                    width: `${(bar.value / max) * 100}%`,
+                    backgroundColor: bar.color,
+                    animation: `bar-fill 0.6s ease-out ${150 + i * 80}ms both`,
+                  }}
+                />
+              </div>
             </div>
+            <span className="w-9 shrink-0 text-right text-xs font-semibold tabular-nums">
+              {bar.value}
+            </span>
+            <span className="w-9 shrink-0 text-right text-[10px] tabular-nums text-muted-foreground">
+              {Math.round(pct)}%
+            </span>
           </div>
-          <span className="w-10 text-right text-xs font-medium tabular-nums">
-            {bar.value}
-          </span>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }

@@ -108,6 +108,7 @@ export interface Translations {
     deleteConfirm: string;
     duplicateWord: string;
     totalWordCount: (n: number) => string;
+    countCompact: (n: number) => string;
     loadMore: string;
     activeTab: string;
     masteredTab: string;

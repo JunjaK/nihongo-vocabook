@@ -41,7 +41,7 @@ export function Header({
         >
           <ArrowLeftIcon className="size-5" />
         </Button>
-        <div className="flex items-end gap-2.5">
+        <div className="flex items-center gap-2.5">
           <h1 className="text-section font-semibold text-foreground">{title}</h1>
           {typeof desc === 'string' ? (
             <span className="text-badge font-medium text-text-tertiary">{desc}</span>
@@ -56,10 +56,10 @@ export function Header({
 
   return (
     <header className="sticky top-0 z-10 flex h-14 items-center justify-between bg-background px-5">
-      <div className="flex items-end gap-2.5">
+      <div className="flex items-center gap-2.5">
         <h1 className="text-section font-semibold text-foreground">{title}</h1>
         {typeof desc === 'string' ? (
-          <span className="text-badge font-medium text-text-tertiary pb-0.5">{desc}</span>
+          <span className="text-badge font-medium text-text-tertiary">{desc}</span>
         ) : (
           desc
         )}

@@ -110,6 +110,7 @@ const en: Translations = {
     deleteConfirm: 'Delete this word?',
     duplicateWord: 'This word already exists.',
     totalWordCount: (n: number) => `Total words: ${n}`,
+    countCompact: (n: number) => `${n.toLocaleString()} words`,
     loadMore: 'Load more',
     activeTab: 'Active',
     masteredTab: 'Mastered',

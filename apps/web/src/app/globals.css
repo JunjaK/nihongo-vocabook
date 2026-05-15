@@ -126,6 +126,19 @@
   --chart-3: oklch(0.708 0.046 248.5);               /* accent-muted */
   --chart-4: oklch(0.769 0.165 70.1);                /* warning */
   --chart-5: oklch(0.723 0.192 149.6);               /* success */
+  /* ─── Stats: FSRS card states (semantic ramp, restrained chroma) ─── */
+  --chart-state-new: oklch(0.62 0.05 250);           /* cool slate — queued */
+  --chart-state-learning: oklch(0.55 0.12 235);      /* brand-extended teal-blue — active */
+  --chart-state-review: oklch(0.62 0.10 175);        /* cool sage — consolidated */
+  --chart-state-relearning: oklch(0.66 0.14 50);     /* warm amber — single warning note */
+  /* ─── Stats: rating (Again/Hard/Good/Easy — coherent palette, single warm dissent) ─── */
+  --chart-rating-again: oklch(0.60 0.14 25);         /* coral — not pure red */
+  --chart-rating-hard: oklch(0.70 0.12 65);          /* soft amber */
+  --chart-rating-good: oklch(0.55 0.10 235);         /* brand-adjacent slate-blue */
+  --chart-rating-easy: oklch(0.65 0.11 165);         /* cool mint-sage */
+  /* ─── Stats: daily activity stack (two-tone slate ramp) ─── */
+  --chart-bar-new: oklch(0.62 0.10 220);             /* mid slate-teal */
+  --chart-bar-review: oklch(0.50 0.09 250);          /* deeper brand slate */
   /* ─── Sidebar (mirrors main) ─── */
   --sidebar: oklch(0.970 0 0);                       /* #F5F5F5 */
   --sidebar-foreground: oklch(0.145 0 0);            /* #0A0A0A */
@@ -169,6 +182,17 @@
   --chart-3: oklch(0.462 0.071 255.6);               /* primary */
   --chart-4: oklch(0.711 0.166 22.2);                /* destructive */
   --chart-5: oklch(0.723 0.192 149.6);               /* success */
+  /* ─── Stats (dark) — slightly lifted for contrast against #141414 cards ─── */
+  --chart-state-new: oklch(0.66 0.05 250);
+  --chart-state-learning: oklch(0.66 0.12 230);
+  --chart-state-review: oklch(0.70 0.10 175);
+  --chart-state-relearning: oklch(0.74 0.14 55);
+  --chart-rating-again: oklch(0.66 0.14 25);
+  --chart-rating-hard: oklch(0.74 0.12 65);
+  --chart-rating-good: oklch(0.66 0.11 230);
+  --chart-rating-easy: oklch(0.72 0.11 165);
+  --chart-bar-new: oklch(0.70 0.10 220);
+  --chart-bar-review: oklch(0.55 0.10 250);
   /* ─── Sidebar (dark) ─── */
   --sidebar: oklch(0.191 0 0);                       /* #141414 */
   --sidebar-foreground: oklch(0.970 0 0);            /* #F5F5F5 */

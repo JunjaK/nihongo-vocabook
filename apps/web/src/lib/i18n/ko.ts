@@ -110,6 +110,7 @@ const ko: Translations = {
     deleteConfirm: '이 단어를 삭제하시겠습니까?',
     duplicateWord: '이미 존재하는 단어입니다.',
     totalWordCount: (n: number) => `총 단어 수: ${n}개`,
+    countCompact: (n: number) => `${n.toLocaleString()} 개`,
     loadMore: '더 보기',
     activeTab: '학습중',
     masteredTab: '암기완료',
