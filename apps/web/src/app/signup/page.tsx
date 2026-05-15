@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import Link from 'next/link';
 import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
@@ -25,13 +26,14 @@ export default function SignupPage() {
   const [privacyAgreed, setPrivacyAgreed] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // Auto-check if user agreed on the privacy page
+  // Auto-check if user agreed on the privacy page.
+  // Hydrating consent flag from sessionStorage — SSR cannot read it.
   useEffect(() => {
     const agreed = sessionStorage.getItem('vocabook_privacy_agreed');
-    if (agreed === 'true') {
-      setPrivacyAgreed(true);
-      sessionStorage.removeItem('vocabook_privacy_agreed');
-    }
+    if (agreed !== 'true') return;
+    sessionStorage.removeItem('vocabook_privacy_agreed');
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setPrivacyAgreed(true);
   }, []);
 
   const passwordHasLetter = /[a-zA-Z]/.test(password);
@@ -73,8 +75,15 @@ export default function SignupPage() {
   return (
     <div className="flex min-h-0 flex-1 flex-col justify-end overflow-y-auto">
       {/* Branding */}
-      <div className="flex shrink-0 flex-col items-center gap-2 px-8 pb-6 pt-8">
-        <div className="font-ja text-kanji font-bold tracking-[-1px] text-primary">NiVoca</div>
+      <div className="flex shrink-0 flex-col items-center gap-3 px-8 pb-6 pt-8">
+        <Image
+          src="/main_logo.png"
+          alt="NiVoca"
+          width={180}
+          height={44}
+          priority
+          className="h-auto w-[180px] dark:invert dark:brightness-200 dark:contrast-100"
+        />
         <p className="text-body text-muted-foreground">{t.auth.createYourAccount}</p>
       </div>
 
