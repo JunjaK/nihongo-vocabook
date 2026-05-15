@@ -5,6 +5,7 @@ import { extractViaBridge } from '@/lib/ai/native-bridge-adapter';
 import { getSnapshot } from '@/lib/ai/model-manager';
 import { isNativeApp } from '@/lib/native-bridge';
 import { searchDictionary, searchDictionaryBatch } from '@/lib/dictionary/jisho';
+import { lookupTeFormBase } from '@/lib/ocr/te-form-map';
 import type { ExtractedWord } from '@/lib/ocr/llm-vision';
 import type { DictionaryEntry } from '@/types/word';
 
@@ -129,6 +130,11 @@ function preservesKanji(raw: string, candidate: string): boolean {
 export function buildNormalizedLookupForms(raw: string): string[] {
   const normalized = raw.normalize('NFKC');
   const forms = new Set<string>([normalized]);
+
+  // Curated te-form / ta-form → base lookup. Handles cases the algorithmic
+  // stripper misses because godan te-form has 1:N inverse (って → つ/う/る etc.).
+  const curatedBase = lookupTeFormBase(normalized);
+  if (curatedBase) forms.add(curatedBase);
 
   for (const ending of INFLECTION_ENDINGS) {
     if (!normalized.endsWith(ending)) continue;

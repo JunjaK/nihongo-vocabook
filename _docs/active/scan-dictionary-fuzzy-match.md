@@ -288,16 +288,65 @@ match.
 Pass 2 still sets `matchSource` explicitly from its variant-origin map
 (can't be inferred from term/reading equality there).
 
-### Te-form stripping deliberately incomplete
+### Te-form stripping deliberately incomplete (resolved by addendum below)
 
 Group 6 includes `た` and `て` as 1-char strip endings (with stricter
 min-stem guard). Multi-character te-form rules like `って → う/つ/る` (godan
 verb te-form) would need verb-class detection (vs ichidan `食べて → 食べる`),
-which adds significant complexity for a small gain. The test case
-`行った` (godan past tense) deliberately stays unmatched in pass 2.
+which adds significant complexity for a small gain.
 
-If users report this as a recurring miss, a curated te-form table keyed on
-the last hiragana before the geminate `っ` would be a future addition.
+**Resolved**: Addressed by the curated `te-form-map` addendum (see below).
+A flat lookup table keyed on the full inflected form (e.g. `待って → 待つ`)
+adds zero false positives at the cost of finite coverage.
+
+## Addendum: Te-form curated mapping
+
+### Why a curated table
+
+Godan te/ta-form has a 1:N reverse mapping (`って → つ/う/る`, `んで → む/ぬ/ぶ`,
+`いて → く/ぐ`). Recovering the right base from the suffix alone requires
+verb-class knowledge we don't have at lookup time. Generating all plausible
+inverses (algorithmic) is consistent with the rest of the pass-2 pipeline,
+but adds candidates that depend on dict to filter — fine for in-vocabulary
+kanji, but increases query payload and noise.
+
+A curated table is the conservative pick: deterministic, zero false positives
+for listed entries, easy to extend later. Coverage is bounded by the list size
+(currently ~75 godan bases + 3 irregular × 6 stacked variants = ~470 entries).
+
+### Implementation
+
+`apps/web/src/lib/ocr/te-form-map.ts` — generator builds a `Map<inflected, base>`
+at module load from:
+
+- Godan bases grouped by suffix class (く / ぐ / す / つ / ぬ / ぶ / む / う / る)
+- Conjugation rules per class (`書く → 書いて/書いた`, `読む → 読んで/読んだ`, etc.)
+- Stacked te-iru family suffixes appended to te-form: `<te>`, `<te>いる`,
+  `<te>いた`, `<te>います`, `<te>いました`, `<te>ください`
+- Irregular: `行く / 来る / する` with both kanji and kana spellings
+
+Wired into `buildNormalizedLookupForms`: `lookupTeFormBase(normalized)` runs
+first; if a base is found, it is added to the lookup-form set alongside the
+algorithmic candidates. Pass 1 / Pass 2 then query the dictionary as before.
+
+### Coverage examples
+
+| Raw | Base | Source |
+|---|---|---|
+| 待って | 待つ | curated (godan -つ) |
+| 読んでいる | 読む | curated (te-iru stacked) |
+| 話してください | 話す | curated (te-kudasai stacked) |
+| 行った | 行く | curated (irregular) |
+| 食べて | 食べる | algorithmic (existing `+る` candidate, 一段) |
+| 食べた | 食べた | unchanged (1-char `た` strip, 2-char stem not single-kanji) |
+
+### Out of scope (deferred until usage data warrants)
+
+- Te-stacking beyond te-iru family (`〜てあげる / 〜てくる / 〜てしまう` etc.)
+- Negative-past for godan verbs in the curated style (algorithmic already covers
+  the `なかった` / `ません` / `ない` family for stems with kanji)
+- Honorific te-form (`お書きになって`) — would conflict with the honorific
+  prefix dedup elsewhere
 
 ## User Feedback
 
@@ -309,8 +358,10 @@ the last hiragana before the geminate `っ` would be a future addition.
 
 ```
 M apps/web/src/lib/ocr/llm-vision.ts            — MatchSource type + matchSource field
-M apps/web/src/stores/scan-store.ts              — Full inflection table, passes 2 + 3
-A apps/web/src/stores/scan-store.test.ts         — 12 vitest cases covering the golden set
+M apps/web/src/stores/scan-store.ts              — Full inflection table, passes 2 + 3, te-form-map wiring
+A apps/web/src/stores/scan-store.test.ts         — vitest cases covering the golden set + te-form
+A apps/web/src/lib/ocr/te-form-map.ts            — curated te/ta-form → base map (addendum)
+A apps/web/src/lib/ocr/te-form-map.test.ts       — vitest cases for the curated map
 M apps/web/src/components/scan/word-preview.tsx  — Auto-corrected badge
 M apps/web/src/lib/i18n/types.ts                 — scan.autoCorrected key
 M apps/web/src/lib/i18n/ko.ts                    — 사전 자동 보정
@@ -339,6 +390,9 @@ Both are simple `term.in.() OR reading.in.()` queries against the existing
 ### Follow-ups (not in scope here)
 
 - Verify on-device with real scan images (deferred until physical test)
-- If users complain about `行った`-class misses, add te-form table
+- ~~If users complain about `行った`-class misses, add te-form table~~ — done
+  via te-form-map addendum
+- Expand the curated te-form list as usage data identifies misses (current ~75
+  godan bases cover JLPT N5/N4; longer-tail verbs are easy to add)
 - Consider exposing the matchSource as a tooltip/popover detail (currently
   only `title` attribute carries the specific kind)

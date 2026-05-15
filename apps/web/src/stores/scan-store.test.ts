@@ -68,11 +68,17 @@ describe('buildNormalizedLookupForms', () => {
     // 見ろ (imperative) → strip ろ → stem 見 (single-kanji exempt) → +る
     expect(buildNormalizedLookupForms('見ろ')).toContain('見る');
     // 食べた → strip た → stem 食べ (2 chars, but minStem=3 for 1-char ending)
-    //   → not single-kanji → guard rejects, no extra forms
+    //   → not single-kanji → guard rejects, no extra forms from algorithm
     expect(buildNormalizedLookupForms('食べた')).toEqual(['食べた']);
-    // 行った → strip た → stem 行っ (2 chars, not single-kanji) → rejected
-    //   (would need te-form normalization which we deliberately don't do)
-    expect(buildNormalizedLookupForms('行った')).toEqual(['行った']);
+  });
+
+  it('recovers te/ta-form base via curated te-form map', () => {
+    // Algorithm alone cannot recover these (godan te-form has 1:N inverse);
+    // the curated te-form-map handles them.
+    expect(buildNormalizedLookupForms('行った')).toContain('行く');
+    expect(buildNormalizedLookupForms('待って')).toContain('待つ');
+    expect(buildNormalizedLookupForms('読んでいる')).toContain('読む');
+    expect(buildNormalizedLookupForms('話してください')).toContain('話す');
   });
 
   it('NFKC-normalizes the input before stripping', () => {
