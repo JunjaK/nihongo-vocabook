@@ -126,21 +126,27 @@ happily eat a 100 MB image and OOM the conversion worker.
 User-facing errors via `toast.error()` with three new i18n keys
 (`scan.imageTooLarge`, `scan.invalidImageType`, `scan.tooManyImages`).
 
-#### 6. Rate limiter is in-memory + UA in bucket key — closed with deferral
+#### 6. Rate limiter is in-memory + UA in bucket key — closed
 **Evidence:** `apps/web/src/lib/api/rate-limit.ts` kept buckets in a
-process-local `Map`, with the bucket key composed of `IP:UA`. Two
-problems: rotating the User-Agent header trivially bypassed the limit,
-and behind any horizontal scaler each replica enforced its own bucket.
+process-local `Map`, with the bucket key composed of `IP:UA`. Rotating
+the User-Agent header trivially bypassed the limit. Separately, the IP
+resolution read the *leftmost* `x-forwarded-for` entry, which any
+attacker can prepend a fake value to.
 
-**Mitigation (partial):** stripped UA from the bucket key (now IP-only)
-and added a periodic sweep every 256 inserts to bound memory. Added a
-header comment explicitly documenting the multi-replica limitation.
+**Mitigation:**
+- Stripped UA from the bucket key (now IP-only).
+- Switched IP resolution to trust `x-real-ip` first (set authoritatively
+  by Cloudflare → reverse proxy chain) and fall back to the *rightmost*
+  `x-forwarded-for` entry. The rightmost is the closest trusted hop's
+  view of the caller; the leftmost was attacker-controlled.
+- Added a periodic sweep every 256 inserts to bound memory.
 
-**Deferred:** moving to Redis / Upstash KV. This is an infrastructure
-change and only matters when the app scales beyond a single Node
-process — currently it ships as a single Docker container per the
-GitHub Actions deploy workflow, so the single-process limit holds. Add
-shared-store rate limiting before adding a second replica.
+**No follow-up required for this stack.** The deploy target is a single
+Raspberry Pi node behind Cloudflare — replicas will never be added, so
+in-memory state is the correct architecture indefinitely. The primary
+throttle layer should be Cloudflare's edge rate-limiting rules; this
+in-memory limiter is a second line of defense for routes that bypass
+the CF cache.
 
 #### 7. 73 dependency vulnerabilities — closed (within semver)
 **Evidence:** `bun audit --prod` returned 33 high + 36 moderate + 4 low.
@@ -271,14 +277,43 @@ the key), so fixing it is now load-bearing.
 
 ---
 
-## What was left
+## Deployment context (so scope decisions make sense)
 
-| Item | Reason |
+This is not a multi-tenant SaaS. The deploy target is:
+
+- **Single Raspberry Pi node** behind **Cloudflare**, with **Supabase**
+  as the managed backend. No horizontal scaling, ever.
+- Personal / small-circle user base. Cloudflare's free-tier edge
+  features (WAF managed rules, rate-limit rules, Bot Fight Mode) carry
+  the bulk of the abuse / DoS defense before traffic reaches the Pi.
+- The app's own security layers exist to defend against the threats
+  that survive Cloudflare (logged-in users misusing each other's data
+  via RLS gaps, XSS via stored user content, etc.) — not as a primary
+  throttle / WAF.
+
+Items below are framed against that context. Items that would be
+mandatory in a multi-tenant SaaS are listed here only when they still
+have real ROI at this scale.
+
+## Won't do — out of scope for this deploy
+
+| Item | Why not |
 |---|---|
-| Move rate limiter to Redis / Upstash | Single-process deploy today. Add before second replica. |
-| Tighten CSP to remove `'unsafe-inline'` / `'unsafe-eval'` | Requires per-request nonces threaded through every `<Script>` and refactor of esbuild-wasm usage. |
-| Clear remaining dev-tooling vulns (picomatch / Hono / postcss) | Requires major bumps of vitest, expo, eslint-config-next — separate scope. |
-| `git filter-repo` GitHub-side cache cleanup | ~90 days self-clears. Solo private repo — acceptable. |
+| Redis / Upstash rate limiter | Single Node process forever. The edge throttle is Cloudflare's job; the in-memory limiter is a backstop. |
+| CSP nonce flow to remove `'unsafe-inline'` / `'unsafe-eval'` | 3–5 days of refactor across Next bootstrap + Tailwind 4 + Radix `style` props + esbuild-wasm. Marginal XSS hardening when the threat model is "friends with accounts" and main content paths are already validated (#9, #10). Consider revisiting if/when third-party scripts are added. |
+| Major bumps of vitest / expo / eslint-config-next | The 52 remaining audit findings are dev-tooling transitives that never reach the Pi. Bumping is a build / DX concern, not security. |
+
+## Follow-ups worth doing later
+
+| Item | Why |
+|---|---|
+| Move CSP / security headers from `next.config.ts` to a Cloudflare Transform Rule | Single source of truth at the edge; survives Next misconfig and applies to any sibling service on the same hostname. Code-side `headers()` can stay as defense-in-depth. |
+| Enable Cloudflare **Bot Fight Mode** + a generous IP rate-limit rule on `/api/*` | Removes most need for the in-app rate limiter. Free tier, zero code. |
+| Cloudflare **Access** policy on `/api/account/*` and admin-flavored routes | Restricts deletion / destructive endpoints to your own identity via Zero-Trust login. Free for ≤50 users. |
+| Pi-side hardening checklist | SSH key-only + disable password auth, UFW default-deny inbound, fail2ban on sshd, Docker user namespace, container `read_only: true` + `tmpfs` for `/tmp`. Outside this audit's web-app scope but more impactful than CSP nonces at this scale. |
+| Supabase 2FA + Vault for `service_role` | The deploy workflow already pulls the key from GH Secrets, but turning on 2FA on the Supabase account and using Vault inside SQL functions (migration 023 already does this for cron jobs) closes the "compromised laptop" path. |
+| Supabase scheduled backup → Pi-side rsync | Data loss is the realistic disaster, not breach. Worth automating. |
+| `git filter-repo` GitHub-side cache cleanup | ~90 days self-clears. Solo private repo — acceptable to wait. |
 
 ## Verification
 
