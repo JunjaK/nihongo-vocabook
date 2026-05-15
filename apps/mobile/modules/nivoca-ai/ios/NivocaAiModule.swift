@@ -309,18 +309,20 @@ public class NivocaAiModule: Module {
       logger.error("tryCreateEngine: settings_create returned NULL for backend=\(backend, privacy: .public)")
       return false
     }
-    // KV cache size. Gemma 4 E2B (.litertlm) supports up to 32K tokens per the
-    // litert-community model card. We set the published max so multi-turn chat
-    // + 13 tool definitions + occasional image/audio attachments fit without
-    // truncation. Memory cost on iPhone 15 Pro+ (8 GB RAM): ~1.5-2 GB working
-    // set including model weights + KV cache + scratch — well under iOS
-    // Jetsam pressure for our supported devices. Lower this to 8192 or 16384
-    // if low-RAM iPhones report OOM kills.
+    // KV cache size. Gemma 4 E2B (.litertlm) supports up to 32K, but the
+    // KV cache scales ~linearly with context and gets added to the ~1.4 GB
+    // GPU baseline (model weights + Metal scratch). On iPhone 15 Pro the
+    // app's Jetsam limit lands around 2-3 GB; 32K (~800 MB cache) reliably
+    // OOMs mid-stream. 16K (~400 MB) is borderline once image cache /
+    // scan store add their share. 8K (~200 MB) leaves comfortable headroom
+    // and still covers system + 13-tool catalog + 5-6 turn multi-turn chat
+    // — context auto-summary (post-Phase 1.5) handles longer sessions by
+    // compressing earlier turns before they hit this cap.
     //
-    // Previously 2048 to avoid an early DYNAMIC_UPDATE_SLICE bug in v0.11.0;
-    // that bug was MTP-drafter shape mismatch, not max_num_tokens-related,
-    // and is handled by the gpu+MTP / gpu / cpu fallback chain above.
-    litert_lm_engine_settings_set_max_num_tokens(settings, 32768)
+    // If users still trip this on real workloads, prefer trimming the
+    // system prompt / tool catalog before raising. 16K can be revisited
+    // once memory pressure from non-AI subsystems is measured.
+    litert_lm_engine_settings_set_max_num_tokens(settings, 8192)
     litert_lm_engine_settings_set_cache_dir(settings, cacheDir)
     // MTP (multi-token prediction) — Gemma 4's official 2-3× decode speedup.
     // Google's guidance: enable on GPU backends universally; on CPU only for
