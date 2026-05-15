@@ -46,6 +46,7 @@ export interface Translations {
     feature2: string;
     feature3: string;
     feature4: string;
+    feature5: string;
   };
   auth: {
     welcomeBack: string;

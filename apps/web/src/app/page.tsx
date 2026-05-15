@@ -1,5 +1,6 @@
+import Image from 'next/image';
 import Link from 'next/link';
-import { BookOpen, Brain, Camera, Share2 } from '@/components/ui/icons';
+import { BookOpen, Brain, Camera, Share2, Sparkles } from '@/components/ui/icons';
 import { Button } from '@/components/ui/button';
 import { btnCta } from '@/lib/styles';
 import { cn } from '@/lib/utils';
@@ -8,7 +9,8 @@ const FEATURES = [
   { Icon: BookOpen, text: 'Jisho 사전으로 일본어 단어 검색 및 저장' },
   { Icon: Brain, text: 'FSRS 간격반복 플래시카드로 복습' },
   { Icon: Camera, text: '이미지에서 OCR/AI로 단어 자동 추출' },
-  { Icon: Share2, text: '단어장 공유 기능 (로그인 필수)' },
+  { Icon: Sparkles, text: '기기 내 LLM으로 단어 풀이·예문 생성' },
+  { Icon: Share2, text: '단어장 공유 기능' },
 ] as const;
 
 const BASE_URL = 'https://nivoca.jun-devlog.win';
@@ -22,7 +24,7 @@ const JSON_LD = {
       url: BASE_URL,
       name: 'NiVoca',
       inLanguage: 'ko-KR',
-      description: 'JLPT N5~N1 일본어 단어장. 간격 반복(SRS) 퀴즈, 이미지 OCR 단어 추출, 단어장 공유.',
+      description: 'JLPT N5~N1 일본어 단어장. 간격 반복(SRS) 퀴즈, 이미지 OCR 단어 추출, 기기 내 AI 어시스턴트, 단어장 공유.',
       publisher: { '@id': `${BASE_URL}/#org` },
     },
     {
@@ -40,7 +42,7 @@ const JSON_LD = {
       applicationCategory: 'EducationalApplication',
       operatingSystem: 'Web, iOS, Android',
       description:
-        'JLPT N5부터 N1까지 일본어 단어를 SRS 간격 반복 퀴즈로 학습하고, 이미지 OCR로 단어를 자동 추출하며, 단어장을 공유할 수 있는 PWA.',
+        'JLPT N5부터 N1까지 일본어 단어를 SRS 간격 반복 퀴즈로 학습하고, 이미지 OCR로 단어를 자동 추출하며, 기기 내 LLM 어시스턴트로 단어 풀이·예문을 받고, 단어장을 공유할 수 있는 PWA.',
       inLanguage: 'ko-KR',
       offers: { '@type': 'Offer', price: '0', priceCurrency: 'KRW' },
     },
@@ -58,16 +60,23 @@ export default function LandingPage() {
       <div className="h-20 shrink-0" />
 
       {/* Hero */}
-      <header className="animate-fade-in flex w-full flex-col items-center gap-3 text-center">
-        <h1 className="font-ja text-display font-bold leading-none tracking-[-1.5px] text-primary">
-          NiVoca
+      <header className="animate-fade-in flex w-full flex-col items-center gap-4 text-center">
+        <h1 className="leading-none">
+          <Image
+            src="/main_logo.png"
+            alt="NiVoca"
+            width={260}
+            height={64}
+            priority
+            className="h-auto w-[260px] dark:invert dark:brightness-200 dark:contrast-100"
+          />
         </h1>
         <p className="w-[260px] whitespace-pre-line text-title-sm leading-[1.5] text-muted-foreground">
           {'일본어 단어\n학습 · 복습 · 공유'}
         </p>
         {/* SR-only secondary heading carries the JLPT keyword cluster */}
         <h2 className="sr-only">
-          JLPT N5~N1 일본어 단어장 — 간격 반복 SRS 퀴즈, 이미지 OCR 단어 추출, 단어장 공유
+          JLPT N5~N1 일본어 단어장 — 간격 반복 SRS 퀴즈, 이미지 OCR 단어 추출, 기기 내 AI 어시스턴트, 단어장 공유
         </h2>
       </header>
 

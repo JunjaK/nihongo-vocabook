@@ -46,8 +46,9 @@ const en: Translations = {
     signIn: 'Sign In',
     feature1: 'Search and save Japanese words with Jisho dictionary',
     feature2: 'Review with FSRS spaced repetition flashcards',
-    feature3: 'Wordbook sharing (sign-in required)',
-    feature4: 'Extract words from images via OCR/AI',
+    feature3: 'Extract words from images via OCR/AI',
+    feature4: 'Definitions & example sentences from an on-device LLM',
+    feature5: 'Share wordbooks with other users',
   },
   auth: {
     welcomeBack: 'Welcome back',

@@ -35,8 +35,8 @@ export const metadata: Metadata = {
     default: 'NiVoca — JLPT 일본어 단어 학습',
     template: '%s | NiVoca',
   },
-  description: 'JLPT N5~N1 일본어 단어장. 간격 반복(SRS) 퀴즈, 이미지 OCR 단어 추출, 단어장 공유까지.',
-  keywords: ['JLPT', '일본어', '단어장', '일본어 공부', 'Japanese vocabulary', 'SRS', 'spaced repetition', 'NiVoca'],
+  description: 'JLPT N5~N1 일본어 단어장. 간격 반복(SRS) 퀴즈, 이미지 OCR 단어 추출, 기기 내 AI 어시스턴트, 단어장 공유까지.',
+  keywords: ['JLPT', '일본어', '단어장', '일본어 공부', 'Japanese vocabulary', 'SRS', 'spaced repetition', 'on-device LLM', 'on-device AI', 'NiVoca'],
   authors: [{ name: 'jun-devlog' }],
   creator: 'jun-devlog',
   appleWebApp: {

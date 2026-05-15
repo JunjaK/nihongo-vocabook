@@ -46,8 +46,9 @@ const ko: Translations = {
     signIn: '로그인',
     feature1: 'Jisho 사전으로 일본어 단어 검색 및 저장',
     feature2: 'FSRS 간격반복 플래시카드로 복습',
-    feature3: '단어장 공유 기능 (로그인 필수)',
-    feature4: '이미지에서 OCR/AI로 단어 자동 추출',
+    feature3: '이미지에서 OCR/AI로 단어 자동 추출',
+    feature4: '기기 내 LLM으로 단어 풀이·예문 생성',
+    feature5: '단어장 공유 기능',
   },
   auth: {
     welcomeBack: '다시 오셨군요',
