@@ -10,7 +10,7 @@
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#3eb8d4"
+      "backgroundColor": "#345280"
     },
     "ios": {
       "supportsTablet": false,
@@ -33,7 +33,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#3eb8d4"
+        "backgroundColor": "#345280"
       },
       "package": "win.jundevlog.nivoca",
       "permissions": [
@@ -49,7 +49,7 @@
         "expo-notifications",
         {
           "icon": "./assets/notification-icon.png",
-          "color": "#3eb8d4"
+          "color": "#345280"
         }
       ],
       [
