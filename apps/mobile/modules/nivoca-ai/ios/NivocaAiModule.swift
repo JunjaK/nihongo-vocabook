@@ -213,6 +213,40 @@ public class NivocaAiModule: Module {
     }
   }
 
+  /**
+   * Pick a max_num_tokens value sized to the process's current available
+   * memory. The KV cache grows ~linearly with this value; we want a setting
+   * that fits inside `os_proc_available_memory()` with comfortable headroom
+   * after subtracting the GPU baseline (~1.4 GB on iPhone).
+   *
+   * Headroom budget (rough): each 1K context ≈ 25 MB of KV cache on E2B.
+   * We require 1.6× safety margin over the cache size itself so the runtime
+   * has room for activations + RN/WebView heap pressure.
+   *
+   * Falls back to 2048 on the simulator (returns 0 there) to match prior
+   * behavior.
+   */
+  private func pickKVCacheSize() -> Int {
+    let availableBytes = Int(os_proc_available_memory())
+    if availableBytes <= 0 {
+      return 2048 // simulator or pre-iOS-15 — keep prior conservative default
+    }
+    // ~25 MB per 1K context KV. Reserve 1.4 GB for model weights/scratch,
+    // require 1.6× safety margin on top of the cache itself.
+    let kvBytesPer1K = 25 * 1024 * 1024
+    let baselineBytes = Int(1.4 * 1024 * 1024 * 1024)
+    let usableForCache = availableBytes - baselineBytes
+    if usableForCache <= 0 { return 2048 }
+    let maxKContext = max(2, usableForCache / Int(Double(kvBytesPer1K) * 1.6))
+    let target = maxKContext * 1024
+    // Clamp to the published model max (32K) and a sensible floor.
+    if target >= 32768 { return 32768 }
+    if target >= 16384 { return 16384 }
+    if target >= 8192 { return 8192 }
+    if target >= 4096 { return 4096 }
+    return 2048
+  }
+
   // MARK: - Lazy engine + session
 
   private func resolveModelPath() throws -> String {
@@ -310,19 +344,20 @@ public class NivocaAiModule: Module {
       return false
     }
     // KV cache size. Gemma 4 E2B (.litertlm) supports up to 32K, but the
-    // KV cache scales ~linearly with context and gets added to the ~1.4 GB
-    // GPU baseline (model weights + Metal scratch). On iPhone 15 Pro the
-    // app's Jetsam limit lands around 2-3 GB; 32K (~800 MB cache) reliably
-    // OOMs mid-stream. 16K (~400 MB) is borderline once image cache /
-    // scan store add their share. 8K (~200 MB) leaves comfortable headroom
-    // and still covers system + 13-tool catalog + 5-6 turn multi-turn chat
-    // — context auto-summary (post-Phase 1.5) handles longer sessions by
-    // compressing earlier turns before they hit this cap.
+    // KV cache adds ~linearly to the ~1.4 GB GPU baseline (weights + Metal
+    // scratch). Without `increased-memory-limit` entitlement the default
+    // Jetsam ceiling on 8 GB iPhones is ~2-3 GB → 32K (~800 MB cache)
+    // reliably OOMs mid-stream.
     //
-    // If users still trip this on real workloads, prefer trimming the
-    // system prompt / tool catalog before raising. 16K can be revisited
-    // once memory pressure from non-AI subsystems is measured.
-    litert_lm_engine_settings_set_max_num_tokens(settings, 8192)
+    // With the entitlement granted (production) OR `increased-debugging-
+    // memory-limit` (debug builds), the limit climbs to ~6 GB on 8 GB
+    // devices, giving room for the full 32K cache. We probe at runtime via
+    // `os_proc_available_memory()` and pick the largest cache that fits
+    // a 1.6× safety margin. Falls back gracefully on Jetsam-constrained
+    // devices without the entitlement.
+    let cacheSize = pickKVCacheSize()
+    logger.info("tryCreateEngine: max_num_tokens=\(cacheSize) (available=\(os_proc_available_memory()) bytes)")
+    litert_lm_engine_settings_set_max_num_tokens(settings, Int32(cacheSize))
     litert_lm_engine_settings_set_cache_dir(settings, cacheDir)
     // MTP (multi-token prediction) — Gemma 4's official 2-3× decode speedup.
     // Google's guidance: enable on GPU backends universally; on CPU only for
