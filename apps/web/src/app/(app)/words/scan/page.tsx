@@ -114,11 +114,13 @@ export default function ScanPage() {
   };
 
   const handleBulkAdd = async (words: ExtractedWord[]) => {
-    let count = 0;
-    let skipped = 0;
+    let added = 0;
+    let duplicate = 0;
+    let noMatch = 0;
+    let failed = 0;
     for (const word of words) {
       if (!word.dictionaryEntryId) {
-        skipped++;
+        noMatch++;
         continue;
       }
       try {
@@ -130,30 +132,45 @@ export default function ScanPage() {
           jlptLevel: word.jlptLevel,
           priority: 2,
         });
-        count++;
+        added++;
       } catch (err) {
         if (err instanceof Error && err.message === 'DUPLICATE_WORD') {
-          // Skip duplicates silently
+          duplicate++;
         } else {
-          throw err;
+          // Don't bail out of the loop — log and keep going so a single
+          // misbehaving entry doesn't strand the rest mid-add.
+          failed++;
+          console.error('[scan] create failed', err);
         }
       }
     }
-    if (count > 0) invalidateListCache('words');
-    setDone(count);
-    toast.success(t.scan.wordsAdded(count));
-    if (skipped > 0) {
-      toast.warning(`${skipped} ${skipped === 1 ? 'word' : 'words'} skipped (no dictionary match).`);
+    if (added > 0) {
+      invalidateListCache('words');
+      // Only transition to the "complete" screen when something actually
+      // landed. Otherwise stay on preview so the user can adjust + retry.
+      setDone(added);
+      toast.success(t.scan.wordsAdded(added));
     }
+    if (duplicate > 0) toast.info(t.scan.duplicatesSkipped(duplicate));
+    if (noMatch > 0) toast.warning(t.scan.noMatchSkipped(noMatch));
+    if (failed > 0) toast.error(t.scan.addFailed(failed));
   };
 
   const handleEditAndAdd = (words: ExtractedWord[]) => {
     sessionStorage.setItem('scan-edit-words', JSON.stringify(words));
+    // Clear the in-progress scan so coming back to /words/scan starts fresh
+    // instead of resurrecting the stale preview.
+    reset();
     router.push('/words/create-by-image');
   };
 
   const handleReset = () => {
     reset();
+  };
+
+  const handleDiscard = () => {
+    reset();
+    router.push('/words');
   };
 
   const handleCancelExtract = () => {
@@ -309,6 +326,7 @@ export default function ScanPage() {
           onConfirm={handleBulkAdd}
           onEditAndAdd={handleEditAndAdd}
           onRetry={handleReset}
+          onDiscard={handleDiscard}
         />
       ) : step === 'done' ? (
         <ScanComplete addedCount={addedCount} onAddMore={handleReset} />
@@ -323,13 +341,13 @@ export default function ScanPage() {
       <AlertDialog open={leaveConfirmOpen} onOpenChange={setLeaveConfirmOpen}>
         <AlertDialogContent size="sm">
           <AlertDialogHeader>
-            <AlertDialogTitle>{t.common.unsavedChangesTitle}</AlertDialogTitle>
-            <AlertDialogDescription>{t.common.unsavedChangesDescription}</AlertDialogDescription>
+            <AlertDialogTitle>{t.scan.discardConfirmTitle}</AlertDialogTitle>
+            <AlertDialogDescription>{t.scan.discardConfirmDescription}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>{t.common.cancel}</AlertDialogCancel>
             <AlertDialogAction onClick={handleConfirmLeave}>
-              {t.common.leave}
+              {t.scan.discard}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

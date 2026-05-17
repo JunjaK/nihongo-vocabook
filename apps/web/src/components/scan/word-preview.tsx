@@ -17,6 +17,8 @@ interface WordPreviewProps {
   onConfirm: (selectedWords: ExtractedWord[]) => Promise<void>;
   onEditAndAdd?: (selectedWords: ExtractedWord[]) => void;
   onRetry: () => void;
+  /** Dismiss the scan results without adding. */
+  onDiscard?: () => void;
 }
 
 function getDefaultChecked(
@@ -71,6 +73,7 @@ export function WordPreview({
   onConfirm,
   onEditAndAdd,
   onRetry,
+  onDiscard,
 }: WordPreviewProps) {
   const { t } = useTranslation();
   const wordCount = words.length;
@@ -311,6 +314,17 @@ export function WordPreview({
       <div className={bottomBar}>
         <div className={bottomSep} />
         <div className="flex gap-2">
+          {onDiscard && (
+            <Button
+              className="shrink-0 px-3 text-muted-foreground"
+              variant="outline"
+              disabled={confirming}
+              onClick={onDiscard}
+              data-testid="scan-discard"
+            >
+              {t.scan.discard}
+            </Button>
+          )}
           {onEditAndAdd && (
             <Button
               className="min-w-0 flex-1 basis-0"

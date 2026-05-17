@@ -402,6 +402,12 @@ const ko: Translations = {
     imageTooLarge: (sizeMb: number) => `이미지가 너무 큽니다 (최대 ${sizeMb}MB)`,
     invalidImageType: '이미지 파일만 업로드할 수 있어요.',
     tooManyImages: (max: number) => `이미지는 한 번에 최대 ${max}장까지 선택할 수 있어요.`,
+    discard: '버리기',
+    discardConfirmTitle: '스캔 결과를 버릴까요?',
+    discardConfirmDescription: '추가하지 않은 단어가 사라집니다.',
+    duplicatesSkipped: (n: number) => `${n}개는 이미 추가된 단어입니다`,
+    noMatchSkipped: (n: number) => `${n}개는 사전에서 찾지 못했습니다`,
+    addFailed: (n: number) => `${n}개 추가에 실패했습니다`,
   },
   aiModel: {
     nativeTitle: 'AI 모델',

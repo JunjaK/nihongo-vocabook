@@ -397,6 +397,12 @@ export interface Translations {
     imageTooLarge: (sizeMb: number) => string;
     invalidImageType: string;
     tooManyImages: (max: number) => string;
+    discard: string;
+    discardConfirmTitle: string;
+    discardConfirmDescription: string;
+    duplicatesSkipped: (n: number) => string;
+    noMatchSkipped: (n: number) => string;
+    addFailed: (n: number) => string;
   };
   aiModel: {
     /** Native iOS path uses Gemma 4 (LiteRT-LM). */

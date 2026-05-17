@@ -402,6 +402,12 @@ const en: Translations = {
     imageTooLarge: (sizeMb: number) => `Image too large (max ${sizeMb}MB)`,
     invalidImageType: 'Only image files are allowed.',
     tooManyImages: (max: number) => `You can select at most ${max} images at a time.`,
+    discard: 'Discard',
+    discardConfirmTitle: 'Discard scan results?',
+    discardConfirmDescription: 'Words you haven\'t added will be lost.',
+    duplicatesSkipped: (n: number) => `${n} already in your list`,
+    noMatchSkipped: (n: number) => `${n} not found in dictionary`,
+    addFailed: (n: number) => `Failed to add ${n}`,
   },
   aiModel: {
     nativeTitle: 'AI Model',
