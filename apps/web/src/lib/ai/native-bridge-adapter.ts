@@ -151,12 +151,14 @@ export function cancelNativeDownload(): void {
 }
 
 export function deleteNativeVariant(variantId: AiModelVariantId): void {
+  resetEngineInfoCache();
   sendToNative({ type: 'AI_MODEL_DELETE', variantId });
 }
 
 /** Switch which installed variant is used for inference. No-op natively
  *  when the variant isn't installed (the UI gates the call). */
 export function setNativeActiveVariant(variantId: AiModelVariantId): void {
+  resetEngineInfoCache();
   ensureSubscription();
   sendToNative({ type: 'AI_MODEL_SET_ACTIVE', variantId });
 }
@@ -239,7 +241,22 @@ export function getEngineInfo(): Promise<AiEngineInfo> {
       typeof crypto !== 'undefined' && 'randomUUID' in crypto
         ? crypto.randomUUID()
         : `einfo-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
-    pendingEngineInfo.set(requestId, { resolve, reject });
+
+    const timer = setTimeout(() => {
+      pendingEngineInfo.delete(requestId);
+      reject(new Error('getEngineInfo timeout (3s)'));
+    }, 3000);
+
+    pendingEngineInfo.set(requestId, {
+      resolve: (info) => {
+        clearTimeout(timer);
+        resolve(info);
+      },
+      reject: (err) => {
+        clearTimeout(timer);
+        reject(err);
+      },
+    });
     sendToNative({ type: 'AI_ENGINE_INFO', requestId });
   });
 }

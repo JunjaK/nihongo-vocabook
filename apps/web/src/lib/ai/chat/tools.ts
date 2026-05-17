@@ -89,6 +89,7 @@ function stripWordForToolResult(word: Word) {
     reading: word.reading,
     meaning: word.meaning,
     jlptLevel: word.jlptLevel,
+    priority: word.priority,
   };
 }
 
@@ -263,7 +264,8 @@ export const TOOLS: Record<string, ToolDefinition> = {
         await repo.words.setPriority(created.id, priority);
       }
       recordId(idTable.word, created.id, 'word');
-      return stripWordForToolResult(created);
+      const finalCreated = priority !== undefined ? { ...created, priority } : created;
+      return stripWordForToolResult(finalCreated);
     },
     describeAction: (args) => `단어 「${args.term ?? ''}」 추가`,
   },
@@ -380,7 +382,8 @@ export const TOOLS: Record<string, ToolDefinition> = {
       if (priority !== undefined) {
         await repo.words.setPriority(updated.id, priority);
       }
-      return stripWordForToolResult(updated);
+      const finalUpdated = priority !== undefined ? { ...updated, priority } : updated;
+      return stripWordForToolResult(finalUpdated);
     },
     describeAction: () => '단어 편집',
   },
