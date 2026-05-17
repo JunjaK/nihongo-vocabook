@@ -360,7 +360,7 @@ export const useChatStore = create<ChatStoreState>((set, get) => ({
     }
     // If the deleted session was the active one, clear local state.
     if (get().generalSession?.id === sessionId) {
-      set({ generalSession: null, pendingConfirms: [], unreadCount: 0 });
+      set({ generalSession: null, pendingConfirms: [], unreadCount: 0, idTable: emptyIdTable() });
     }
   },
 

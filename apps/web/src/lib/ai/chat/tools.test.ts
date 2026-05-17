@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { TOOLS, SCOPE_TOOL_ALLOWLIST, getTool, getToolDefsForBridge, emptyIdTable } from './tools';
+import type { DataRepository } from '@/lib/repository/types';
 import type { ChatScope } from '@/types/chat';
 
 describe('TOOLS catalog', () => {
@@ -166,21 +167,26 @@ describe('idTable resolution in execute', () => {
   const FULL_UUID = '550e8400-e29b-41d4-a716-446655440000';
   const SHORT = '550e8400';
 
+  interface TestRepoStub {
+    words: {
+      delete?: (id: string) => Promise<{ ok: boolean; id: string }>;
+    };
+  }
+
   function ctxWith(opts: { word?: [string, string][] } = {}) {
     const idTable = emptyIdTable();
     for (const [s, f] of opts.word ?? []) idTable.word.set(s, f);
-    return {
-      repo: { words: { delete: async (id: string) => ({ ok: true, id }) } } as never,
-      locale: 'ko',
-      idTable,
+    const repo: TestRepoStub = {
+      words: { delete: async (id: string) => ({ ok: true, id }) },
     };
+    return { repo: repo as unknown as DataRepository, locale: 'ko', idTable };
   }
 
   it('resolves a short wordId against the idTable', async () => {
     const tool = TOOLS.delete_word;
     const ctx = ctxWith({ word: [[SHORT, FULL_UUID]] });
     let calledWith = '';
-    (ctx.repo as never as { words: { delete: (id: string) => Promise<unknown> } }).words.delete = async (id: string) => {
+    (ctx.repo as unknown as TestRepoStub).words.delete = async (id: string) => {
       calledWith = id;
       return { ok: true, id };
     };
@@ -192,7 +198,7 @@ describe('idTable resolution in execute', () => {
     const tool = TOOLS.delete_word;
     const ctx = ctxWith();
     let calledWith = '';
-    (ctx.repo as never as { words: { delete: (id: string) => Promise<unknown> } }).words.delete = async (id: string) => {
+    (ctx.repo as unknown as TestRepoStub).words.delete = async (id: string) => {
       calledWith = id;
       return { ok: true, id };
     };

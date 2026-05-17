@@ -108,7 +108,12 @@ function resolveId(
   table: Map<string, string>,
   kind: 'wordId' | 'wordbookId',
 ): string {
-  if (raw.length >= 36) return raw;
+  // Treat as full UUID if it has the canonical 36-char dashed shape OR
+  // the 32-char dashless shape. Anything else is either a short prefix
+  // (look up) or malformed (caller will surface the repo-level error).
+  const looksFull =
+    (raw.length === 36 && raw.includes('-')) || raw.length === 32;
+  if (looksFull) return raw;
   const full = table.get(raw);
   if (!full) {
     throw new Error(
@@ -116,6 +121,30 @@ function resolveId(
     );
   }
   return full;
+}
+
+/** Write a (shortId, fullId) pair into the session idTable. Detects the
+ *  rare case where two distinct UUIDs share their 8-char prefix in one
+ *  session and refuses to overwrite — the first one wins. Logs a warning
+ *  so a stealth data-loss bug doesn't sit invisible. */
+function recordId(
+  table: Map<string, string>,
+  fullId: string,
+  kind: 'word' | 'wordbook',
+): void {
+  const short = shortenId(fullId);
+  const existing = table.get(short);
+  if (existing && existing !== fullId) {
+    if (process.env.NODE_ENV !== 'production') {
+      console.warn(
+        `[chat] idTable ${kind} short-id collision: '${short}' already maps to ` +
+        `'${existing}', refusing to remap to '${fullId}'. ` +
+        `The model should reference '${existing}' by full id to disambiguate.`,
+      );
+    }
+    return; // first writer wins
+  }
+  table.set(short, fullId);
 }
 
 // ---------------------------------------------------------------------------
@@ -139,7 +168,7 @@ export const TOOLS: Record<string, ToolDefinition> = {
       const limit = optInt(args, 'limit', 20) ?? 10;
       const results = await repo.words.search(str(args, 'query'));
       const sliced = results.slice(0, limit);
-      for (const w of sliced) idTable.word.set(shortenId(w.id), w.id);
+      for (const w of sliced) recordId(idTable.word, w.id, 'word');
       return sliced.map(stripWordForToolResult);
     },
     describeAction: (args) => `단어 검색: ${args.query ?? ''}`,
@@ -233,7 +262,7 @@ export const TOOLS: Record<string, ToolDefinition> = {
       if (priority !== undefined) {
         await repo.words.setPriority(created.id, priority);
       }
-      idTable.word.set(shortenId(created.id), created.id);
+      recordId(idTable.word, created.id, 'word');
       return stripWordForToolResult(created);
     },
     describeAction: (args) => `단어 「${args.term ?? ''}」 추가`,
@@ -254,7 +283,6 @@ export const TOOLS: Record<string, ToolDefinition> = {
     execute: async (args, { repo, idTable }) => {
       const wordId = resolveId(str(args, 'wordId'), idTable.word, 'wordId');
       const word = await repo.words.setMastered(wordId, bool(args, 'mastered'));
-      idTable.word.set(shortenId(word.id), word.id);
       return { id: shortenId(word.id), mastered: bool(args, 'mastered') };
     },
     describeAction: (args) => (args.mastered ? '암기완료로 표시' : '암기 해제'),
@@ -319,7 +347,7 @@ export const TOOLS: Record<string, ToolDefinition> = {
         name: str(args, 'name'),
         description: optStr(args, 'description') ?? null,
       });
-      idTable.wordbook.set(shortenId(wb.id), wb.id);
+      recordId(idTable.wordbook, wb.id, 'wordbook');
       return stripWordbookForToolResult(wb);
     },
     describeAction: (args) => `단어장 「${args.name ?? ''}」 생성`,
@@ -346,7 +374,7 @@ export const TOOLS: Record<string, ToolDefinition> = {
         meaning: optStr(args, 'meaning'),
         jlptLevel: optInt(args, 'jlptLevel'),
       });
-      idTable.word.set(shortenId(updated.id), updated.id);
+      recordId(idTable.word, updated.id, 'word');
       return stripWordForToolResult(updated);
     },
     describeAction: () => '단어 편집',
@@ -371,7 +399,7 @@ export const TOOLS: Record<string, ToolDefinition> = {
         name: optStr(args, 'name'),
         description: optStr(args, 'description'),
       });
-      idTable.wordbook.set(shortenId(wb.id), wb.id);
+      recordId(idTable.wordbook, wb.id, 'wordbook');
       return stripWordbookForToolResult(wb);
     },
     describeAction: () => '단어장 편집',
@@ -401,7 +429,6 @@ export const TOOLS: Record<string, ToolDefinition> = {
         source: 'ai_generated',
       });
       return {
-        id: shortenId(created.id),
         sentenceJa: created.sentenceJa,
       };
     },

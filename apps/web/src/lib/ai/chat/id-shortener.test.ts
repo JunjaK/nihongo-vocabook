@@ -5,7 +5,6 @@ describe('shortenId', () => {
   it('truncates a 36-char UUID to 8 chars', () => {
     const uuid = '550e8400-e29b-41d4-a716-446655440000';
     expect(shortenId(uuid)).toBe('550e8400');
-    expect(shortenId(uuid)).toHaveLength(8);
   });
 
   it('is idempotent on already-short ids', () => {
