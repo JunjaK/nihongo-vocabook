@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { TOOLS, getTool, getToolDefsForBridge } from './tools';
+import type { ChatScope } from '@/types/chat';
 
 describe('TOOLS catalog', () => {
   it('contains the 12 tools from the spec', () => {
@@ -81,14 +82,72 @@ describe('getTool', () => {
 
 describe('getToolDefsForBridge', () => {
   it('returns one entry per catalog tool', () => {
-    const defs = getToolDefsForBridge();
+    const defs = getToolDefsForBridge({ kind: 'general' });
     expect(defs).toHaveLength(Object.keys(TOOLS).length);
   });
 
   it('strips execute/mutates/describeAction (wire format only)', () => {
-    const defs = getToolDefsForBridge();
+    const defs = getToolDefsForBridge({ kind: 'general' });
     for (const d of defs) {
       expect(Object.keys(d).sort()).toEqual(['description', 'name', 'parameters']);
     }
+  });
+});
+
+describe('getToolDefsForBridge(scope)', () => {
+  it('returns all 12 tools for general scope', () => {
+    const defs = getToolDefsForBridge({ kind: 'general' });
+    expect(defs).toHaveLength(12);
+  });
+
+  it('returns exactly 3 tools for quiz scope', () => {
+    const defs = getToolDefsForBridge({
+      kind: 'quiz',
+      currentWordId: 'x',
+      lastRating: 3,
+    } as ChatScope);
+    expect(defs.map((d) => d.name).sort()).toEqual(
+      ['generate_example_sentence', 'search_words', 'set_mastered'],
+    );
+  });
+
+  it('returns exactly 6 tools for word scope', () => {
+    const defs = getToolDefsForBridge({ kind: 'word', wordId: 'x' });
+    expect(defs.map((d) => d.name).sort()).toEqual(
+      [
+        'add_word_to_wordbook',
+        'edit_word',
+        'generate_example_sentence',
+        'remove_word_from_wordbook',
+        'search_words',
+        'set_mastered',
+      ],
+    );
+  });
+
+  it('returns exactly 4 tools for wordbook scope', () => {
+    const defs = getToolDefsForBridge({ kind: 'wordbook', wordbookId: 'x' });
+    expect(defs.map((d) => d.name).sort()).toEqual(
+      [
+        'add_word_to_wordbook',
+        'edit_wordbook',
+        'remove_word_from_wordbook',
+        'search_words',
+      ],
+    );
+  });
+});
+
+describe('TOOLS iteration order', () => {
+  it('starts with read-only tools', () => {
+    const names = Object.keys(TOOLS);
+    expect(names[0]).toBe('search_words');
+    expect(names[1]).toBe('extract_words_from_image');
+  });
+
+  it('ends with destructive tools', () => {
+    const names = Object.keys(TOOLS);
+    expect(names[names.length - 2]).toBe('delete_word');
+    expect(names[names.length - 1]).toBe('delete_wordbook');
   });
 });

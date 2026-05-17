@@ -497,7 +497,7 @@ export const useChatStore = create<ChatStoreState>((set, get) => ({
 
     // Build the request payload.
     const basePrompt = await buildSystemPrompt(scope, repo, locale);
-    const tools = getToolDefsForBridge();
+    const tools = getToolDefsForBridge(scope);
     const toolsJson = JSON.stringify(tools);
 
     const sessNow = get().getSessionByScope(scope)!;

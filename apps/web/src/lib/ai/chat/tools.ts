@@ -16,7 +16,7 @@ import { getAttachment, blobToDataUrl } from './attachments';
 import { extractViaBridge } from '@/lib/ai/native-bridge-adapter';
 import type { Word } from '@/types/word';
 import type { Wordbook } from '@/types/wordbook';
-import type { AiToolDef } from '@/types/chat';
+import type { AiToolDef, ChatScope } from '@/types/chat';
 
 export interface ToolContext {
   repo: DataRepository;
@@ -86,13 +86,106 @@ function stripWordbookForToolResult(wb: Wordbook) {
 }
 
 // ---------------------------------------------------------------------------
+// Scope allowlist
+// ---------------------------------------------------------------------------
+
+const SCOPE_TOOL_ALLOWLIST: Record<ChatScope['kind'], readonly string[]> = {
+  general: [
+    'search_words',
+    'extract_words_from_image',
+    'add_word',
+    'set_mastered',
+    'add_word_to_wordbook',
+    'remove_word_from_wordbook',
+    'create_wordbook',
+    'edit_word',
+    'edit_wordbook',
+    'generate_example_sentence',
+    'delete_word',
+    'delete_wordbook',
+  ],
+  word: [
+    'search_words',
+    'set_mastered',
+    'edit_word',
+    'add_word_to_wordbook',
+    'remove_word_from_wordbook',
+    'generate_example_sentence',
+  ],
+  wordbook: [
+    'search_words',
+    'add_word_to_wordbook',
+    'remove_word_from_wordbook',
+    'edit_wordbook',
+  ],
+  quiz: [
+    'search_words',
+    'set_mastered',
+    'generate_example_sentence',
+  ],
+};
+
+// ---------------------------------------------------------------------------
 // Catalog
 // ---------------------------------------------------------------------------
 
 export const TOOLS: Record<string, ToolDefinition> = {
+  search_words: {
+    name: 'search_words',
+    description: "Search the user's vocab by term/reading/meaning (≤20 matches).",
+    parameters: {
+      type: 'object',
+      required: ['query'],
+      properties: {
+        query: { type: 'string' },
+        limit: { type: 'integer', maximum: 20 },
+      },
+    },
+    mutates: false,
+    execute: async (args, { repo }) => {
+      const limit = optInt(args, 'limit', 20) ?? 10;
+      const results = await repo.words.search(str(args, 'query'));
+      return results.slice(0, limit).map(stripWordForToolResult);
+    },
+    describeAction: (args) => `단어 검색: ${args.query ?? ''}`,
+  },
+
+  extract_words_from_image: {
+    name: 'extract_words_from_image',
+    description: "Extract Japanese words from an image attached this turn (≤50).",
+    parameters: {
+      type: 'object',
+      required: ['attachmentId'],
+      properties: {
+        attachmentId: { type: 'string' },
+      },
+    },
+    mutates: false,
+    execute: async (args, { locale }) => {
+      const attachmentId = str(args, 'attachmentId');
+      const blob = await getAttachment(attachmentId);
+      if (!blob) {
+        throw new Error(`Attachment ${attachmentId} not found in local storage.`);
+      }
+      const dataUrl = await blobToDataUrl(blob);
+      const words = await extractViaBridge(dataUrl, locale);
+      return {
+        count: words.length,
+        words: words.slice(0, 50).map((w) => ({
+          term: w.term,
+          reading: w.reading,
+          meaning: w.meaning,
+          jlptLevel: w.jlptLevel,
+        })),
+      };
+    },
+    describeAction: () => `이미지에서 단어 추출`,
+  },
+
   add_word: {
     name: 'add_word',
-    description: "Add a Japanese word to the user's list.",
+    description:
+      "Add a Japanese word to the user's list. Requires an existing dictionary entry — search via Jisho first or ask the user for a known dictionary form.",
     parameters: {
       type: 'object',
       required: ['term', 'reading', 'meaning'],
@@ -150,49 +243,6 @@ export const TOOLS: Record<string, ToolDefinition> = {
     describeAction: (args) => `단어 「${args.term ?? ''}」 추가`,
   },
 
-  edit_word: {
-    name: 'edit_word',
-    description: "Edit a word's reading/meaning/JLPT (not the kanji term).",
-    parameters: {
-      type: 'object',
-      required: ['wordId'],
-      properties: {
-        wordId: { type: 'string' },
-        reading: { type: 'string' },
-        meaning: { type: 'string' },
-        jlptLevel: { type: ['integer', 'null'], minimum: 1, maximum: 5 },
-      },
-    },
-    mutates: true,
-    execute: async (args, { repo }) => {
-      const wordId = str(args, 'wordId');
-      const updated = await repo.words.update(wordId, {
-        reading: optStr(args, 'reading'),
-        meaning: optStr(args, 'meaning'),
-        jlptLevel: optInt(args, 'jlptLevel'),
-      });
-      return stripWordForToolResult(updated);
-    },
-    describeAction: () => '단어 편집',
-  },
-
-  delete_word: {
-    name: 'delete_word',
-    description: 'Delete a word permanently.',
-    parameters: {
-      type: 'object',
-      required: ['wordId'],
-      properties: { wordId: { type: 'string' } },
-    },
-    mutates: true,
-    execute: async (args, { repo }) => {
-      const wordId = str(args, 'wordId');
-      await repo.words.delete(wordId);
-      return { ok: true, wordId };
-    },
-    describeAction: () => '단어 삭제 (취소 불가)',
-  },
-
   set_mastered: {
     name: 'set_mastered',
     description: 'Toggle word mastered status (true=mastered, false=active).',
@@ -210,68 +260,6 @@ export const TOOLS: Record<string, ToolDefinition> = {
       return { id: word.id, mastered: bool(args, 'mastered') };
     },
     describeAction: (args) => (args.mastered ? '암기완료로 표시' : '암기 해제'),
-  },
-
-  create_wordbook: {
-    name: 'create_wordbook',
-    description: 'Create a new wordbook.',
-    parameters: {
-      type: 'object',
-      required: ['name'],
-      properties: {
-        name: { type: 'string', maxLength: 50 },
-        description: { type: 'string', maxLength: 200 },
-      },
-    },
-    mutates: true,
-    execute: async (args, { repo }) => {
-      const wb = await repo.wordbooks.create({
-        name: str(args, 'name'),
-        description: optStr(args, 'description') ?? null,
-      });
-      return stripWordbookForToolResult(wb);
-    },
-    describeAction: (args) => `단어장 「${args.name ?? ''}」 생성`,
-  },
-
-  edit_wordbook: {
-    name: 'edit_wordbook',
-    description: 'Rename or change a wordbook description.',
-    parameters: {
-      type: 'object',
-      required: ['wordbookId'],
-      properties: {
-        wordbookId: { type: 'string' },
-        name: { type: 'string', maxLength: 50 },
-        description: { type: 'string', maxLength: 200 },
-      },
-    },
-    mutates: true,
-    execute: async (args, { repo }) => {
-      const wb = await repo.wordbooks.update(str(args, 'wordbookId'), {
-        name: optStr(args, 'name'),
-        description: optStr(args, 'description'),
-      });
-      return stripWordbookForToolResult(wb);
-    },
-    describeAction: () => '단어장 편집',
-  },
-
-  delete_wordbook: {
-    name: 'delete_wordbook',
-    description: 'Delete a wordbook (words preserved).',
-    parameters: {
-      type: 'object',
-      required: ['wordbookId'],
-      properties: { wordbookId: { type: 'string' } },
-    },
-    mutates: true,
-    execute: async (args, { repo }) => {
-      const wordbookId = str(args, 'wordbookId');
-      await repo.wordbooks.delete(wordbookId);
-      return { ok: true, wordbookId };
-    },
-    describeAction: () => '단어장 삭제 (취소 불가)',
   },
 
   add_word_to_wordbook: {
@@ -316,57 +304,75 @@ export const TOOLS: Record<string, ToolDefinition> = {
     describeAction: () => '단어장에서 단어 제거',
   },
 
-  search_words: {
-    name: 'search_words',
-    description: "Search the user's vocab by term/reading/meaning (≤20 matches).",
+  create_wordbook: {
+    name: 'create_wordbook',
+    description: 'Create a new wordbook.',
     parameters: {
       type: 'object',
-      required: ['query'],
+      required: ['name'],
       properties: {
-        query: { type: 'string' },
-        limit: { type: 'integer', maximum: 20 },
+        name: { type: 'string', maxLength: 50 },
+        description: { type: 'string', maxLength: 200 },
       },
     },
-    mutates: false,
+    mutates: true,
     execute: async (args, { repo }) => {
-      const limit = optInt(args, 'limit', 20) ?? 10;
-      const results = await repo.words.search(str(args, 'query'));
-      return results.slice(0, limit).map(stripWordForToolResult);
+      const wb = await repo.wordbooks.create({
+        name: str(args, 'name'),
+        description: optStr(args, 'description') ?? null,
+      });
+      return stripWordbookForToolResult(wb);
     },
-    describeAction: (args) => `단어 검색: ${args.query ?? ''}`,
+    describeAction: (args) => `단어장 「${args.name ?? ''}」 생성`,
   },
 
-  extract_words_from_image: {
-    name: 'extract_words_from_image',
-    description:
-      "Extract Japanese words from an image attached this turn (≤50). Follow with add_word calls for words the user wants to keep.",
+  edit_word: {
+    name: 'edit_word',
+    description: "Edit a word's reading/meaning/JLPT (not the kanji term).",
     parameters: {
       type: 'object',
-      required: ['attachmentId'],
+      required: ['wordId'],
       properties: {
-        attachmentId: { type: 'string' },
+        wordId: { type: 'string' },
+        reading: { type: 'string' },
+        meaning: { type: 'string' },
+        jlptLevel: { type: ['integer', 'null'], minimum: 1, maximum: 5 },
       },
     },
-    mutates: false,
-    execute: async (args, { locale }) => {
-      const attachmentId = str(args, 'attachmentId');
-      const blob = await getAttachment(attachmentId);
-      if (!blob) {
-        throw new Error(`Attachment ${attachmentId} not found in local storage.`);
-      }
-      const dataUrl = await blobToDataUrl(blob);
-      const words = await extractViaBridge(dataUrl, locale);
-      return {
-        count: words.length,
-        words: words.slice(0, 50).map((w) => ({
-          term: w.term,
-          reading: w.reading,
-          meaning: w.meaning,
-          jlptLevel: w.jlptLevel,
-        })),
-      };
+    mutates: true,
+    execute: async (args, { repo }) => {
+      const wordId = str(args, 'wordId');
+      const updated = await repo.words.update(wordId, {
+        reading: optStr(args, 'reading'),
+        meaning: optStr(args, 'meaning'),
+        jlptLevel: optInt(args, 'jlptLevel'),
+      });
+      return stripWordForToolResult(updated);
     },
-    describeAction: () => `이미지에서 단어 추출`,
+    describeAction: () => '단어 편집',
+  },
+
+  edit_wordbook: {
+    name: 'edit_wordbook',
+    description: 'Rename or change a wordbook description.',
+    parameters: {
+      type: 'object',
+      required: ['wordbookId'],
+      properties: {
+        wordbookId: { type: 'string' },
+        name: { type: 'string', maxLength: 50 },
+        description: { type: 'string', maxLength: 200 },
+      },
+    },
+    mutates: true,
+    execute: async (args, { repo }) => {
+      const wb = await repo.wordbooks.update(str(args, 'wordbookId'), {
+        name: optStr(args, 'name'),
+        description: optStr(args, 'description'),
+      });
+      return stripWordbookForToolResult(wb);
+    },
+    describeAction: () => '단어장 편집',
   },
 
   generate_example_sentence: {
@@ -399,15 +405,53 @@ export const TOOLS: Record<string, ToolDefinition> = {
     describeAction: (args) =>
       `예문 추가: 「${typeof args.sentenceJa === 'string' && args.sentenceJa.length > 40 ? args.sentenceJa.slice(0, 40) + '…' : args.sentenceJa ?? ''}」`,
   },
+
+  delete_word: {
+    name: 'delete_word',
+    description: 'Delete a word permanently.',
+    parameters: {
+      type: 'object',
+      required: ['wordId'],
+      properties: { wordId: { type: 'string' } },
+    },
+    mutates: true,
+    execute: async (args, { repo }) => {
+      const wordId = str(args, 'wordId');
+      await repo.words.delete(wordId);
+      return { ok: true, wordId };
+    },
+    describeAction: () => '단어 삭제 (취소 불가)',
+  },
+
+  delete_wordbook: {
+    name: 'delete_wordbook',
+    description: 'Delete a wordbook (words preserved).',
+    parameters: {
+      type: 'object',
+      required: ['wordbookId'],
+      properties: { wordbookId: { type: 'string' } },
+    },
+    mutates: true,
+    execute: async (args, { repo }) => {
+      const wordbookId = str(args, 'wordbookId');
+      await repo.wordbooks.delete(wordbookId);
+      return { ok: true, wordbookId };
+    },
+    describeAction: () => '단어장 삭제 (취소 불가)',
+  },
 };
 
-/** Tool definitions in the wire format the bridge expects (no execute fn). */
-export function getToolDefsForBridge(): AiToolDef[] {
-  return Object.values(TOOLS).map((t) => ({
-    name: t.name,
-    description: t.description,
-    parameters: t.parameters,
-  }));
+/** Tool definitions in the wire format the bridge expects (no execute fn).
+ *  Filtered to the tools that are useful in the given scope. */
+export function getToolDefsForBridge(scope: ChatScope): AiToolDef[] {
+  const allowed = new Set(SCOPE_TOOL_ALLOWLIST[scope.kind]);
+  return Object.values(TOOLS)
+    .filter((t) => allowed.has(t.name))
+    .map((t) => ({
+      name: t.name,
+      description: t.description,
+      parameters: t.parameters,
+    }));
 }
 
 /** Lookup a tool by name, or null if the model invented one. */
