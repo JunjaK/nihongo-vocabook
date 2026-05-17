@@ -609,7 +609,6 @@ export interface Translations {
         add_word_to_wordbook: (term: string, wbName: string) => string;
         remove_word_from_wordbook: (term: string, wbName: string) => string;
         search_words: (query: string) => string;
-        find_similar: (term: string) => string;
       };
     };
     fallback: {

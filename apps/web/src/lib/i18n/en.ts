@@ -618,7 +618,6 @@ const en: Translations = {
         remove_word_from_wordbook: (term: string, wbName: string) =>
           `Remove "${term}" from wordbook "${wbName}"`,
         search_words: (query: string) => `Search words: ${query}`,
-        find_similar: (term: string) => `Find similar to "${term}"`,
       },
     },
     fallback: {

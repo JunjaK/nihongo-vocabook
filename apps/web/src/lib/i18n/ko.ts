@@ -616,7 +616,6 @@ const ko: Translations = {
         remove_word_from_wordbook: (term: string, wbName: string) =>
           `단어장 「${wbName}」에서 「${term}」 제거`,
         search_words: (query: string) => `단어 검색: ${query}`,
-        find_similar: (term: string) => `「${term}」 유사어 추천`,
       },
     },
     fallback: {

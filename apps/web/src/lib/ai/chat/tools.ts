@@ -8,8 +8,6 @@
  *    as a confirmation card. User reviews and approves before execution.
  *
  * Per design decision D2: ALL DB mutations require user confirmation.
- * `find_similar` is an acknowledgement marker (no DB call) so the model can
- * signal intent to provide suggestions without any side effect.
  */
 
 import type { DataRepository } from '@/lib/repository/types';
@@ -336,26 +334,6 @@ export const TOOLS: Record<string, ToolDefinition> = {
       return results.slice(0, limit).map(stripWordForToolResult);
     },
     describeAction: (args) => `단어 검색: ${args.query ?? ''}`,
-  },
-
-  find_similar: {
-    name: 'find_similar',
-    description: 'Marker: assistant will suggest related words next (in text or add_word calls).',
-    parameters: {
-      type: 'object',
-      required: ['term'],
-      properties: {
-        term: { type: 'string' },
-        count: { type: 'integer', maximum: 10 },
-      },
-    },
-    mutates: false,
-    execute: async (args) => ({
-      acknowledged: true,
-      term: str(args, 'term'),
-      count: optInt(args, 'count', 10) ?? 5,
-    }),
-    describeAction: (args) => `유사어 추천: ${args.term ?? ''}`,
   },
 
   extract_words_from_image: {

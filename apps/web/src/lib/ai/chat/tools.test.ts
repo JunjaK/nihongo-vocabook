@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { TOOLS, getTool, getToolDefsForBridge } from './tools';
 
 describe('TOOLS catalog', () => {
-  it('contains the 13 tools from the spec', () => {
+  it('contains the 12 tools from the spec', () => {
     expect(Object.keys(TOOLS).sort()).toEqual(
       [
         'add_word',
@@ -13,7 +13,6 @@ describe('TOOLS catalog', () => {
         'edit_word',
         'edit_wordbook',
         'extract_words_from_image',
-        'find_similar',
         'generate_example_sentence',
         'remove_word_from_wordbook',
         'search_words',
@@ -38,9 +37,12 @@ describe('TOOLS catalog', () => {
     }
   });
 
-  it('search_words and find_similar are non-mutating', () => {
+  it('search_words is non-mutating', () => {
     expect(TOOLS.search_words.mutates).toBe(false);
-    expect(TOOLS.find_similar.mutates).toBe(false);
+  });
+
+  it('does not expose find_similar — removed in 2026-05-17 redesign', () => {
+    expect(Object.keys(TOOLS)).not.toContain('find_similar');
   });
 
   it('add_word / edit_word / delete_word are mutating', () => {
