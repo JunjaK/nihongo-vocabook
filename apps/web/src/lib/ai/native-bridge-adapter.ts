@@ -7,6 +7,7 @@ import {
   isNativeApp,
   onNativeMessage,
   sendToNative,
+  type AiEngineInfo,
   type AiModelStatusSnapshot,
   type AiModelVariantId,
   type NativeToWebMessage,
@@ -35,6 +36,15 @@ interface PendingInference {
 
 /** Active inference promises keyed by requestId so concurrent calls don't collide. */
 const pending = new Map<string, PendingInference>();
+
+/** Pending engine-info requests keyed by requestId. */
+const pendingEngineInfo = new Map<
+  string,
+  { resolve: (info: AiEngineInfo) => void; reject: (err: Error) => void }
+>();
+
+/** Cached engine info — reset when the engine is torn down. */
+let cachedEngineInfo: AiEngineInfo | null = null;
 
 /** Mirrors the latest `AI_MODEL_STATUS_RESULT.deviceSupported`. */
 let lastDeviceSupported: boolean | undefined;
@@ -87,6 +97,15 @@ function handleNativeMessage(message: NativeToWebMessage): void {
         entry.detachAbort?.();
         pending.delete(message.requestId);
         entry.reject(new Error(message.message || 'native_infer_failed'));
+      }
+      break;
+    }
+    case 'AI_ENGINE_INFO_RESULT': {
+      const entry = pendingEngineInfo.get(message.requestId);
+      if (entry) {
+        pendingEngineInfo.delete(message.requestId);
+        cachedEngineInfo = message.info;
+        entry.resolve(message.info);
       }
       break;
     }
@@ -199,6 +218,42 @@ export function getActiveVariant(): AiModelVariantId | null {
   // Callers should subscribe via `subscribeSnapshot` for reactive reads.
   return null;
 }
+
+/**
+ * Query the native engine for the context-size and backend selected by
+ * `pickKVCacheSize()` at engine start. Cached per JS-context lifetime —
+ * engine teardown / re-create is rare and we accept slightly stale values
+ * rather than hammering the bridge per turn.
+ *
+ * On web (non-native) build returns the unknown/zero shape so callers fall
+ * back to the default conservative budget.
+ */
+export function getEngineInfo(): Promise<AiEngineInfo> {
+  if (cachedEngineInfo) return Promise.resolve(cachedEngineInfo);
+  if (!isNativeApp()) {
+    return Promise.resolve({ maxNumTokens: 0, backend: 'unknown', mtpEnabled: false });
+  }
+  ensureSubscription();
+  return new Promise<AiEngineInfo>((resolve, reject) => {
+    const requestId =
+      typeof crypto !== 'undefined' && 'randomUUID' in crypto
+        ? crypto.randomUUID()
+        : `einfo-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+    pendingEngineInfo.set(requestId, { resolve, reject });
+    sendToNative({ type: 'AI_ENGINE_INFO', requestId });
+  });
+}
+
+/**
+ * Drop the cached engine info. Call when the engine is known to have been
+ * torn down (variant switch, manual unload) so the next `getEngineInfo()`
+ * fetches fresh values from the native side.
+ */
+export function resetEngineInfoCache(): void {
+  cachedEngineInfo = null;
+}
+
+export type { AiEngineInfo };
 
 /** Boot the subscription on module load so the very first STATUS_RESULT lands. */
 ensureSubscription();

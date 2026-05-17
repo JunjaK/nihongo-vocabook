@@ -46,6 +46,18 @@ declare class NivocaAiModule extends NativeModule<NivocaAiModuleEvents> {
    * backends fail.
    */
   prewarm(): Promise<void>;
+
+  /**
+   * C5 — query the active engine's capability snapshot: context-window size
+   * chosen by `pickKVCacheSize()`, backend selected (gpu/cpu), and whether
+   * Multi-Token Prediction is enabled. Resolves immediately if the engine is
+   * loaded; returns zero/unknown if not.
+   */
+  getEngineInfo(): Promise<{
+    maxNumTokens: number;
+    backend: 'gpu' | 'cpu' | 'unknown';
+    mtpEnabled: boolean;
+  }>;
 }
 
 // Loads the native module object from JSI. Throws on platforms where the

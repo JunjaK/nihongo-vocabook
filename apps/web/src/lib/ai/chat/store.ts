@@ -23,7 +23,8 @@ import type { DataRepository } from '@/lib/repository/types';
 import { recordMetric } from './metrics';
 import { storeAttachment } from './attachments';
 import { streamInfer, cancelInfer } from './inference';
-import { buildSystemPrompt, trimHistoryToBudget } from './prompts';
+import { buildSystemPrompt, trimHistoryToBudget, getBudget } from './prompts';
+import { getEngineInfo } from '@/lib/ai/native-bridge-adapter';
 import { getTool, getToolDefsForBridge, type ToolContext, type ChatIdTable, emptyIdTable } from './tools';
 import { getSaveQuizAiSessions } from '../assistant-prefs';
 import type {
@@ -530,7 +531,22 @@ export const useChatStore = create<ChatStoreState>((set, get) => ({
       role: m.role === 'tool' ? 'tool' : m.role,
       content: chatBlocksToBridgeBlocks(m.content, attachmentSources),
     }));
-    const { kept, truncated } = trimHistoryToBudget(systemPrompt, toolsJson, bridgeMessages);
+    const engineInfo = await getEngineInfo().catch(() => null);
+    const kvCache =
+      engineInfo && engineInfo.maxNumTokens > 0 ? engineInfo.maxNumTokens : undefined;
+    const budget = getBudget(kvCache);
+    const { kept, truncated } = trimHistoryToBudget(
+      systemPrompt,
+      toolsJson,
+      bridgeMessages,
+      budget,
+    );
+    void recordMetric('chat.budget', {
+      scope: scope.kind,
+      kvCache: budget.total,
+      truncated,
+      kept: kept.length,
+    });
     fullHistory.push({ role: 'system', content: [{ type: 'text', text: systemPrompt }] });
     fullHistory.push(...kept);
 

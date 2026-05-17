@@ -1,6 +1,15 @@
 /** The two LiteRT-LM variants we support — see `model-manager.ts`. */
 export type AiModelVariantId = 'gemma-4-e2b' | 'gemma-4-e4b';
 
+/** Engine capability snapshot returned by `NivocaAi.getEngineInfo()` via the
+ *  bridge. The web side uses this to size its token budget dynamically instead
+ *  of hardcoding a conservative worst-case. */
+export interface AiEngineInfo {
+  maxNumTokens: number;
+  backend: 'gpu' | 'cpu' | 'unknown';
+  mtpEnabled: boolean;
+}
+
 /** Messages sent from Web (WebView) to Native (Expo) */
 export type WebToNativeMessage =
   | { type: 'READY'; bridgeVersion: number }
@@ -36,6 +45,9 @@ export type WebToNativeMessage =
   /** Pre-warm the on-device engine without running inference. Fire-and-forget;
    *  failures are reported via a future AI_PREWARM_RESULT if we add one. */
   | { type: 'AI_PREWARM' }
+  /** Query the native engine's capability snapshot (context size, backend,
+   *  MTP flag). Reply: AI_ENGINE_INFO_RESULT. */
+  | { type: 'AI_ENGINE_INFO'; requestId: string }
   /** Start recording audio via the native mic. Native emits TICK events while
    *  recording, RESULT on stop, CANCELLED if cancelled, ERROR on failure. */
   | { type: 'AUDIO_RECORD_START'; maxSeconds?: number }
@@ -152,6 +164,8 @@ export type NativeToWebMessage =
       code: string;
       message: string;
     }
+  /** Reply to AI_ENGINE_INFO. */
+  | { type: 'AI_ENGINE_INFO_RESULT'; requestId: string; info: AiEngineInfo }
   /** Periodic update while recording — used to drive UI timer + level meter. */
   | { type: 'AUDIO_RECORD_TICK'; elapsedMs: number; level?: number }
   /** Recording finished successfully. base64 is the raw audio bytes. */

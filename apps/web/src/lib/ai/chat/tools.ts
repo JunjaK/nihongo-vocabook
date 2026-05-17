@@ -355,7 +355,7 @@ export const TOOLS: Record<string, ToolDefinition> = {
 
   edit_word: {
     name: 'edit_word',
-    description: "Edit a word's reading/meaning/JLPT (not the kanji term).",
+    description: "Edit a word's reading/meaning/JLPT/priority (not the kanji term).",
     parameters: {
       type: 'object',
       required: ['wordId'],
@@ -364,6 +364,7 @@ export const TOOLS: Record<string, ToolDefinition> = {
         reading: { type: 'string' },
         meaning: { type: 'string' },
         jlptLevel: { type: ['integer', 'null'], minimum: 1, maximum: 5 },
+        priority: { type: 'integer', minimum: 0, maximum: 5 },
       },
     },
     mutates: true,
@@ -375,6 +376,10 @@ export const TOOLS: Record<string, ToolDefinition> = {
         jlptLevel: optInt(args, 'jlptLevel'),
       });
       recordId(idTable.word, updated.id, 'word');
+      const priority = optInt(args, 'priority');
+      if (priority !== undefined) {
+        await repo.words.setPriority(updated.id, priority);
+      }
       return stripWordForToolResult(updated);
     },
     describeAction: () => '단어 편집',

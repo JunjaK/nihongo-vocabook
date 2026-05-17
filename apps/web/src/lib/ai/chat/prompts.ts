@@ -178,18 +178,39 @@ export async function buildSystemPrompt(
 // Token budgeting (rough estimator — char/4 for text, +256 per image block)
 // ---------------------------------------------------------------------------
 
-const TOKEN_BUDGET = 2048;
-const RESERVED_FOR_OUTPUT = 600;
-const RESERVED_FOR_NEXT_USER = 200;
+const DEFAULT_KV_CACHE = 2048;
 const IMAGE_TOKEN_COST = 256;
+const AUDIO_TOKEN_COST = 384;
+
+export interface Budget {
+  total: number;
+  reservedForOutput: number;
+  reservedForNextUser: number;
+}
+
+/**
+ * Pick reasonable reserves for the given KV cache ceiling. Bigger caches
+ * support richer explanations without truncating mid-sentence, so the
+ * output reserve scales up; the next-user reserve grows modestly for
+ * multi-turn quiz Q&A.
+ */
+export function getBudget(kvCache?: number): Budget {
+  const total = kvCache && kvCache > 0 ? kvCache : DEFAULT_KV_CACHE;
+  const reservedForOutput =
+    total >= 16384 ? 2048 :
+    total >= 8192  ? 1024 :
+    total >= 4096  ? 768  :
+                     600;
+  const reservedForNextUser = total >= 8192 ? 400 : 200;
+  return { total, reservedForOutput, reservedForNextUser };
+}
 
 export function estimateTokens(text: string): number {
   return Math.ceil(text.length / 4);
 }
 
-const AUDIO_TOKEN_COST = 384; // rough per-clip estimate; updated when verified
-
 interface MessageLike {
+  role: 'user' | 'assistant' | 'tool' | 'system';
   content: Array<
     | { type: 'text'; text: string }
     | { type: 'image'; attachmentId?: string; source?: string }
@@ -201,41 +222,62 @@ interface MessageLike {
 export function estimateMessageTokens(msg: MessageLike): number {
   let total = 4; // role tags overhead
   for (const block of msg.content) {
-    if (block.type === 'text') {
-      total += estimateTokens(block.text);
-    } else if (block.type === 'image') {
-      total += IMAGE_TOKEN_COST;
-    } else if (block.type === 'audio') {
-      total += AUDIO_TOKEN_COST;
-    } else if (block.type === 'tool_result') {
-      total += estimateTokens(JSON.stringify(block.result ?? {}));
-    }
+    if (block.type === 'text') total += estimateTokens(block.text);
+    else if (block.type === 'image') total += IMAGE_TOKEN_COST;
+    else if (block.type === 'audio') total += AUDIO_TOKEN_COST;
+    else if (block.type === 'tool_result') total += estimateTokens(JSON.stringify(block.result ?? {}));
   }
   return total;
 }
 
 /**
- * Trim oldest history messages until the system + tools + history fits within
- * the token budget. Returns the trimmed list and a boolean indicating whether
- * truncation occurred.
+ * Group consecutive messages into turn groups. A new group starts on each
+ * `user` message; everything until the next `user` (assistant replies,
+ * tool results, follow-up assistant chunks) belongs to that group.
+ */
+function groupTurns<T extends MessageLike>(messages: T[]): T[][] {
+  const groups: T[][] = [];
+  for (const m of messages) {
+    if (m.role === 'user' || groups.length === 0) {
+      groups.push([m]);
+    } else {
+      groups[groups.length - 1].push(m);
+    }
+  }
+  return groups;
+}
+
+/**
+ * Trim oldest history turn-groups until the system + tools + remaining
+ * history fits within the budget. Returns kept messages (flattened) plus
+ * whether any truncation occurred.
+ *
+ * Turn groups are atomic — never split. This prevents the orphan-user
+ * case where the assistant reply was dropped but the user message
+ * remained, leaving the model staring at a question with no answer.
  */
 export function trimHistoryToBudget<T extends MessageLike>(
   systemPrompt: string,
   toolsJson: string,
   messages: T[],
+  budget: Budget,
 ): { kept: T[]; truncated: boolean } {
   const fixed = estimateTokens(systemPrompt) + estimateTokens(toolsJson);
-  const available = TOKEN_BUDGET - fixed - RESERVED_FOR_OUTPUT - RESERVED_FOR_NEXT_USER;
+  const available = budget.total - fixed - budget.reservedForOutput - budget.reservedForNextUser;
 
-  const kept: T[] = [];
+  const groups = groupTurns(messages);
+  const keptGroups: T[][] = [];
   let used = 0;
-  for (let i = messages.length - 1; i >= 0; i--) {
-    const cost = estimateMessageTokens(messages[i]);
+  let truncated = false;
+
+  for (let i = groups.length - 1; i >= 0; i--) {
+    const cost = groups[i].reduce((acc, m) => acc + estimateMessageTokens(m), 0);
     if (used + cost > available) {
-      return { kept, truncated: true };
+      truncated = true;
+      break;
     }
-    kept.unshift(messages[i]);
+    keptGroups.unshift(groups[i]);
     used += cost;
   }
-  return { kept, truncated: false };
+  return { kept: keptGroups.flat(), truncated };
 }

@@ -214,3 +214,12 @@ describe('idTable resolution in execute', () => {
     );
   });
 });
+
+describe('edit_word.priority', () => {
+  it('declares priority in its parameter schema', () => {
+    const params = TOOLS.edit_word.parameters as {
+      properties: Record<string, unknown>;
+    };
+    expect(params.properties.priority).toBeDefined();
+  });
+});

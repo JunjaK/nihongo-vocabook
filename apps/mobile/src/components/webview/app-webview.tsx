@@ -311,6 +311,28 @@ export function AppWebView() {
           break;
         }
 
+        case 'AI_ENGINE_INFO': {
+          // Query engine capability snapshot (context size, backend, MTP).
+          // The web side uses this to size its token budget dynamically.
+          try {
+            const NivocaAi = (await import('../../../modules/nivoca-ai')).default;
+            const info = await NivocaAi.getEngineInfo();
+            sendToWeb({
+              type: 'AI_ENGINE_INFO_RESULT',
+              requestId: message.requestId,
+              info,
+            });
+          } catch (err) {
+            console.warn('[bridge] getEngineInfo failed', err);
+            sendToWeb({
+              type: 'AI_ENGINE_INFO_RESULT',
+              requestId: message.requestId,
+              info: { maxNumTokens: 0, backend: 'unknown', mtpEnabled: false },
+            });
+          }
+          break;
+        }
+
         // Future: SHARE, OPEN_EXTERNAL_URL
       }
     },

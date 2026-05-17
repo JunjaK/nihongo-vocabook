@@ -133,3 +133,82 @@ describe('buildSystemPrompt — wordbook scope', () => {
     expect(p).not.toContain('単語24');
   });
 });
+
+import { getBudget, trimHistoryToBudget } from './prompts';
+
+describe('getBudget', () => {
+  it('returns conservative reserves on the 2K bucket', () => {
+    expect(getBudget(2048)).toEqual({
+      total: 2048,
+      reservedForOutput: 600,
+      reservedForNextUser: 200,
+    });
+  });
+
+  it('scales output reserve to 1024 on the 8K bucket', () => {
+    expect(getBudget(8192)).toEqual({
+      total: 8192,
+      reservedForOutput: 1024,
+      reservedForNextUser: 400,
+    });
+  });
+
+  it('caps output reserve at 2048 on the 32K bucket', () => {
+    expect(getBudget(32768)).toEqual({
+      total: 32768,
+      reservedForOutput: 2048,
+      reservedForNextUser: 400,
+    });
+  });
+
+  it('falls back to the 2K bucket on undefined input', () => {
+    expect(getBudget(undefined)).toEqual({
+      total: 2048,
+      reservedForOutput: 600,
+      reservedForNextUser: 200,
+    });
+  });
+});
+
+describe('trimHistoryToBudget — pair preservation', () => {
+  // Helper: a message of `chars` text characters in the text block.
+  function msg(role: 'user' | 'assistant' | 'tool', chars: number) {
+    return {
+      role,
+      content: [{ type: 'text' as const, text: 'x'.repeat(chars) }],
+    };
+  }
+
+  it('drops in turn groups, never orphans a user from its assistant', () => {
+    const history = [
+      msg('user', 400),
+      msg('assistant', 400),
+      msg('user', 400),
+      msg('assistant', 400),
+      msg('user', 400),
+      msg('assistant', 400),
+    ];
+    const budget = { total: 2048, reservedForOutput: 600, reservedForNextUser: 200 };
+    const { kept, truncated } = trimHistoryToBudget(
+      /* system — large enough to consume most of the budget */ 'x'.repeat(748 * 4),
+      /* toolsJson */ '[]',
+      history,
+      budget,
+    );
+    expect(truncated).toBe(true);
+    // kept length must be even — pairs only.
+    expect(kept.length % 2).toBe(0);
+    // First kept message must be a user role (the start of a turn).
+    if (kept.length > 0) {
+      expect(kept[0].role).toBe('user');
+    }
+  });
+
+  it('keeps everything when the budget is large enough', () => {
+    const history = [msg('user', 50), msg('assistant', 50)];
+    const budget = { total: 32768, reservedForOutput: 2048, reservedForNextUser: 400 };
+    const { kept, truncated } = trimHistoryToBudget('x', '[]', history, budget);
+    expect(truncated).toBe(false);
+    expect(kept).toHaveLength(2);
+  });
+});

@@ -74,6 +74,8 @@ type WebToNativeMessage =
   | { type: 'AI_INFER'; requestId: string; request: AiInferRequest }
   | { type: 'AI_INFER_CANCEL'; requestId: string }
   | { type: 'AI_PREWARM' }
+  /** Query the native engine's capability snapshot. Reply: AI_ENGINE_INFO_RESULT. */
+  | { type: 'AI_ENGINE_INFO'; requestId: string }
   | { type: 'AUDIO_RECORD_START'; maxSeconds?: number }
   | { type: 'AUDIO_RECORD_STOP' }
   | { type: 'AUDIO_RECORD_CANCEL' }
@@ -112,12 +114,23 @@ type NativeToWebMessage =
       modelVariant?: string;
     }
   | { type: 'AI_INFER_ERROR'; requestId: string; code: string; message: string }
+  /** Reply to AI_ENGINE_INFO. */
+  | { type: 'AI_ENGINE_INFO_RESULT'; requestId: string; info: AiEngineInfo }
   | { type: 'AUDIO_RECORD_TICK'; elapsedMs: number; level?: number }
   | { type: 'AUDIO_RECORD_RESULT'; base64: string; mimeType: string; durationMs: number }
   | { type: 'AUDIO_RECORD_CANCELLED' }
   | { type: 'AUDIO_RECORD_ERROR'; message: string }
   | { type: 'AUDIO_FILE_RESULT'; base64: string; mimeType: string; name?: string }
   | { type: 'AUDIO_FILE_CANCELLED' };
+
+/** Engine capability snapshot. Mirror of `AiEngineInfo` in
+ *  apps/mobile/src/types/bridge.ts — declared inline to avoid cross-workspace
+ *  imports. */
+export interface AiEngineInfo {
+  maxNumTokens: number;
+  backend: 'gpu' | 'cpu' | 'unknown';
+  mtpEnabled: boolean;
+}
 
 // ---------------------------------------------------------------------------
 // Global type augmentation

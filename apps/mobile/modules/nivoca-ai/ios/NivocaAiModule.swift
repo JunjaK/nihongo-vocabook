@@ -139,6 +139,9 @@ public class NivocaAiModule: Module {
   private var engine: OpaquePointer? = nil
   private var sessionConfig: OpaquePointer? = nil
   private var convConfig: OpaquePointer? = nil
+  private var activeMaxNumTokens: Int = 0
+  private var activeBackend: String = "unknown"   // "gpu" | "cpu" | "unknown"
+  private var activeMtpEnabled: Bool = false
   /// Path of the `.litertlm` file currently loaded into `engine`. Tracking
   /// this lets us notice when the user switches active variants in settings
   /// and rebuild the engine on next `ensureLoaded` instead of running the
@@ -210,6 +213,14 @@ public class NivocaAiModule: Module {
     //      Throws if model is missing or all backends fail.
     AsyncFunction("prewarm") { () -> Void in
       try self.ensureLoaded()
+    }
+
+    AsyncFunction("getEngineInfo") { () -> [String: Any] in
+      return [
+        "maxNumTokens": self.activeMaxNumTokens,
+        "backend": self.activeBackend,
+        "mtpEnabled": self.activeMtpEnabled,
+      ]
     }
   }
 
@@ -356,6 +367,7 @@ public class NivocaAiModule: Module {
     // a 1.6× safety margin. Falls back gracefully on Jetsam-constrained
     // devices without the entitlement.
     let cacheSize = pickKVCacheSize()
+    self.activeMaxNumTokens = cacheSize
     logger.info("tryCreateEngine: max_num_tokens=\(cacheSize) (available=\(os_proc_available_memory()) bytes)")
     litert_lm_engine_settings_set_max_num_tokens(settings, Int32(cacheSize))
     litert_lm_engine_settings_set_cache_dir(settings, cacheDir)
@@ -441,6 +453,8 @@ public class NivocaAiModule: Module {
       return false
     }
     litert_lm_conversation_delete(smokeConv)
+    self.activeBackend = backend
+    self.activeMtpEnabled = enableMtp
     return true
   }
 
@@ -461,6 +475,9 @@ public class NivocaAiModule: Module {
     self.sessionConfig = nil
     self.convConfig = nil
     self.loadedModelPath = nil
+    self.activeMaxNumTokens = 0
+    self.activeBackend = "unknown"
+    self.activeMtpEnabled = false
   }
 
   private func ensureLoaded() throws {
@@ -745,7 +762,7 @@ public class NivocaAiModule: Module {
 
     if let tools = request.tools, !tools.isEmpty {
       var toolsArr: [[String: Any]] = []
-      for tool in tools {
+      for tool in tools.sorted(by: { $0.name < $1.name }) {
         var entry: [String: Any] = [
           "name": tool.name,
           "description": tool.description,
