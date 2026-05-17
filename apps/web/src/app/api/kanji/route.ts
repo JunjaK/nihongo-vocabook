@@ -2,7 +2,6 @@ import { NextResponse, after, type NextRequest } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { createLogger } from '@/lib/logger';
-import { createAnonymousRateLimiter } from '@/lib/api/rate-limit';
 import { KANJI_REGEX } from '@/lib/ruby';
 import {
   translateKanjiReadings,
@@ -27,7 +26,6 @@ interface KanjiRow {
 }
 
 const logger = createLogger('api/kanji');
-const isAnonymousRateLimited = createAnonymousRateLimiter();
 
 function isSingleKanji(input: string): boolean {
   if (!input) return false;
@@ -80,10 +78,9 @@ export async function GET(request: NextRequest) {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  const isAuthenticated = Boolean(user);
 
-  if (!isAuthenticated && isAnonymousRateLimited(request)) {
-    return NextResponse.json({ error: 'RATE_LIMITED' }, { status: 429 });
+  if (!user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   const { data: row, error } = await supabase
@@ -119,11 +116,9 @@ export async function GET(request: NextRequest) {
     return a.position - b.position;
   });
 
-  // Identify readings that still need English meanings — trigger fire-and-forget LLM backfill.
+  // Identify readings that still need English or Korean meanings — trigger fire-and-forget LLM backfill.
   const needBackfill = sortedReadings.filter(
-    (r) =>
-      r.meanings.length === 0 ||
-      (isAuthenticated && r.meanings_ko.length === 0),
+    (r) => r.meanings.length === 0 || r.meanings_ko.length === 0,
   );
 
   if (needBackfill.length > 0) {
@@ -134,7 +129,7 @@ export async function GET(request: NextRequest) {
     after(() => backfillMeanings(row.character, inputs));
   }
 
-  const showKo = isAuthenticated && locale === 'ko';
+  const showKo = locale === 'ko';
 
   const data: Kanji = {
     character: row.character,

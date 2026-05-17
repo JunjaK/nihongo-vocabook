@@ -2,7 +2,6 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { translateToKorean } from '@/lib/dictionary/translate';
 import { createLogger } from '@/lib/logger';
-import { createAnonymousRateLimiter } from '@/lib/api/rate-limit';
 import { quotePostgrestValue } from '@/lib/api/postgrest-safe';
 
 const MAX_QUERY_LEN = 100;
@@ -32,7 +31,6 @@ interface DictionaryRow {
 const SEARCH_RESULT_LIMIT = 10;
 const HIRAGANA_KATAKANA_OFFSET = 0x60;
 const logger = createLogger('api/dictionary');
-const isAnonymousRateLimited = createAnonymousRateLimiter();
 
 function toKatakana(s: string): string {
   return s.replace(/[ぁ-ゖ]/g, (c) =>
@@ -202,10 +200,9 @@ export async function GET(request: NextRequest) {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  const isAuthenticated = Boolean(user);
 
-  if (!isAuthenticated && isAnonymousRateLimited(request)) {
-    return NextResponse.json({ error: 'RATE_LIMITED' }, { status: 429 });
+  if (!user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   // 1. Try local DB first — match both term and reading, including hiragana ↔
@@ -226,10 +223,8 @@ export async function GET(request: NextRequest) {
     .limit(SEARCH_RESULT_LIMIT);
 
   if (rows && rows.length > 0) {
-    // Backfill missing Korean meanings (auth only — requires LLM call).
-    if (isAuthenticated) {
-      await translateAndUpdateRows(supabase, rows);
-    }
+    // Backfill missing Korean meanings — requires LLM call.
+    await translateAndUpdateRows(supabase, rows);
 
     const mapped = rows.map(mapRowToJisho);
     return NextResponse.json({
@@ -243,25 +238,23 @@ export async function GET(request: NextRequest) {
 
     // 3. Translate before responding so Korean meanings are available immediately
     if (results.length > 0) {
-      if (isAuthenticated) {
-        try {
-          const translated = await translateToKorean(
-            results.map((result) => {
-              const row = mapJishoResultToRow(result);
-              return {
-                term: row.term,
-                reading: row.reading,
-                meanings: row.meanings,
-              };
-            }));
-          applyKoreanDefinitionsToResults(results, translated);
-        } catch (err) {
-          // Non-blocking — translation failure falls back to English-only
-          logger.warn(
-            'Failed to translate Jisho results',
-            err instanceof Error ? err.message : err,
-          );
-        }
+      try {
+        const translated = await translateToKorean(
+          results.map((result) => {
+            const row = mapJishoResultToRow(result);
+            return {
+              term: row.term,
+              reading: row.reading,
+              meanings: row.meanings,
+            };
+          }));
+        applyKoreanDefinitionsToResults(results, translated);
+      } catch (err) {
+        // Non-blocking — translation failure falls back to English-only
+        logger.warn(
+          'Failed to translate Jisho results',
+          err instanceof Error ? err.message : err,
+        );
       }
 
       const entries = results.map(mapJishoResultToRow);

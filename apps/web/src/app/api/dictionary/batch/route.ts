@@ -90,7 +90,10 @@ export async function POST(request: NextRequest) {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  const isAuthenticated = Boolean(user);
+
+  if (!user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
 
   // Quote each value so commas/parens/quotes inside a term cannot break out
   // of the in-list and tack on additional filter clauses.
@@ -108,8 +111,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'DB_ERROR' }, { status: 500 });
   }
 
-  // Backfill missing Korean meanings for authenticated users
-  if (isAuthenticated && rows && rows.length > 0) {
+  // Backfill missing Korean meanings
+  if (rows && rows.length > 0) {
     const toTranslate = rows.filter(
       (r) => !r.meanings_ko || r.meanings_ko.length === 0,
     );
