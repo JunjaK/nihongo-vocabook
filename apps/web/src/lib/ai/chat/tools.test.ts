@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { TOOLS, SCOPE_TOOL_ALLOWLIST, getTool, getToolDefsForBridge } from './tools';
+import { TOOLS, SCOPE_TOOL_ALLOWLIST, getTool, getToolDefsForBridge, emptyIdTable } from './tools';
 import type { ChatScope } from '@/types/chat';
 
 describe('TOOLS catalog', () => {
@@ -159,5 +159,52 @@ describe('TOOLS iteration order', () => {
     const names = Object.keys(TOOLS);
     expect(names[names.length - 2]).toBe('delete_word');
     expect(names[names.length - 1]).toBe('delete_wordbook');
+  });
+});
+
+describe('idTable resolution in execute', () => {
+  const FULL_UUID = '550e8400-e29b-41d4-a716-446655440000';
+  const SHORT = '550e8400';
+
+  function ctxWith(opts: { word?: [string, string][] } = {}) {
+    const idTable = emptyIdTable();
+    for (const [s, f] of opts.word ?? []) idTable.word.set(s, f);
+    return {
+      repo: { words: { delete: async (id: string) => ({ ok: true, id }) } } as never,
+      locale: 'ko',
+      idTable,
+    };
+  }
+
+  it('resolves a short wordId against the idTable', async () => {
+    const tool = TOOLS.delete_word;
+    const ctx = ctxWith({ word: [[SHORT, FULL_UUID]] });
+    let calledWith = '';
+    (ctx.repo as never as { words: { delete: (id: string) => Promise<unknown> } }).words.delete = async (id: string) => {
+      calledWith = id;
+      return { ok: true, id };
+    };
+    await tool.execute({ wordId: SHORT }, ctx);
+    expect(calledWith).toBe(FULL_UUID);
+  });
+
+  it('passes a 36-char wordId through unchanged', async () => {
+    const tool = TOOLS.delete_word;
+    const ctx = ctxWith();
+    let calledWith = '';
+    (ctx.repo as never as { words: { delete: (id: string) => Promise<unknown> } }).words.delete = async (id: string) => {
+      calledWith = id;
+      return { ok: true, id };
+    };
+    await tool.execute({ wordId: FULL_UUID }, ctx);
+    expect(calledWith).toBe(FULL_UUID);
+  });
+
+  it('throws a clear message when a short wordId is unknown', async () => {
+    const tool = TOOLS.delete_word;
+    const ctx = ctxWith();
+    await expect(tool.execute({ wordId: SHORT }, ctx)).rejects.toThrow(
+      /Unknown wordId.*search_words/,
+    );
   });
 });

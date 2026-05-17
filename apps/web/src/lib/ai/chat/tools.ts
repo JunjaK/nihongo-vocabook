@@ -14,13 +14,28 @@ import type { DataRepository } from '@/lib/repository/types';
 import { searchDictionary } from '@/lib/dictionary/jisho';
 import { getAttachment, blobToDataUrl } from './attachments';
 import { extractViaBridge } from '@/lib/ai/native-bridge-adapter';
+import { shortenId } from './id-shortener';
 import type { Word } from '@/types/word';
 import type { Wordbook } from '@/types/wordbook';
 import type { AiToolDef, ChatScope } from '@/types/chat';
 
+export interface ChatIdTable {
+  word: Map<string, string>;     // short id (8-char) → full UUID
+  wordbook: Map<string, string>;
+}
+
 export interface ToolContext {
   repo: DataRepository;
   locale: string;
+  /** Short-id → full-id mappings the model has seen so far this session.
+   *  Populated by tool executes as they produce entities. Mutating tools
+   *  that take a wordId / wordbookId resolve through this table when the
+   *  arg is shorter than 36 chars. */
+  idTable: ChatIdTable;
+}
+
+export function emptyIdTable(): ChatIdTable {
+  return { word: new Map(), wordbook: new Map() };
 }
 
 export interface ToolDefinition {
@@ -69,7 +84,7 @@ function optInt(args: Record<string, unknown>, key: string, max?: number): numbe
 
 function stripWordForToolResult(word: Word) {
   return {
-    id: word.id,
+    id: shortenId(word.id),
     term: word.term,
     reading: word.reading,
     meaning: word.meaning,
@@ -79,10 +94,28 @@ function stripWordForToolResult(word: Word) {
 
 function stripWordbookForToolResult(wb: Wordbook) {
   return {
-    id: wb.id,
+    id: shortenId(wb.id),
     name: wb.name,
     description: wb.description,
   };
+}
+
+/** Resolve a wordId / wordbookId argument. Pass through full UUIDs; look up
+ *  short prefixes in the session idTable. Throws if the model invented a
+ *  prefix not seen in any tool result this session. */
+function resolveId(
+  raw: string,
+  table: Map<string, string>,
+  kind: 'wordId' | 'wordbookId',
+): string {
+  if (raw.length >= 36) return raw;
+  const full = table.get(raw);
+  if (!full) {
+    throw new Error(
+      `Unknown ${kind} '${raw}'. Use search_words first or paste the full id.`,
+    );
+  }
+  return full;
 }
 
 // ---------------------------------------------------------------------------
@@ -102,10 +135,12 @@ export const TOOLS: Record<string, ToolDefinition> = {
       },
     },
     mutates: false,
-    execute: async (args, { repo }) => {
+    execute: async (args, { repo, idTable }) => {
       const limit = optInt(args, 'limit', 20) ?? 10;
       const results = await repo.words.search(str(args, 'query'));
-      return results.slice(0, limit).map(stripWordForToolResult);
+      const sliced = results.slice(0, limit);
+      for (const w of sliced) idTable.word.set(shortenId(w.id), w.id);
+      return sliced.map(stripWordForToolResult);
     },
     describeAction: (args) => `단어 검색: ${args.query ?? ''}`,
   },
@@ -158,7 +193,7 @@ export const TOOLS: Record<string, ToolDefinition> = {
       },
     },
     mutates: true,
-    execute: async (args, { repo, locale }) => {
+    execute: async (args, { repo, locale, idTable }) => {
       const term = str(args, 'term');
       const reading = str(args, 'reading');
       // Resolve dictionaryEntryId via jisho lookup (the WordRepository contract
@@ -198,6 +233,7 @@ export const TOOLS: Record<string, ToolDefinition> = {
       if (priority !== undefined) {
         await repo.words.setPriority(created.id, priority);
       }
+      idTable.word.set(shortenId(created.id), created.id);
       return stripWordForToolResult(created);
     },
     describeAction: (args) => `단어 「${args.term ?? ''}」 추가`,
@@ -215,9 +251,11 @@ export const TOOLS: Record<string, ToolDefinition> = {
       },
     },
     mutates: true,
-    execute: async (args, { repo }) => {
-      const word = await repo.words.setMastered(str(args, 'wordId'), bool(args, 'mastered'));
-      return { id: word.id, mastered: bool(args, 'mastered') };
+    execute: async (args, { repo, idTable }) => {
+      const wordId = resolveId(str(args, 'wordId'), idTable.word, 'wordId');
+      const word = await repo.words.setMastered(wordId, bool(args, 'mastered'));
+      idTable.word.set(shortenId(word.id), word.id);
+      return { id: shortenId(word.id), mastered: bool(args, 'mastered') };
     },
     describeAction: (args) => (args.mastered ? '암기완료로 표시' : '암기 해제'),
   },
@@ -234,11 +272,11 @@ export const TOOLS: Record<string, ToolDefinition> = {
       },
     },
     mutates: true,
-    execute: async (args, { repo }) => {
-      const wordId = str(args, 'wordId');
-      const wordbookId = str(args, 'wordbookId');
+    execute: async (args, { repo, idTable }) => {
+      const wordId = resolveId(str(args, 'wordId'), idTable.word, 'wordId');
+      const wordbookId = resolveId(str(args, 'wordbookId'), idTable.wordbook, 'wordbookId');
       await repo.wordbooks.addWord(wordbookId, wordId);
-      return { ok: true, wordId, wordbookId };
+      return { ok: true, wordId: shortenId(wordId), wordbookId: shortenId(wordbookId) };
     },
     describeAction: () => '단어장에 단어 추가',
   },
@@ -255,11 +293,11 @@ export const TOOLS: Record<string, ToolDefinition> = {
       },
     },
     mutates: true,
-    execute: async (args, { repo }) => {
-      const wordId = str(args, 'wordId');
-      const wordbookId = str(args, 'wordbookId');
+    execute: async (args, { repo, idTable }) => {
+      const wordId = resolveId(str(args, 'wordId'), idTable.word, 'wordId');
+      const wordbookId = resolveId(str(args, 'wordbookId'), idTable.wordbook, 'wordbookId');
       await repo.wordbooks.removeWord(wordbookId, wordId);
-      return { ok: true, wordId, wordbookId };
+      return { ok: true, wordId: shortenId(wordId), wordbookId: shortenId(wordbookId) };
     },
     describeAction: () => '단어장에서 단어 제거',
   },
@@ -276,11 +314,12 @@ export const TOOLS: Record<string, ToolDefinition> = {
       },
     },
     mutates: true,
-    execute: async (args, { repo }) => {
+    execute: async (args, { repo, idTable }) => {
       const wb = await repo.wordbooks.create({
         name: str(args, 'name'),
         description: optStr(args, 'description') ?? null,
       });
+      idTable.wordbook.set(shortenId(wb.id), wb.id);
       return stripWordbookForToolResult(wb);
     },
     describeAction: (args) => `단어장 「${args.name ?? ''}」 생성`,
@@ -300,13 +339,14 @@ export const TOOLS: Record<string, ToolDefinition> = {
       },
     },
     mutates: true,
-    execute: async (args, { repo }) => {
-      const wordId = str(args, 'wordId');
+    execute: async (args, { repo, idTable }) => {
+      const wordId = resolveId(str(args, 'wordId'), idTable.word, 'wordId');
       const updated = await repo.words.update(wordId, {
         reading: optStr(args, 'reading'),
         meaning: optStr(args, 'meaning'),
         jlptLevel: optInt(args, 'jlptLevel'),
       });
+      idTable.word.set(shortenId(updated.id), updated.id);
       return stripWordForToolResult(updated);
     },
     describeAction: () => '단어 편집',
@@ -325,11 +365,13 @@ export const TOOLS: Record<string, ToolDefinition> = {
       },
     },
     mutates: true,
-    execute: async (args, { repo }) => {
-      const wb = await repo.wordbooks.update(str(args, 'wordbookId'), {
+    execute: async (args, { repo, idTable }) => {
+      const wordbookId = resolveId(str(args, 'wordbookId'), idTable.wordbook, 'wordbookId');
+      const wb = await repo.wordbooks.update(wordbookId, {
         name: optStr(args, 'name'),
         description: optStr(args, 'description'),
       });
+      idTable.wordbook.set(shortenId(wb.id), wb.id);
       return stripWordbookForToolResult(wb);
     },
     describeAction: () => '단어장 편집',
@@ -350,15 +392,16 @@ export const TOOLS: Record<string, ToolDefinition> = {
       },
     },
     mutates: true,
-    execute: async (args, { repo }) => {
-      const created = await repo.words.addExample(str(args, 'wordId'), {
+    execute: async (args, { repo, idTable }) => {
+      const wordId = resolveId(str(args, 'wordId'), idTable.word, 'wordId');
+      const created = await repo.words.addExample(wordId, {
         sentenceJa: str(args, 'sentenceJa'),
         sentenceReading: optStr(args, 'sentenceReading'),
         sentenceMeaning: optStr(args, 'sentenceMeaning'),
         source: 'ai_generated',
       });
       return {
-        id: created.id,
+        id: shortenId(created.id),
         sentenceJa: created.sentenceJa,
       };
     },
@@ -375,10 +418,10 @@ export const TOOLS: Record<string, ToolDefinition> = {
       properties: { wordId: { type: 'string' } },
     },
     mutates: true,
-    execute: async (args, { repo }) => {
-      const wordId = str(args, 'wordId');
+    execute: async (args, { repo, idTable }) => {
+      const wordId = resolveId(str(args, 'wordId'), idTable.word, 'wordId');
       await repo.words.delete(wordId);
-      return { ok: true, wordId };
+      return { ok: true, wordId: shortenId(wordId) };
     },
     describeAction: () => '단어 삭제 (취소 불가)',
   },
@@ -392,10 +435,10 @@ export const TOOLS: Record<string, ToolDefinition> = {
       properties: { wordbookId: { type: 'string' } },
     },
     mutates: true,
-    execute: async (args, { repo }) => {
-      const wordbookId = str(args, 'wordbookId');
+    execute: async (args, { repo, idTable }) => {
+      const wordbookId = resolveId(str(args, 'wordbookId'), idTable.wordbook, 'wordbookId');
       await repo.wordbooks.delete(wordbookId);
-      return { ok: true, wordbookId };
+      return { ok: true, wordbookId: shortenId(wordbookId) };
     },
     describeAction: () => '단어장 삭제 (취소 불가)',
   },

@@ -24,7 +24,7 @@ import { recordMetric } from './metrics';
 import { storeAttachment } from './attachments';
 import { streamInfer, cancelInfer } from './inference';
 import { buildSystemPrompt, trimHistoryToBudget } from './prompts';
-import { getTool, getToolDefsForBridge, type ToolContext } from './tools';
+import { getTool, getToolDefsForBridge, type ToolContext, type ChatIdTable, emptyIdTable } from './tools';
 import { getSaveQuizAiSessions } from '../assistant-prefs';
 import type {
   AiInferMessage,
@@ -59,6 +59,8 @@ interface ChatStoreState {
   locale: string;
   /** Repository injected by app shell on mount. */
   _repo: DataRepository | null;
+  /** Short-id → full-id mapping for the current session. Reset on session boundary. */
+  idTable: ChatIdTable;
 
   // Setup
   init(repo: DataRepository, locale: string): Promise<void>;
@@ -205,6 +207,7 @@ export const useChatStore = create<ChatStoreState>((set, get) => ({
   hydrated: false,
   locale: 'ko',
   _repo: null,
+  idTable: emptyIdTable(),
 
   init: async (repo, locale) => {
     // Re-init can fire when the repo identity flips (guest ↔ Supabase).
@@ -217,6 +220,7 @@ export const useChatStore = create<ChatStoreState>((set, get) => ({
       contextSessions: {},
       pendingConfirms: [],
       hydrated: false,
+      idTable: emptyIdTable(),
     });
     try {
       const existing = await repo.chat.getCurrentSession();
@@ -293,6 +297,7 @@ export const useChatStore = create<ChatStoreState>((set, get) => ({
         return gen ? gen.messages.some((m) => m.id === b.messageId) : false;
       }),
       unreadCount: 0,
+      idTable: emptyIdTable(),
     });
   },
 
@@ -336,12 +341,13 @@ export const useChatStore = create<ChatStoreState>((set, get) => ({
     set({
       generalSession: { ...found, messages, messageCount: messages.length },
       pendingConfirms: [],
+      idTable: emptyIdTable(),
     });
   },
 
   startNewGeneralSession: async () => {
     // Drop the local handle; a fresh session is lazily created on next send.
-    set({ generalSession: null, pendingConfirms: [], unreadCount: 0 });
+    set({ generalSession: null, pendingConfirms: [], unreadCount: 0, idTable: emptyIdTable() });
   },
 
   deleteGeneralSession: async (sessionId) => {
@@ -598,7 +604,7 @@ export const useChatStore = create<ChatStoreState>((set, get) => ({
             // Auto-execute read-only.
             const tool = getTool(event.name);
             if (tool) {
-              const ctx: ToolContext = { repo, locale };
+              const ctx: ToolContext = { repo, locale, idTable: get().idTable };
               try {
                 const result = await tool.execute(event.args, ctx);
                 readOnlyToolCount++;
@@ -849,7 +855,7 @@ export const useChatStore = create<ChatStoreState>((set, get) => ({
       ),
     }));
 
-    const ctx: ToolContext = { repo, locale };
+    const ctx: ToolContext = { repo, locale, idTable: get().idTable };
     const executed: Array<{ callId: string; args: Record<string, unknown>; result: unknown }> = [];
     const failed: Array<{ callId: string; args: Record<string, unknown>; error: string }> = [];
     const skipped: Array<{ callId: string; args: Record<string, unknown> }> = [];
