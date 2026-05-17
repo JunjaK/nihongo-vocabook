@@ -86,46 +86,6 @@ function stripWordbookForToolResult(wb: Wordbook) {
 }
 
 // ---------------------------------------------------------------------------
-// Scope allowlist
-// ---------------------------------------------------------------------------
-
-const SCOPE_TOOL_ALLOWLIST: Record<ChatScope['kind'], readonly string[]> = {
-  general: [
-    'search_words',
-    'extract_words_from_image',
-    'add_word',
-    'set_mastered',
-    'add_word_to_wordbook',
-    'remove_word_from_wordbook',
-    'create_wordbook',
-    'edit_word',
-    'edit_wordbook',
-    'generate_example_sentence',
-    'delete_word',
-    'delete_wordbook',
-  ],
-  word: [
-    'search_words',
-    'set_mastered',
-    'edit_word',
-    'add_word_to_wordbook',
-    'remove_word_from_wordbook',
-    'generate_example_sentence',
-  ],
-  wordbook: [
-    'search_words',
-    'add_word_to_wordbook',
-    'remove_word_from_wordbook',
-    'edit_wordbook',
-  ],
-  quiz: [
-    'search_words',
-    'set_mastered',
-    'generate_example_sentence',
-  ],
-};
-
-// ---------------------------------------------------------------------------
 // Catalog
 // ---------------------------------------------------------------------------
 
@@ -439,6 +399,34 @@ export const TOOLS: Record<string, ToolDefinition> = {
     },
     describeAction: () => '단어장 삭제 (취소 불가)',
   },
+};
+
+// ---------------------------------------------------------------------------
+// Scope allowlist (declared after TOOLS so `general` can derive from its keys)
+// ---------------------------------------------------------------------------
+
+export const SCOPE_TOOL_ALLOWLIST: Record<ChatScope['kind'], readonly string[]> = {
+  /** All tools — derived at module init so newly added tools are included automatically. */
+  general: Object.keys(TOOLS),
+  word: [
+    'search_words',
+    'set_mastered',
+    'edit_word',
+    'add_word_to_wordbook',
+    'remove_word_from_wordbook',
+    'generate_example_sentence',
+  ],
+  wordbook: [
+    'search_words',
+    'add_word_to_wordbook',
+    'remove_word_from_wordbook',
+    'edit_wordbook',
+  ],
+  quiz: [
+    'search_words',
+    'set_mastered',
+    'generate_example_sentence',
+  ],
 };
 
 /** Tool definitions in the wire format the bridge expects (no execute fn).

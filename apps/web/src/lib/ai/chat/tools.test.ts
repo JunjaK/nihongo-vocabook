@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { TOOLS, getTool, getToolDefsForBridge } from './tools';
+import { TOOLS, SCOPE_TOOL_ALLOWLIST, getTool, getToolDefsForBridge } from './tools';
 import type { ChatScope } from '@/types/chat';
 
 describe('TOOLS catalog', () => {
@@ -103,9 +103,10 @@ describe('getToolDefsForBridge(scope)', () => {
   it('returns exactly 3 tools for quiz scope', () => {
     const defs = getToolDefsForBridge({
       kind: 'quiz',
+      sessionId: 'test-session',
       currentWordId: 'x',
       lastRating: 3,
-    } as ChatScope);
+    });
     expect(defs.map((d) => d.name).sort()).toEqual(
       ['generate_example_sentence', 'search_words', 'set_mastered'],
     );
@@ -135,6 +136,15 @@ describe('getToolDefsForBridge(scope)', () => {
         'search_words',
       ],
     );
+  });
+
+  it('every allowlist entry refers to a real tool', () => {
+    const allKnown = new Set(Object.keys(TOOLS));
+    for (const [scope, names] of Object.entries(SCOPE_TOOL_ALLOWLIST)) {
+      for (const name of names) {
+        expect(allKnown, `${scope}: '${name}' not in TOOLS`).toContain(name);
+      }
+    }
   });
 });
 
