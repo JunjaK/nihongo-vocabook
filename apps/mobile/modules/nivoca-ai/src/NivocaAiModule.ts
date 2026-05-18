@@ -58,6 +58,30 @@ declare class NivocaAiModule extends NativeModule<NivocaAiModuleEvents> {
     backend: 'gpu' | 'cpu' | 'unknown';
     mtpEnabled: boolean;
   }>;
+
+  /**
+   * Verification probe for the `increased-memory-limit` /
+   * `increased-debugging-memory-limit` entitlements. Synchronous (no
+   * Promise) — reads `os_proc_available_memory()` directly. Forum
+   * thread 685084 reports the entitlement can sign in successfully
+   * but still leave the kernel cap unraised on some iOS versions, so
+   * we surface raw bytes + a coarse `entitlementsHint` instead of
+   * trusting the entitlement plist alone.
+   *
+   * - `physicalBytes` — total RAM (`ProcessInfo.physicalMemory`).
+   * - `availableBytes` — current per-process cap. 0 on simulator.
+   * - `projectedCacheSize` — what `pickKVCacheSize()` would return now.
+   * - `entitlementsHint` — `elevated` (≥60 % of physical), `default_cap`
+   *    (< 60 %), or `simulator_or_unavailable` (probe returned 0).
+   * - `buildType` — `debug` | `release` (which entitlement applies).
+   */
+  getMemoryProbe(): {
+    physicalBytes: number;
+    availableBytes: number;
+    projectedCacheSize: number;
+    entitlementsHint: 'elevated' | 'default_cap' | 'simulator_or_unavailable';
+    buildType: 'debug' | 'release';
+  };
 }
 
 // Loads the native module object from JSI. Throws on platforms where the

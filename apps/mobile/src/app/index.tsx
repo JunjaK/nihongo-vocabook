@@ -36,6 +36,20 @@ export default function HomeScreen() {
     // `AI_MODEL_STATUS_RESULT.deviceSupported` in Phase C.
     // eslint-disable-next-line no-console
     console.log('[nivoca-ai] eligibility', JSON.stringify(getDeviceEligibility()));
+    // Memory-limit entitlement verification — see Apple DTS case
+    // 102890625077 / forum thread 685084. If `entitlementsHint` reads
+    // `default_cap` on a physical device, the portal capability is
+    // toggled on but the kernel did NOT raise the per-process cap, so
+    // the 32K KV-cache bucket will Jetsam mid-stream regardless of
+    // what `pickKVCacheSize()` returns. Remove this once we've
+    // confirmed `elevated` on the target device matrix.
+    try {
+      // eslint-disable-next-line no-console
+      console.log('[nivoca-ai] memory-probe', JSON.stringify(NivocaAi.getMemoryProbe()));
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error('[nivoca-ai] memory-probe failed:', err);
+    }
   }, []);
 
   return (

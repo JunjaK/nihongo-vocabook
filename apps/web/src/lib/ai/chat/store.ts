@@ -142,6 +142,26 @@ function devWarn(scope: string, err: unknown): void {
 }
 
 /**
+ * Terminal chat failures that break persistence end-to-end (e.g. the
+ * very first `createSession` for a brand-new general scope) must NOT be
+ * swallowed by `devWarn` — that's the exact failure mode that produced
+ * the long-running "messages vanish on reload" bug. We log to the
+ * production console too, with a structured shape that gives us the
+ * Supabase / PostgREST `code` + `message` without leaking message
+ * content. Anyone reporting the issue can paste this line directly.
+ */
+function logChatFailure(scope: string, err: unknown): void {
+  const e = err as { code?: string; message?: string; details?: string } | null;
+  const payload = {
+    code: e?.code,
+    message: e?.message ?? String(err),
+    details: e?.details,
+  };
+  // eslint-disable-next-line no-console
+  console.error(`[chat] ${scope} failed`, payload);
+}
+
+/**
  * Returns true when a session of the given scope should be persisted to the
  * `ai_sessions` / `ai_messages` tables.
  *  - General: always (single rolling user session).
@@ -249,16 +269,17 @@ export const useChatStore = create<ChatStoreState>((set, get) => ({
     if (scope.kind === 'general') {
       const repo = get()._repo;
       if (!repo) throw new Error('Repository not initialized');
-      try {
-        const created = await repo.chat.createSession(scope);
-        set({ generalSession: created });
-        return created;
-      } catch (err) {
-        devWarn('ensureSession.createSession(general)', err);
-        const fallback = newSession(scope);
-        set({ generalSession: fallback });
-        return fallback;
-      }
+      // For `general` scope we MUST NOT fall back to an in-memory session
+      // on `createSession` failure: doing so used to look fine (the
+      // optimistic bubble rendered) but every subsequent `appendMessage`
+      // hit a foreign-key violation against `ai_sessions(id)`, was swallowed
+      // by another silent catch, and the entire chat history was lost on
+      // reload while `/assistant/sessions` listed nothing. Surfacing the
+      // error to the caller lets `sendMessage` show a toast and abort
+      // before optimistic UI state diverges from persistence reality.
+      const created = await repo.chat.createSession(scope);
+      set({ generalSession: created });
+      return created;
     }
 
     // Quiz scope with "save sessions" toggle ON → create a real DB session so
@@ -385,7 +406,28 @@ export const useChatStore = create<ChatStoreState>((set, get) => ({
     const repo = get()._repo;
     if (!repo) throw new Error('Repository not initialized');
 
-    const session = await get().ensureSession(scope);
+    let session: ChatSession;
+    try {
+      session = await get().ensureSession(scope);
+    } catch (err) {
+      // Terminal failure: persistence cannot be wired up. Surface to the
+      // user with a clear toast (they typed a message that's about to go
+      // nowhere) and log a structured line for support. The most common
+      // cause in the mobile WebView is `LOGIN_REQUIRED` because the
+      // Supabase session hasn't finished restoring; we already retry the
+      // session refresh once inside `SupabaseChatRepository.currentUserId`,
+      // so reaching this point usually means a real auth failure.
+      logChatFailure(`ensureSession(${scope.kind})`, err);
+      if (scope.kind === 'general') {
+        const locale = get().locale;
+        toast.error(
+          locale === 'ko'
+            ? 'AI 채팅 세션을 시작하지 못했습니다. 다시 로그인 후 시도해주세요.'
+            : 'Could not start the AI chat session. Please re-login and try again.',
+        );
+      }
+      throw err;
+    }
     const locale = get().locale;
 
     // Resolve attachment sources for image/audio blocks to data URLs.

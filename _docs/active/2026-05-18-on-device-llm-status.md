@@ -50,8 +50,64 @@ point when picking up the on-device LLM track.
 |---|---|---|
 | Immediate crash on launch (mmap-cap) | Personal Team can't mmap a 2.4 GB blob | `com.apple.developer.kernel.extended-virtual-addressing` |
 | `INVALID_ARGUMENT 2630 >= 2048` | `max_num_tokens = 2K` too small | Adaptive `pickKVCacheSize()` (2K/4K/8K/16K/32K buckets) |
-| Jetsam OOM mid-stream | 32K cache + GPU weights ≈ 2.5 GB working set, exceeds default Jetsam | `increased-memory-limit` (production, Apple approval pending) + `increased-debugging-memory-limit` (debug, no approval needed) |
+| Jetsam OOM mid-stream | 32K cache + GPU weights ≈ 2.5 GB working set, exceeds default Jetsam | `increased-memory-limit` (production, self-service via Apple Developer portal — see §3.1) + `increased-debugging-memory-limit` (debug, no portal action needed) |
 | Xcode 26.5 link error | `__preview.dylib` implicit-links SwiftUICore, rejected | Local config plugin `with-disable-previews` (sets `ENABLE_PREVIEWS = NO`) |
+
+### 3.1 Enabling `increased-memory-limit` for production (Apple DTS, 2026-05-18)
+
+Contacted Apple Developer Support to clarify the activation process for
+`com.apple.developer.kernel.increased-memory-limit`.
+Case **102890625077**. Reply from DTS engineer **Soo** pointed to the
+canonical thread <https://developer.apple.com/forums/thread/685084>
+(DTS Engineer Quinn "The Eskimo!" answers).
+
+**Key clarifications:**
+
+- This is **not an approval-gated entitlement** — it is a self-service
+  capability. The previous "Apple approval pending" framing in this doc
+  was wrong.
+- Adding the entitlement directly to `.entitlements` is **not
+  sufficient** — every entitlement must be authorized by a
+  provisioning profile, so the App ID must opt in to the capability
+  first.
+- The Xcode "Signing & Capabilities" editor currently does **not**
+  surface the "Increased Memory Limit" row (Apple has filed a bug
+  internally), so the workflow has to go through the developer portal.
+
+**Workflow (per Quinn's reply):**
+
+1. developer.apple.com → **Certificates, Identifiers & Profiles** →
+   Identifiers → select the app's App ID.
+2. Enable the **"Increased Memory Limit"** capability and save.
+3. Regenerate / redownload the provisioning profile (or let Xcode
+   automatic signing refetch it).
+4. For Xcode automatic-signing flows, follow the same pattern documented
+   for Multicast Networking:
+   <https://developer.apple.com/forums/thread/663271> — substitute
+   "Increased Memory Limit" for "Multicast Networking" throughout.
+5. Keep the entitlement key in `Nivoca.entitlements`; the profile +
+   capability are what make it actually grant the elevated limit at
+   runtime.
+
+**Caveat to verify after enabling.**
+A developer in thread/685084 reported that on **iOS 15.3** the
+entitlement signed in correctly but `os_proc_available_memory()` still
+returned the unentitled limit — i.e. the capability was authorized but
+the kernel did not raise the cap. On modern iOS this is likely fixed,
+but we need to confirm empirically: after enabling, run a release
+build on a physical device and log `os_proc_available_memory()` at
+launch. If the value is the same as the no-entitlement baseline,
+escalate back to DTS on the same case (102890625077) before assuming
+the larger KV-cache bucket is safe in production.
+
+**Note on the related `extended-virtual-addressing` entitlement.**
+Apple's reply did not address this one. Per memory + Phase B above it
+still appears to be paid-account-only for Personal Team signing, which
+is what blocks Phase D-A. The forum thread does confirm
+`extended-virtual-addressing` is a real, separate entitlement (less
+documented) — so the long-term answer to the Personal Team mmap-cap
+crash remains: upgrade to a paid Apple Developer Program membership.
+That decision is independent of the `increased-memory-limit` work above.
 
 ## 4. Adaptive KV cache (`pickKVCacheSize`)
 
@@ -185,15 +241,51 @@ Pass writeup: `_docs/active/2026-05-17-on-device-llm-status.md` →
   filtered catalog cuts ~700 tokens off non-general turns.
 - Open: explicit "first token at T+X" UX feedback during the wait.
 
-### Empty conversation-history bug (reported by user, 2026-05-17)
+### Empty conversation-history bug (reported by user, 2026-05-17 → fix landed 2026-05-18)
 
 - Symptom: user actively chats but `/assistant/sessions` shows
   "저장된 대화가 없습니다.".
-- Unresolved. Working hypothesis: `createSession` fails silently
-  (LOGIN_REQUIRED or transient) → in-memory fallback session → its rows
-  never reach `ai_sessions` so `listSessions` returns nothing.
-- Not currently in the task queue. Pick up after the cascade lookup
-  work or in parallel.
+- **Confirmed root cause.** Three failure surfaces stacked on top of
+  each other:
+  1. `SupabaseChatRepository.currentUserId()` (`supabase-repo.ts:1859`)
+     threw `LOGIN_REQUIRED` whenever `auth.getUser()` returned null. In
+     the mobile WebView this happens during the brief window where
+     `AuthProvider` has called `setSession({ access_token: '' })` and
+     Supabase is still refreshing the JWT via the stored refresh
+     token — `authLoading` flips to false based on the auth-store
+     `user` object, but the Supabase client's own session may not be
+     populated yet.
+  2. `useChatStore.ensureSession(scope='general')`
+     (`chat/store.ts:245`) caught the `LOGIN_REQUIRED` throw with a
+     `devWarn` (silent in production) and substituted an in-memory
+     `newSession(scope)` with a fresh client-generated UUID.
+  3. Every subsequent `appendMessage` then sent that fake UUID as
+     `session_id`, which Supabase rejected on the
+     `ai_messages.session_id → ai_sessions(id)` foreign key — but
+     that throw was *also* caught by `devWarn` (chat is "optimistic
+     — the bubble already renders"). End result: bubbles in the UI,
+     zero rows in `ai_sessions` / `ai_messages`, `/assistant/sessions`
+     empty.
+- **Fix landed (3 commits planned):**
+  1. `currentUserId()` now retries once via
+     `supabase.auth.refreshSession()` before throwing — handles the
+     WebView token-refresh race directly at the lowest layer.
+  2. `ensureSession` no longer falls back to in-memory for the
+     `general` scope. On failure it lets the error propagate to
+     `sendMessage`, which logs a structured `[chat] ensureSession(general) failed`
+     line (visible in production console — code/message/details
+     scrubbed of message content) and shows a localized toast:
+     *"AI 채팅 세션을 시작하지 못했습니다. 다시 로그인 후 시도해주세요."* /
+     *"Could not start the AI chat session. Please re-login and try again."*
+  3. `logChatFailure()` helper added alongside the existing
+     `devWarn` — same structured shape, but always emits regardless
+     of `NODE_ENV`, reserved for terminal failures only (not the
+     per-message `appendMessage` blips that legitimately want to
+     stay quiet).
+- Word / wordbook / quiz scopes are unchanged — their in-memory
+  fallback is "ephemeral by design" per `shouldPersistScope`.
+- Tests: all 75 chat-module tests still pass after the change
+  (`bunx vitest run src/lib/ai/chat`).
 
 ### Simulator verification (this session, interrupted)
 
@@ -213,9 +305,17 @@ Pass writeup: `_docs/active/2026-05-17-on-device-llm-status.md` →
 - **(unfiled)** Conversation-history empty bug
 - **(unfiled)** Resume simulator verification (login → assistant →
   send messages → check tool chips, rating tone, ID shortening live)
-- **(unfiled)** Apple Developer portal `increased-memory-limit`
-  entitlement request — production builds need this for the largest
-  KV cache bucket
+- **(unfiled)** Apple Developer portal — enable `increased-memory-limit`
+  capability on the App ID (self-service per DTS case 102890625077; see
+  §3.1). Steps: portal → Identifiers → enable "Increased Memory Limit"
+  → regenerate provisioning profile → release build on device → verify
+  `os_proc_available_memory()` actually reports the elevated limit
+  (the 685084 thread flags a case where it did not). Needed before the
+  largest KV-cache bucket is safe in production.
+- **(unfiled, separate track)** `extended-virtual-addressing` for
+  Personal Team / Phase D-A — still blocked on upgrading to a paid
+  Apple Developer Program membership; not resolvable from the portal
+  on a Personal Team.
 
 ## Aggregate stats
 

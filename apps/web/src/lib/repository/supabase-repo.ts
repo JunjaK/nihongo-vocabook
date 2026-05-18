@@ -1856,10 +1856,25 @@ interface DbAiMessage {
 class SupabaseChatRepository implements ChatRepository {
   constructor(private supabase: SupabaseClient) {}
 
+  /**
+   * Resolves the current authenticated user's id. In the mobile WebView the
+   * Supabase client is bootstrapped with `setSession({ access_token: '' })`
+   * and asked to refresh via the stored refresh token. There is a brief
+   * window during which `auth.getUser()` returns null even though the
+   * session is being restored — chat init waits on `authLoading`, but a
+   * stale JWT can still expire mid-session. When `getUser()` comes back
+   * empty we attempt a single `refreshSession()` before failing, which
+   * unblocks the common "first message after a long idle" case that
+   * otherwise drops the user into the in-memory fallback session and
+   * never persists anything.
+   */
   private async currentUserId(): Promise<string> {
-    const { data, error } = await this.supabase.auth.getUser();
-    if (error || !data.user) throw new Error('LOGIN_REQUIRED');
-    return data.user.id;
+    const first = await this.supabase.auth.getUser();
+    if (!first.error && first.data.user) return first.data.user.id;
+    await this.supabase.auth.refreshSession().catch(() => undefined);
+    const retry = await this.supabase.auth.getUser();
+    if (retry.error || !retry.data.user) throw new Error('LOGIN_REQUIRED');
+    return retry.data.user.id;
   }
 
   private mapSession(row: DbAiSession, messages: ChatMessage[] = []): ChatSession {

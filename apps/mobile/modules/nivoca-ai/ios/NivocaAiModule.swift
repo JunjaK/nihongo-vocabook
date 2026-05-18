@@ -222,6 +222,44 @@ public class NivocaAiModule: Module {
         "mtpEnabled": self.activeMtpEnabled,
       ]
     }
+
+    // Verification probe for the `increased-memory-limit` /
+    // `increased-debugging-memory-limit` entitlements. Returns raw
+    // bytes plus a heuristic flag so the JS side can confirm at boot
+    // that the elevated jetsam cap actually took effect — forum
+    // thread 685084 reports cases where the entitlement signed in but
+    // the kernel did not raise the cap. If `entitlementsHint` is
+    // `default_cap` on a physical device, the 32K KV-cache bucket is
+    // not safe regardless of what the portal says.
+    Function("getMemoryProbe") { () -> [String: Any] in
+      let physical = Int(ProcessInfo.processInfo.physicalMemory)
+      let available = Int(os_proc_available_memory())
+      let projectedCache = self.pickKVCacheSize()
+      let hint: String
+      if available <= 0 {
+        // Simulator or pre-iOS-15 — `os_proc_available_memory()` returns 0.
+        hint = "simulator_or_unavailable"
+      } else {
+        // Default foreground cap is ~25-37 % of physical RAM on iPhone;
+        // entitled cap climbs to ~75 %. 60 % is a clean separator.
+        let elevatedThreshold = Int(Double(physical) * 0.6)
+        hint = available > elevatedThreshold ? "elevated" : "default_cap"
+      }
+      let buildType: String
+      #if DEBUG
+      buildType = "debug"
+      #else
+      buildType = "release"
+      #endif
+      logger.error("MEMORY_PROBE physical=\(physical, privacy: .public) available=\(available, privacy: .public) projectedCache=\(projectedCache, privacy: .public) hint=\(hint, privacy: .public) build=\(buildType, privacy: .public)")
+      return [
+        "physicalBytes": physical,
+        "availableBytes": available,
+        "projectedCacheSize": projectedCache,
+        "entitlementsHint": hint,
+        "buildType": buildType,
+      ]
+    }
   }
 
   /**

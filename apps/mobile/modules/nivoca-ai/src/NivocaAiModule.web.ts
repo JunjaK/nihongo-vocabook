@@ -39,6 +39,21 @@ class NivocaAiModule extends NativeModule<NivocaAiModuleEvents> {
   async prewarm(): Promise<void> {
     throw new Error('NivocaAi is iOS-only — prewarm is unsupported on web');
   }
+  getMemoryProbe(): {
+    physicalBytes: number;
+    availableBytes: number;
+    projectedCacheSize: number;
+    entitlementsHint: 'elevated' | 'default_cap' | 'simulator_or_unavailable';
+    buildType: 'debug' | 'release';
+  } {
+    return {
+      physicalBytes: 0,
+      availableBytes: 0,
+      projectedCacheSize: 0,
+      entitlementsHint: 'simulator_or_unavailable',
+      buildType: 'release',
+    };
+  }
 }
 
 export default registerWebModule(NivocaAiModule, 'NivocaAiModule');
